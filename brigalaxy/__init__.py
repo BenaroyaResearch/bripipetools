@@ -29,9 +29,6 @@ class SessionManager(object):
         else:
             self.gs = galaxy_session
 
-        self.dir = target_dir
-
-
     def select_user(self, user_num=None):
 
         # Load list of known users
@@ -69,6 +66,9 @@ class SessionManager(object):
                                     data=login_payload)
         self.gs = galaxy_session
 
+    def add_target_dir(self, target_dir=None):
+        self.dir = target_dir
+
 
 ###################################
 
@@ -83,6 +83,7 @@ class HistoryManager(object):
             self.select_history()
         else:
             self.hid = history_id
+            self.hname = self.gi.histories.get_histories(self.hid)[0].get('name')
 
     def select_history(self):
         """
@@ -98,6 +99,7 @@ class HistoryManager(object):
         var = raw_input("Type the number of the History you wish to select: ")
         history = history_list[int(var)]
         self.hid = history.get('id')
+        self.hname = history.get('name')
 
 
     def get_datasets(self):
