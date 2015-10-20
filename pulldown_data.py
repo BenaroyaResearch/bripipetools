@@ -158,6 +158,7 @@ def main(argv):
 
     # Get list of input datasets
     print "\n(Identifying input Datasets...)"
+    hm.collect_history_info()
     input_dataset_list = hm.show_input_datasets()
 
     printlog("\n### DATA PULLDOWN ###\n", log)
@@ -172,8 +173,8 @@ def main(argv):
         for i,o in enumerate(output_dataset_list):
             rd = bg.ResultDownloader(sm, rc.lib, o)
 
-            printlog("%4d (dataset): %s" % (i, rd.dname), log)
-            printlog(rd.go(), log, msg=True)
+            printlog("%4d (hid): %s [from %s]" % (i, rd.label, rd.prior), log)
+            [printlog(m, log, msg=True) for m in rd.go()]
     print "\nDone."
     log.close()
 

@@ -107,7 +107,6 @@ class HistoryManager(object):
         self.hid = history.get('id')
         self.hname = history.get('name')
 
-
     def get_datasets(self):
         """
         Get list of all Datasets in History.
@@ -124,9 +123,37 @@ class HistoryManager(object):
 
         return self.dl
 
+    def annotate_dataset_list(self):
+        def clean_dataset_name(dataset_name=None):
+            """
+            Format a Dataset name (to make it generic).
+            """
+            dataset_name = re.sub("lib.*fastq", "input FASTQ", dataset_name)
+            dataset_name = re.sub(" on data [0-9]+( and data [0-9]+)*", "",
+                                  dataset_name)
+            dataset_name = re.sub("_.*(\:|\.)+", ": ", dataset_name)
+
+            return dataset_name
+
+        dataset_dict = {d.get('id'):
+                        {'name': clean_dataset_name(d.get('name')),
+                         'num': d.get('hid')} for d in self.dl}
+
+        self.dd = dataset_dict
+
+    # def get_dataset_name(self, dataset_id):
+    #     """
+    #     Get Dataset name corresponding to ID.
+    #     """
+    #     dc = self.gi.datasets
+    #     dataset_name = dc.show_dataset(dataset_id).get('name')
+    #
+    #     return self.clean_dataset_name(dataset_name)
+
     def build_dataset_graph(self, dataset_graph={}):
         """
-        Build graph representing input/output relationship of all Datasets in current History.
+        Build graph representing input/output relationship of all Datasets in
+        current History.
         """
         if not hasattr(self, 'dl'):
             self.get_datasets()
@@ -152,21 +179,15 @@ class HistoryManager(object):
 
         self.dg = dataset_graph
 
-
     def show_dataset_graph(self):
         """
-        View graph (dictionary) with input/output relationship for all Datasets in History.
+        View graph (dictionary) with input/output relationship for all
+        Datasets in History.
         """
         if not hasattr(self, 'dg'):
             self.build_dataset_graph()
 
         return self.dg
-
-    #def annotate_workflow_graph(self):
-        """
-        Trace path from a single input to all outputs and replace Dataset IDs
-        with names.
-        """
 
     def get_root_datasets(self):
         """
@@ -180,7 +201,6 @@ class HistoryManager(object):
         root_dataset_list = [d for d in self.dl \
                              if d.get('id') not in output_dataset_list]
         self.rdl = root_dataset_list
-
 
     def show_root_datasets(self):
         """
@@ -214,12 +234,42 @@ class HistoryManager(object):
 
         return self.idl
 
+    def build_summary_graph(self, input_dataset=None, summary_graph={}):
+        """
+        Trace path from a single input to all outputs.
+        """
+        if not hasattr(self, 'idl'):
+            self.get_input_datasets()
+
+        if not input_dataset:
+            input_id = self.idl[0].keys()[0]
+        else:
+            input_id = input_dataset
+
+        self.sg = summary_graph
+
+        if isinstance(input_id, list):
+            [self.build_summary_graph(i, self.sg) for i in input]
+        if input_id in self.dg:
+            [self.build_summary_graph(i, self.sg) \
+             for i in self.dg[input_id]]
+
+            self.sg[input_id] = [i for i in self.dg[input_id]]
+
+        return self.sg
+
+    def collect_history_info(self):
+        if not hasattr(self, 'sg'):
+            self.build_summary_graph()
+        if not hasattr(self, 'dd'):
+            self.annotate_dataset_list()
 
 ###################################
 
 class ResultCollector(object):
     """
-    Class with methods for collecting information about all downstream (output) Datasets for current input Dataset.
+    Class with methods for collecting information about all downstream
+    (output) Datasets for current input Dataset.
     """
     def __init__(self, history_manager=None, input_dataset=None):
 
@@ -229,23 +279,6 @@ class ResultCollector(object):
         self.file = input_dataset.values()[0]
         self.lib = re.search('lib[0-9]+(.*(XX)+)*',
                               self.file).group()
-
-    def build_input_graph(self, input_id=None, input_graph={}):
-        """
-        Build graph representing all input/output relationships among Datasets downstream of input Dataset.
-        """
-        if not input_id:
-            input_id = self.id
-
-        self.ig = input_graph
-
-        if input_id in self.hm.dg:
-            self.ig[input_id] = self.hm.dg[input_id]
-
-            for d in self.hm.dg[input_id]:
-                self.ig = self.build_input_graph(d, self.ig)
-
-        return self.ig
 
     def get_input_outputs(self, input_id=None, input_output_list=[]):
         """
@@ -264,13 +297,53 @@ class ResultCollector(object):
 
         return self.iol
 
-    def show_output_list(self):
+    def annotate_output_list(self):
 
         if not hasattr(self, 'iol'):
             self.get_input_outputs()
 
+        def get_info(dataset_id):
+            dname = self.hm.dd[dataset_id].get('name')
+            dnum = self.hm.dd[dataset_id].get('num')
+
+            return (dname, dnum)
+
+        self.ol = []
+        for output in self.iol:
+            dname,dnum = get_info(output)
+            priors = [get_info(d)[0] \
+                      for d in self.hm.sg if output in self.hm.sg[d]][0]
+            self.ol.append({'id': output, 'num': dnum,
+                                'name': dname, 'prior': priors})
+
+
+    def flag_duplicate_outputs(self, output_list):
+        seen = set()
+        seen_add = seen.add
+
+        # find final versions of duplicated outputs
+        duplicated = { x.get('name'): i \
+                       for i,x in enumerate(output_list) \
+                       if x.get('name') in seen or seen_add(x.get('name')) }
+
+        # remove duplicated outputs if not final version
+        not_final = [i for i,x in enumerate(output_list) \
+                     if x.get('name') in duplicated \
+                     and not i == duplicated[x.get('name')]]
+
+        for i in not_final:
+            output_list[i]['name'] = 'skip_' + output_list[i]['name']
+
+        return output_list
+
+    def show_output_list(self):
+
+        if not hasattr(self, 'ol'):
+            self.annotate_output_list()
+
         get_hid = self.hm.gi.histories.show_dataset
-        sorted_output_list = sorted(self.iol, key=lambda x: get_hid(self.hm.hid, x).get('hid'))
+        sorted_output_list = sorted(self.ol, key=lambda x: x.get('num'))
+        final_output_list = self.flag_duplicate_outputs(sorted_output_list)
 
         return sorted_output_list
 
@@ -279,13 +352,17 @@ class ResultCollector(object):
 
 class ResultDownloader(object):
 
-    def __init__(self, session_manager, lib_id=None, output_id=None, result_type=None):
+    def __init__(self, session_manager, lib_id=None, output=None,
+                 result_type=None):
 
         self.gi = session_manager.gi
         self.gs = session_manager.gs
         self.dir = session_manager.dir
         self.lib = lib_id
-        self.oid = output_id
+
+
+        if output is not None:
+            self.parse_output(output)
 
         with open('data/params.json') as f:
             self.params = json.load(f)
@@ -295,30 +372,23 @@ class ResultDownloader(object):
 
         self.state = 'idle'
 
-    def clean_dataset_name(self, dataset_name=None):
+    def parse_output(self, output):
+        self.dname = output.get('name')
+        self.oid = output.get('id')
+        self.prior = output.get('prior')
+        self.label = '%s (%d)' % (self.dname, output.get('num'))
 
-        dataset_name = re.sub(" on data [0-9]+( and data [0-9]+)*", "", dataset_name)
-        dataset_name = re.sub("_.*(\:|\.)+", ": ", dataset_name)
-
-        return dataset_name
-
-    def get_dataset_name(self):
-        dc = self.gi.datasets
-        dataset_name = dc.show_dataset(self.oid).get('name')
-
-        self.dname = self.clean_dataset_name(dataset_name)
 
     def get_result_type(self, result_type=None):
 
-        if not hasattr(self, 'dname'):
-            self.get_dataset_name()
+        dname = self.dname
 
         result_type_dict = self.params['result_types']
 
         self.rtd = result_type_dict
 
-        if self.dname in result_type_dict:
-            result_type = result_type_dict[self.dname]
+        if dname in result_type_dict:
+            result_type = result_type_dict[dname]
 
         self.rt = result_type
 
@@ -358,6 +428,10 @@ class ResultDownloader(object):
 
             instructions['method'] = method
 
+            if 'bam' in extension:
+                instructions['out_idx'] = os.path.join(self.folder, self.lib + extension + '.bai')
+                instructions['idx_url'] = self.gi.datasets.show_dataset(self.oid)['metadata_bam_index']
+
         self.instructions = instructions
 
 
@@ -389,7 +463,7 @@ class ResultDownloader(object):
 
             msg = DownloadHandler(self.gs, self.instructions).get_data()
         else:
-            msg = "Non-requested result type; skipping."
+            msg = ["Non-requested result type; skipping."]
 
         return msg
 
@@ -405,20 +479,32 @@ class DownloadHandler(object):
         self.path = instructions['out_file']
         self.method = instructions['method']
 
+        if 'idx_url' in instructions:
+            self.idx_src = instructions['idx_url']
+            self.idx_path = instructions['out_idx']
+
     def get_data(self):
+        message=[]
         if self.method == 'remote':
-            message = ("Copying file from %s to %s via remote connection." %
-                       (self.src, self.path))
+            message.append(("Copying file from %s to %s via remote connection." %
+                            (self.src, self.path)))
 
             r = self.gs.get(self.src)
             with open(self.path, 'wb') as f:
                 f.write(r.content)
 
         elif self.method == 'local':
-            message = ("Copying file from %s to %s via SLURM." %
-                       (self.src, self.path))
+            message.append(("Copying file from %s to %s via SLURM." %
+                            (self.src, self.path)))
             os.system(('sbatch -N 1 -o slurm.out --open-mode=append <<EOF\n'
                        '#!/bin/bash\n'
                        'cp %s %s') % (self.src, self.path))
+
+            if hasattr(self, 'idx_src'):
+                message.append(("Copying index from %s to %s via SLURM." %
+                                (self.idx_src, self.idx_path)))
+                os.system(('sbatch -N 1 -o slurm.out --open-mode=append <<EOF\n'
+                           '#!/bin/bash\n'
+                           'cp %s %s') % (self.idx_src, self.idx_path))
 
         return message
