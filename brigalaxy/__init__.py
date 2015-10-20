@@ -1,5 +1,5 @@
 from bioblend import galaxy
-import requests, re, os, json
+import requests, re, os, json, zipfile, StringIO
 
 class SessionManager(object):
 
@@ -508,3 +508,142 @@ class DownloadHandler(object):
                            'cp %s %s') % (self.idx_src, self.idx_path))
 
         return message
+
+
+###################################
+
+class ResultStitcher(object):
+    def __init__(self, resultType=None, processedDir=None, libList=None):
+        self.resultType = resultType
+        self.processedDir = processedDir
+        self.resultDir = os.path.join(self.processedDir, self.resultType)
+        self.libList = libList
+
+        if self.libList is None:
+            self.libList = self.get_lib_list(self.resultDir)
+
+    def get_lib_id(self, libFile):
+        libId = re.search('lib[0-9]+(.*(XX)+)*', libFile).group()
+
+        return libId
+
+    def get_lib_list(self, resultDir):
+        self.libList = [self.get_lib_id(libFile) \
+                   for libFile in os.listdir(self.resultDir) \
+                   if 'lib' in libFile]
+        self.libList = list(set(self.libList))
+        self.libList.sort()
+        return self.libList
+
+    def build_count_dict(self):
+        self.countDict = {}
+        print("Generating combined counts data...")
+        for idx, lib in enumerate(self.libList):
+            filePath = [os.path.join(self.resultDir, fileName) \
+                        for fileName in os.listdir(self.resultDir) \
+                        if lib in fileName][0]
+
+            with open(filePath) as csvFile:
+                reader = csv.reader(csvFile, delimiter = '\t')
+                if idx == 0:
+                    self.countHeader = ['geneName', lib]
+                    for row in reader:
+                        self.countDict[row[0]] = [row[1]]
+                else:
+                    self.countHeader.append(lib)
+                    for row in reader:
+                        self.countDict[row[0]].append(row[1])
+
+        return (self.countHeader, self.countDict)
+
+    def write_counts_file(self, countsFile):
+        print("Writing combined counts file...")
+        with open(countsFile, 'w') as csvFile:
+            writer = csv.writer(csvFile)
+            writer.writerow(self.countHeader)
+            for entry in self.countDict:
+                writer.writerow([entry] + self.countDict[entry])
+
+    def build_metric_list(self):
+        # Specify information for combined metric file below
+        self.metricHeader = ['libID']
+        self.metricList = []
+
+        # Specify all output filenames
+        metricFileDict = {'picard_align': {'fileExt': '_qc.zip',
+                                           'fileName': 'CollectAlignmentSummaryMetrics.metrics.txt'},
+                       'picard_rnaseq': {'fileExt': '_al.zip',
+                                         'fileName': 'CollectRnaSeqMetrics.metrics.txt'},
+                       'tophat_stats': {'fileExt': 'ths.txt'},
+                       'htseq': {'fileExt': 'mm.txt'},
+                       'picard_markdups': {'fileExt': 'MarkDups.zip',
+                                           'fileName': 'MarkDuplicates.metrics.txt'}}
+        metricTypes = ['picard_align', 'picard_rnaseq', 'tophat_stats', 'htseq', 'picard_markdups']
+
+        print("Generating combined metrics data...")
+        for idx, lib in enumerate(self.libList):
+            metrics = [lib]
+            for metricType in metricTypes:
+                filePath = [os.path.join(self.resultDir, fileName) \
+                            for fileName in os.listdir(self.resultDir) \
+                            if lib in fileName and
+                            metricFileDict[metricType].get('fileExt') in fileName][0]
+
+                if '.zip' in metricFileDict[metricType].get('fileExt'):
+                    with zipfile.ZipFile(filePath) as metric:
+                        metSrc = StringIO.StringIO(metric.read(metricFileDict[metricType].get('fileName')))
+                        metricLines = metSrc.readlines()
+                    metricVals = metricLines[7].rstrip('\n').split('\t')
+                    headerVals = metricLines[6].rstrip('\n').split('\t')
+
+                else:
+                    metricVals = []
+                    if metricType is 'tophat_stats':
+                        col = 0
+                        headerVals = ['fastq_total_reads', 'reads_aligned_sam',
+                                   'aligned', 'reads_with_mult_align',
+                                   'algn_seg_with_mult_algn']
+                    elif metricType is 'htseq':
+                        col = 1
+                        headerVals = ['no_feature',
+                                   'ambiguous', 'too_low_aQual', 'not_aligned',
+                                   'alignment_not_unique']
+                    with open(filePath) as metric:
+                        metricLines = metric.readlines()
+                        for line in metricLines:
+                            metricVals.append(line.strip().split('\t')[col])
+                if idx == 0:
+                    self.metricHeader = self.metricHeader + headerVals
+                metrics = metrics + metricVals
+
+            # Add column for normalized reads
+            ureIdx = self.metricHeader.index("UNPAIRED_READS_EXAMINED")
+            unpairedExamined = float(metrics[ureIdx])
+
+            ftrIdx = self.metricHeader.index("fastq_total_reads")
+            totalReads = float(metrics[ftrIdx])
+
+            metrics.append("%f" % (unpairedExamined / totalReads))
+
+            if idx == 0:
+                self.metricHeader = self.metricHeader + ['mapped_reads_w_dups']
+            self.metricList.append(metrics)
+
+        return (self.metricHeader, self.metricList)
+
+    def write_metrics_file(self, metricsFile):
+        print("Writing combined metrics file...")
+        with open(metricsFile, 'w') as csvFile:
+            writer = csv.writer(csvFile)
+            writer.writerow(self.metricHeader)
+            for entry in self.metricList:
+                writer.writerow(entry)
+
+    def execute(self, targetFile):
+        if self.resultType is 'counts':
+            self.build_count_dict()
+            self.write_counts_file(targetFile)
+        elif self.resultType is 'metrics':
+            self.build_metric_list()
+            self.write_metrics_file(targetFile)
+        print "Done"
