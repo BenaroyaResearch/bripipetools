@@ -64,7 +64,7 @@ def main(argv):
                'macsTreatBedFile': '_treatment.bed',
                'macsCtrlBedFile': '_control.bed',
                'macsPeaksBedFile': '_peaks.bed',
-               'macsReport': '_report.txt',
+               'macsReport': '_report.zip',
                'macsSummitsBedFile': '_summits.bed',
                'atacSeqMetrics': '_atac.zip'}
 

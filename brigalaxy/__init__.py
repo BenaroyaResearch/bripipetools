@@ -4,7 +4,8 @@ import requests, re, os, json
 class SessionManager(object):
 
     def __init__(self, user_num=None, galaxy_user=None, galaxy_server=None,
-                 galaxy_instance=None, galaxy_session=None, target_dir=None):
+                 galaxy_instance=None, galaxy_session=None,
+                 include_results=None, target_dir=None):
 
         if not galaxy_user:
             if user_num is None:
@@ -28,6 +29,8 @@ class SessionManager(object):
             self.connect_to_galaxy_server()
         else:
             self.gs = galaxy_session
+
+        self.rd = include_results
 
     def select_user(self, user_num=None):
 
@@ -68,6 +71,9 @@ class SessionManager(object):
 
     def add_target_dir(self, target_dir=None):
         self.dir = target_dir
+
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir)
 
 
 ###################################
@@ -156,6 +162,12 @@ class HistoryManager(object):
 
         return self.dg
 
+    #def annotate_workflow_graph(self):
+        """
+        Trace path from a single input to all outputs and replace Dataset IDs
+        with names.
+        """
+
     def get_root_datasets(self):
         """
         Based on the Dataset graph, identify root Datasets in the History.
@@ -209,10 +221,9 @@ class ResultCollector(object):
     """
     Class with methods for collecting information about all downstream (output) Datasets for current input Dataset.
     """
-    def __init__(self, history_manager=None, dataset_graph=None, input_dataset=None):
+    def __init__(self, history_manager=None, input_dataset=None):
 
         self.hm = history_manager
-        self.dg = dataset_graph
 
         self.id = input_dataset.keys()[0]
         self.file = input_dataset.values()[0]
@@ -228,10 +239,10 @@ class ResultCollector(object):
 
         self.ig = input_graph
 
-        if input_id in self.dg:
-            self.ig[input_id] = self.dg[input_id]
+        if input_id in self.hm.dg:
+            self.ig[input_id] = self.hm.dg[input_id]
 
-            for d in self.dg[input_id]:
+            for d in self.hm.dg[input_id]:
                 self.ig = self.build_input_graph(d, self.ig)
 
         return self.ig
@@ -245,10 +256,10 @@ class ResultCollector(object):
 
         self.iol = input_output_list
 
-        if input_id in self.dg:
-            self.iol = list(set(self.iol + self.dg[input_id]))
+        if input_id in self.hm.dg:
+            self.iol = list(set(self.iol + self.hm.dg[input_id]))
 
-            for d in self.dg[input_id]:
+            for d in self.hm.dg[input_id]:
                 self.iol = self.get_input_outputs(d, self.iol)
 
         return self.iol
@@ -406,8 +417,8 @@ class DownloadHandler(object):
         elif self.method == 'local':
             message = ("Copying file from %s to %s via SLURM." %
                        (self.src, self.path))
-#             os.system(('sbatch -N 1 -o slurm.out --open-mode=append <<EOF\n'
-#                        '#!/bin/bash\n'
-#                        'cp %s %s') % (self.src, self.path)
+            os.system(('sbatch -N 1 -o slurm.out --open-mode=append <<EOF\n'
+                       '#!/bin/bash\n'
+                       'cp %s %s') % (self.src, self.path))
 
         return message

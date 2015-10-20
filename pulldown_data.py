@@ -56,7 +56,7 @@ def parse_input_args(parser=None):
                               "/mnt/genomics/Illumina/"))
     parser.add_argument('-x', '--exclude_results',
                         type=int,
-                        default=None,
+                        default=[],
                         nargs='+',
                         choices=range(len(result_types)),
                         help=("Select one or more result types to exclude: " +
@@ -65,11 +65,17 @@ def parse_input_args(parser=None):
     # Parse and collect input arguments
     args = parser.parse_args()
 
-    if len(args.exclude_results):
-        exclude_results = [result_types[r] for r in args.exclude_results]
+    # if args.exclude_results:
+    #     exclude_results = [result_types[r] for r in args.exclude_results]
+    # else:
+    #     exclude_results = args.exclude_results
+
+    results_dict = {}
+    for i,r in enumerate(result_types):
+        results_dict[r] = i not in args.exclude_results
 
     return (args.flowcell, args.project, args.user_num, args.root_directory,
-            exclude_results)
+            results_dict)
 
 def get_output_labels(flowcell, project, history_name):
 
@@ -96,52 +102,80 @@ def get_output_labels(flowcell, project, history_name):
     except:
         file_tag = project + '_multiFCs_' + date_tag + '_'
 
-    return (project_folder, file_tag)
+    return (project, project_folder, file_tag)
 
+def initialize_log(session_manager, history_name, project, file_tag):
+    # Create log file and begin logging
+    outlog = os.path.join(session_manager.dir, file_tag + 'pulldown_log.txt')
+    log = open(outlog, 'w')
+
+    # Get current time
+    current_time = time.asctime(time.gmtime())
+
+    # Get system user name
+    sys_user = os.getlogin()
+
+    printlog(("Script run by user %s on %s" % (sys_user, current_time)), log)
+
+    printlog(("\nConnected to Galaxy server at %s as user %s") %
+             (session_manager.server, session_manager.user['username']), log)
+
+    # Print and log script settings
+    printlog("\n### SCRIPT SETTINGS ###", log)
+
+    printlog(("\nSelected history: '%s'" % history_name), log)
+    printlog(("Project ID/label: '%s'" % project), log, msg=True)
+    printlog(("\nPath to flowcell & results: %s" % (session_manager.dir)), log)
+    printlog(("Combined count/metric files will be prepended with '%s' tag" %
+              file_tag), log)
+
+    printlog("\nCollecting the following result types (if available):", log)
+    [ printlog(("  > %s : %s" % (r, session_manager.rd[r])), log) \
+      for r in session_manager.rd ]
+
+    return log
 
 def main(argv):
     parser = argparse.ArgumentParser()
-    fc,proj,user_num,root_dir,exclude = parse_input_args(parser)
+    fc,proj,user_num,root_dir,results_dict = parse_input_args(parser)
 
     # Initialize session manager object for interacting with Galaxy API and
     # Galaxy server
-    print "Connecting to Galaxy..."
-    sm = bg.SessionManager(user_num=0, target_dir="outDir")
+    print "(Connecting to Galaxy...)"
+    sm = bg.SessionManager(user_num=0, include_results=results_dict)
 
     # Initialize history manager object for collecting information about a
     # selected History
-    print "Initializing History manager..."
+    print "(Initializing History manager...)"
     hm = bg.HistoryManager(sm.gi, history_id='bd9802014d926144')
     hname = hm.hname
-    project_folder,file_tag = get_output_labels(fc, proj, hname)
+    proj,project_folder,file_tag = get_output_labels(fc, proj, hname)
 
-    sm.add_target_dir(os.path.join(root_dir, project_folder))
-    print sm.dir
+    sm.add_target_dir(os.path.join(root_dir, fc, project_folder))
 
-    #
-    #
-    # # Get dataset graph for history
-    # print "Building Dataset graph..."
-    # dataset_graph = hm.show_dataset_graph()
-    #
-    # # Get list of input datasets
-    # print "Identifying input Datasets..."
-    # input_dataset_list = hm.show_input_datasets()
-    #
-    # print "Getting ouptut data..."
-    # for i in input_dataset_list[0:1]:
-    #
-    #     rc = bg.ResultCollector(hm, dataset_graph, i)
-    #     print "\nCollecting outputs for library:", rc.lib
-    #     output_dataset_list = rc.show_output_list()
-    #
-    #     print "Downloading files..."
-    #     for o in output_dataset_list:
-    # #         print ResultDownloader(sm, rc.lib, o).show()
-    #         rd = bg.ResultDownloader(sm, rc.lib, o)
-    #         print " > Dataset:", rd.dname
-    #         print " -- ", rd.go()
-    # print "\nDone."
+    print "(Initializing pulldown log...)\n"
+    log = initialize_log(sm, hname, proj, file_tag)
+
+    # Get list of input datasets
+    print "\n(Identifying input Datasets...)"
+    input_dataset_list = hm.show_input_datasets()
+
+    printlog("\n### DATA PULLDOWN ###\n", log)
+    print "(Getting ouptut data...)"
+    for i in input_dataset_list[0:1]:
+
+        rc = bg.ResultCollector(hm, i)
+        printlog("\nCollecting outputs for library: %s" % rc.lib, log)
+        output_dataset_list = rc.show_output_list()
+
+        print "(Downloading files...)"
+        for i,o in enumerate(output_dataset_list):
+            rd = bg.ResultDownloader(sm, rc.lib, o)
+
+            printlog("%4d (dataset): %s" % (i, rd.dname), log)
+            printlog(rd.go(), log, msg=True)
+    print "\nDone."
+    log.close()
 
 if __name__ == "__main__":
    main(sys.argv[1:])
