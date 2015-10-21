@@ -65,11 +65,6 @@ def parse_input_args(parser=None):
     # Parse and collect input arguments
     args = parser.parse_args()
 
-    # if args.exclude_results:
-    #     exclude_results = [result_types[r] for r in args.exclude_results]
-    # else:
-    #     exclude_results = args.exclude_results
-
     results_dict = {}
     for i,r in enumerate(result_types):
         results_dict[r] = i not in args.exclude_results
@@ -142,12 +137,12 @@ def main(argv):
     # Initialize session manager object for interacting with Galaxy API and
     # Galaxy server
     print "(Connecting to Galaxy...)"
-    sm = bg.SessionManager(user_num=0, include_results=results_dict)
+    sm = bg.SessionManager(include_results=results_dict)
 
     # Initialize history manager object for collecting information about a
     # selected History
     print "(Initializing History manager...)"
-    hm = bg.HistoryManager(sm.gi, history_id='bd9802014d926144')
+    hm = bg.HistoryManager(sm.gi)
     hname = hm.hname
     proj,project_folder,file_tag = get_output_labels(fc, proj, hname)
 
@@ -163,7 +158,7 @@ def main(argv):
 
     printlog("\n### DATA PULLDOWN ###\n", log)
     print "(Getting ouptut data...)"
-    for i in input_dataset_list[0:1]:
+    for i in input_dataset_list:
 
         rc = bg.ResultCollector(hm, i)
         printlog("\nCollecting outputs for library: %s" % rc.lib, log)
