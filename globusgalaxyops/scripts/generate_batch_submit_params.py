@@ -150,7 +150,7 @@ def get_lane_fastq(libDir, lane):
 # Create output file path corresponding to the current parameter / result type
 def build_result_path(lib, targetDir, param):
     resultTypes = ['trimmed', 'counts', 'alignments', 'metrics',
-                   'QC', 'Trinity']
+                   'QC', 'Trinity', 'log']
     resultType = [ rType for rType in resultTypes \
                    if rType.lower() in param ][0]
 
