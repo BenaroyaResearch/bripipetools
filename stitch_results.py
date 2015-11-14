@@ -2,19 +2,19 @@ import brigalaxy as bg
 import sys, os, argparse, re
 
 def parse_input_args(parser=None):
-    parser.add_argument('-d', '--processedDir',
+    parser.add_argument('-d', '--processed_dir',
                         required=True,
                         default=None,
                         help=("path to processed directory - e.g., "
                               "/mnt/genomics/Illumina/"
                               "150218_D00565_0081_BC5UF5ANXX/"
                               "Project_P69Processed"))
-    parser.add_argument('-r', '--resultType',
+    parser.add_argument('-r', '--result_type',
                         default=None,
                         choices=['c', 'm', 'b'],
                         help=("Select type of result file to combine: " +
                               "c [counts], m [metrics], b [both]"))
-    parser.add_argument('-t', '--fileTag',
+    parser.add_argument('-t', '--file_tag',
                         default='',
                         help=("specify tag to add to combined files - e.g., "
                               "<tag>_combined_counts.csv"))
@@ -22,8 +22,8 @@ def parse_input_args(parser=None):
     # Parse and collect input arguments
     args = parser.parse_args()
 
-    processedDir = os.path.abspath(args.processedDir)
-    return (processedDir, args.resultType, args.fileTag)
+    processed_dir = os.path.abspath(args.processed_dir)
+    return (processed_dir, args.result_type, args.file_tag)
 
 def get_file_tag(project_folder):
     path_parts = os.path.split(project_folder)

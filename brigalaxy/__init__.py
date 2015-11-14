@@ -512,181 +512,181 @@ class DownloadHandler(object):
 ###################################
 
 class ResultStitcher(object):
-    def __init__(self, resultType=None, processedDir=None, libList=None):
-        self.resultType = resultType
-        self.processedDir = processedDir
-        self.resultDir = os.path.join(self.processedDir, self.resultType)
-        self.libList = libList
+    def __init__(self, result_type=None, processed_dir=None, lib_list=None):
+        self.result_type = result_type
+        self.processed_dir = processed_dir
+        self.result_dir = os.path.join(self.processed_dir, self.result_type)
+        self.lib_list = lib_list
 
-        if self.libList is None:
-            self.libList = self.get_lib_list(self.resultDir)
+        if self.lib_list is None:
+            self.lib_list = self.get_lib_list(self.result_dir)
 
-    def get_lib_id(self, libFile):
-        libId = re.search('lib[0-9]+(.*(XX)+)*', libFile).group()
+    def get_lib_id(self, lib_file):
+        lib_id = re.search('lib[0-9]+(.*(XX)+)*', lib_file).group()
 
-        return libId
+        return lib_id
 
-    def get_lib_list(self, resultDir):
-        self.libList = [self.get_lib_id(libFile) \
-                   for libFile in os.listdir(self.resultDir) \
-                   if 'lib' in libFile]
-        self.libList = list(set(self.libList))
-        self.libList.sort()
-        return self.libList
+    def get_lib_list(self, result_dir):
+        self.lib_list = [self.get_lib_id(lib_file) \
+                   for lib_file in os.listdir(self.result_dir) \
+                   if 'lib' in lib_file]
+        self.lib_list = list(set(self.lib_list))
+        self.lib_list.sort()
+        return self.lib_list
 
     def build_count_dict(self):
-        self.countDict = {}
+        self.count_dict = {}
         print("\nGenerating combined counts data...")
-        for idx, lib in enumerate(self.libList):
-            filePath = [os.path.join(self.resultDir, fileName) \
-                        for fileName in os.listdir(self.resultDir) \
-                        if lib in fileName][0]
+        for idx, lib in enumerate(self.lib_list):
+            file_path = [os.path.join(self.result_dir, file_name) \
+                        for file_name in os.listdir(self.result_dir) \
+                        if lib in file_name][0]
 
-            with open(filePath) as csvFile:
-                reader = csv.reader(csvFile, delimiter = '\t')
+            with open(file_path) as csv_file:
+                reader = csv.reader(csv_file, delimiter = '\t')
                 if idx == 0:
-                    self.countHeader = ['geneName', lib]
+                    self.count_header = ['geneName', lib]
                     for row in reader:
-                        self.countDict[row[0]] = [row[1]]
+                        self.count_dict[row[0]] = [row[1]]
                 else:
-                    self.countHeader.append(lib)
+                    self.count_header.append(lib)
                     for row in reader:
-                        self.countDict[row[0]].append(row[1])
+                        self.count_dict[row[0]].append(row[1])
 
-        return (self.countHeader, self.countDict)
+        return (self.count_header, self.count_dict)
 
-    def write_counts_file(self, countsFile):
+    def write_counts_file(self, counts_file):
         print("Writing combined counts file...")
-        with open(countsFile, 'w') as csvFile:
-            writer = csv.writer(csvFile)
-            writer.writerow(self.countHeader)
-            for entry in self.countDict:
-                writer.writerow([entry] + self.countDict[entry])
+        with open(counts_file, 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(self.count_header)
+            for entry in self.count_dict:
+                writer.writerow([entry] + self.count_dict[entry])
 
     def build_metric_list(self):
         # Specify information for combined metric file below
-        self.metricHeader = ['libID']
-        self.metricList = []
+        self.metric_header = ['lib_id']
+        self.metric_list = []
 
-        # Specify all output filenames
+        # Specify all output file_names
         ### picard align/rnaseq extensions are swapped - need to fix!!
-        metricFileDict = {'picard_align': {'fileExt': '_al.zip',
-                                           'fileName': 'CollectAlignmentSummaryMetrics.metrics.txt'},
-                          'picard_rnaseq': {'fileExt': '_qc.zip',
-                                            'fileName': 'CollectRnaSeqMetrics.metrics.txt'},
-                          'tophat_stats': {'fileExt': 'ths.txt'},
-                          'htseq': {'fileExt': 'mm.txt'},
-                          'picard_markdups': {'fileExt': 'MarkDups.zip',
-                                              'fileName': 'MarkDuplicates.metrics.txt'},
-                          'atacseq_metrics': {'fileExt': 'atac.zip',
-                                              'fileName': 'MTDupsFilterStats_html.html'},
-                          'fastqmcf_log': {'fileExt': '_fqmcf.txt'}}
-        metricTypes = ['picard_align', 'picard_rnaseq', 'tophat_stats', 'htseq', 'picard_markdups', 'atacseq_metrics', 'fastqmcf_log']
+        metric_file_dict = {'picard_align': {'file_ext': '_al.zip',
+                                           'file_name': 'CollectAlignmentSummaryMetrics.metrics.txt'},
+                          'picard_rnaseq': {'file_ext': '_qc.zip',
+                                            'file_name': 'CollectRnaSeqMetrics.metrics.txt'},
+                          'tophat_stats': {'file_ext': 'ths.txt'},
+                          'htseq': {'file_ext': 'mm.txt'},
+                          'picard_markdups': {'file_ext': 'MarkDups.zip',
+                                              'file_name': 'MarkDuplicates.metrics.txt'},
+                          'atacseq_metrics': {'file_ext': 'atac.zip',
+                                              'file_name': 'MTDupsFilterStats_html.html'},
+                          'fastqmcf_log': {'file_ext': '_fqmcf.txt'}}
+        metric_types = ['picard_align', 'picard_rnaseq', 'tophat_stats', 'htseq', 'picard_markdups', 'atacseq_metrics', 'fastqmcf_log']
 
         print("\nGenerating combined metrics data...")
-        for idx, lib in enumerate(self.libList):
+        for idx, lib in enumerate(self.lib_list):
             metrics = [lib]
-            for metricType in metricTypes:
-                filePath = [os.path.join(self.resultDir, fileName) \
-                            for fileName in os.listdir(self.resultDir) \
-                            if lib in fileName and
-                            metricFileDict[metricType].get('fileExt') in fileName]
+            for metric_type in metric_types:
+                file_path = [os.path.join(self.result_dir, file_name) \
+                            for file_name in os.listdir(self.result_dir) \
+                            if lib in file_name and
+                            metric_file_dict[metric_type].get('file_ext') in file_name]
 
-                if len(filePath):
-                    filePath = filePath[0]
+                if len(file_path):
+                    file_path = file_path[0]
                 else:
                     continue
 
-                if '.zip' in metricFileDict[metricType].get('fileExt'):
-                    with zipfile.ZipFile(filePath) as metric:
-                        metSrc = StringIO.StringIO(metric.read(metricFileDict[metricType].get('fileName')))
-                        metricLines = metSrc.readlines()
-                    if metricType is not 'atacseq_metrics':
-                        metricVals = metricLines[7].rstrip('\n').split('\t')
-                        headerVals = metricLines[6].rstrip('\n').split('\t')
+                if '.zip' in metric_file_dict[metric_type].get('file_ext'):
+                    with zipfile.ZipFile(file_path) as metric:
+                        met_src = StringIO.StringIO(metric.read(metric_file_dict[metric_type].get('file_name')))
+                        metric_lines = met_src.readlines()
+                    if metric_type is not 'atacseq_metrics':
+                        metric_vals = metric_lines[7].rstrip('\n').split('\t')
+                        header_vals = metric_lines[6].rstrip('\n').split('\t')
                     else:
-                        metricVals = [re.search('[0-9]{2,}', l).group() for l in metricLines]
-                        metricVals = [metricVals[0], metricVals[1],
-                                      '%f' % (1 - float(metricVals[1]) / float(metricVals[0])),
-                                      metricVals[2],
-                                      '%f' % (1 - float(metricVals[2]) / float(metricVals[0])),
-                                      metricVals[3],
-                                      '%f' % (1 - float(metricVals[3])/ float(metricVals[2]))]
-                        headerVals = ['aligned_reads', 'aligned_reads_wo_dups', 'perc_dups',
+                        metric_vals = [re.search('[0-9]{2,}', l).group() for l in metric_lines]
+                        metric_vals = [metric_vals[0], metric_vals[1],
+                                      '%f' % (1 - float(metric_vals[1]) / float(metric_vals[0])),
+                                      metric_vals[2],
+                                      '%f' % (1 - float(metric_vals[2]) / float(metric_vals[0])),
+                                      metric_vals[3],
+                                      '%f' % (1 - float(metric_vals[3])/ float(metric_vals[2]))]
+                        header_vals = ['aligned_reads', 'aligned_reads_wo_dups', 'perc_dups',
                                       'aligned_reads_wo_mito', 'perc_mito',
                                       'aligned_reads_wo_mito_wo_dups', 'perc_non_mito_dups']
 
                 else:
-                    metricVals = []
-                    if metricType is 'tophat_stats':
+                    metric_vals = []
+                    if metric_type is 'tophat_stats':
                         col = 0
-                        headerVals = ['fastq_total_reads', 'reads_aligned_sam',
+                        header_vals = ['fastq_total_reads', 'reads_aligned_sam',
                                    'aligned', 'reads_with_mult_align',
                                    'algn_seg_with_mult_algn']
-                    elif metricType is 'htseq':
+                    elif metric_type is 'htseq':
                         col = 1
-                        headerVals = ['no_feature',
+                        header_vals = ['no_feature',
                                    'ambiguous', 'too_low_aQual', 'not_aligned',
                                    'alignment_not_unique']
-                    elif metricType is 'fastqmcf_log':
-                        headerVals = ['post_trim_fastq_reads']
+                    elif metric_type is 'fastqmcf_log':
+                        header_vals = ['post_trim_fastq_reads']
 
-                    if metricType is 'fastqmcf_log':
-                        with open(filePath) as metric:
-                            metricLines = metric.readlines()
-                            metricVals.append([line.strip().split(': ')[1] \
-                                               for line in metricLines \
+                    if metric_type is 'fastqmcf_log':
+                        with open(file_path) as metric:
+                            metric_lines = metric.readlines()
+                            metric_vals.append([line.strip().split(': ')[1] \
+                                               for line in metric_lines \
                                                if ':' in line][-2])
                     else:
-                        with open(filePath) as metric:
-                            metricLines = metric.readlines()
-                            for line in metricLines:
-                                metricVals.append(line.strip().split('\t')[col])
+                        with open(file_path) as metric:
+                            metric_lines = metric.readlines()
+                            for line in metric_lines:
+                                metric_vals.append(line.strip().split('\t')[col])
                 if idx == 0:
-                    self.metricHeader = self.metricHeader + headerVals
-                metrics = metrics + metricVals
+                    self.metric_header = self.metric_header + header_vals
+                metrics = metrics + metric_vals
 
             # Add column for normalized reads
-            if 'fastq_total_reads' in self.metricHeader:
-                ureIdx = self.metricHeader.index("UNPAIRED_READS_EXAMINED")
-                unpairedExamined = float(metrics[ureIdx])
+            if 'fastq_total_reads' in self.metric_header:
+                ure_idx = self.metric_header.index("UNPAIRED_READS_EXAMINED")
+                unpaired_examined = float(metrics[ure_idx])
 
-                ftrIdx = self.metricHeader.index("fastq_total_reads")
-                totalReads = float(metrics[ftrIdx])
+                ftr_idx = self.metric_header.index("fastq_total_reads")
+                total_reads = float(metrics[ftr_idx])
 
-                metrics.append("%f" % (unpairedExamined / totalReads))
+                metrics.append("%f" % (unpaired_examined / total_reads))
 
                 if idx == 0:
-                    self.metricHeader = self.metricHeader + ['mapped_reads_w_dups']
+                    self.metric_header = self.metric_header + ['mapped_reads_w_dups']
             else:
-                alIdx = self.metricHeader.index('aligned_reads')
-                alignedReads = float(metrics[alIdx])
+                al_idx = self.metric_header.index('aligned_reads')
+                aligned_reads = float(metrics[al_idx])
 
-                ftrIdx = self.metricHeader.index('post_trim_fastq_reads')
-                totalReads = float(metrics[ftrIdx])
+                ftr_idx = self.metric_header.index('post_trim_fastq_reads')
+                total_reads = float(metrics[ftr_idx])
 
-                metrics.append("%f" % (alignedReads / totalReads))
+                metrics.append("%f" % (aligned_reads / total_reads))
 
                 if idx == 0:
-                    self.metricHeader = self.metricHeader + ['perc_post_trim_reads_aligned']
+                    self.metric_header = self.metric_header + ['perc_post_trim_reads_aligned']
 
-            self.metricList.append(metrics)
+            self.metric_list.append(metrics)
 
-        return (self.metricHeader, self.metricList)
+        return (self.metric_header, self.metric_list)
 
-    def write_metrics_file(self, metricsFile):
+    def write_metrics_file(self, metrics_file):
         print("Writing combined metrics file...")
-        with open(metricsFile, 'w') as csvFile:
-            writer = csv.writer(csvFile)
-            writer.writerow(self.metricHeader)
-            for entry in self.metricList:
+        with open(metrics_file, 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(self.metric_header)
+            for entry in self.metric_list:
                 writer.writerow(entry)
 
-    def execute(self, targetFile):
-        if self.resultType is 'counts':
+    def execute(self, target_file):
+        if self.result_type is 'counts':
             self.build_count_dict()
-            self.write_counts_file(targetFile)
-        elif self.resultType is 'metrics':
+            self.write_counts_file(target_file)
+        elif self.result_type is 'metrics':
             self.build_metric_list()
-            self.write_metrics_file(targetFile)
+            self.write_metrics_file(target_file)
         print "Done"
