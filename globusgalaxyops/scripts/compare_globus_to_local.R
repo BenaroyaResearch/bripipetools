@@ -19,6 +19,17 @@ globus_metrics_dat <- read_csv(globus_metrics_file)
 names(globus_metrics_dat)[1] <- "lib_id"
 
 
+
+# select target metrics ---------------------------------------------------
+
+metrics_list <- c("MEAN_READ_LENGTH",
+                  "MEDIAN_3PRIME_BIAS",
+                  "MEDIAN_5PRIME_BIAS",
+                  "MEDIAN_CV_COVERAGE",
+                  "TOTAL_READS",
+                  "UNPAIRED_READS_EXAMINED",
+                  "total_reads_in_fastq_file")
+
 # define fxns -------------------------------------------------------------
 
 extract_metric <- function(local_df, globus_df, col, include_lib=FALSE) {
@@ -77,6 +88,8 @@ metric_stats_dat <- lapply(as.list(2:length(local_metrics_dat)),
                            }) %>% 
     bind_rows()
 
+selected_metric_stats <- metric_stats_dat %>% 
+    filter(metric %in% metrics_list)
 
 # plot problem metrics ----------------------------------------------------
 
@@ -103,6 +116,9 @@ plot_metric_vals <- function(metric_name) {
         geom_point(aes(colour = metric_source), 
                    position = position_dodge(width = 0.5, height = 0))
 }
+
+
+# plot selected metrics ---------------------------------------------------
 
 dev.off()
 lapply(as.list(diff_metrics$metric), plot_metric_vals)
