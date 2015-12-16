@@ -189,7 +189,6 @@ plot_metric <- function(metric, norm = FALSE, rank = FALSE, rm_outliers = FALSE)
     abline(0, 1)
 }
 
-<<<<<<< HEAD
 # hq base check -----------------------------------------------------------
 
 lib <- "lib6833"
@@ -198,16 +197,4 @@ gb <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_ALIGNED_BASES
 lb <- local_metrics_dat %>% filter(lib_id == lib) %>% .$PF_ALIGNED_BASES
 lbh <- local_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_BASES
 gbh <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_BASES
-=======
-
-# plot selected metrics ---------------------------------------------------
-
-dev.off()
-lapply(as.list(diff_metrics$metric), plot_metric_vals)
->>>>>>> 5fc329152a0ad33c15c0681543ccf4ac955216c7
-
-lr <- local_metrics_dat %>% filter(lib_id == lib) %>% .$PF_READS_ALIGNED
-gr <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_READS_ALIGNED
-lrh <- local_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_READS
-grh <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_READS
 
