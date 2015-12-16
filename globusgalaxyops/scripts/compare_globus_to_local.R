@@ -26,6 +26,17 @@ local_metrics_dat <- local_metrics_dat %>%
 globus_metrics_dat <- globus_metrics_dat %>% 
     filter(!(lib_id %in% skip_libs))
 
+
+# select target metrics ---------------------------------------------------
+
+metrics_list <- c("MEAN_READ_LENGTH",
+                  "MEDIAN_3PRIME_BIAS",
+                  "MEDIAN_5PRIME_BIAS",
+                  "MEDIAN_CV_COVERAGE",
+                  "TOTAL_READS",
+                  "UNPAIRED_READS_EXAMINED",
+                  "total_reads_in_fastq_file")
+
 # define fxns -------------------------------------------------------------
 
 extract_metric <- function(local_df, globus_df, col, include_lib=FALSE) {
@@ -128,6 +139,8 @@ metric_stats_dat <- lapply(as.list(2:length(sub_local_metrics_dat)),
                            }) %>% 
     bind_rows()
 
+selected_metric_stats <- metric_stats_dat %>% 
+    filter(metric %in% metrics_list)
 
 metric_stats_norm_dat <- lapply(as.list(2:length(sub_local_metrics_dat)), 
                            function(x) { 
@@ -176,6 +189,7 @@ plot_metric <- function(metric, norm = FALSE, rank = FALSE, rm_outliers = FALSE)
     abline(0, 1)
 }
 
+<<<<<<< HEAD
 # hq base check -----------------------------------------------------------
 
 lib <- "lib6833"
@@ -184,6 +198,13 @@ gb <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_ALIGNED_BASES
 lb <- local_metrics_dat %>% filter(lib_id == lib) %>% .$PF_ALIGNED_BASES
 lbh <- local_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_BASES
 gbh <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_BASES
+=======
+
+# plot selected metrics ---------------------------------------------------
+
+dev.off()
+lapply(as.list(diff_metrics$metric), plot_metric_vals)
+>>>>>>> 5fc329152a0ad33c15c0681543ccf4ac955216c7
 
 lr <- local_metrics_dat %>% filter(lib_id == lib) %>% .$PF_READS_ALIGNED
 gr <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_READS_ALIGNED
