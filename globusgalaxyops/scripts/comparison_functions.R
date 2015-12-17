@@ -66,7 +66,6 @@ compare_dfs <- function(df1, df2, norm_vals = FALSE) {
     df_comp_dat <- lapply(as.list(col_nums), 
                           function(x) { 
                               col_name <- names(df1)[x]
-                              print(col_name)
                               lm_dat <- extract_col(df1, df2, x) %>% 
                                   get_lm_stats(norm = norm_vals) %>% 
                                   mutate(col = col_name)
@@ -75,3 +74,59 @@ compare_dfs <- function(df1, df2, norm_vals = FALSE) {
         bind_rows()
     return(df_comp_dat)
 }
+
+# plot matching column values from two dataframes against each other
+# simple plot of metric values from one source vs the other
+plot_compare_vals <- function(df1, df2, col_name, 
+                         norm = FALSE, rank = FALSE, rm_outliers = FALSE) 
+{
+    x <- df1[[col_name]]
+    y <- df2[[col_name]]
+    
+    if (rank) {
+        norm <- FALSE
+        rm_outliers <- FALSE
+        x <- rank(x)
+        y <- rank(y)
+    }
+    
+    if (norm) {
+        max_val <- max(x, y)
+        x <- x / max_val
+        y <- y / max_val
+    }
+    
+    if (rm_outliers) {
+        q <- IQR(c(x, y))
+        m <- median(c(x, y))
+        x <- x[ (x >= (m - 0.75*q)) & (x <= (m + 0.75*q)) ]
+        y <- y[ (y >= (m - 0.75*q)) & (y <= (m + 0.75*q)) ]
+        print(m - 0.75*q)
+        print(m + 0.75*q)
+    }
+    
+    plot(x, y, main = col_name, xlab = "local", ylab = "globus")
+    abline(0, 1)
+}
+
+
+# plot fxn ----------------------------------------------------------------
+
+plot_compare_df <- function(compare_dat, multi = FALSE) {
+    p <- compare_dat %>% 
+        ggplot(aes(x = col, y = est)) +
+            geom_point(aes(size = std_err), fill = "black",
+                       shape = 21, alpha = 0.7)
+    
+    if (multi) {
+        p <- p + 
+            geom_boxplot(alpha = 0.5, outlier.shape = NA)
+    }
+    p <- p +
+        facet_wrap(~ lm_fit, nrow = 2, scales = "free_y") +
+        scale_fill_colorblind() +
+        theme(axis.text.x = element_text(angle = -90, hjust = 0))
+    return(p)
+}
+
+
