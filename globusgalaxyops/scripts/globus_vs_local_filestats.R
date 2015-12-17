@@ -5,6 +5,7 @@ library(dplyr)
 library(stringr)
 library(reshape2)
 library(ggplot2)
+library(ggthemes)
 
 
 # load counts data --------------------------------------------------------
