@@ -7,56 +7,54 @@ library(reshape2)
 library(ggplot2)
 
 
-# load metrics data --------------------------------------------------------
+# load counts data --------------------------------------------------------
 
 # project P43-12
-local_metrics_file <- "data/P43-12_local_metrics.csv"
-local_metrics_dat <- read_csv(local_metrics_file)
-names(local_metrics_dat)[1] <- "lib_id"
+local_counts_file <- "data/P43-12_local_counts.csv"
+local_counts_dat <- read_csv(local_counts_file) %>% 
+    select(one_of(sort(names(.))))
 
-globus_metrics_file <- "data/P43-12_globus_metrics.csv"
-globus_metrics_dat <- read_csv(globus_metrics_file)
-names(globus_metrics_dat)[1] <- "lib_id"
+# transpose the dataframe
+# gene_names <- local_counts_dat$geneName
+# lib_ids <- names(local_counts_dat)[-1]
+# local_counts_dat <- local_counts_dat[, -1] %>% 
+#     t() %>% 
+#     as.data.frame() %>% 
+#     bind_cols(data_frame(lib_id = lib_ids), .)
+# names(local_counts_dat) <- c("lib_id", gene_names)
+
+globus_counts_file <- "data/P43-12_globus_counts.csv"
+globus_counts_dat <- read_csv(globus_counts_file) %>% 
+    select(one_of(sort(names(.))))
 
 # temp filter
-skip_libs <- c("lib6832", "lib6924")
-local_metrics_dat <- local_metrics_dat %>% 
-    filter(!(lib_id %in% skip_libs))
+skip_libs <- c("lib6(832|924)")
+local_counts_dat <- local_counts_dat %>% 
+    select(-matches(skip_libs))
 
-globus_metrics_dat <- globus_metrics_dat %>% 
-    filter(!(lib_id %in% skip_libs))
-
-
-# select target metrics ---------------------------------------------------
-
-metrics_list <- c("MEAN_READ_LENGTH",
-                  "MEDIAN_3PRIME_BIAS",
-                  "MEDIAN_5PRIME_BIAS",
-                  "MEDIAN_CV_COVERAGE",
-                  "TOTAL_READS",
-                  "UNPAIRED_READS_EXAMINED",
-                  "total_reads_in_fastq_file")
+globus_counts_dat <- globus_counts_dat %>% 
+    select(-matches(skip_libs))
 
 # define fxns -------------------------------------------------------------
 
-# pull out the relevant metric values from each source
-extract_metric <- function(local_df, globus_df, col, include_lib=FALSE) {
-    metric_dat <- local_df %>% 
+# pull out individual lib counts from each source
+extract_lib <- function(local_df, globus_df, col, include_gene=FALSE) {
+    lib_dat <- local_df %>% 
         select(one_of(names(.)[c(1, col)])) %>% 
         full_join(globus_df %>% 
                       select(one_of(names(.)[c(1, col)])),
-                  by = c("lib_id" = "lib_id")) 
+                  by = c("geneName" = "geneName")) 
     
-    if (!include_lib) {
-        metric_dat <- metric_dat %>% 
-            select(-lib_id)
+    if (!include_gene) {
+        lib_dat <- lib_dat %>% 
+            select(-geneName)
     }
     
-    names(metric_dat) = names(metric_dat) %>% 
+    names(lib_dat) = names(lib_dat) %>% 
         str_replace("x", "local") %>% 
         str_replace("y", "globus")
     
-    return(metric_dat)
+    return(lib_dat)
 }
 
 # small custom function to calculate root mean squared error
@@ -70,13 +68,13 @@ eucd <- function(x, y) {
 }
 
 # collect comparative stats for all metrics
-get_metric_stats <- function(metric_dat, norm = FALSE) {
-
-    metric_name <- names(metric_dat)[1] %>% 
+get_lib_stats <- function(lib_dat, norm = FALSE) {
+    
+    lib_id <- names(lib_dat)[1] %>% 
         str_extract(".*(?=\\.)")
-    metric_dat <- sapply(metric_dat, as.numeric)
-    x <- metric_dat[, 1]
-    y <- metric_dat[, 2]
+    lib_dat <- sapply(lib_dat, as.numeric)
+    x <- lib_dat[, 1]
+    y <- lib_dat[, 2]
     
     if (norm) {
         max_val <- max(x, y)
@@ -84,49 +82,52 @@ get_metric_stats <- function(metric_dat, norm = FALSE) {
         y <- y / max_val
     }
     
-
-    metric_df <- data_frame(
-        metric = metric_name,
+    lib_df <- data_frame(
+        lib = lib_id,
         rho = cor.test(x, y)$estimate,
         eucd = eucd(x, y),
         rmsd = rmsd(x, y),
         lm_int = lm(y ~ x)$coef[1],
         lm_slope = lm(y ~ x)$coef[2]
     )
-
-    return(metric_df)
+    
+    return(lib_df)
 }
 
-# simple plot of metric values from one source vs the other
-plot_metric <- function(metric, norm = FALSE, rank = FALSE, rm_outliers = FALSE) {
-    x <- local_metrics_dat[[metric]]
-    y <- globus_metrics_dat[[metric]]
-    
-    if (rank) {
-        norm <- FALSE
-        rm_outliers <- FALSE
-        x <- rank(x)
-        y <- rank(y)
+get_lm_stats <- function(x, y = NULL) {
+    if (is.null(y)) {
+        y <- x[[2]]
+        x <- x[[1]]
     }
     
-    if (norm) {
-        max_val <- max(x, y)
-        x <- x / max_val
-        y <- y / max_val
-    }
+    s <- lm(x ~ y) %>% 
+        summary() %>% 
+        .[["coefficients"]] %>% 
+        .[, 1:2] %>% 
+        as.data.frame()
     
-    if (rm_outliers) {
-        q <- IQR(c(x, y))
-        m <- median(c(x, y))
-        x <- x[ (x >= (m - 0.75*q)) & (x <= (m + 0.75*q)) ]
-        y <- y[ (y >= (m - 0.75*q)) & (y <= (m + 0.75*q)) ]
-        print(m - 0.75*q)
-        print(m + 0.75*q)
-    }
+    row.names(s) <- c("int", "slope")
+    names(s) <- c("est", "std_err")
     
-    plot(x, y, main = metric, xlab = "local", ylab = "globus")
-    abline(0, 1)
+    s <- s %>% 
+        add_rownames(var = "lm_fit")
+    return(s)
 }
+
+# pull out the relevant metric values from each source
+compare_sampled_genes <- function(local_df, globus_df, sample_size = 1000) {
+    sample_rows <- sample(1:nrow(local_df), sample_size)
+    local_sample <- local_df %>% 
+        slice(sample_rows)
+    
+    globus_sample <- globus_df %>% 
+        slice(sample_rows)
+    
+    extract_lib(local_sample, globus_sample, 2) %>% 
+        get_lm_stats() %>% 
+        mutate(lib = names(local_df)[2])
+}
+
 
 # all correlations --------------------------------------------------------
 
@@ -139,8 +140,8 @@ remove_constant_vars <- function(data) {
 
 local_metrics_mat <- local_metrics_dat %>% 
     select(-contains("HQ")) %>% # the Globus version of Picard does something
-                                # weird when it counts high quality bases;
-                                # ignore these fields for now
+    # weird when it counts high quality bases;
+    # ignore these fields for now
     remove_constant_vars() %>% 
     .[, -1] %>% 
     as.matrix()
@@ -177,11 +178,11 @@ metric_stats_dat <- lapply(as.list(2:length(sub_local_metrics_dat)),
     bind_rows()
 
 metric_stats_norm_dat <- lapply(as.list(2:length(sub_local_metrics_dat)), 
-                           function(x) { 
-                               extract_metric(sub_local_metrics_dat, 
-                                              sub_globus_metrics_dat, x) %>% 
-                                   get_metric_stats(norm = TRUE)
-                           }) %>% 
+                                function(x) { 
+                                    extract_metric(sub_local_metrics_dat, 
+                                                   sub_globus_metrics_dat, x) %>% 
+                                        get_metric_stats(norm = TRUE)
+                                }) %>% 
     bind_rows()
 
 
