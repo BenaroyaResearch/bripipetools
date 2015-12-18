@@ -219,7 +219,15 @@ class FileMunger(object):
                     print "   Source file %s not found" % src_file
                 else:
                     print "   Copying %s to %s" % (src_file, target_file)
-                    shutil.copy(src_file, target_file)
+                    if not len(self.subdir):
+                        os.system(("sbatch -N 1 -J %s"
+                                   "-o slurm.out --open-mode=append <<EOF\n"
+                                   "#!/bin/bash\n"
+                                   "cp %s %s\n"
+                                   "EOF" %
+                                   (self.rs + "_file_copy", src_file, target_file)))
+                    else:
+                        shutil.copy(src_file, target_file)
         self.bundle = list(set(dirs_to_bundle))
 
     def bundle_files(self):
