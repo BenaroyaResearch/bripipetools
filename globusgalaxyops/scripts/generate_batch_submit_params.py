@@ -210,7 +210,8 @@ def create_workflow_file(workflowTemplate, endpoint, unalignedDir, proj, fcTag):
     # temp kluge to select just one lib
     # unalignedLibs = [ lib for lib in unalignedLibs if 'lib6645' in lib ]
     # unalignedLibs = [ lib for lib in unalignedLibs if 'lib6833' in lib ]
-
+    # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib6(830|922)', lib) ]
+    # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib66(05|20)', lib) ]
 
     targetDir = prep_output_directory(unalignedDir, proj)
 
