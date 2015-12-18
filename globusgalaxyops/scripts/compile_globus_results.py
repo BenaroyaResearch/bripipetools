@@ -220,12 +220,13 @@ class FileMunger(object):
                 else:
                     print "   Copying %s to %s" % (src_file, target_file)
                     if not len(self.subdir):
-                        os.system(("sbatch -N 1 -J %s"
-                                   "-o slurm.out --open-mode=append <<EOF\n"
-                                   "#!/bin/bash\n"
-                                   "cp %s %s\n"
-                                   "EOF" %
-                                   (self.rs + "_file_copy", src_file, target_file)))
+                        slurm_cmd = ("sbatch -N 1 -J %s "
+                                     "-o slurm.out --open-mode=append <<EOF\n"
+                                     "#!/bin/bash\n"
+                                     "cp %s %s\n"
+                                     "EOF" %
+                                     (self.rs + "_file_copy", src_file, target_file))
+                        os.system(slurm_cmd)
                     else:
                         shutil.copy(src_file, target_file)
         self.bundle = list(set(dirs_to_bundle))
