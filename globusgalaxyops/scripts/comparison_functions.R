@@ -1,20 +1,20 @@
 
 # pull out matching column from two data frames
 extract_col <- function(df1, df2, col, labels=c("1", "2"), 
-                        include_rownames=FALSE) 
+                        include_obsnames=FALSE) 
 {
-    col_names <- names(df1)[c(1, col)]
-    key_name <- col_names[1]
+    var_names <- names(df1)[c(1, col)]
+    obs_label <- var_names[1]
     
     col_dat <- df1 %>% 
-        select(one_of(col_names)) %>% 
+        select(one_of(var_names)) %>% 
         full_join(df2 %>% 
-                      select(one_of(col_names)),
-                  by = key_name) 
+                      select(one_of(var_names)),
+                  by = obs_label) 
     
-    if (!include_rownames) {
+    if (!include_obsnames) {
         col_dat <- col_dat %>% 
-            select(-one_of(key_name))
+            select(-one_of(obs_label))
     }
     
     names(col_dat) = names(col_dat) %>% 
@@ -22,6 +22,46 @@ extract_col <- function(df1, df2, col, labels=c("1", "2"),
         str_replace("y", labels[2])
     
     return(col_dat)
+}
+
+transpose_df <- function(df) {
+    # transpose the dataframe
+    obs_names <- df[[1]]
+    var_names <- names(df)[-1]
+    df <- df[, -1] %>% 
+        t() %>% 
+        as.data.frame() %>% 
+        bind_cols(data_frame(obs = var_names), .)
+    names(df) <- c("obs", obs_names)
+    return(df)
+}
+
+# pull out matching row from two data frames
+extract_row <- function(df1, df2, row, labels=c("1", "2"), 
+                        include_obsnames=FALSE) 
+{
+    df1 <- transpose_df(df1)
+    df2 <- transpose_df(df2)
+    
+    var_names <- names(df1)[c(1, row)]
+    obs_label <- var_names[1]
+    
+    row_dat <- df1 %>% 
+        select(one_of(var_names)) %>% 
+        full_join(df2 %>% 
+                      select(one_of(var_names)),
+                  by = obs_label) 
+    
+    if (!include_obsnames) {
+        row_dat <- row_dat %>% 
+            select(-one_of(obs_label))
+    }
+    
+    names(row_dat) = names(row_dat) %>% 
+        str_replace("x", labels[1]) %>% 
+        str_replace("y", labels[2])
+    
+    return(row_dat)
 }
 
 # use lm estimates (intercept, slope) to compare two vectors
@@ -61,17 +101,41 @@ get_lm_stats <- function(x, y = NULL, norm = FALSE) {
 }
 
 # compare two dataframes column-by-column
-compare_dfs <- function(df1, df2, norm_vals = FALSE) {
-    col_nums = 2:ncol(df1)
-    df_comp_dat <- lapply(as.list(col_nums), 
-                          function(x) { 
-                              col_name <- names(df1)[x]
-                              lm_dat <- extract_col(df1, df2, x) %>% 
-                                  get_lm_stats(norm = norm_vals) %>% 
-                                  mutate(col = col_name)
-                              return(lm_dat)
-                          }) %>% 
-        bind_rows()
+compare_dfs <- function(df1, df2, norm_comp=FALSE, rowwise=FALSE, norm_cols=FALSE) {
+    if (norm_cols) {
+        df1 <- df1 %>% 
+            mutate_each_(funs(. / max(.)), list(quote(-lib_id))) %>% 
+            mutate_each(funs(ifelse(is.nan(.), 0, .)))
+        
+        df2 <- df2 %>% 
+            mutate_each_(funs(. / max(.)), list(quote(-lib_id))) %>% 
+            mutate_each(funs(ifelse(is.nan(.), 0, .)))
+    }
+    
+    if (!rowwise) {
+        col_nums = 2:ncol(df1)
+        df_comp_dat <- lapply(as.list(col_nums), 
+                              function(x) { 
+                                  col_name <- names(df1)[x]
+                                  lm_dat <- extract_col(df1, df2, x) %>% 
+                                      get_lm_stats(norm = norm_comp) %>% 
+                                      mutate(item = col_name)
+                                  return(lm_dat)
+                              }) %>% 
+            bind_rows()
+    } else {
+        row_nums = 2:nrow(df1)
+        df_comp_dat <- lapply(as.list(row_nums), 
+                              function(x) {
+                                  row_name <- df1[[1]][x]
+                                  lm_dat <- extract_row(df1, df2, x) %>% 
+                                      get_lm_stats(norm = norm_comp) %>% 
+                                      mutate(item = row_name)
+                                  return(lm_dat)
+                              }) %>% 
+            bind_rows()
+    }
+
     return(df_comp_dat)
 }
 
@@ -113,10 +177,16 @@ plot_compare_vals <- function(df1, df2, col_name,
 # plot fxn ----------------------------------------------------------------
 
 plot_compare_df <- function(compare_dat, multi = FALSE) {
+    
+    spacer <- data_frame(item = rep(compare_dat$item[1], 4),
+                         est = c(-0.1, 0.1, 0.9, 1.1),
+                         lm_fit = c("int", "int", "slope", "slope"))
+    
     p <- compare_dat %>% 
-        ggplot(aes(x = col, y = est)) +
-            geom_point(aes(size = std_err), fill = "black",
-                       shape = 21, alpha = 0.7)
+        ggplot(aes(x = item, y = est)) +
+        geom_point(aes(size = std_err), fill = "black",
+                   shape = 21, alpha = 0.7) +
+        geom_blank(data = spacer)
     
     if (multi) {
         p <- p + 

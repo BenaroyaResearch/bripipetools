@@ -94,3 +94,12 @@ gbh <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_BASES
 metric_stats_dat %>% 
     plot_compare_df()
     
+
+# check individual lib ----------------------------------------------------
+
+lib6924_dat <- extract_row(local_metrics_dat, globus_metrics_dat, 22, 
+                           labels = c("local", "globus"), 
+                           include_obsnames = TRUE) %>% 
+    mutate(lib6924_local_char = sprintf("%s", lib6924.local), 
+           lib6924_globus_char = sprintf("%s", lib6924.globus))
+
