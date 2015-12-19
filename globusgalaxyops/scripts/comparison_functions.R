@@ -83,6 +83,11 @@ get_lm_stats <- function(x, y = NULL, norm = FALSE) {
         s <- data_frame(lm_fit = c("int", "slope"), 
                         est = c(0, 1),
                         std_err = c(0, 0))
+    } else if (sum(x == y) != length(x) & n_distinct(x) <= 2 & n_distinct(y) <= 2) {
+        offset <- mean(x) - mean(y)
+        s <- data_frame(lm_fit = c("int", "slope"), 
+                        est = c(offset, 1),
+                        std_err = c(0, 0))
     } else {
         s <- lm(x ~ y) %>% 
             summary() %>% 
