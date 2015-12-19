@@ -67,14 +67,14 @@ sub_globus_metrics_dat <- globus_metrics_dat %>%
 # compare metrics ---------------------------------------------------------
 
 metric_comp_dat <- compare_dfs(sub_local_metrics_dat,
-                                sub_globus_metrics_dat, norm_vals = TRUE)
+                                sub_globus_metrics_dat, norm_comp = TRUE)
 
 
 # select offset metrics ---------------------------------------------------
 
 # pull out metrics with offset of > 1%
-offset_metric_dat <- metric_stats_dat %>% 
-    group_by(col) %>% 
+offset_metric_dat <- metric_comp_dat %>% 
+    group_by(item) %>% 
     mutate(int = ifelse(lm_fit == "int", est, lag(est))) %>% 
     filter(abs(int) > 0.01) %>% 
     select(-int)
@@ -91,7 +91,7 @@ gbh <- globus_metrics_dat %>% filter(lib_id == lib) %>% .$PF_HQ_ALIGNED_BASES
 
 # plot --------------------------------------------------------------------
 
-metric_stats_dat %>% 
+metric_comp_dat %>% 
     plot_compare_df()
     
 

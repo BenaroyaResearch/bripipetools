@@ -141,7 +141,7 @@ compare_dfs <- function(df1, df2, norm_comp=FALSE, rowwise=FALSE, norm_cols=FALS
 
 # plot matching column values from two dataframes against each other
 # simple plot of metric values from one source vs the other
-plot_compare_vals <- function(df1, df2, col_name, 
+plot_compare_var <- function(df1, df2, col_name, 
                          norm = FALSE, rank = FALSE, rm_outliers = FALSE) 
 {
     x <- df1[[col_name]]
@@ -176,7 +176,7 @@ plot_compare_vals <- function(df1, df2, col_name,
 
 # plot fxn ----------------------------------------------------------------
 
-plot_compare_df <- function(compare_dat, multi = FALSE) {
+plot_compare_summary <- function(compare_dat, multi = FALSE) {
     
     spacer <- data_frame(item = rep(compare_dat$item[1], 4),
                          est = c(-0.1, 0.1, 0.9, 1.1),
@@ -199,4 +199,33 @@ plot_compare_df <- function(compare_dat, multi = FALSE) {
     return(p)
 }
 
+plot_compare_vars <- function(df1, df2, item_names) {
+    item_cols = match(item_names, names(df1))
+    
+    item_dat <- lapply(as.list(item_cols), 
+                       function(x) {
+                           extract_col(df1, df2, x, labels = c("x", "y"))
+                       }) %>% 
+        bind_cols() %>% 
+        bind_cols(df1[1], .)
+    names(item_dat)[1] <- "obs"
+    
+    item_plot_dat <- item_dat %>% 
+        melt(id.vars = "obs") %>% 
+        extract(variable, c("item", "df_source"), regex = "(.*)\\.(.*)") %>% 
+        spread(df_source, value) %>% 
+        mutate(perc_diff = (x - y) / x) %>% 
+        mutate(label = ifelse(perc_diff > 0.01, obs, ""))
+    
+    p <- item_plot_dat %>% 
+        ggplot(aes(x = x, y = y)) + 
+        geom_abline(intercept = 0, slope = 1) + 
+        geom_point(aes(fill = perc_diff), shape = 21, size = 4, 
+                   colour = "white", alpha = 0.7) +
+        geom_text(aes(label = label), hjust = 0, vjust = 0, size = 4) +
+        facet_wrap(~ item, scales = "free") +
+        scale_x_continuous(expand = c(0.5, 0)) +
+        scale_y_continuous(expand = c(0.5, 0))
+    return(p)
+}
 
