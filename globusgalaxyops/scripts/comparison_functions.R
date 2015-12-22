@@ -204,12 +204,19 @@ plot_compare_summary <- function(compare_dat, multi = FALSE) {
     return(p)
 }
 
-plot_compare_vars <- function(df1, df2, item_names) {
+plot_compare_vars <- function(df1, df2, item_names, norm = FALSE) {
     item_cols = match(item_names, names(df1))
     
     item_dat <- lapply(as.list(item_cols), 
                        function(x) {
-                           extract_col(df1, df2, x, labels = c("x", "y"))
+                           col_dat <- extract_col(df1, df2, x, 
+                                                  labels = c("x", "y"))
+                           
+                           if (norm) {
+                               col_dat <- col_dat %>% 
+                                   mutate_each(funs(. / max(max(.))))
+                           }
+                           return(col_dat)
                        }) %>% 
         bind_cols() %>% 
         bind_cols(df1[1], .)
