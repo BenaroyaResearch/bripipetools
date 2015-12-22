@@ -189,22 +189,26 @@ plot_compare_summary <- function(compare_dat, multi = FALSE) {
     
     p <- compare_dat %>% 
         ggplot(aes(x = item, y = est)) +
-        geom_point(aes(size = std_err), fill = "black",
-                   shape = 21, alpha = 0.7) +
         geom_blank(data = spacer)
     
     if (multi) {
         p <- p + 
+            geom_point(aes(size = std_err, fill = iter),
+                       shape = 21, alpha = 0.7) +
             geom_boxplot(alpha = 0.5, outlier.shape = NA)
+    } else {
+        p <- p + 
+            geom_point(aes(size = std_err), fill = "black",
+                       shape = 21, alpha = 0.7)
     }
     p <- p +
         facet_wrap(~ lm_fit, nrow = 2, scales = "free_y") +
-        scale_fill_colorblind() +
-        theme(axis.text.x = element_text(angle = -90, hjust = 0))
+        theme(axis.text.x = element_text(angle = -60, hjust = 0))
     return(p)
 }
 
-plot_compare_vars <- function(df1, df2, item_names, norm = FALSE) {
+plot_compare_vars <- function(df1, df2, item_names, norm = FALSE,
+                              labels = c("x", "y")) {
     item_cols = match(item_names, names(df1))
     
     item_dat <- lapply(as.list(item_cols), 
@@ -235,7 +239,9 @@ plot_compare_vars <- function(df1, df2, item_names, norm = FALSE) {
         geom_point(aes(fill = perc_diff), shape = 21, size = 4, 
                    colour = "white", alpha = 0.7) +
         geom_text(aes(label = label), hjust = 0, vjust = 0, size = 4) +
-        facet_wrap(~ item, scales = "free") +
+        xlab(labels[1]) +
+        ylab(labels[2]) +
+        facet_wrap(~ item, scales = "free", ncol = 4) +
         scale_x_continuous(expand = c(0.5, 0)) +
         scale_y_continuous(expand = c(0.5, 0))
     return(p)
