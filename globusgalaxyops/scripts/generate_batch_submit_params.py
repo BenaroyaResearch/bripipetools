@@ -77,8 +77,11 @@ def parse_workflow_template(batchWorkflowTemplate):
     headerLine = [ line for line in templateLines if 'SampleName' in line ][0]
     headers = headerLine.rstrip('\t').split('\t')
     headerKeys = [ header.split('##')[0] for header in headers ]
+    paramNames = [ header.split('::')[-1] for header in headers]
+    laneOrder = [ re.search('[1-9]', p).group() \
+                  for p in paramNames if re.search('from_path[1-8]', p) ]
 
-    return get_unique_keys(headerKeys), templateLines
+    return get_unique_keys(headerKeys), laneOrder, templateLines
 
 # Replace root directory with /~/ for compatibility with Globus transfer
 def format_endpoint_dir(localDir):
@@ -165,7 +168,7 @@ def build_result_path(lib, targetDir, param):
     return resultPath
 
 # Fill in parameter values for current lib based on the keys from the template
-def build_lib_param_list(lib, endpoint, targetDir, headerKeys, fcTag):
+def build_lib_param_list(lib, endpoint, targetDir, headerKeys, laneOrder, fcTag):
     libParams = []
     libId = parse_lib_path(lib)
     targetLib = libId + fcTag
@@ -174,9 +177,9 @@ def build_lib_param_list(lib, endpoint, targetDir, headerKeys, fcTag):
         if 'SampleName' in param:
             libParams.append(targetLib)
         elif 'fastq_in' in param:
-            lane = re.search('(?<=L)[0-9]', param).group()
             libParams.append(endpoint)
-            libParams.append(get_lane_fastq(lib, lane))
+            for lane in laneOrder:
+                libParams.append(get_lane_fastq(lib, lane))
         elif 'annotation' in param:
             refPath = build_ref_path(param)
             libParams.append(refPath)
@@ -194,7 +197,7 @@ def build_lib_param_list(lib, endpoint, targetDir, headerKeys, fcTag):
 
 # Parse template and fill in appropriate parameter values for all project libs
 def create_workflow_file(workflowTemplate, endpoint, unalignedDir, proj, fcTag):
-    headerKeys,templateLines = parse_workflow_template(workflowTemplate)
+    headerKeys,laneOrder,templateLines = parse_workflow_template(workflowTemplate)
     workflowLines = templateLines
 
     projLineNum = [ idx for idx,line in enumerate(templateLines) \
@@ -208,17 +211,17 @@ def create_workflow_file(workflowTemplate, endpoint, unalignedDir, proj, fcTag):
                       if os.path.isdir(os.path.join(unalignedDir, entry)) ]
 
     # temp kluge to select just one lib
-    # unalignedLibs = [ lib for lib in unalignedLibs if 'lib6645' in lib ]
-    # unalignedLibs = [ lib for lib in unalignedLibs if 'lib6833' in lib ]
-    # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib6(830|922)', lib) ]
-    # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib66(05|20)', lib) ]
+    unalignedLibs = [ lib for lib in unalignedLibs if 'lib6645' in lib ] # for P109-1
+    # unalignedLibs = [ lib for lib in unalignedLibs if 'lib6833' in lib ] # for P43-12
+    # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib6(830|922)', lib) ] # for P43-12
+    # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib66(05|20)', lib) ] # for P109-1
 
     targetDir = prep_output_directory(unalignedDir, proj)
 
     for lib in unalignedLibs:
         if "Undetermined" not in lib:
             libParams = build_lib_param_list(lib, endpoint, targetDir,
-                                             headerKeys, fcTag)
+                                             headerKeys, laneOrder, fcTag)
             workflowLines.append(('\t').join(libParams) + '\n')
 
     return (workflowLines, targetDir)
@@ -271,8 +274,7 @@ def main(argv):
     fcTag,proj = parse_unaligned_path(unalignedDir)
 
     workflowLines,targetDir = create_workflow_file(workflowTemplate, endpoint,
-                                                unalignedDir, proj, fcTag)
-
+                                                   unalignedDir, proj, fcTag)
     write_batch_workflow(workflowLines, targetDir,
                          workflowTemplate, proj)
 
