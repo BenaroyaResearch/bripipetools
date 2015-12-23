@@ -107,6 +107,20 @@ get_lm_stats <- function(x, y = NULL, norm = FALSE) {
 
 # compare two dataframes column-by-column
 compare_dfs <- function(df1, df2, norm_comp=FALSE, rowwise=FALSE, norm_cols=FALSE) {
+    
+    obs_label <- names(df1)[1]
+    
+    # keep only unique observations
+    df1 <- df1 %>% 
+        group_by_(lazyeval::as.lazy(obs_label)) %>% 
+        slice(1) %>% 
+        ungroup()
+    
+    df2 <- df2 %>% 
+        group_by_(lazyeval::as.lazy(obs_label)) %>% 
+        slice(1) %>% 
+        ungroup()
+    
     if (norm_cols) {
         df1 <- df1 %>% 
             mutate_each_(funs(. / max(.)), list(quote(-lib_id))) %>% 
@@ -208,13 +222,30 @@ plot_compare_summary <- function(compare_dat, multi = FALSE) {
 }
 
 plot_compare_vars <- function(df1, df2, item_names, norm = FALSE,
-                              labels = c("x", "y")) {
+                              multi = FALSE, labels = c("x", "y")) {
+    obs_label = names(df1)[1]
+    
+    # keep only unique observations
+    df1 <- df1 %>% 
+        group_by_(lazyeval::as.lazy(obs_label)) %>% 
+        slice(1) %>% 
+        ungroup()
+    
+    df2 <- df2 %>% 
+        group_by_(lazyeval::as.lazy(obs_label)) %>% 
+        slice(1) %>% 
+        ungroup()
+    
+    if (multi) {
+        item_names <- c(item_names, "iter")
+    }
     item_cols = match(item_names, names(df1))
     
     item_dat <- lapply(as.list(item_cols), 
                        function(x) {
                            col_dat <- extract_col(df1, df2, x, 
                                                   labels = c("x", "y"))
+                           print(nrow(col_dat))
                            
                            if (norm) {
                                col_dat <- col_dat %>% 
@@ -226,8 +257,18 @@ plot_compare_vars <- function(df1, df2, item_names, norm = FALSE,
         bind_cols(df1[1], .)
     names(item_dat)[1] <- "obs"
     
+    
+    if (multi) {
+        item_dat <- item_dat %>% 
+            select(-iter.y) %>% 
+            dplyr::rename(iter = `iter.x`)
+    } else {
+        item_dat <- item_dat %>% 
+            mutate(iter = 1)
+    }
+    
     item_plot_dat <- item_dat %>% 
-        melt(id.vars = "obs") %>% 
+        melt(id.vars = c("obs", "iter")) %>% 
         extract(variable, c("item", "df_source"), regex = "(.*)\\.(.*)") %>% 
         spread(df_source, value) %>% 
         mutate(perc_diff = (x - y) / x) %>% 
@@ -235,10 +276,19 @@ plot_compare_vars <- function(df1, df2, item_names, norm = FALSE,
     
     p <- item_plot_dat %>% 
         ggplot(aes(x = x, y = y)) + 
-        geom_abline(intercept = 0, slope = 1) + 
-        geom_point(aes(fill = perc_diff), shape = 21, size = 4, 
-                   colour = "white", alpha = 0.7) +
-        geom_text(aes(label = label), hjust = 0, vjust = 0, size = 4) +
+        geom_abline(intercept = 0, slope = 1)
+    
+    if (multi) {
+        p <- p +
+            geom_point(aes(fill = iter), shape = 21, size = 3,
+                       colour = "white", alpha = 0.7)
+    } else {
+        p <- p +
+            geom_point(aes(fill = perc_diff), shape = 21, size = 3, 
+                       colour = "white", alpha = 0.7)
+    }
+    p <- p +    
+        geom_text(aes(label = label), hjust = 0, vjust = 0, size = 3) +
         xlab(labels[1]) +
         ylab(labels[2]) +
         facet_wrap(~ item, scales = "free", ncol = 4) +
