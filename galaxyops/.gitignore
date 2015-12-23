@@ -1,0 +1,8 @@
+# Ignore users/params files in data/
+data
+
+# Ignore script to define users
+bin/set_users.py
+
+# Ignore slurm output
+slurm.out
