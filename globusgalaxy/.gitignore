@@ -1,0 +1,2 @@
+# ignore slurm output
+slurm.out

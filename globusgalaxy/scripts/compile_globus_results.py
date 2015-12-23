@@ -65,7 +65,7 @@ class ResultCurator(object):
         processed_dir = self.dir
 
         batch_file = [ f for f in os.listdir(processed_dir) if \
-                       re.search('v[0-9]\.[0-9]+\.txt', f) ]
+                       re.search('v[0-9]\.[0-9]+.*\.txt', f) ]
 
         if len(batch_file):
             batch_file = os.path.join(processed_dir, batch_file[0])
@@ -183,7 +183,7 @@ class FileMunger(object):
                             'picard_markdups_metrics_html': 'MarkDups_Dupes_Marked_html.html',
                             'trinity_fasta': 'Trinity.fasta',
                             'tophat_stats_metrics_txt': self.lib + 'ths.txt',
-                            'picard_rnaseq_metrics_html': 'RNA_Seq_Metrics_html.html',
+                            'picard_rnaseq_metrics_text': 'RNA_Seq_Metrics_html.html',
                             'htseq_counts_txt': self.lib + '_count.txt',
                             'tophat_alignments_bam': self.lib + '.bam',
                             'htseq_metrics_txt': self.lib + 'mm.txt',
