@@ -211,10 +211,8 @@ def create_workflow_file(workflowTemplate, endpoint, unalignedDir, proj, fcTag):
                       if os.path.isdir(os.path.join(unalignedDir, entry)) ]
 
     # temp kluge to select just one lib
-    unalignedLibs = [ lib for lib in unalignedLibs if 'lib6645' in lib ] # for P109-1
-    # unalignedLibs = [ lib for lib in unalignedLibs if 'lib6833' in lib ] # for P43-12
     # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib6(830|922)', lib) ] # for P43-12
-    # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib66(05|20)', lib) ] # for P109-1
+    unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib66(05|20)', lib) ] # for P109-1
 
     targetDir = prep_output_directory(unalignedDir, proj)
 
@@ -229,7 +227,7 @@ def create_workflow_file(workflowTemplate, endpoint, unalignedDir, proj, fcTag):
 # Write completed batch workflow to file and return formatted path
 def write_batch_workflow(workflowLines, targetDir, workflowTemplate, proj):
     templateFile = os.path.basename(workflowTemplate)
-    workflowFile = re.sub('Galaxy-API-Workflow', proj, templateFile)
+    workflowFile = proj + '_' + templateFile
     workflowPath = os.path.join(targetDir, workflowFile)
 
     wFile = open(workflowPath, 'w')
