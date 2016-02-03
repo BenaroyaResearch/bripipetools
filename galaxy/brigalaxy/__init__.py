@@ -418,7 +418,10 @@ class ResultDownloader(object):
 
         if self.rt in ext_dict:
             extension = ext_dict[self.rt]
-            method = method_dict[os.path.splitext(extension)[1]]
+            if re.search('^\.', extension):
+                method = method_dict[os.path.splitext(extension)[0]]
+            else:
+                method = method_dict[os.path.splitext(extension)[1]]
             instructions['out_file'] = os.path.join(self.folder, self.lib + extension)
 
             if method == 'remote':
