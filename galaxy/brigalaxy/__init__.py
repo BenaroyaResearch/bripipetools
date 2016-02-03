@@ -357,6 +357,7 @@ class ResultDownloader(object):
         self.gi = session_manager.gi
         self.gs = session_manager.gs
         self.dir = session_manager.dir
+        self.rd = session_manager.rd
         self.lib = lib_id
 
 
@@ -455,12 +456,15 @@ class ResultDownloader(object):
         self.state = 'active'
 
         if self.rt:
-            self.prep_output_folder()
+            if self.rd[self.params['folders'][self.rt]]:
+                self.prep_output_folder()
 
-            if not hasattr(self, 'instructions'):
-                self.prep_download_instructions()
+                if not hasattr(self, 'instructions'):
+                    self.prep_download_instructions()
 
-            msg = DownloadHandler(self.gs, self.instructions).get_data()
+                msg = DownloadHandler(self.gs, self.instructions).get_data()
+            else:
+                msg = ["Excluded result type; skipping."]
         else:
             msg = ["Non-requested result type; skipping."]
 
