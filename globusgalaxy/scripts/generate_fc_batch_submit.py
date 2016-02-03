@@ -209,9 +209,8 @@ def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
 
     # temp kluge to select just one lib
 #     unaligned_libs = [ lib for lib in unaligned_libs if re.search('lib6(830|922)', lib) ] # for P43-12
-    unaligned_libs = [ lib for lib in unaligned_libs if re.search('lib6(830|822)', lib) ] # for P43-12/13
+    unaligned_libs = [ lib for lib in unaligned_libs if re.search('lib6(830|822|605)', lib) ] # for P43-12/13 or P109-1
     # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib66(05|20)', lib) ] # for P109-1
-    print len(unaligned_libs)
 
     target_dir,date_tag = prep_output_directory(unaligned_dir, proj)
 
