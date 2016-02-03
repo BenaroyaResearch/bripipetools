@@ -227,6 +227,7 @@ def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
 def create_workflow_file(endpoint, workflow_template, project_list):
     header_keys,lane_order,template_lines = parse_workflow_template(workflow_template)
     workflow_lines = template_lines
+    workflow_lines[-1] = re.sub('\t$', '\n', workflow_lines[-1])
 
     proj_list = []
     for unaligned_project in project_list:
@@ -235,13 +236,11 @@ def create_workflow_file(endpoint, workflow_template, project_list):
         proj_list.append(proj)
         workflow_lines += proj_lines
 
-
     submit_tag = '%s_%s%s' % (date_tag, ('_').join(proj_list), fc_tag)
     proj_line_num = [idx for idx,line in enumerate(template_lines)
                     if 'Project Name' in line][0]
     workflow_lines[proj_line_num] = re.sub('<Your_project_name>', submit_tag,
                                            template_lines[proj_line_num])
-    workflow_lines[-1] = re.sub('\t$', '\n', workflow_lines[-1])
 
     return (workflow_lines, submit_tag)
 
@@ -256,7 +255,7 @@ def write_batch_workflow(workflow_lines, flowcell_dir, workflow_template, submit
     workflow_file = submit_tag + '_' + template_file
     workflow_path = os.path.join(target_dir, workflow_file)
 
-    w_file = open(workflow_path, 'w')
+    w_file = open(workflow_path, 'w+')
     w_file.writelines(workflow_lines)
     w_file.close()
 
