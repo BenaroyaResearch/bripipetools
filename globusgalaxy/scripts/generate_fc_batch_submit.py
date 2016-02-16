@@ -197,7 +197,7 @@ def build_lib_param_list(lib, endpoint, target_dir, header_keys, lane_order, fc_
 
 
 def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
-                       project_lines=None):
+                       project_lines=None, N=None, sort=False):
     if project_lines is None:
         project_lines = []
 
@@ -211,9 +211,15 @@ def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
     # unaligned_libs = [ lib for lib in unaligned_libs if re.search('lib6(830|922)', lib) ] # for P43-12
     # unaligned_libs = [ lib for lib in unaligned_libs if re.search('lib6(830|822|605)', lib) ] # for P43-12/13 or P109-1
     # unaligned_libs = [ lib for lib in unaligned_libs if re.search('lib(9497|9555)', lib) ] # for P43-12/13 or P109-1
-
     # unalignedLibs = [ lib for lib in unalignedLibs if re.search('lib66(05|20)', lib) ] # for P109-1
-    unaligned_libs = unaligned_libs[0:3] # first 3 libs, any project
+
+    if sort:
+        unaligned_libs = sorted(unaligned_libs,
+                                key=lambda x: sum(os.path.getsize(os.path.join(x, f))
+                                                  for f in os.listdir(x)))
+
+    if N is not None:
+        unaligned_libs = unaligned_libs[0:N] # first N libs, any project
 
     target_dir,date_tag = prep_output_directory(unaligned_dir, proj)
 
@@ -227,7 +233,7 @@ def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
 
 
 # Parse template and fill in appropriate parameter values for all project libs
-def create_workflow_file(endpoint, workflow_template, project_list):
+def create_workflow_file(endpoint, workflow_template, project_list, N=None, sort=False):
     header_keys,lane_order,template_lines = parse_workflow_template(workflow_template)
     workflow_lines = template_lines
     workflow_lines[-1] = re.sub('\t$', '\n', workflow_lines[-1])
@@ -235,7 +241,8 @@ def create_workflow_file(endpoint, workflow_template, project_list):
     proj_list = []
     for unaligned_project in project_list:
         proj,fc_tag,proj_lines,date_tag = get_project_params(endpoint, header_keys,
-                                                             lane_order, unaligned_project)
+                                                             lane_order, unaligned_project,
+                                                             N=N, sort=sort)
         proj_list.append(proj)
         workflow_lines += proj_lines
 
@@ -324,17 +331,25 @@ def main(argv):
                               "/mnt/genomics/galaxyWorkflows/"
                               "Galaxy-API-Workflow-alignCount_truSeq_"
                               "single_GRCh38_v1.txt"))
+    parser.add_argument('-N', '--first_N',
+                        type=int,
+                        default=None),
+    parser.add_argument('-s', '--sort_libs',
+                        action='store_true')
     args = parser.parse_args()
 
     endpoint = args.endpoint
     flowcell_dir = args.flowcell_dir
     workflow_dir = args.workflow_dir
+    N = args.first_N
+    sort_libs = args.sort_libs
 
     submit_dict = build_submit_dict(flowcell_dir, workflow_dir)
 
     for w in submit_dict:
         workflow_lines,submit_tag = create_workflow_file(endpoint,
-                                                         w, submit_dict[w])
+                                                         w, submit_dict[w],
+                                                         N, sort_libs)
         write_batch_workflow(workflow_lines, flowcell_dir, w, submit_tag)
 
 if __name__ == "__main__":
