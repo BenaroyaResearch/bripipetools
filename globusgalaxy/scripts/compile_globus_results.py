@@ -18,9 +18,9 @@ class WorkflowParser(object):
 
     def get_params(self):
 
-        param_line = [ l for l in self.batch if 'SampleName' in l ][0]
-        param_dict = { idx: re.sub('##.*', '', p) \
-                       for idx,p in enumerate(param_line.strip().split('\t')) }
+        param_line = [l for l in self.batch if 'SampleName' in l][0]
+        param_dict = {idx: re.sub('##.*', '', p) \
+                      for idx,p in enumerate(param_line.strip().split('\t'))}
 
         self.pd = param_dict
 
@@ -30,9 +30,9 @@ class WorkflowParser(object):
             self.get_params()
 
         param_dict = self.pd
-        lib_param_dict = [ { param_dict[i]: p \
-                             for i,p in enumerate(l.strip().split('\t')) } \
-                           for l in self.batch if re.search('lib[0-9]+', l) ]
+        lib_param_dict = [{param_dict[i]: p \
+                           for i,p in enumerate(l.strip().split('\t'))} \
+                          for l in self.batch if re.search('lib[0-9]+', l)]
 
         self.lpd = lib_param_dict
 
@@ -42,9 +42,9 @@ class WorkflowParser(object):
             self.get_lib_params()
 
         lib_param_dict = self.lpd
-        out_file_dict = { pd['SampleName']: { re.sub('_out', '', k): pd[k] \
-                                              for k in pd if 'out' in k } \
-                          for pd in lib_param_dict }
+        out_file_dict = {pd['SampleName']: {re.sub('_out', '', k): pd[k] \
+                                            for k in pd if 'out' in k} \
+                         for pd in lib_param_dict}
 
         self.ofd = out_file_dict
 
@@ -55,24 +55,58 @@ class WorkflowParser(object):
 
         return self.ofd
 
+class CompileController(object):
+
+    def __init__(self, flowcell_dir=None):
+        self.fc_dir = flowcell_dir
+
+    def select_batch(self):
+        batch_submit_dir = os.path.join(self.fc_dir, "globus_batch_submission")
+        batch_dates = list(set(f.split('_')[0] for f in os.listdir(batch_submit_dir)))
+
+        print "\nFound the following Globus Genomics Galaxy batches:"
+        for i, d in enumerate(batch_dates):
+            print "%3d : %s" % (i, d)
+        batch_i = raw_input("Select the date of flowcell batch to compile: ")
+        batch_date = batch_dates[int(batch_i)]
+
+        self.batch_submit_files = [os.path.join(batch_submit_dir, f)
+                                   for f in os.listdir(batch_submit_dir)
+                                   if f.split('_')[0] in batch_date]
+
+    def go(self):
+
+        if not hasattr(self, 'batch_submit_files'):
+            self.select_batch()
+
+        for f in self.batch_submit_files:
+            rc = ResultCurator(self.fc_dir, f).curate_outputs()
+
 class ResultCurator(object):
-    def __init__(self, processed_dir=None):
-        self.dir = os.path.abspath(processed_dir)
-        self.pf = re.search('Project_.*', processed_dir).group()
+
+    def __init__(self, flowcell_dir=None, batch_submit_file=None):
+        self.fc_dir = flowcell_dir
+        self.submit_file = batch_submit_file
+        self.get_workflow()
+
+    def get_workflow(self):
+
+        batch_workflow = re.search('(?<=optimized_).*(?=.txt)',
+                                   self.submit_file).group()
+        self.workflow = batch_workflow
 
     def get_outputs(self):
 
-        processed_dir = self.dir
-
-        batch_file = [ f for f in os.listdir(processed_dir) if \
-                       re.search('v[0-9]\.[0-9]+.*\.txt', f) ]
-
-        if len(batch_file):
-            batch_file = os.path.join(processed_dir, batch_file[0])
-
-        output_dict = WorkflowParser(batch_file).show_output_files()
+        output_dict = WorkflowParser(self.submit_file).show_output_files()
 
         self.od = output_dict
+
+    def get_project_dir(self, lib=None):
+
+        project_dir = os.path.join(self.fc_dir,
+                                   re.search('Project_[^/]*',
+                                             self.od[lib].get('workflow_log_txt')).group())
+        return project_dir
 
     def curate_outputs(self):
 
@@ -80,10 +114,13 @@ class ResultCurator(object):
             self.get_outputs()
 
         for idx,lib in enumerate(self.od):
-            print ("\n>>> Compiling outputs for %s (%d of %d)\n" %
-                   (lib, idx + 1, len(self.od)))
+            project_dir = self.get_project_dir(lib)
+            proj_id = re.search('P+[0-9]+(-[0-9]+){,1}', project_dir).group()
+            print "\nWorkflow: %s" % self.workflow
+            print (">> Compiling outputs for %s [%s] (%d of %d)\n" %
+                   (lib, proj_id, idx + 1, len(self.od)))
             sc = SampleCurator(lib, self.od[lib])
-            sc.organize_files(self.dir)
+            sc.organize_files(self.get_project_dir(lib))
 
 class SampleCurator(object):
 
@@ -144,15 +181,16 @@ class SampleCurator(object):
             fm = FileMunger(self, target_dir, rs)
             fm.go()
 
+
 class FileMunger(object):
 
     def __init__(self, sample_curator, target_dir, result_source):
 
         self.lib = sample_curator.lib
-        self.dir = target_dir
-        self.target = target_dir + '_formatted'
+        self.start = target_dir
+        self.target = target_dir
         self.rs = result_source
-        print self.rs
+        print " > Result source: %s" % self.rs
 
         self.sod = sample_curator.sd[result_source]
         self.prep_output_subdir()
@@ -183,7 +221,7 @@ class FileMunger(object):
                             'picard_markdups_metrics_html': 'MarkDups_Dupes_Marked_html.html',
                             'trinity_fasta': 'Trinity.fasta',
                             'tophat_stats_metrics_txt': self.lib + 'ths.txt',
-                            'picard_rnaseq_metrics_text': 'RNA_Seq_Metrics_html.html',
+                            'picard_rnaseq_metrics_html': 'RNA_Seq_Metrics_html.html',
                             'htseq_counts_txt': self.lib + '_count.txt',
                             'tophat_alignments_bam': self.lib + '.bam',
                             'htseq_metrics_txt': self.lib + 'mm.txt',
@@ -199,40 +237,34 @@ class FileMunger(object):
 
         dirs_to_bundle = []
         for idx,o in enumerate(source_output_dict):
-            print (" > %s: file %d of %d:" %
-                   (self.rs, idx + 1, len(source_output_dict)))
+            print ("   (file %d of %d)" %
+                   (idx + 1, len(source_output_dict)))
             rf = source_output_dict[o]['file']
             rt = source_output_dict[o]['type']
 
             if self.rs is not 'fastq':
                 out_dir = os.path.join(self.target, type_subdir_dict[rt], self.subdir)
                 if not os.path.isdir(out_dir):
+                    print "   - Creating directory %s" % out_dir
                     os.makedirs(out_dir)
+
                 if len(self.subdir) and not self.rs == 'trinity':
                     dirs_to_bundle.append(out_dir)
 
-                src_file = os.path.join(self.dir, rt, os.path.basename(rf))
+                src_file = os.path.join(self.start, rt, os.path.basename(rf))
                 target_file = os.path.join(out_dir, result_file_dict[o])
                 if os.path.exists(target_file):
-                    print "   Target file %s already exists" % target_file
+                    print "   - Target file %s already exists" % target_file
                 elif not os.path.exists(src_file):
-                    print "   Source file %s not found" % src_file
+                    print "   - Source file %s not found" % src_file
                 else:
-                    print "   Copying %s to %s" % (src_file, target_file)
-                    if not len(self.subdir):
-                        slurm_cmd = ("sbatch -N 1 -J %s "
-                                     "-o slurm.out --open-mode=append <<EOF\n"
-                                     "#!/bin/bash\n"
-                                     "cp %s %s\n"
-                                     "EOF" %
-                                     (self.rs + "_file_copy", src_file, target_file))
-                        os.system(slurm_cmd)
-                    else:
-                        shutil.copy(src_file, target_file)
+                    print "   - Copying %s to %s" % (src_file, target_file)
+                    shutil.move(src_file, target_file)
         self.bundle = list(set(dirs_to_bundle))
 
     def bundle_files(self):
         for d in self.bundle:
+            print "   - Zipping up %s" % d
             shutil.make_archive(d, 'zip', d)
             shutil.rmtree(d)
 
@@ -240,11 +272,9 @@ class FileMunger(object):
         self.rename_files()
         self.bundle_files()
 
-
 def main(argv):
-    processed_dir = sys.argv[1]
-    rc = ResultCurator(processed_dir)
-    rc.curate_outputs()
+    flowcell_dir = sys.argv[1]
+    CompileController(flowcell_dir).go()
 
 if __name__ == "__main__":
    main(sys.argv[1:])
