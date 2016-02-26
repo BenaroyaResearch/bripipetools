@@ -1,4 +1,4 @@
-import os
+import os, re
 import xml.etree.ElementTree as et
 
 from bripipetools.util import string_ops as so
@@ -89,7 +89,7 @@ class FlowcellRun(Run):
         self._get_fc_protocol()
 
     def _get_fc_params(self, fc_dir):
-        root_dir = find_dir('/', 'genomics', 3)
+        root_dir = files.find_dir('/', 'genomics', 3)
         local_fc_dir = re.sub('.*genomics', root_dir, fc_dir)
         run_params_file = os.path.join(local_fc_dir, self._id, 'runParameters.xml')
 
@@ -104,10 +104,10 @@ class FlowcellRun(Run):
         is_rapid = 'rapid' in fc_param.lower()
         version = so.matchdefault('v[0-9]+', fc_param)
         if is_rapid:
-            self.protocol_id = '_'.join([instrument_dict[r.instrument],
+            self.protocol_id = '_'.join([instrument_dict[self.instrument],
                                      'rapid', version])
         else:
-            self.protocol_id = '_'.join([instrument_dict[r.instrument],
+            self.protocol_id = '_'.join([instrument_dict[self.instrument],
                                       version])
 
 
