@@ -14,4 +14,7 @@ def get_file_type(file_path):
     if 'z' in ext[-1]:
         compression = ext[-1].lstrip('.')
         ext = os.path.splitext(ext[0])[-1].lstrip('.')
+    else:
+        print file_path
+
     return ext, compression

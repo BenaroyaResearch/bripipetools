@@ -24,6 +24,8 @@ def collect_fastq_info(file_path):
 
     if file_type == 'fastq':
         lane_id, read_id, sample_num = labels.get_fastq_source(file_path)
+    else:
+        print file_path
 
     file_path = re.sub('.*(?=/genomics)', '', file_path)
 
@@ -37,7 +39,8 @@ def get_lib_fastqs(fastq_dir):
         fastq_dir = re.sub('mnt', 'Volumes', fastq_dir)
 
     return [collect_fastq_info(os.path.join(fastq_dir, f))
-            for f in os.listdir(fastq_dir)]
+            for f in os.listdir(fastq_dir)
+            if re.search('(?<!empty)_.*.fastq.gz', f)]
 
 
 class TG3Object(dict):
