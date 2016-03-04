@@ -1,5 +1,6 @@
-from bripipetools import brigalaxy as bg
+import _mypath
 import sys, os, argparse, time, json, re
+from bripipetools import brigalaxy as bg
 
 def printlog(string, file, msg=False):
     """This is a small custom function to combine print and write in one
