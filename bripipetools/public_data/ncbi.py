@@ -45,7 +45,7 @@ def collect_supplementary_files(gse, target_dir='./'):
           % (len(supplementary_files), selected_type))
 
     for supp_f in supplementary_files:
-        gsm_name = strings.matchdefault('GSM[0-9]+', supp_f)
+        gsm_name = strings.matchdefault('GSM[0-9]+(?=[^GSM]*$)', supp_f)
         print('- Downloading file for %s...' % gsm_name),
         sys.stdout.flush()
 
@@ -54,7 +54,6 @@ def collect_supplementary_files(gse, target_dir='./'):
             with open(target_f, 'wb') as f:
                 shutil.copyfileobj(r, f)
         print('done.')
-        break
 
 def download_gse_data(acc, target_dir='./'):
     if not os.path.isdir(target_dir):
