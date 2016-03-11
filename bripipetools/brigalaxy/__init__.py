@@ -35,7 +35,7 @@ class SessionManager(object):
     def select_user(self, user_num=None):
 
         # Load list of known users
-        with open('data/users.json') as f:
+        with open('../data/users.json') as f:
             users = json.load(f)
 
         # Select user number
@@ -112,7 +112,7 @@ class HistoryManager(object):
         Get list of all Datasets in History.
         """
         dataset_list = self.gi.histories.show_history(self.hid, contents=True)
-        self.dl = dataset_list
+        self.dl = [d for d in dataset_list if not d.get('deleted')]
 
     def show_datasets(self):
         """
@@ -351,7 +351,7 @@ class ResultCollector(object):
 
 class ResultDownloader(object):
 
-    def __init__(self, session_manager, lib_id=None, output=None,
+    def __init__(self, session_manager, lib_id, output=None,
                  result_type=None):
 
         self.gi = session_manager.gi
@@ -364,7 +364,7 @@ class ResultDownloader(object):
         if output is not None:
             self.parse_output(output)
 
-        with open('data/params.json') as f:
+        with open('../data/params.json') as f:
             self.params = json.load(f)
 
         if not result_type:
@@ -378,10 +378,28 @@ class ResultDownloader(object):
         self.prior = output.get('prior')
         self.label = '%s (%d)' % (self.dname, output.get('num'))
 
+    def check_macs2_version(self):
+
+        history_id = (self.gi.datasets
+                        .show_dataset(self.oid)
+                        .get('history_id'))
+        macs2_params = (self.gi.histories
+                            .show_dataset_provenance(history_id, self.oid)
+                            .get('parameters')
+                            .get('advanced_options'))
+
+        if 'broad' in macs2_params:
+            self.macs2v = '_broad'
+        else:
+            self.macs2v = ''
 
     def get_result_type(self, result_type=None):
 
         dname = self.dname
+        if re.search('macs2', dname.lower()):
+            self.check_macs2_version()
+            dname = re.sub('skip_', '', dname)
+            self.dname = dname
 
         result_type_dict = self.params['result_types']
 
@@ -399,6 +417,8 @@ class ResultDownloader(object):
 
         if self.rt in folder_dict:
             result_folder = os.path.join(self.dir, folder_dict[self.rt])
+            if hasattr(self, 'macs2v'):
+                result_folder += self.macs2v
 
         if not os.path.isdir(result_folder) and self.state is 'active':
             os.makedirs(result_folder)

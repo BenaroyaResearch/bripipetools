@@ -166,10 +166,10 @@ def main(argv):
         output_dataset_list = rc.show_output_list()
 
         print "(Downloading files...)"
-        for i,o in enumerate(output_dataset_list):
+        for idx,o in enumerate(output_dataset_list):
             rd = bg.ResultDownloader(sm, rc.lib, o)
 
-            printlog("%4d (hid): %s [from %s]" % (i, rd.label, rd.prior), log)
+            printlog("%4d (hid): %s [from %s]" % (idx, rd.label, rd.prior), log)
             [printlog(m, log, msg=True) for m in rd.go()]
     print "\nDone."
     log.close()

@@ -20,10 +20,12 @@ def main(argv):
                         'htseq-count': 'countFile',
                         'htseq-count (no feature)': 'htseqMetrics',
                         'MACS2 callpeak (Bedgraph Treatment)': 'macsTreatBedGraphFile',
-                        'MACS2 callpeak (Bedgraph Control)': 'macsCtrlBedGraphFile',
+                        #'MACS2 callpeak (Bedgraph Control)': 'macsCtrlBedGraphFile',
                         'MACS2 callpeak (Peaks in BED format)': 'macsPeaksBedFile',
-                        'MACS2 callpeak (html report)': 'macsReport',
+                        #'MACS2 callpeak (html report)': 'macsReport',
+                        'MACS2 callpeak (narrow Peaks)': 'macsNarrowPeaksBedFile',
                         'MACS2 callpeak (summits in BED)': 'macsSummitsBedFile',
+                        'MACS2 callpeak (broad Peaks)': 'macsBroadPeaksBedFile',
                         'MTDupsFilterStats': 'atacSeqMetrics'}
 
     folder_dict = {'adapterTrimMetrics': 'metrics',
@@ -40,11 +42,13 @@ def main(argv):
                   'tophatStatsMetrics': 'metrics',
                   'countFile': 'counts',
                   'htseqMetrics': 'metrics',
-                  'macsTreatBedGraphFile': 'peakCallOutput',
-                  'macsCtrlBedGraphFile': 'peakCallOutput',
-                  'macsPeaksBedFile': 'peakCallOutput',
-                  'macsReport': 'peakCallOutput',
-                  'macsSummitsBedFile': 'peakCallOutput',
+                  'macsTreatBedGraphFile': 'peakCallOutput/macs2',
+                  #'macsCtrlBedGraphFile': 'peakCallOutput',
+                  'macsPeaksBedFile': 'peakCallOutput/macs2',
+                  #'macsReport': 'peakCallOutput',
+                  'macsNarrowPeaksBedFile': 'peakCallOutput/macs2',
+                  'macsSummitsBedFile': 'peakCallOutput/macs2',
+                  'macsBroadPeaksBedFile': 'peakCallOutput/macs2',
                   'atacSeqMetrics': 'metrics'}
 
     ext_dict = {'adapterTrimMetrics': '_fqmcf.txt',
@@ -62,10 +66,12 @@ def main(argv):
                'countFile': '_count.txt',
                'htseqMetrics': 'mm.txt',
                'macsTreatBedGraphFile': '_treatment.bdg',
-               'macsCtrlBedGraphFile': '_control.bdg',
+               #'macsCtrlBedGraphFile': '_control.bdg',
                'macsPeaksBedFile': '_peaks.bed',
-               'macsReport': '_report.zip',
+               #'macsReport': '_report.zip',
+               'macsNarrowPeaksBedFile': '_narrowpeaks.bed',
                'macsSummitsBedFile': '_summits.bed',
+               'macsBroadPeaksBedFile': '_broadpeaks.bed',
                'atacSeqMetrics': '_atac.zip'}
 
     method_dict = {'.txt': 'remote',
