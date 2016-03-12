@@ -35,7 +35,7 @@ class SessionManager(object):
     def select_user(self, user_num=None):
 
         # Load list of known users
-        with open('../data/users.json') as f:
+        with open('data/users.json') as f:
             users = json.load(f)
 
         # Select user number
@@ -364,7 +364,7 @@ class ResultDownloader(object):
         if output is not None:
             self.parse_output(output)
 
-        with open('../data/params.json') as f:
+        with open('data/params.json') as f:
             self.params = json.load(f)
 
         if not result_type:
