@@ -25,7 +25,11 @@ def main(argv):
                         #'MACS2 callpeak (html report)': 'macsReport',
                         'MACS2 callpeak (narrow Peaks)': 'macsNarrowPeaksBedFile',
                         'MACS2 callpeak (summits in BED)': 'macsSummitsBedFile',
-                        'MACS2 callpeak (broad Peaks)': 'macsBroadPeaksBedFile',
+                        'MACS2 callpeak (broad Peaks)': 'macsBroadPeaksBedFile'
+                        'SICER (test-W200-G600-E0.01-islandfiltered-normalized.wig)': 'sicerIFNormWigFile',
+                        'SICER (test-W200-G600-E0.01-islandfiltered.bed)': 'sicerIFBedFile',
+                        'SICER (test-W200-normalized.wig)': 'sicerNormWigFile',
+                        'SICER (test-1-removed.bed)': 'sicerRemBedFile',
                         'MTDupsFilterStats': 'atacSeqMetrics'}
 
     folder_dict = {'adapterTrimMetrics': 'metrics',
@@ -49,6 +53,10 @@ def main(argv):
                   'macsNarrowPeaksBedFile': 'peakCallOutput/macs2',
                   'macsSummitsBedFile': 'peakCallOutput/macs2',
                   'macsBroadPeaksBedFile': 'peakCallOutput/macs2',
+                  'sicerIFNormWigFile': 'peakCallOutput/sicer',
+                  'sicerIFBedFile': 'peakCallOutput/sicer',
+                  'sicerNormWigFile': 'peakCallOutput/sicer',
+                  'sicerRemBedFile': 'peakCallOutput/sicer'
                   'atacSeqMetrics': 'metrics'}
 
     ext_dict = {'adapterTrimMetrics': '_fqmcf.txt',
@@ -72,6 +80,10 @@ def main(argv):
                'macsNarrowPeaksBedFile': '_narrowpeaks.bed',
                'macsSummitsBedFile': '_summits.bed',
                'macsBroadPeaksBedFile': '_broadpeaks.bed',
+               'sicerIFNormWigFile': '_islandfilt_norm.wig',
+               'sicerIFBedFile': '_islandfilt.bed',
+               'sicerNormWigFile': '_norm.wig',
+               'sicerRemBedFile': '_removed.bed'
                'atacSeqMetrics': '_atac.zip'}
 
     method_dict = {'.txt': 'remote',
@@ -79,7 +91,8 @@ def main(argv):
                   '.fastq': 'local',
                   '.bam': 'local',
                   '.bed': 'local',
-                  '.bdg': 'local'}
+                  '.bdg': 'local',
+                  '.wig': 'local'}
 
     params = {'result_types': result_type_dict,
               'folders': folder_dict,
