@@ -11,8 +11,8 @@ def matchdefault(pattern, string, default=''):
         return default
 
 def to_camel_case(snake_str):
-    if not re.search('^_', snake_str):
+    if re.search('_', snake_str):
         components = snake_str.split('_')
-        return components[0] + "".join(x.title() for x in components[1:])
+        return components[0] + ''.join(x.title() for x in components[1:])
     else:
         return snake_str

@@ -34,5 +34,5 @@ def get_fastq_source(file_path):
     lane_id = so.matchdefault('(?<=_)L00[1-8]', file_path)
     read_id = so.matchdefault('(?<=_)R[1-2]', file_path)
     sample_num = int(so.matchdefault('(?<=_S)[0-9]+', file_path))
-    
+
     return lane_id, read_id, sample_num
