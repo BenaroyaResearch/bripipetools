@@ -95,7 +95,7 @@ def build_ref_path(param, build = 'GRCh38'):
     ref_dict['GRCh38'] = dict([('gtf', 'GRCh38/Homo_sapiens.GRCh38.77.gtf'),
                               ('refflat', 'GRCh38/Homo_sapiens.GRCh38.77.refflat.txt'),
                               ('ribosomal_intervals',
-                               'GRCh38/Homo_sapiens.GRCh38.77.ribosomalIntervalsWheader.txt'),
+                               'GRCh38/Homo_sapiens.GRCh38.77.ribosomalIntervalsWheader_reorder.txt'),
                                ('adapters', 'adapters/smarter_adapter_seqs_3p_5p.fasta')])
     ref_type = re.sub('^annotation_', '', param)
     ref_path = 'library::annotation::' + ref_dict[build].get(ref_type)
