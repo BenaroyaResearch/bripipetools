@@ -1,7 +1,7 @@
 __author__ = 'jeddy'
 import sys, os, re, argparse, time
 
-"""generateBatchSubmitParams
+"""generate_fc_batch_submit
 
 This script is used to generate a batch submit file for Globus Genomics Galaxy,
 with all parameters specified for the selected Workflow for each library
@@ -109,7 +109,7 @@ def prep_output_directory(unaligned_dir, proj):
 
     date_tag = time.strftime("%y%m%d", time.gmtime())
 
-    target_dir = '%s/Project_%sProcessed_%s' % (fc_dir, proj, date_tag)
+    target_dir = '%s/Project_%sProcessed_globus_%s' % (fc_dir, proj, date_tag)
     fastq_dir = os.path.join(target_dir, 'inputFastqs')
     if not os.path.isdir(fastq_dir):
         os.makedirs(fastq_dir)
@@ -272,21 +272,31 @@ def write_batch_workflow(workflow_lines, flowcell_dir, workflow_template, submit
     print "Batch file path: \n%s" % format_endpoint_dir(workflow_path)
 
 # Prompt user to specify workflow for each flowcell project
-def build_submit_dict(flowcell_dir, workflow_dir):
+def build_submit_dict(flowcell_dir, workflow_dir, optimized_only=False):
 
     flowcell_projects = [os.path.join(flowcell_dir, 'Unaligned', p)
                      for p in os.listdir(os.path.join(flowcell_dir, 'Unaligned'))
                      if '.' not in p]
+    flowcell_projects.sort()
 
     workflow_choices = [os.path.join(workflow_dir, f)
-                    for f in os.listdir(workflow_dir) if 'Galaxy-API' not in f]
+                        for f in os.listdir(workflow_dir)
+                        if 'Galaxy-API' not in f]
+    workflow_choices.sort()
+
+    if optimized_only:
+        workflow_choices = [f for f in workflow_choices
+                            if re.search('optimized', f)]
 
     ps_cont = True
     submit_dict = {}
     while ps_cont:
-        print "\nFound the following projects:"
+        print(submit_dict)
+        print "\nFound the following projects: [current workflows selected]"
         for i, p in enumerate(flowcell_projects):
-            print "%3d : %s" % (i, os.path.basename(p))
+            workflow_nums = [w for w, k in enumerate(workflow_choices)
+                             if p in submit_dict.get(k, [])]
+            print "%3d : %s %s" % (i, os.path.basename(p), str(workflow_nums))
 
         p_i = raw_input("\nType the number of the project you wish to select or hit enter to finish: ")
 
@@ -337,6 +347,9 @@ def main(argv):
     parser.add_argument('-s', '--sort_libs',
                         action='store_true',
                         help=("sort libraries from smallest to largest"))
+    parser.add_argument('-o', '--optimized_only',
+                        action='store_true',
+                        help=("show only optimized workflows"))
     args = parser.parse_args()
 
     endpoint = args.endpoint
@@ -344,8 +357,9 @@ def main(argv):
     workflow_dir = args.workflow_dir
     N = args.first_N
     sort_libs = args.sort_libs
+    optimized_only = args.optimized_only
 
-    submit_dict = build_submit_dict(flowcell_dir, workflow_dir)
+    submit_dict = build_submit_dict(flowcell_dir, workflow_dir, optimized_only)
 
     for w in submit_dict:
         workflow_lines,submit_tag = create_workflow_file(endpoint,
