@@ -1,5 +1,6 @@
-from bripipetools.util import label_munging as labels
+import re, os
 
+from bripipetools.io import labels
 
 class LibListParser(object):
 
@@ -49,3 +50,58 @@ class LibListParser(object):
                         fc_dict[fc_run_id] = fc_packet
 
         return fc_dict, lib_dict
+
+
+class WorkflowParser(object):
+
+    def __init__(self, batch_file=None):
+
+        self.bf = batch_file
+        self.read_batch_file()
+
+    def read_batch_file(self):
+
+        batch_file = self.bf
+        with open(batch_file) as f:
+            batch_lines = f.readlines()
+
+        self.batch = batch_lines
+
+    def get_params(self):
+
+        param_line = [l for l in self.batch if 'SampleName' in l][0]
+        param_dict = {idx: re.sub('##.*', '', p) \
+                      for idx,p in enumerate(param_line.strip().split('\t'))}
+
+        self.pd = param_dict
+
+    def get_lib_params(self):
+
+        if not hasattr(self, 'pd'):
+            self.get_params()
+
+        param_dict = self.pd
+        lib_param_dict = [{param_dict[i]: p \
+                           for i,p in enumerate(l.strip().split('\t'))} \
+                          for l in self.batch if re.search('lib[0-9]+', l)]
+
+        self.lpd = lib_param_dict
+
+    def build_out_dict(self):
+
+        if not hasattr(self, 'lpd'):
+            self.get_lib_params()
+
+        lib_param_dict = self.lpd
+        out_file_dict = {pd['SampleName']: {re.sub('_out', '', k): pd[k] \
+                                            for k in pd if 'out' in k} \
+                         for pd in lib_param_dict}
+
+        self.ofd = out_file_dict
+
+    def show_output_files(self):
+
+        if not hasattr(self, 'ofd'):
+            self.build_out_dict()
+
+        return self.ofd
