@@ -53,22 +53,40 @@ class LibListParser(object):
 
 
 class WorkflowParser(object):
+    def __init__(self, batch_file):
+        """
+        A parser to map input sample names to expected output files based on a
+        completed Globus Galaxy batch submit file.
 
-    def __init__(self, batch_file=None):
-
+        :type batch_file: str
+        :param batch_file: File path of batch submit file.
+        """
         self.bf = batch_file
         self.read_batch_file()
 
     def read_batch_file(self):
-
+        """
+        Read lines from batch submit file.
+        """
         batch_file = self.bf
         with open(batch_file) as f:
             batch_lines = f.readlines()
 
+        # TODO: use a more informative variable name than 'batch'
         self.batch = batch_lines
 
-    def get_params(self):
+    def get_workflow_name(self):
+        """
+        Identify metadata line indicating workflow name; return name.
+        """
+        name_line = [l for l in self.batch if 'Workflow Name' in l][0]
+        return name_line.strip().split('\t')[-1]
 
+    def get_params(self):
+        """
+        Identify header line with parameter names; store the index and name of
+        each parameter.
+        """
         param_line = [l for l in self.batch if 'SampleName' in l][0]
         param_dict = {idx: re.sub('##.*', '', p) \
                       for idx,p in enumerate(param_line.strip().split('\t'))}
@@ -76,32 +94,33 @@ class WorkflowParser(object):
         self.pd = param_dict
 
     def get_lib_params(self):
-
+        """
+        Collect the parameter details for each input sample; store the index
+        and input for each parameter.
+        """
         if not hasattr(self, 'pd'):
             self.get_params()
 
         param_dict = self.pd
         lib_param_dict = [{param_dict[i]: p \
-                           for i,p in enumerate(l.strip().split('\t'))} \
+                          for i,p in enumerate(l.strip().split('\t'))} \
                           for l in self.batch if re.search('lib[0-9]+', l)]
 
         self.lpd = lib_param_dict
 
-    def build_out_dict(self):
+    def get_batch_outputs(self):
+        """
+        Build the mapping between each input sample and its expected output
+        files.
 
+        :rtype: dict
+        :return: A dict of dicts, where the value stored for each input sample
+        key is a dictionary with parameter name : file name key-value pairs.
+        """
         if not hasattr(self, 'lpd'):
             self.get_lib_params()
 
         lib_param_dict = self.lpd
-        out_file_dict = {pd['SampleName']: {re.sub('_out', '', k): pd[k] \
-                                            for k in pd if 'out' in k} \
-                         for pd in lib_param_dict}
-
-        self.ofd = out_file_dict
-
-    def show_output_files(self):
-
-        if not hasattr(self, 'ofd'):
-            self.build_out_dict()
-
-        return self.ofd
+        return {pd['SampleName']: {re.sub('_out', '', k): pd[k] \
+                                   for k in pd if 'out' in k} \
+                for pd in lib_param_dict}

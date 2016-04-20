@@ -9,7 +9,9 @@ class WorkflowParser(object):
         self.read_batch_file()
 
     def read_batch_file(self):
-
+        """
+        Read lines from batch submit file.
+        """
         batch_file = self.bf
         with open(batch_file) as f:
             batch_lines = f.readlines()
@@ -17,7 +19,10 @@ class WorkflowParser(object):
         self.batch = batch_lines
 
     def get_params(self):
-
+        """
+        Identify header line with parameter names; store the index and name of
+        each parameter.
+        """
         param_line = [l for l in self.batch if 'SampleName' in l][0]
         param_dict = {idx: re.sub('##.*', '', p) \
                       for idx,p in enumerate(param_line.strip().split('\t'))}
@@ -31,7 +36,7 @@ class WorkflowParser(object):
 
         param_dict = self.pd
         lib_param_dict = [{param_dict[i]: p \
-                           for i,p in enumerate(l.strip().split('\t'))} \
+                          for i,p in enumerate(l.strip().split('\t'))} \
                           for l in self.batch if re.search('lib[0-9]+', l)]
 
         self.lpd = lib_param_dict
