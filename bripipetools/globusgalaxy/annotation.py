@@ -1,6 +1,4 @@
 class GlobusOutputAnnotator(object):
-    # TODO: this might make sense as a separate module for annotating outputs,
-    # might overlap with similar tasks for Galaxy Datasets
     def __init__(self, sample_output_map, sample):
         """
         Methods for annotating / classifying output files for a selected sample.
@@ -16,32 +14,62 @@ class GlobusOutputAnnotator(object):
         self.output_map = sample_output_map[sample]
         self.sample = sample
 
-    def _get_output_type(self, output):
-        output_str = re.sub('_[a-z]+$', '', output)
-        return strings.matchdefault('(?<=_)[a-z]+$', output_str,
-                                    output_str)
+    def get_output_type(self, output_name):
+        """
+        Return the type of a selected output.
 
+        :type output_name: str
+        :param output_name: Parameter name of the current output file (e.g.,
+            'tophat_alignments_bam_out')
 
-    def _get_output_source(self, output):
-        if not re.search('fastq$', output):
+        :rtype: str
+        :return: A string indicating the filetype (extension) of the output
+            file (e.g., 'bam').
+        """
+        output_name = re.sub('_[a-z]+$', '', output_name)
+        return strings.matchdefault('(?<=_)[a-z]+$', output_name, output_name)
+
+    def get_output_source(self, output_name):
+        """
+        Return the source of or tool used to generate the current output file.
+
+        :type output_name: str
+        :param output_name: Parameter name of the current output file (e.g.,
+            'tophat_alignments_bam_out')
+
+        :rtype: str
+        :return: A string indicating the source of the output file (e.g.,
+            'tophat').
+        """
+        # TODO: replace with separate parameter configs (json or yaml)
+        if not re.search('fastq$', output_name):
             output_sources = ['picard_align', 'picard_markdups', 'picard_rnaseq',
-                              'htseq', 'trinity', 'tophat', 'tophat_stats', 'fastqc',
-                              'workflow_log']
+                              'htseq', 'trinity', 'tophat', 'tophat_stats',
+                              'fastqc', 'workflow_log']
             return [s for s in output_sources
-                    if re.search(s.lower(), output)][0]
+                    if re.search(s.lower(), output_name)][0]
         else:
             output_sources = ['fastq', 'trimmed_fastq']
             return [s for s in output_sources
-                    if re.search('^' + s.lower() + '$', output)][0]
+                    if re.search('^' + s.lower() + '$', output_name)][0]
 
-    def get_source_outputs(self):
+    def get_output_info(self):
+        """
+        For the current sample, group output files by source; return the path
+        and type of each file.
+
+        :rtype: dict
+        :return: A dict, where for each ``source`` key, a list of dicts is
+            stored, containing the ``file`` (path) and ``type`` of each
+            corresponding output file.
+        """
         source_output_map = {}
         for o in self.output_map:
-            rt = self._get_output_type(o)
-            rs = self._get_output_source(o)
+            output_type = self.get_output_type(o)
+            output_source = self.get_output_source(o)
 
-            source_ouput_map.setdefault(rs, {})[o] = {'file': output_dict[o],
-                                                      'type': rt}
+            source_ouput_map.setdefault(output_source, {})[o] =
+                {'file': output_dict[o], 'type': output_type}
 
             # if rs in source_dict:
             #     source_output_map[rs][o] = {'file': output_dict[o],
@@ -50,4 +78,4 @@ class GlobusOutputAnnotator(object):
             #     source_dict[rs] = {o: {'file': output_dict[o],
             #                            'type': rt}}
 
-        self.source_outputs = source_output_map
+        return source_output_map

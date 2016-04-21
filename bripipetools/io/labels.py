@@ -23,12 +23,12 @@ def parse_fc_run_id(fc_run_id):
 
     return date, instrument_id, run_num, fc_id, fc_pos
 
-def get_proj_id(proj_str):
-    proj = strings.matchdefault('P+[0-9]+(-[0-9]+){,1}', proj_str)
-    proj_id = int(strings.matchdefault('(?<=P)[0-9]+', proj))
-    subproj_id = int(strings.matchdefault('(?<=-)[0-9]+', proj))
+def get_project_id(project_str):
+    project_name = strings.matchdefault('P+[0-9]+(-[0-9]+){,1}', project_str)
+    project_id = int(strings.matchdefault('(?<=P)[0-9]+', project_name))
+    subproject_id = int(strings.matchdefault('(?<=-)[0-9]+', project_name))
 
-    return proj_id, subproj_id
+    return (proj_id, subproj_id)
 
 def get_fastq_source(file_path):
     lane_id = strings.matchdefault('(?<=_)L00[1-8]', file_path)
