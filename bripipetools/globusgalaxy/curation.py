@@ -24,6 +24,16 @@ class BatchCurator(object):
             self.fc_dir = os.path.dirname(os.path.dirname(self.submit_file))
         else:
             self.fc_dir = flowcell_dir
+        self._load_output_map()
+
+    def _load_output_map(self):
+        """
+        Parse the batch submit file to obtain and store the mapping between
+        samples and their expected output files.
+        """
+        wp = WorkflowParser(self.submit_file)
+        self.workflow_name = wp.get_workflow_name()
+        self.sample_output_map = wp.get_batch_outputs()
 
     def _match_sample_project(self, sample_output_map, sample):
         """
@@ -54,9 +64,8 @@ class BatchCurator(object):
         :return: A dict, where for each ``sample``, output files are detailed
             and grouped by source.
         """
-        wp = WorkflowParser(self.submit_file)
-        workflow_name = wp.get_workflow_name()
-        sample_output_map = wp.get_batch_outputs()
+        workflow_name = self.workflow_name
+        sample_output_map = self.sample_output_map
 
         sample_output_info = {}
         for idx, sample in enumerate(sample_output_map):
@@ -69,7 +78,7 @@ class BatchCurator(object):
                   .format(sample, project_id, subproject_id,
                           idx + 1, len(sample_output_map)))
 
-            goa = annotation.GlobusOutputAnnotator(sample_output_map, sample)
+            goa = GlobusOutputAnnotator(sample_output_map, sample)
             sample_output_info.setdefault(sample, []).append(
                 goa.get_output_info())
         return sample_output_info

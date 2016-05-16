@@ -1,3 +1,7 @@
+import re
+
+from bripipetools.util import strings
+
 class GlobusOutputAnnotator(object):
     def __init__(self, sample_output_map, sample):
         """
@@ -68,8 +72,8 @@ class GlobusOutputAnnotator(object):
             output_type = self.get_output_type(o)
             output_source = self.get_output_source(o)
 
-            source_ouput_map.setdefault(output_source, {})[o] =
-                {'file': output_dict[o], 'type': output_type}
+            source_output_map.setdefault(output_source, {})[o] = \
+                {'file': self.output_map[o], 'type': output_type}
 
             # if rs in source_dict:
             #     source_output_map[rs][o] = {'file': output_dict[o],
