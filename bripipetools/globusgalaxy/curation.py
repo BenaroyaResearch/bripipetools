@@ -1,6 +1,7 @@
 import os
 
 from bripipetools.util import strings
+from bripipetools.util import files
 from bripipetools.io import labels
 from bripipetools.io.parsers import WorkflowParser
 from bripipetools.globusgalaxy.annotation import GlobusOutputAnnotator
@@ -54,6 +55,35 @@ class BatchCurator(object):
         log_file = sample_output_map[sample].get('workflow_log_txt')
         project_folder = strings.matchdefault('Project_[^/]*', log_file)
         return os.path.join(self.fc_dir, project_folder)
+
+    def check_outputs(self):
+        """
+        Check whether all expected output files are present for each sample in
+        the batch.
+
+        :rtype: dict
+        :return: A dict, where for each ``sample``, output files are flagged as
+            ok, missing, or empty.
+        """
+        sample_output_map = self.sample_output_map
+        current_root = files.locate_root_folder('genomics')
+
+        output_status_dict = {}
+        for sample in sample_output_map:
+            output_list = [{'file': v, 'type': k}
+                           for (k, v) in sample_output_map[sample].items()]
+
+            for f in output_list:
+                f['file'] = files.swap_root(f['file'], 'genomics', current_root)
+                f['exists'] = os.path.exists(f['file'])
+                f['size'] = os.stat(f['file']).st_size if f['exists'] else 0
+                if not f['exists']:
+                    f['status'] = 'missing'
+                else:
+                    f['status'] = 'empty' if f['size'] == 0 else 'ok'
+            output_status_dict[sample] = output_list
+
+        return output_status_dict
 
     def curate_outputs(self):
         """
