@@ -23,7 +23,7 @@ def locate_root_folder(top_level, max_depth=3):
         root_glob = os.path.join('/', max_glob)
         for f in glob.glob(root_glob):
             if top_level in f:
-                return os.path.dirname(f)
+                return '{}/'.format(os.path.dirname(f))
                 break
 
 def swap_root(path, top_level, new_root='/~/'):

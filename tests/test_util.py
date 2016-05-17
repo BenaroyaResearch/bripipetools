@@ -21,7 +21,7 @@ def test_to_camel_case_two_words_not_lower():
 # test utility functions in the files submodule
 
 def test_locate_root_folder():
-    assert (files.locate_root_folder('null') == '/dev')
+    assert (files.locate_root_folder('null') == '/dev/')
 
 def test_swap_root_local_globus():
     assert (files.swap_root('/Volumes/genomics/folder', 'genomics') ==
