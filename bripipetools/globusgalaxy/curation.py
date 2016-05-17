@@ -5,6 +5,7 @@ from bripipetools.util import files
 from bripipetools.io import labels
 from bripipetools.io.parsers import WorkflowParser
 from bripipetools.globusgalaxy.annotation import GlobusOutputAnnotator
+# from bripipetools.globusgalaxy.fileops import FileMunger
 
 class BatchCurator(object):
     def __init__(self, batch_submit_file, flowcell_dir=None):
@@ -115,20 +116,19 @@ class BatchCurator(object):
         workflow_name = self.workflow_name
         sample_output_map = self.sample_output_map
 
+        print('\nWorkflow: {}'.format(workflow_name))
         sample_output_info = {}
         for idx, sample in enumerate(sample_output_map):
             project_dir = self._match_sample_project(sample_output_map, sample)
             # TODO: might want to store project folder somewhere
             project_id, subproject_id = labels.get_project_id(project_dir)
 
-            print('\nWorkflow: {}'.format(workflow_name))
             print('>> Compiling ouputs for {} [P{}-{}] ({} of {})\n'
                   .format(sample, project_id, subproject_id,
                           idx + 1, len(sample_output_map)))
 
             goa = GlobusOutputAnnotator(sample_output_map, sample)
-            sample_output_info.setdefault(sample, []).append(
-                goa.get_output_info())
+            sample_output_info[sample] = goa.get_output_info()
         return sample_output_info
 
     def organize_files(self, target_dir, sample_output_info=None):
@@ -142,7 +142,10 @@ class BatchCurator(object):
         if sample_output_info is None:
             sample_output_info = self.curate_outputs()
 
-        for source in sample_output_info:
-            fm = FileMunger(self, target_dir, source)
-            fm.go()
-        # TODO: return something...
+        for sample, packet in sample_output_info.items():
+            fpm = fileops.FilePacketManager(packet, sample, '.')
+
+        # for source in sample_output_info:
+        #     fm = FileMunger(self, target_dir, source)
+        #     fm.go()
+        # # TODO: return something...
