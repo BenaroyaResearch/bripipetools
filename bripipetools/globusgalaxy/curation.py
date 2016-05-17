@@ -85,6 +85,24 @@ class BatchCurator(object):
 
         return output_status_dict
 
+    def report_problem_outputs(self):
+        """
+        Return non-zero status and display missing/empty files (if any exist).
+        """
+        # TODO: turn this into an actual error message / raise exception
+        output_status_dict = self.check_outputs()
+
+        problem_outputs = [(sample, output['file'])
+                           for sample in output_status_dict
+                           for output in output_status_dict[sample]
+                           if output['status'] != 'ok']
+
+        if len(problem_outputs):
+            print(problem_outputs)
+            return 1
+        else:
+            return 0
+
     def curate_outputs(self):
         """
         For each sample in the processed batch, identify and classify each
