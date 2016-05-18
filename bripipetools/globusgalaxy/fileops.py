@@ -1,5 +1,7 @@
 import os
 
+from bripipetools.util import files
+
 class FilePacketManager(object):
     def __init__(self, packet_info, packet_key, target_dir):
         """
@@ -125,14 +127,21 @@ class FilePacketManager(object):
             for (file_id, file_details) in source_files.items():
                 # print ("   (file %d of %d)" %
                 #        (idx + 1, len(source_output_dict)))
-                new_file = self._build_new_file_path(source, file_id,
-                                                          file_details)
-                print(file_details['file'], new_file)
-            # munger = fileops.FileMunger(source_files, source)
+                file_details['new_path'] = (self._build_new_file_path(
+                                                source, file_id, file_details))
+                # print(file_details)
+
+            # check whether to bundle files
+            bundle_subdir = self._get_bundle_subdir(source)
+            bundle_flag = len(bundle_subdir) and bundle_subdir != 'trinity'
+            # print(bundle_flag)
+
+            munger = FileMunger(source_files, source, bundle_flag)
+            munger.rename_files()
 
 
 class FileMunger(object):
-    def __init__(self, file_info, file_key):
+    def __init__(self, file_info, file_key, bundle_flag):
         """
         Performs operations such as renaming, moving, or bundling (zipping) on
         an annotated set of files.
@@ -147,54 +156,50 @@ class FileMunger(object):
         """
         self.file_info = file_info
         self.file_key = file_key
-        # self.rs = result_source
-        #
-        # self.sod = sample_curator.sd[result_source]
-        # self.prep_output_subdir()
+
+    def _prep_output_dirs(self):
+        """
+        Check all files in ``file_info`` and create any folders in new paths
+        that don't already exist.
+        """
+        file_info = self.file_info
+        file_key = self.file_key
+
+        for file_id, file_details in file_info.items():
+            out_dir = os.path.dirname(file_details['new_path'])
+            if not os.path.isdir(out_dir):
+                print("   - Creating directory {}".format(out_dir))
+                # os.makedirs(out_dir)
 
     def rename_files(self):
         """
-        For each file in the ``file_info``
+        For each file in the ``file_info``, rename/move to new path.
         """
-        source_output_dict = self.sod
+        file_info = self.file_info
+        file_key = self.file_key
 
+        self._prep_output_dirs()
 
+        rename_status = {}
+        for idx, (file_id, file_details) in enumerate(file_info.items()):
+            print("   (file {} of {})".format(idx + 1, len(file_info)))
+            rename_status[file_id] = (files.SystemFile(file_details['path'])
+                                      .rename(file_details['new_path']))
 
-
-
-        dirs_to_bundle = []
-        for idx,o in enumerate(source_output_dict):
-            print ("   (file %d of %d)" %
-                   (idx + 1, len(source_output_dict)))
-            rf = source_output_dict[o]['file']
-            rt = source_output_dict[o]['type']
-
-            if self.rs is not 'fastq':
-                out_dir = os.path.join(self.target, type_subdir_dict[rt], self.subdir)
-                if not os.path.isdir(out_dir):
-                    print "   - Creating directory %s" % out_dir
-                    os.makedirs(out_dir)
-
-                if len(self.subdir) and not self.rs == 'trinity':
-                    dirs_to_bundle.append(out_dir)
-
-                src_file = os.path.join(self.start, rt, os.path.basename(rf))
-                target_file = os.path.join(out_dir, result_file_dict[o])
-                if os.path.exists(target_file):
-                    print "   - Target file %s already exists" % target_file
-                elif not os.path.exists(src_file):
-                    print "   - Source file %s not found" % src_file
-                else:
-                    print "   - Copying %s to %s" % (src_file, target_file)
-                    shutil.move(src_file, target_file)
-        self.bundle = list(set(dirs_to_bundle))
-
-    def bundle_files(self):
-        for d in self.bundle:
-            print "   - Zipping up %s" % d
-            shutil.make_archive(d, 'zip', d)
-            shutil.rmtree(d)
-
-    def go(self):
-        self.rename_files()
-        self.bundle_files()
+        # TODO: improve error handling here...
+        if len([fid for fid, status in rename_status.items()
+                if status]):
+            print("WARNING")
+            return 1
+        else:
+            return 0
+    #
+    # def bundle_files(self):
+    #     for d in self.bundle:
+    #         print "   - Zipping up %s" % d
+    #         shutil.make_archive(d, 'zip', d)
+    #         shutil.rmtree(d)
+    #
+    # def go(self):
+    #     self.rename_files()
+    #     self.bundle_files()
