@@ -121,29 +121,29 @@ class FilePacketManager(object):
         corresponding to that source will be renamed, moved, or bundled as
         necessary.
 
-
+        :type param: bool
+        :param dry_run: If flag is ``True``, only print what would be done.
         """
         packet_info = self.packet_info
         for (source, source_files) in packet_info.items():
             print " > Result source: %s" % source
             for (file_id, file_details) in source_files.items():
-                # print ("   (file %d of %d)" %
-                #        (idx + 1, len(source_output_dict)))
                 file_details['new_path'] = (self._build_new_file_path(
                                                 source, file_id, file_details))
-                # print(file_details)
+
+            munger = FileMunger(source_files, source, dry_run)
+            munger.rename_files()
 
             # check whether to bundle files
             bundle_subdir = self._get_bundle_subdir(source)
-            bundle_flag = len(bundle_subdir) and bundle_subdir != 'trinity'
-            # print(bundle_flag)
+            if len(bundle_subdir) and bundle_subdir != 'trinity':
+                munger.bundle_files()
 
-            munger = FileMunger(source_files, source, bundle_flag, dry_run)
-            munger.rename_files()
+        # TODO: return something...
 
 
 class FileMunger(object):
-    def __init__(self, file_info, file_key, bundle_flag, dry_run=False):
+    def __init__(self, file_info, file_key, dry_run=False):
         """
         Performs operations such as renaming, moving, or bundling (zipping) on
         an annotated set of files.
@@ -155,14 +155,11 @@ class FileMunger(object):
         :type file_key: str
         :param file_key: A string representing the key or label for the
             set of files.
-        :type bundle_flag: bool
-        :param bundle_flag: If flag is ``True``, bundle all files in folder.
         :type param: bool
         :param dry_run: If flag is ``True``, only print what would be done.
         """
         self.file_info = file_info
         self.file_key = file_key
-        self.bundle_flag = bundle_flag
         self.dry_run = dry_run
 
     def _prep_output_dirs(self):
@@ -202,13 +199,18 @@ class FileMunger(object):
             return 1
         else:
             return 0
-    #
-    # def bundle_files(self):
-    #     for d in self.bundle:
-    #         print "   - Zipping up %s" % d
-    #         shutil.make_archive(d, 'zip', d)
-    #         shutil.rmtree(d)
-    #
-    # def go(self):
-    #     self.rename_files()
-    #     self.bundle_files()
+
+    def bundle_files(self):
+        """
+        Create a zip archive for the folder where files in ``file_info`` have
+        been moved; remove original folder.
+        """
+        file_info = self.file_info
+
+        bundle_dir = os.path.dirname(file_info.values()[0]['new_path'])
+        print("   - Zipping up {}".format(bundle_dir))
+        if not self.dry_run:
+            shutil.make_archive(bundle_dir, 'zip', bundle_dir)
+            shutil.rmtree(bundle_dir)
+
+        # TODO: return something...

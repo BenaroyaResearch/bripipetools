@@ -144,6 +144,12 @@ class BatchCurator(object):
         :type target_dir: str
         :param target_dir: path to folder where final output files are to be
             saved
+        :type sample_output_info:
+        :param sample_output_info: A dict, where for each ``sample``, output
+            files are detailed with type, path, etc. and grouped by source
+            (usually shouldn't need to provide this as an input).
+        :type param: bool
+        :param dry_run: If flag is ``True``, only print what would be done.
         """
         if sample_output_info is None:
             sample_output_info = self.curate_outputs()
@@ -160,7 +166,4 @@ class BatchCurator(object):
             fpm = fileops.FilePacketManager(packet, sample, project_dir)
             fpm.munge_files(dry_run)
 
-        # for source in sample_output_info:
-        #     fm = FileMunger(self, target_dir, source)
-        #     fm.go()
-        # # TODO: return something...
+        # TODO: return something...
