@@ -27,6 +27,7 @@ class BatchCurator(object):
         else:
             self.fc_dir = flowcell_dir
         self._load_output_map()
+        self._clean_output_paths()
 
     def _load_output_map(self):
         """
@@ -36,6 +37,21 @@ class BatchCurator(object):
         wp = WorkflowParser(self.submit_file)
         self.workflow_name = wp.get_workflow_name()
         self.sample_output_map = wp.get_batch_outputs()
+
+    def _clean_output_paths(self):
+        """
+        Replaces ambigious file path roots with current system root.
+        """
+        sample_output_map = self.sample_output_map
+        current_root = files.locate_root_folder('genomics')
+
+        for (sample, sample_files) in sample_output_map.items():
+            for file_id in sample_files:
+                sample_files[file_id] = files.swap_root(sample_files[file_id],
+                                                        'genomics',
+                                                        current_root)
+
+        self.sample_output_map = sample_output_map
 
     def _match_sample_project(self, sample_output_map, sample):
         """
@@ -67,17 +83,15 @@ class BatchCurator(object):
             ok, missing, or empty.
         """
         sample_output_map = self.sample_output_map
-        current_root = files.locate_root_folder('genomics')
 
         output_status_dict = {}
         for sample in sample_output_map:
-            output_list = [{'file': v, 'type': k}
+            output_list = [{'path': v, 'type': k}
                            for (k, v) in sample_output_map[sample].items()]
 
             for f in output_list:
-                f['file'] = files.swap_root(f['file'], 'genomics', current_root)
-                f['exists'] = os.path.exists(f['file'])
-                f['size'] = os.stat(f['file']).st_size if f['exists'] else 0
+                f['exists'] = os.path.exists(f['path'])
+                f['size'] = os.stat(f['path']).st_size if f['exists'] else 0
                 if not f['exists']:
                     f['status'] = 'missing'
                 else:
@@ -93,7 +107,7 @@ class BatchCurator(object):
         # TODO: turn this into an actual error message / raise exception
         output_status_dict = self.check_outputs()
 
-        problem_outputs = [(sample, output['file'])
+        problem_outputs = [(sample, output['path'])
                            for sample in output_status_dict
                            for output in output_status_dict[sample]
                            if output['status'] != 'ok']
