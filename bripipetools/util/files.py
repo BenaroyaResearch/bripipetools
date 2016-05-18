@@ -85,7 +85,7 @@ class SystemFile(object):
             print("   - Source file {} not found".format(original_file))
             return 1
         else:
-            print("   - Copying {} to {}".format(original_file, target_file))
+            print("   - Moving {} to {}".format(original_file, target_file))
             if not dry_run:
                 shutil.move(original_file, target_file)
                 self.path = target_file

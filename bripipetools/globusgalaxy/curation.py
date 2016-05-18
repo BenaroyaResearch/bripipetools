@@ -4,8 +4,8 @@ from bripipetools.util import strings
 from bripipetools.util import files
 from bripipetools.io import labels
 from bripipetools.io.parsers import WorkflowParser
-from bripipetools.globusgalaxy.annotation import GlobusOutputAnnotator
 from bripipetools.globusgalaxy import fileops
+from bripipetools.globusgalaxy.annotation import GlobusOutputAnnotator
 
 class BatchCurator(object):
     def __init__(self, batch_submit_file, flowcell_dir=None):
