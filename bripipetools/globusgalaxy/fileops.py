@@ -16,17 +16,21 @@ class FilePacketManager(object):
         :type target_dir: str
         :param target_dir: Path to folder where final files are to be saved.
         """
-
         self.packet_info = packet_info
         self.packet_key = packet_key
         self.target_dir = target_dir
 
     def _get_type_subdir(self, file_type):
         """
-        For each file in the file packet, create folders corresponding to type.
-        """
-        # packet_info = self.packet_info
+        Based on pre-defined translations in lookup table, return the folder
+        name corresponding to type of result.
 
+        :type file_type: str
+        :param file_type: File type used in lookup table.
+
+        :rtype: str
+        :return: Formatted folder name corresponding to result type.
+        """
         type_subdir_dict = {'qc': 'QC',
                             'metrics': 'metrics',
                             'counts': 'counts',
@@ -35,24 +39,24 @@ class FilePacketManager(object):
                             'trinity': 'Trinity',
                             'log': 'logs'}
 
-        # for file_names in packet_info.values():
-        #     for f in file_names.values():
-        #         type_subdir = type_subdir_dict.get(f['type'], '')
-        #         f['target_dir'] = os.path.join(self.target_dir, type_subdir)
-
         return type_subdir_dict.get(file_type, '')
 
-    def _get_bundle_subdir(self, source):
+    def _get_bundle_subdir(self, file_source):
         """
-        For each source in the file packet, create any subfolders needed
-        for bundling/zipping multiple files.
+        Based on pre-defined translations in lookup table, return the path of
+        the subfolder for files from a specified source that need to be bundled
+        (compressed) in a subsequent step. The ``packet_key`` is also inserted
+        as needed.
 
-        :rtype: dict
-        :return: A modified version of the ``packet_info`` dict with target
-            subdirectory stored in the ``subdir`` field for each source.
+        :type file_source: str
+        :param file_source: File source used in lookup table.
+
+        :rtype: str
+        :return: Formatted sub-folder name corresponding to file source; if
+            non-empty, sub-folder should be bundled after all individual files
+            from the source have been moved/renamed.
         """
         packet_key = self.packet_key
-        # packet_info = self.packet_info
 
         source_subdir_dict = {'fastqc': os.path.join(packet_key, 'qcR1'),
                               'picard_align': '{}_qc'.format(packet_key),
@@ -60,37 +64,54 @@ class FilePacketManager(object):
                               'picard_rnaseq': '{}_al'.format(packet_key),
                               'trinity': packet_key}
 
-        # for source in packet_info:
-        #     packet_info[source]['subdir'] = source_subdir_dict.get(source, '')
-        return source_subdir_dict.get(source, '')
+        return source_subdir_dict.get(file_source, '')
 
-    def _get_new_file_name(self, file_name):
+    def _get_new_file_name(self, file_id):
+        """
+        Based on pre-defined translations in lookup table, return the final
+        file name corresponding to a file identifier. The ``packet_key`` is
+        also inserted into the new file name as instructed by string values
+        in the lookup table.
 
+        :type file_id: str
+        :param file_id: File identifier used in lookup table; for Globus
+            Galaxy batch submissions, this corresponds to a parameter name
+            for an output file (e.g., 'tophat_alignments_bam').
+
+        :rtype: str
+        :return: A string representing the new file name (i.e., basename) for
+            the current file; or, an empty string, if file ID not found in
+            lookup table.
+        """
         packet_key = self.packet_key
 
         file_name_dict = {'trimmed_fastq': '{}_trimmed.fastq'.format(packet_key),
-                            'fastqc_qc_html': 'fastqc_report.html',
-                            'fastqc_qc_txt': 'fastqc_data.txt',
-                            'picard_align_metrics_html': 'Picard_Alignment_Summary_Metrics_html.html',
-                            'picard_markdups_metrics_html': 'MarkDups_Dupes_Marked_html.html',
-                            'trinity_fasta': 'Trinity.fasta',
-                            'tophat_stats_metrics_txt': '{}ths.txt'.format(packet_key),
-                            'picard_rnaseq_metrics_html': 'RNA_Seq_Metrics_html.html',
-                            'htseq_counts_txt': '{}_count.txt'.format(packet_key),
-                            'tophat_alignments_bam': '{}.bam'.format(packet_key),
-                            'htseq_metrics_txt': '{}mm.txt'.format(packet_key),
-                            'workflow_log_txt': '{}_workflow_log.txt'.format(packet_key)}
+                          'fastqc_qc_html': 'fastqc_report.html',
+                          'fastqc_qc_txt': 'fastqc_data.txt',
+                          'picard_align_metrics_html': 'Picard_Alignment_Summary_Metrics_html.html',
+                          'picard_markdups_metrics_html': 'MarkDups_Dupes_Marked_html.html',
+                          'trinity_fasta': 'Trinity.fasta',
+                          'tophat_stats_metrics_txt': '{}ths.txt'.format(packet_key),
+                          'picard_rnaseq_metrics_html': 'RNA_Seq_Metrics_html.html',
+                          'htseq_counts_txt': '{}_count.txt'.format(packet_key),
+                          'tophat_alignments_bam': '{}.bam'.format(packet_key),
+                          'htseq_metrics_txt': '{}mm.txt'.format(packet_key),
+                          'workflow_log_txt': '{}_workflow_log.txt'.format(packet_key)}
 
-        return file_name_dict.get(file_name, '')
+        return file_name_dict.get(file_id, '')
 
-    def _build_munge_instructions(self, file_source, file_name, file_details):
+    def _build_new_file_path(self, file_source, file_id, file_details):
+        """
+        Return the final path for file which is scheduled to be moved or
+        renamed.
+        """
         packet_key = self.packet_key
         packet_info = self.packet_info
 
         return os.path.join(self.target_dir,
                             self._get_type_subdir(file_details['type']),
                             self._get_bundle_subdir(file_source),
-                            self._get_new_file_name(file_name))
+                            self._get_new_file_name(file_id))
 
     def munge_files(self):
         """
@@ -101,10 +122,10 @@ class FilePacketManager(object):
         packet_info = self.packet_info
         for (source, source_files) in packet_info.items():
             print " > Result source: %s" % source
-            for (file_name, file_details) in source_files.items():
+            for (file_id, file_details) in source_files.items():
                 # print ("   (file %d of %d)" %
                 #        (idx + 1, len(source_output_dict)))
-                new_file = self._build_munge_instructions(source, file_name,
+                new_file = self._build_new_file_path(source, file_id,
                                                           file_details)
                 print(file_details['file'], new_file)
             # munger = fileops.FileMunger(source_files, source)
