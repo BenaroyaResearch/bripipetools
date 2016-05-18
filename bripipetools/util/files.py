@@ -43,9 +43,9 @@ def swap_root(path, top_level, new_root='/~/'):
     return top_re.sub(new_root, path)
 
 class SystemFile(object):
-    def __init__(self, file_path):
+    def __init__(self, path):
 
-        self.path = file_path
+        self.path = path
 
     def __repr__(self):
 
@@ -70,3 +70,22 @@ class SystemFile(object):
             print path
 
         return compression
+
+    def rename(self, new_path):
+        """
+        Moves file to new path and updates object path.
+        """
+        original_file = self.path
+        target_file = new_path
+
+        if os.path.exists(target_file):
+            print("   - Target file {} already exists".format(target_file))
+            return 1
+        elif not os.path.exists(original_file):
+            print("   - Source file {} not found".format(original_file))
+            return 1
+        else:
+            print("   - Copying {} to {}".format(original_file, target_file))
+            self.path = target_file
+            # shutil.move(src_file, target_file
+            return 0
