@@ -115,11 +115,13 @@ class FilePacketManager(object):
                             self._get_bundle_subdir(file_source),
                             self._get_new_file_name(file_id))
 
-    def munge_files(self):
+    def munge_files(self, dry_run=False):
         """
         Creates a file munging job for each ``source``, where files
         corresponding to that source will be renamed, moved, or bundled as
         necessary.
+
+
         """
         packet_info = self.packet_info
         for (source, source_files) in packet_info.items():
@@ -136,12 +138,12 @@ class FilePacketManager(object):
             bundle_flag = len(bundle_subdir) and bundle_subdir != 'trinity'
             # print(bundle_flag)
 
-            munger = FileMunger(source_files, source, bundle_flag)
+            munger = FileMunger(source_files, source, bundle_flag, dry_run)
             munger.rename_files()
 
 
 class FileMunger(object):
-    def __init__(self, file_info, file_key, bundle_flag):
+    def __init__(self, file_info, file_key, bundle_flag, dry_run=False):
         """
         Performs operations such as renaming, moving, or bundling (zipping) on
         an annotated set of files.
@@ -153,9 +155,15 @@ class FileMunger(object):
         :type file_key: str
         :param file_key: A string representing the key or label for the
             set of files.
+        :type bundle_flag: bool
+        :param bundle_flag: If flag is ``True``, bundle all files in folder.
+        :type param: bool
+        :param dry_run: If flag is ``True``, only print what would be done.
         """
         self.file_info = file_info
         self.file_key = file_key
+        self.bundle_flag = bundle_flag
+        self.dry_run = dry_run
 
     def _prep_output_dirs(self):
         """
@@ -169,7 +177,8 @@ class FileMunger(object):
             out_dir = os.path.dirname(file_details['new_path'])
             if not os.path.isdir(out_dir):
                 print("   - Creating directory {}".format(out_dir))
-                # os.makedirs(out_dir)
+                if not self.dry_run:
+                    os.makedirs(out_dir)
 
     def rename_files(self):
         """
@@ -184,12 +193,12 @@ class FileMunger(object):
         for idx, (file_id, file_details) in enumerate(file_info.items()):
             print("   (file {} of {})".format(idx + 1, len(file_info)))
             rename_status[file_id] = (files.SystemFile(file_details['path'])
-                                      .rename(file_details['new_path']))
+                                      .rename(file_details['new_path'],
+                                              self.dry_run))
 
         # TODO: improve error handling here...
         if len([fid for fid, status in rename_status.items()
                 if status]):
-            print("WARNING")
             return 1
         else:
             return 0

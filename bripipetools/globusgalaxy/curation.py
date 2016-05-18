@@ -5,7 +5,7 @@ from bripipetools.util import files
 from bripipetools.io import labels
 from bripipetools.io.parsers import WorkflowParser
 from bripipetools.globusgalaxy.annotation import GlobusOutputAnnotator
-# from bripipetools.globusgalaxy.fileops import FileMunger
+from bripipetools.globusgalaxy import fileops
 
 class BatchCurator(object):
     def __init__(self, batch_submit_file, flowcell_dir=None):
@@ -53,14 +53,10 @@ class BatchCurator(object):
 
         self.sample_output_map = sample_output_map
 
-    def _match_sample_project(self, sample_output_map, sample):
+    def _match_sample_project(self, sample):
         """
         For a selected sample, check the location of the workflow log output
         file to determine the correct project folder.
-
-        :type sample_output_map: dict
-        :param sample_output_map: Dict mapping samples to expected output
-            files in the flowcell folder.
 
         :type sample: str
         :param sample: Name of current sample (i.e., a key in the
@@ -69,6 +65,8 @@ class BatchCurator(object):
         :rtype: str
         :return: File path of project folder for the current sample.
         """
+        sample_output_map = self.sample_output_map
+
         log_file = sample_output_map[sample].get('workflow_log_txt')
         project_folder = strings.matchdefault('Project_[^/]*', log_file)
         return os.path.join(self.fc_dir, project_folder)
@@ -133,19 +131,13 @@ class BatchCurator(object):
         print('\nWorkflow: {}'.format(workflow_name))
         sample_output_info = {}
         for idx, sample in enumerate(sample_output_map):
-            project_dir = self._match_sample_project(sample_output_map, sample)
-            # TODO: might want to store project folder somewhere
-            project_id, subproject_id = labels.get_project_id(project_dir)
-
-            print('>> Compiling ouputs for {} [P{}-{}] ({} of {})\n'
-                  .format(sample, project_id, subproject_id,
-                          idx + 1, len(sample_output_map)))
 
             goa = GlobusOutputAnnotator(sample_output_map, sample)
             sample_output_info[sample] = goa.get_output_info()
         return sample_output_info
 
-    def organize_files(self, target_dir, sample_output_info=None):
+    def organize_files(self, target_dir=None, sample_output_info=None,
+                       dry_run=False):
         """
         For the outputs identified, rename and reorganize files as needed.
 
@@ -156,8 +148,17 @@ class BatchCurator(object):
         if sample_output_info is None:
             sample_output_info = self.curate_outputs()
 
-        for sample, packet in sample_output_info.items():
-            fpm = fileops.FilePacketManager(packet, sample, '.')
+        for idx, (sample, packet) in enumerate(sample_output_info.items()):
+            project_dir = self._match_sample_project(sample)
+            # TODO: might want to store project folder somewhere
+            project_id, subproject_id = labels.get_project_id(project_dir)
+
+            print('>> Compiling ouputs for {} [P{}-{}] ({} of {})\n'
+                  .format(sample, project_id, subproject_id,
+                          idx + 1, len(sample_output_info)))
+
+            fpm = fileops.FilePacketManager(packet, sample, project_dir)
+            fpm.munge_files(dry_run)
 
         # for source in sample_output_info:
         #     fm = FileMunger(self, target_dir, source)

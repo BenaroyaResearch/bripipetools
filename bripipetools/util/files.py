@@ -71,7 +71,7 @@ class SystemFile(object):
 
         return compression
 
-    def rename(self, new_path):
+    def rename(self, new_path, dry_run=False):
         """
         Moves file to new path and updates object path.
         """
@@ -86,6 +86,7 @@ class SystemFile(object):
             return 1
         else:
             print("   - Copying {} to {}".format(original_file, target_file))
-            self.path = target_file
-            # shutil.move(src_file, target_file
+            if not dry_run:
+                shutil.move(original_file, target_file)
+                self.path = target_file
             return 0
