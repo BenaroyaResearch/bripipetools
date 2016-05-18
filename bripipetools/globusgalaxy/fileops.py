@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from bripipetools.util import files
 
