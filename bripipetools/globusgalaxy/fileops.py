@@ -33,7 +33,8 @@ class FilePacketManager(object):
         :rtype: str
         :return: Formatted folder name corresponding to result type.
         """
-        type_subdir_dict = {'qc': 'QC',
+        type_subdir_dict = {'fastq': 'InputFastqs',
+                            'qc': 'QC',
                             'metrics': 'metrics',
                             'counts': 'counts',
                             'alignments': 'alignments',
@@ -87,7 +88,8 @@ class FilePacketManager(object):
         """
         packet_key = self.packet_key
 
-        file_name_dict = {'trimmed_fastq': '{}_trimmed.fastq'.format(packet_key),
+        file_name_dict = {'fastq': '{}_R1-final.fastq.gz'.format(packet_key),
+                          'trimmed_fastq': '{}_trimmed.fastq'.format(packet_key),
                           'fastqc_qc_html': 'fastqc_report.html',
                           'fastqc_qc_txt': 'fastqc_data.txt',
                           'picard_align_metrics_html': 'Picard_Alignment_Summary_Metrics_html.html',

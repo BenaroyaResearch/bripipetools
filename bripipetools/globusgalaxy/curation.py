@@ -1,4 +1,5 @@
 import os
+import re
 
 from bripipetools.util import strings
 from bripipetools.util import files
@@ -70,6 +71,24 @@ class BatchCurator(object):
         log_file = sample_output_map[sample].get('workflow_log_txt')
         project_folder = strings.matchdefault('Project_[^/]*', log_file)
         return os.path.join(self.fc_dir, project_folder)
+
+    def _fix_globus_dir(self, project_dir):
+        """
+        If not already in the target folder path, insert the 'globus' tag to
+        avoid overwriting data from local processing jobs.
+
+        :type project_dir: str
+        :param target_dir: Path to folder where processed data is stored for
+            a project.
+
+        :rtype: str
+        :return: File path with 'globus' tag inserted after 'Processed'
+        """
+
+        if not re.search('_globus_', project_dir):
+            return re.sub('Processed_', 'Processed_globus_', project_dir)
+        else:
+            return project_dir
 
     def check_outputs(self):
         """
@@ -156,14 +175,15 @@ class BatchCurator(object):
 
         for idx, (sample, packet) in enumerate(sample_output_info.items()):
             project_dir = self._match_sample_project(sample)
-            # TODO: might want to store project folder somewhere
             project_id, subproject_id = labels.get_project_id(project_dir)
 
             print('>> Compiling ouputs for {} [P{}-{}] ({} of {})\n'
                   .format(sample, project_id, subproject_id,
                           idx + 1, len(sample_output_info)))
 
-            fpm = fileops.FilePacketManager(packet, sample, project_dir)
+            project_globus_dir = self._fix_globus_dir(project_dir)
+            fpm = fileops.FilePacketManager(packet, sample,
+                                            project_globus_dir)
             fpm.munge_files(dry_run)
 
         # TODO: return something...
