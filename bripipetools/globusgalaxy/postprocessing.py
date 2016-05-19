@@ -1,4 +1,10 @@
+"""
+Organize, format, and clean up outputs from a Globus Galaxy processing run.
+"""
+
 import os
+
+from bripipetools.globusgalaxy import curation
 
 class GlobusOutputManager(object):
     def __init__(self, flowcell_dir):
@@ -11,6 +17,11 @@ class GlobusOutputManager(object):
                                              "globus_batch_submission")
 
     def _select_batches(self):
+        """
+        Select and store path to batch submit file(s) from among list of
+        batches found in the 'globus_batch_submission' folder. 
+        """
+        # TODO: add multi-select
         batch_submit_dir = self.batch_submit_dir
         batch_files = os.listdir(batch_submit_dir)
         print "\nFound the following Globus Genomics Galaxy batches:"
