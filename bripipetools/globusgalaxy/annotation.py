@@ -1,3 +1,7 @@
+"""
+Classify / provide details for output files.
+"""
+
 import re
 
 from bripipetools.util import strings

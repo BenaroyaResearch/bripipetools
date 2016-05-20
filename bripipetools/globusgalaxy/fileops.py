@@ -1,3 +1,7 @@
+"""
+Rename, move, and bundle a collection of files based on their source and type.
+"""
+
 import os
 import shutil
 
@@ -124,7 +128,7 @@ class FilePacketManager(object):
         corresponding to that source will be renamed, moved, or bundled as
         necessary.
 
-        :type param: bool
+        :type dry_run: bool
         :param dry_run: If flag is ``True``, only print what would be done.
         """
         packet_info = self.packet_info
@@ -158,7 +162,7 @@ class FileMunger(object):
         :type file_key: str
         :param file_key: A string representing the key or label for the
             set of files.
-        :type param: bool
+        :type dry_run: bool
         :param dry_run: If flag is ``True``, only print what would be done.
         """
         self.file_info = file_info
@@ -197,11 +201,6 @@ class FileMunger(object):
                                               self.dry_run))
 
         # TODO: improve error handling here...
-        if len([fid for fid, status in rename_status.items()
-                if status]):
-            return 1
-        else:
-            return 0
 
     def bundle_files(self):
         """

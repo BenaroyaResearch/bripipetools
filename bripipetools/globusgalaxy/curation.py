@@ -1,3 +1,8 @@
+"""
+Identify, classify, format, and organize outputs from a Globus Galaxy batch
+processing job.
+"""
+
 import os
 import re
 
@@ -167,7 +172,7 @@ class BatchCurator(object):
         :param sample_output_info: A dict, where for each ``sample``, output
             files are detailed with type, path, etc. and grouped by source
             (usually shouldn't need to provide this as an input).
-        :type param: bool
+        :type dry_run: bool
         :param dry_run: If flag is ``True``, only print what would be done.
         """
         if sample_output_info is None:

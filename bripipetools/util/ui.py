@@ -1,10 +1,13 @@
 import os
+import sys
+import __builtin__
 
 def prompt_raw(prompt_text):
     """
     Display prompt text and ask for raw input.
     """
-    return raw_input('{}\n'.format(prompt_text))
+    sys.stderr.write('{}\n'.format(prompt_text))
+    return __builtin__.raw_input()
 
 def list_options(option_list):
     """
@@ -18,3 +21,9 @@ def input_to_int(input_func):
     Collect input from function and convert to integer.
     """
     return int(input_func())
+
+def parse_input_list(input_str, sep=','):
+    """
+    Split input string based on separator and return list.
+    """
+    return input_str.split(sep)
