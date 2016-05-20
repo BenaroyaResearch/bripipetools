@@ -1,10 +1,13 @@
 import os
+import sys
+import __builtin__
 
 def prompt_raw(prompt_text):
     """
     Display prompt text and ask for raw input.
     """
-    return raw_input('{}\n'.format(prompt_text))
+    sys.stderr.write('{}\n'.format(prompt_text))
+    return __builtin__.raw_input()
 
 def list_options(option_list):
     """
