@@ -1,3 +1,8 @@
+"""
+Identify, classify, format, and organize outputs from a Globus Galaxy batch
+processing job.
+"""
+
 import os
 import re
 

@@ -1,3 +1,7 @@
+"""
+Rename, move, and bundle a collection of files based on their source and type.
+"""
+
 import os
 import shutil
 
