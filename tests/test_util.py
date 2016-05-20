@@ -1,45 +1,26 @@
 import _mypath
 from bripipetools.util import strings
 from bripipetools.util import files
+from bripipetools.util import ui
+
+import pytest
+import mock
 
 # test utility functions in the strings submodule
 
-def test_to_camel_case_oneword_is_lower():
-    assert (strings.to_camel_case('oneword') ==
-            strings.to_camel_case('oneword').lower())
+def test_to_camel_case_oneword():
+    assert (strings.to_camel_case('oneword') == 'oneword')
 
-def test_to_camel_case_oneword_no_underscore():
-    assert ('_' not in strings.to_camel_case('oneword'))
-
-def test_to_camel_case_two_words_no_underscore():
-    assert ('_' not in strings.to_camel_case('two_words'))
-
-def test_to_camel_case_two_words_not_lower():
-    assert (strings.to_camel_case('two_words') !=
-            strings.to_camel_case('two_words').lower())
+def test_to_camel_case_two_words():
+    assert (strings.to_camel_case('two_words') == 'twoWords')
 
 # test utility functions in the files submodule
 
 def test_locate_root_folder():
     assert (files.locate_root_folder('null') == '/dev/')
 
-def test_swap_root_local_globus():
-    assert (files.swap_root('/Volumes/genomics/folder', 'genomics') ==
-            '/~/genomics/folder')
-
-def test_swap_root_server_globus():
-    assert (files.swap_root('/mnt/genomics/folder', 'genomics') ==
-            '/~/genomics/folder')
-
-def test_swap_root_local_server():
-    assert (files.swap_root('/Volumes/genomics/folder', 'genomics',
-                            '/mnt/') ==
-            '/mnt/genomics/folder')
-
-def test_swap_root_server_local():
-    assert (files.swap_root('/mnt/genomics/folder', 'genomics',
-                            '/Volumes/') ==
-            '/Volumes/genomics/folder')
+def test_swap_root_default():
+    assert (files.swap_root('/foo/bar/baz', 'bar') == '/~/bar/baz')
 
 # test objects & methods in the files submodule
 
@@ -56,3 +37,16 @@ def test_file_get_file_ext_full_path():
 def test_file_get_file_compression_zip():
     assert(files.SystemFile('test.txt.zip')
            .get_file_compression('txt.zip') == 'zip')
+
+# test objects & methods in the ui submodule
+
+def test_input_to_int_0():
+    assert(ui.input_to_int(lambda: "0") == 0)
+
+def test_list_options_a_b(capsys):
+    ui.list_options(["a", "b"])
+    out, err = capsys.readouterr()
+    assert(out == "  0 : a\n  1 : b\n")
+
+# def test_prompt_raw_foo():
+    # TODO: figure out how to test this function
