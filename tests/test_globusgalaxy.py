@@ -8,14 +8,20 @@ from bripipetools.globusgalaxy import postprocessing
 
 @pytest.fixture(scope="class")
 def globus_output_manager():
-    flowcell_dir = "./tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX"
-    return postprocessing.GlobusOutputManager(flowcell_dir)
+    flowcell_dir = './tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX'
+    batch_list = 'foo,bar'
+    return postprocessing.GlobusOutputManager(flowcell_dir, batch_list)
 
 class TestGlobusOutputManager:
     def test_init(self):
         assert(globus_output_manager())
         assert('flowcell_dir' in dir(globus_output_manager()))
         assert('batch_submit_dir' in dir(globus_output_manager()))
+        assert(globus_output_manager().batch_list ==
+               [('./tests/test-data/genomics/Illumina/'
+                '150615_D00565_0087_AC6VG0ANXX/globus_batch_submission/foo'),
+                ('./tests/test-data/genomics/Illumina/'
+                 '150615_D00565_0087_AC6VG0ANXX/globus_batch_submission/bar')])
 
     def test_select_batch_prompt(self, capsys):
         with mock.patch('__builtin__.raw_input', return_value=""):
@@ -46,3 +52,11 @@ class TestGlobusOutputManager:
                ('./tests/test-data/genomics/Illumina/'
                 '150615_D00565_0087_AC6VG0ANXX/globus_batch_submission/'
                 'dummy.txt'))
+
+    def test_get_select_func_each(self):
+        assert(globus_output_manager()._get_select_func('each').__name__ ==
+               '_select_batches')
+
+    def test_get_select_func_date(self):
+        assert(globus_output_manager()._get_select_func('date').__name__ ==
+               '_select_date_batches')

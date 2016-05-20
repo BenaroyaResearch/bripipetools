@@ -9,14 +9,33 @@ from bripipetools.util import ui
 from bripipetools.globusgalaxy import curation
 
 class GlobusOutputManager(object):
-    def __init__(self, flowcell_dir):
+    def __init__(self, flowcell_dir, batch_list=None, select_type='each'):
         """
         For one or more batches processed from a given flowcell, this object
         controls the curation, stitching, and cleanup of all output files.
+
+        :type flowcell_dir: str
+        :param flowcell_dir: Path to flowcell folder where outputs of one or
+            more Globus Galaxy batch processing jobs should be stored.
+        :type batch_list: str
+        :param batch_list: Comma-separated list of batches (or single batch),
+            as represented by batch submit files, on which to perform curation
+            & cleanup operations.
+        :type select_type: str
+        :param select_type: If list of batches not provided, this argument
+            specifies which method to use for interactive selection; options
+            should be either 'each' or 'date'.
         """
         self.flowcell_dir = flowcell_dir
         self.batch_submit_dir = os.path.join(self.flowcell_dir,
                                              "globus_batch_submission")
+
+        if batch_list is None:
+            batch_list = self._get_select_func(select_type)()
+        else:
+            batch_list = ui.parse_input_list(batch_list)
+        self.batch_list = [self._get_batch_file_path(os.path.basename(f))
+                           for f in batch_list]
 
     def _select_batch_prompt(self):
         """
@@ -90,3 +109,21 @@ class GlobusOutputManager(object):
         """
         batch_submit_dir = self.batch_submit_dir
         return os.path.join(batch_submit_dir, batch_file_name)
+
+    def _get_select_func(self, select_type):
+        """
+        Return the appropriate batch selection function based on specified
+        selection type.
+
+        :type select_type: str
+        :param select_type: Selection method to use: 'each' for selecting
+            batches individually, or 'date' to select all batches for a
+            specified date.
+
+        :rtype: func
+        :return: Bound method, which, when called, interactively prompts user
+            to select batches.
+        """
+        select_dict = {'each': self._select_batches,
+                       'date': self._select_date_batches}
+        return select_dict[select_type]
