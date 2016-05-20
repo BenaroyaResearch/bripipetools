@@ -3,6 +3,7 @@ Organize, format, and clean up outputs from a Globus Galaxy processing run.
 """
 
 import os
+import re
 
 from bripipetools.util import ui
 from bripipetools.globusgalaxy import curation
@@ -30,12 +31,10 @@ class GlobusOutputManager(object):
         """
         # TODO: add multi-select
         batch_submit_dir = self.batch_submit_dir
-        batch_files = os.listdir(batch_submit_dir)
+        batch_files = [f for f in os.listdir(batch_submit_dir)
+                       if not re.search('^\.', f)]
         print "\nFound the following Globus Genomics Galaxy batches:"
-        # for i, d in enumerate(batch_files):
-        #     print "%3d : %s" % (i, d)
         ui.list_options(batch_files)
-        # batch_i = raw_input("Select a batch to compile: ")
         batch_i = ui.input_to_int(self._select_batch_prompt)
         batch_file = batch_files[batch_i]
         return batch_file
@@ -47,14 +46,13 @@ class GlobusOutputManager(object):
     def _select_date_batches(self):
         batch_submit_dir = self.batch_submit_dir
         batch_dates = list(set(f.split('_')[0]
-                               for f in os.listdir(batch_submit_dir)))
+                               for f in os.listdir(batch_submit_dir)
+                               if not re.search('^\.', f)))
 
         print "\nFound Globus Genomics Galaxy batches from the following dates:"
-        for i, d in enumerate(batch_dates):
-            print "%3d : %s" % (i, d)
-        batch_i = raw_input("Select the date of flowcell batches to compile: ")
-        batch_date = batch_dates[int(batch_i)]
+        ui.list_options(batch_dates)
+        batch_i = ui.input_to_int(self._select_batch_date_prompt)
+        batch_date = batch_dates[batch_i]
 
-        return [os.path.join(batch_submit_dir, f)
-                for f in os.listdir(batch_submit_dir)
+        return [f for f in os.listdir(batch_submit_dir)
                 if f.split('_')[0] in batch_date]
