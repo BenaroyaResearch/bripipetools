@@ -4,6 +4,25 @@ import sys
 import pytest
 import mock
 
+# TODO: might be worthwhile to test import, since I'm still changing module
+# names occasionally
+from bripipetools.globusgalaxy import submission
+
+@pytest.fixture(scope="class")
+def globus_submit_manager():
+    flowcell_dir = './tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX'
+    workflow_dir = './tests/test-data/genomics/galaxy_workflows'
+    endpoint = 'jeddy#srvgridftp01'
+    return submission.GlobusSubmitManager(flowcell_dir, workflow_dir, endpoint)
+
+class TestGlobusSubmitManager:
+    def test_init(self):
+        assert(globus_submit_manager())
+        assert('flowcell_dir' in dir(globus_submit_manager()))
+        assert('workflow_dir' in dir(globus_submit_manager()))
+        assert('endpoint' in dir(globus_submit_manager()))
+
+
 from bripipetools.globusgalaxy import postprocessing
 
 @pytest.fixture(scope="class")
