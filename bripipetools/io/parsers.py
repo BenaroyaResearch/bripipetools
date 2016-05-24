@@ -1,4 +1,5 @@
 import re, os
+import xml.etree.ElementTree as ET
 
 from bripipetools.io import labels
 
@@ -50,7 +51,6 @@ class LibListParser(object):
                         fc_dict[fc_run_id] = fc_packet
 
         return fc_dict, lib_dict
-
 
 class WorkflowParser(object):
     def __init__(self, batch_file):
@@ -150,3 +150,68 @@ class WorkflowParser(object):
                  for (output_name, output_value) in sample_params.items()
                  if 'out' in output_name}
         return sample_output_map
+
+class DemultiplexStatsParser(object):
+    def __init__(self, dmplexstats_file):
+        """
+        Reads, parses, and formats 'DemultiplexingStats.xml' file from Illumina
+        sequencing run.
+        """
+        self.dmplexstats_file = dmplexstats_file
+        self._read_to_dict()
+
+    def _read_to_dict(self):
+        """
+        Read data from XML file; store as dict.
+        """
+        dmplexstats_file = self.dmplexstats_file
+
+        data = {}
+        tree = ET.parse(dmplexstats_file)
+        root = tree.getroot()
+
+        self.data = xml_to_dict(root)
+
+    def parse_dict(self):
+        """
+        Return dict with parsed data.
+        """
+        return self.data
+
+# from
+# https://github.com/SciLifeLab/flowcell_parser/blob/master/flowcell_parser/classes.py
+def xml_to_dict(root):
+    current=None
+
+    children=list(root)
+    if children:
+        current={}
+        duplicates={}
+        for child in children:
+            if len(root.findall(child.tag))>1:
+                if child.tag not in duplicates:
+                    duplicates[child.tag]=[]
+                lower=xml_to_dict(child)
+                duplicates[child.tag].extend(lower.values())
+                current.update(duplicates)
+            else:
+                lower=xml_to_dict(child)
+                current.update(lower)
+    if root.attrib:
+        if current:
+            if [x in current for x in root.attrib]:
+                current.update(root.attrib)
+            else:
+                current.update({'attribs':root.attribs})
+        else:
+            current= root.attrib
+    if root.text and root.text.strip() != "":
+        if current:
+            if 'text' not in current:
+                current['text']=root.text
+            else:
+                #you're really pushing here, pal
+                current['xml_text']=root.text
+        else:
+            current=root.text
+    return {root.tag:current}
