@@ -153,22 +153,22 @@ class WorkflowParser(object):
         return sample_output_map
 
 class DemultiplexStatsParser(object):
-    def __init__(self, dmplexstats_file):
+    def __init__(self, demux_stats_file):
         """
         Reads, parses, and formats 'DemultiplexingStats.xml' file from Illumina
         sequencing run.
         """
-        self.dmplexstats_file = dmplexstats_file
+        self.demux_stats_file = demux_stats_file
         self._read_to_dict()
 
     def _read_to_dict(self):
         """
         Read data from XML file; store as dict.
         """
-        dmplexstats_file = self.dmplexstats_file
-        tree = ET.parse(dmplexstats_file)
+        demux_stats_file = self.demux_stats_file
+        tree = ET.parse(demux_stats_file)
         root = tree.getroot()
-        
+
         dmux_dict = {}
         for flowcell in list(root):
             for project in list(flowcell):
@@ -191,6 +191,53 @@ class DemultiplexStatsParser(object):
                                     (dmux_dict.setdefault(count.tag, [])
                                         .append(count.text))
         self.data = dmux_dict
+
+    def parse_to_df(self):
+        """
+        Return data frame from parsed data.
+        """
+        return pd.DataFrame(self.data)
+
+
+class DemuxSummaryParser(object):
+    def __init__(self, demux_summary_file):
+        """
+        Reads, parses, and formats 'DemuxSummary[...].txt' file from Illumina
+        sequencing run.
+        """
+        self.demux_summary_file = demux_summary_file
+        self._read_to_dict()
+
+    def _get_lane_num(self):
+        """
+        Parse lane number from file name.
+        """
+        demux_summary_file = self.demux_summary_file
+        return re.search('(?<=L)[1-8]', demux_summary_file).group()
+
+    def _read_to_dict(self):
+        """
+        Read data from txt file, extract lines describing most popular unknown
+        barcode indexes; store as dict.
+        """
+        demux_summary_file = self.demux_summary_file
+
+        with open(demux_summary_file) as f:
+            demux_summary_lines = f.readlines()
+
+        unknown_index_start = [n for n, l in enumerate(demux_summary_lines)
+                               if re.search('### Most Popular', l)][0] + 2
+        unknown_index_end = len(demux_summary_lines)
+        unknown_index_lines = (demux_summary_lines[unknown_index_start:
+                                                   unknown_index_end])
+
+        lane_num = self._get_lane_num()
+        unknown_indexes = [{'index': l.rstrip().split('\t')[0],
+                            'count': int(l.rstrip().split('\t')[1]),
+                            'lane': lane_num}
+                            for l in unknown_index_lines]
+
+        self.data = unknown_indexes
 
     def parse_to_df(self):
         """
