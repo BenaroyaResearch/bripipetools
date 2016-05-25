@@ -189,7 +189,7 @@ class DemultiplexStatsParser(object):
 
                                 for count in list(lane)[0:2]:
                                     (dmux_dict.setdefault(count.tag, [])
-                                        .append(count.text))
+                                        .append(int(count.text)))
         self.data = dmux_dict
 
     def parse_to_df(self):
