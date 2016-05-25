@@ -1,5 +1,6 @@
 import re, os
 import xml.etree.ElementTree as ET
+import pandas as pd
 
 from bripipetools.io import labels
 
@@ -165,53 +166,34 @@ class DemultiplexStatsParser(object):
         Read data from XML file; store as dict.
         """
         dmplexstats_file = self.dmplexstats_file
-
-        data = {}
         tree = ET.parse(dmplexstats_file)
         root = tree.getroot()
+        
+        dmux_dict = {}
+        for flowcell in list(root):
+            for project in list(flowcell):
+                for sample in list(project):
+                    for barcode in list(sample):
+                        if barcode.attrib['name'] != 'all':
+                            for lane in list(barcode):
+                                (dmux_dict.setdefault(flowcell.tag, [])
+                                    .append(flowcell.attrib['flowcell-id']))
+                                (dmux_dict.setdefault(project.tag, [])
+                                    .append(project.attrib['name']))
+                                (dmux_dict.setdefault(sample.tag, [])
+                                    .append(sample.attrib['name']))
+                                (dmux_dict.setdefault(barcode.tag, [])
+                                    .append(barcode.attrib['name']))
+                                (dmux_dict.setdefault(lane.tag, [])
+                                    .append(lane.attrib['number']))
 
-        self.data = xml_to_dict(root)
+                                for count in list(lane)[0:2]:
+                                    (dmux_dict.setdefault(count.tag, [])
+                                        .append(count.text))
+        self.data = dmux_dict
 
-    def parse_dict(self):
+    def parse_to_df(self):
         """
-        Return dict with parsed data.
+        Return data frame from parsed data.
         """
-        return self.data
-
-# from
-# https://github.com/SciLifeLab/flowcell_parser/blob/master/flowcell_parser/classes.py
-def xml_to_dict(root):
-    current=None
-
-    children=list(root)
-    if children:
-        current={}
-        duplicates={}
-        for child in children:
-            if len(root.findall(child.tag))>1:
-                if child.tag not in duplicates:
-                    duplicates[child.tag]=[]
-                lower=xml_to_dict(child)
-                duplicates[child.tag].extend(lower.values())
-                current.update(duplicates)
-            else:
-                lower=xml_to_dict(child)
-                current.update(lower)
-    if root.attrib:
-        if current:
-            if [x in current for x in root.attrib]:
-                current.update(root.attrib)
-            else:
-                current.update({'attribs':root.attribs})
-        else:
-            current= root.attrib
-    if root.text and root.text.strip() != "":
-        if current:
-            if 'text' not in current:
-                current['text']=root.text
-            else:
-                #you're really pushing here, pal
-                current['xml_text']=root.text
-        else:
-            current=root.text
-    return {root.tag:current}
+        return pd.DataFrame(self.data)
