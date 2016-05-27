@@ -33,7 +33,7 @@ class GlobusOutputManager(object):
         if batch_list is None:
             batch_list = self._get_select_func(select_type)()
         else:
-            batch_list = ui.parse_input_list(batch_list)
+            batch_list = batch_list.split(',')
         self.batch_list = [self._get_batch_file_path(os.path.basename(f))
                            for f in batch_list]
 

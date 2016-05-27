@@ -56,3 +56,6 @@ def test_prompt_raw_foo(capsys):
         ui.prompt_raw("foo")
         out, err = capsys.readouterr()
         assert(err == ("foo\n"))
+
+def test_input_to_int_list_1_2():
+    assert(ui.input_to_int_list(lambda: "1,2") == [1, 2])

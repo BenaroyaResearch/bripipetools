@@ -23,8 +23,10 @@ def input_to_int(input_func):
     if len(input_func()):
         return int(input_func())
 
-def parse_input_list(input_str, sep=','):
+def input_to_int_list(input_func, sep=','):
     """
-    Split input string based on separator and return list.
+    Collect input from function, split based on separator, and convert to list
+    of integers.
     """
-    return input_str.split(sep)
+    # input_str = input_func()
+    return [int(i) for i in input_func().split(sep)]
