@@ -82,7 +82,7 @@ class GlobusSubmitManager(object):
         :rtype: str
         :return: String collected from ``raw_input`` in response to the prompt.
         """
-        return ui.prompt_raw("Type the number of the project you wish to"
+        return ui.prompt_raw("Type the number of the project you wish to "
                              "select or hit enter to finish: ")
 
     def _select_project(self):
@@ -102,7 +102,9 @@ class GlobusSubmitManager(object):
         print("\nFound the following projects: [current workflows selected]")
         ui.list_options(project_choices)
         project_i = ui.input_to_int(self._select_project_prompt)
-        return projects[project_i]
+
+        if project_i is not None:
+            return projects[project_i]
 
     def _select_workflow_prompt(self):
         """
@@ -127,3 +129,21 @@ class GlobusSubmitManager(object):
         ui.list_options(workflow_choices)
         workflow_i = ui.input_to_int(self._select_workflow_prompt)
         return workflows[workflow_i]
+
+    def _update_batch_workflows(self):
+        """
+        Add workflow-project_associations for selected projects in the current
+        flowcell.
+        """
+        project = self._select_project()
+        workflow = self._select_workflow()
+        return project
+        # while True:
+        #     project = self._select_project()
+        #     if project is not None:
+        #         print("\nProject {} selected.\n".format(project['name']))
+        #         workflow = self._select_workflow()
+        #         # print("\nWorkflow {} selected.\n".format(workflow['name']))
+        #         # self._add_workflow_project_association(workflow, project)
+        #     else:
+        #         break
