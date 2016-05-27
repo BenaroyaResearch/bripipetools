@@ -51,5 +51,8 @@ def test_list_options_a_b(capsys):
     out, err = capsys.readouterr()
     assert(out == "  0 : a\n  1 : b\n")
 
-# def test_prompt_raw_foo():
-    # TODO: figure out how to test this function
+def test_prompt_raw_foo(capsys):
+    with mock.patch('__builtin__.raw_input', return_value=""):
+        ui.prompt_raw("foo")
+        out, err = capsys.readouterr()
+        assert(err == ("foo\n"))

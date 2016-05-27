@@ -65,26 +65,12 @@ class TestGlobusSubmitManager:
                 {'name': 'foo'}, [{'projects': [{'name': 'foo'}]}]) ==
                'foo [0]'))
 
-    def test_select_project_prompt(self, capsys):
-        with mock.patch('__builtin__.raw_input', return_value=""):
-            globus_submit_manager()._select_project_prompt()
-            out, err = capsys.readouterr()
-            assert(err == ("Type the number or numbers (separated by comma)"
-                           " of project(s) you wish to add to the current"
-                           " workflow batch, or hit enter to skip: \n"))
-
     def test_select_project_0(self):
         with mock.patch('__builtin__.raw_input', return_value="0"):
             assert(globus_submit_manager()._select_project() ==
                    {'name': 'P109-1-21113094',
                     'path': os.path.join(TEST_UNALIGNED_DIR,
                                          'P109-1-21113094')})
-
-    def test_select_workflow_prompt(self, capsys):
-        with mock.patch('__builtin__.raw_input', return_value=""):
-            globus_submit_manager()._select_workflow_prompt()
-            out, err = capsys.readouterr()
-            assert(err == ("Select workflow for which to create a batch: \n"))
 
     def test_select_workflow_0(self):
         with mock.patch('__builtin__.raw_input', return_value="0"):
