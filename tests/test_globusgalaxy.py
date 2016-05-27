@@ -28,6 +28,8 @@ class TestGlobusSubmitManager:
         assert('flowcell_dir' in dir(globus_submit_manager()))
         assert('workflow_dir' in dir(globus_submit_manager()))
         assert('endpoint' in dir(globus_submit_manager()))
+        assert('projects' in dir(globus_submit_manager()))
+        assert('workflows' in dir(globus_submit_manager()))
 
     def test_set_projects(self):
         gsm = globus_submit_manager()
@@ -47,7 +49,21 @@ class TestGlobusSubmitManager:
         assert(gsm.workflows[0] ==
                {'name': 'nextera_sr_grch38_v0.1_complete.txt',
                 'path': os.path.join(TEST_WORKFLOW_DIR,
-                                     'nextera_sr_grch38_v0.1_complete.txt')})
+                                     'nextera_sr_grch38_v0.1_complete.txt'),
+                'projects': []})
+
+    def test_add_workflow_project_association(self):
+        assert((globus_submit_manager()
+                ._add_workflow_project_association({'name': 'foo'},
+                                                   {'name': 'bar'})) ==
+               {'name': 'foo',
+                'projects': [{'name': 'bar'}]})
+
+    def test_format_project_choice(self):
+        assert((globus_submit_manager()
+                ._format_project_choice(
+                {'name': 'foo'}, [{'projects': [{'name': 'foo'}]}]) ==
+               'foo [0]'))
 
     def test_select_project_prompt(self, capsys):
         with mock.patch('__builtin__.raw_input', return_value=""):
@@ -55,6 +71,13 @@ class TestGlobusSubmitManager:
             out, err = capsys.readouterr()
             assert(err == ("Type the number of the project you wish to"
                            "select or hit enter to finish: \n"))
+
+    def test_select_project_0(self):
+        with mock.patch('__builtin__.raw_input', return_value="0"):
+            assert(globus_submit_manager()._select_project() ==
+                   {'name': 'P109-1-21113094',
+                    'path': os.path.join(TEST_UNALIGNED_DIR,
+                                         'P109-1-21113094')})
 
 
 from bripipetools.globusgalaxy import postprocessing

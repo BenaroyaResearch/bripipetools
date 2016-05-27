@@ -29,6 +29,8 @@ class GlobusSubmitManager(object):
         self.unaligned_dir = os.path.join(flowcell_dir, 'Unaligned')
         self.workflow_dir = workflow_dir
         self.endpoint = endpoint
+        self._set_projects()
+        self._set_workflows()
 
     def _set_projects(self):
         """
@@ -49,7 +51,8 @@ class GlobusSubmitManager(object):
         """
         workflow_dir = self.workflow_dir
         self.workflows = [{'name': f,
-                           'path': os.path.join(workflow_dir, f)}
+                           'path': os.path.join(workflow_dir, f),
+                           'projects': []}
                           for f in os.listdir(workflow_dir)
                           if 'Galaxy-API' not in f
                           and not re.search('^\.', f)]
@@ -59,15 +62,18 @@ class GlobusSubmitManager(object):
         """
         Create association between workflow and project.
         """
-        return workflow.setdefault('projects', []).append(project)
+        workflow.setdefault('projects', []).append(project)
+        return workflow
 
-    def _format_project_choice(self, workflow_project_association):
+    def _format_project_choice(self, project, workflows):
         """
         Format project for selection prompt: only print project ID and
-        currently associated workflows.
+        indexes of currently associated workflows.
         """
-        return
-
+        workflow_nums = [idx for idx, w in enumerate(workflows)
+                         for p in w['projects']
+                         if project['name'] == p['name']]
+        return '{} {}'.format(project['name'], workflow_nums)
 
     def _select_project_prompt(self):
         """
@@ -88,10 +94,12 @@ class GlobusSubmitManager(object):
         :return: A list with the name of the batch file corresponding to user
             command-line selection.
         """
-        unaligned_dir = self.unaligned_dir
-        unaligned_projects = [os.path.join(unaligned_dir, p)
-                              for p in os.listdir(unaligned_dir)
-                              if '.' not in p]
-        unaligned_projects.sort()
+        projects = self.projects
+        workflows = self.workflows
+        project_choices = [self._format_project_choice(p, workflows)
+                           for p in projects]
 
         print "\nFound the following projects: [current workflows selected]"
+        ui.list_options(project_choices)
+        project_i = ui.input_to_int(self._select_project_prompt)
+        return projects[project_i]
