@@ -79,6 +79,20 @@ class TestGlobusSubmitManager:
                     'path': os.path.join(TEST_UNALIGNED_DIR,
                                          'P109-1-21113094')})
 
+    def test_select_workflow_prompt(self, capsys):
+        with mock.patch('__builtin__.raw_input', return_value=""):
+            globus_submit_manager()._select_workflow_prompt()
+            out, err = capsys.readouterr()
+            assert(err == ("Type the number of the workflow to use: \n"))
+
+    def test_select_workflow_0(self):
+        with mock.patch('__builtin__.raw_input', return_value="0"):
+            assert(globus_submit_manager()._select_workflow() ==
+                   {'name': 'nextera_sr_grch38_v0.1_complete.txt',
+                    'path': os.path.join(TEST_WORKFLOW_DIR,
+                                         'nextera_sr_grch38_v0.1_complete.txt'),
+                    'projects': []})
+
 
 from bripipetools.globusgalaxy import postprocessing
 

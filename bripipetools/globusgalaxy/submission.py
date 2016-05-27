@@ -99,7 +99,31 @@ class GlobusSubmitManager(object):
         project_choices = [self._format_project_choice(p, workflows)
                            for p in projects]
 
-        print "\nFound the following projects: [current workflows selected]"
+        print("\nFound the following projects: [current workflows selected]")
         ui.list_options(project_choices)
         project_i = ui.input_to_int(self._select_project_prompt)
         return projects[project_i]
+
+    def _select_workflow_prompt(self):
+        """
+        Display the command-line prompt for selecting an individual workflow.
+
+        :rtype: str
+        :return: String collected from ``raw_input`` in response to the prompt.
+        """
+        return ui.prompt_raw("Type the number of the workflow to use: ")
+
+    def _select_workflow(self):
+        """
+        Select workflow for current project.
+
+        :rtype: list
+        :return: A list with the name of the batch file corresponding to user
+            command-line selection.
+        """
+        workflows = self.workflows
+        workflow_choices = [w['name'] for w in workflows]
+
+        ui.list_options(workflow_choices)
+        workflow_i = ui.input_to_int(self._select_workflow_prompt)
+        return workflows[workflow_i]
