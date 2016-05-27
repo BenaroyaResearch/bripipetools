@@ -8,10 +8,17 @@ import mock
 # names occasionally
 from bripipetools.globusgalaxy import submission
 
+TEST_ROOT_DIR = './tests/test-data/'
+TEST_GENOMICS_DIR = os.path.join(TEST_ROOT_DIR, 'genomics')
+TEST_FLOWCELL_DIR = os.path.join(TEST_GENOMICS_DIR,
+                                 'Illumina/150615_D00565_0087_AC6VG0ANXX')
+TEST_UNALIGNED_DIR = os.path.join(TEST_FLOWCELL_DIR, 'Unaligned')
+TEST_WORKFLOW_DIR = os.path.join(TEST_GENOMICS_DIR, 'galaxy_workflows')
+
 @pytest.fixture(scope="class")
 def globus_submit_manager():
-    flowcell_dir = './tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX'
-    workflow_dir = './tests/test-data/genomics/galaxy_workflows'
+    flowcell_dir = TEST_FLOWCELL_DIR
+    workflow_dir = TEST_WORKFLOW_DIR
     endpoint = 'jeddy#srvgridftp01'
     return submission.GlobusSubmitManager(flowcell_dir, workflow_dir, endpoint)
 
@@ -22,12 +29,39 @@ class TestGlobusSubmitManager:
         assert('workflow_dir' in dir(globus_submit_manager()))
         assert('endpoint' in dir(globus_submit_manager()))
 
+    def test_set_projects(self):
+        gsm = globus_submit_manager()
+        gsm._set_projects()
+        assert(isinstance(gsm.projects, list))
+        assert(len(gsm.projects) == 8)
+        assert(gsm.projects[0] ==
+               {'name': 'P109-1-21113094',
+                'path': os.path.join(TEST_UNALIGNED_DIR,
+                                     'P109-1-21113094')})
+
+    def test_set_workflows(self):
+        gsm = globus_submit_manager()
+        gsm._set_workflows()
+        assert(isinstance(gsm.workflows, list))
+        assert(len(gsm.workflows) == 6)
+        assert(gsm.workflows[0] ==
+               {'name': 'nextera_sr_grch38_v0.1_complete.txt',
+                'path': os.path.join(TEST_WORKFLOW_DIR,
+                                     'nextera_sr_grch38_v0.1_complete.txt')})
+
+    def test_select_project_prompt(self, capsys):
+        with mock.patch('__builtin__.raw_input', return_value=""):
+            globus_submit_manager()._select_project_prompt()
+            out, err = capsys.readouterr()
+            assert(err == ("Type the number of the project you wish to"
+                           "select or hit enter to finish: \n"))
+
 
 from bripipetools.globusgalaxy import postprocessing
 
 @pytest.fixture(scope="class")
 def globus_output_manager(batch_list='foo,bar'):
-    flowcell_dir = './tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX'
+    flowcell_dir = TEST_FLOWCELL_DIR
     return postprocessing.GlobusOutputManager(flowcell_dir, batch_list)
 
 class TestGlobusOutputManager:
@@ -36,10 +70,10 @@ class TestGlobusOutputManager:
         assert('flowcell_dir' in dir(globus_output_manager()))
         assert('batch_submit_dir' in dir(globus_output_manager()))
         assert(globus_output_manager().batch_list ==
-               [('./tests/test-data/genomics/Illumina/'
-                '150615_D00565_0087_AC6VG0ANXX/globus_batch_submission/foo'),
-                ('./tests/test-data/genomics/Illumina/'
-                 '150615_D00565_0087_AC6VG0ANXX/globus_batch_submission/bar')])
+               [os.path.join(TEST_FLOWCELL_DIR,
+                             'globus_batch_submission/foo'),
+                os.path.join(TEST_FLOWCELL_DIR,
+                             'globus_batch_submission/bar')])
 
     def test_select_batch_prompt(self, capsys):
         with mock.patch('__builtin__.raw_input', return_value=""):
