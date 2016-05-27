@@ -43,6 +43,9 @@ def test_file_get_file_compression_zip():
 def test_input_to_int_0():
     assert(ui.input_to_int(lambda: "0") == 0)
 
+def test_input_to_int_empty():
+    assert(ui.input_to_int(lambda: "") is None)
+
 def test_list_options_a_b(capsys):
     ui.list_options(["a", "b"])
     out, err = capsys.readouterr()

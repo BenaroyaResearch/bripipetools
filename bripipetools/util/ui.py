@@ -20,7 +20,8 @@ def input_to_int(input_func):
     """
     Collect input from function and convert to integer.
     """
-    return int(input_func())
+    if len(input_func()):
+        return int(input_func())
 
 def parse_input_list(input_str, sep=','):
     """
