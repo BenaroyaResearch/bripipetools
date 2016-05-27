@@ -69,8 +69,9 @@ class TestGlobusSubmitManager:
         with mock.patch('__builtin__.raw_input', return_value=""):
             globus_submit_manager()._select_project_prompt()
             out, err = capsys.readouterr()
-            assert(err == ("Type the number of the project you wish to "
-                           "select or hit enter to finish: \n"))
+            assert(err == ("Type the number or numbers (separated by comma)"
+                           " of project(s) you wish to add to the current"
+                           " workflow batch, or hit enter to skip: \n"))
 
     def test_select_project_0(self):
         with mock.patch('__builtin__.raw_input', return_value="0"):
@@ -83,7 +84,7 @@ class TestGlobusSubmitManager:
         with mock.patch('__builtin__.raw_input', return_value=""):
             globus_submit_manager()._select_workflow_prompt()
             out, err = capsys.readouterr()
-            assert(err == ("Type the number of the workflow to use: \n"))
+            assert(err == ("Select workflow for which to create a batch: \n"))
 
     def test_select_workflow_0(self):
         with mock.patch('__builtin__.raw_input', return_value="0"):
@@ -93,12 +94,12 @@ class TestGlobusSubmitManager:
                                          'nextera_sr_grch38_v0.1_complete.txt'),
                     'projects': []})
 
-    def test_update_batch_workflows_0_0_break(self):
-        with mock.patch('__builtin__.raw_input', side_effect=iter(["0", ""])):
-            gsm = globus_submit_manager()
-            assert(gsm._update_batch_workflows() is None)
-            # print(gsm.workflows[0]['projects'])
-            # assert(gsm.workflows[0]['projects'])
+    # def test_update_batch_workflows_0_0_break(self):
+    #     with mock.patch('__builtin__.raw_input', side_effect=iter(["0", ""])):
+    #         gsm = globus_submit_manager()
+    #         assert(gsm._update_batch_workflows() is None)
+    #         # print(gsm.workflows[0]['projects'])
+    #         # assert(gsm.workflows[0]['projects'])
 
 
 from bripipetools.globusgalaxy import postprocessing

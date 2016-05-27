@@ -24,7 +24,6 @@ class GlobusSubmitManager(object):
         :param endpoint: Globus endpoint where input data is stored and outputs
             are to be sent.
         """
-
         self.flowcell_dir = flowcell_dir
         self.unaligned_dir = os.path.join(flowcell_dir, 'Unaligned')
         self.workflow_dir = workflow_dir
@@ -58,13 +57,6 @@ class GlobusSubmitManager(object):
                           and not re.search('^\.', f)]
         self.workflows.sort()
 
-    def _add_workflow_project_association(self, workflow, project):
-        """
-        Create association between workflow and project.
-        """
-        workflow.setdefault('projects', []).append(project)
-        return workflow
-
     def _format_project_choice(self, project, workflows):
         """
         Format project for selection prompt: only print project ID and
@@ -75,37 +67,6 @@ class GlobusSubmitManager(object):
                          if project['name'] == p['name']]
         return '{} {}'.format(project['name'], workflow_nums)
 
-    def _select_project_prompt(self):
-        """
-        Display the command-line prompt for selecting an individual project.
-
-        :rtype: str
-        :return: String collected from ``raw_input`` in response to the prompt.
-        """
-        return ui.prompt_raw("Type the number of the project you wish to "
-                             "select or hit enter to finish: ")
-
-    def _select_project(self):
-        """
-        Select and store project (path to unaligned folder) from among list of
-        projects found in flowcell folder.
-
-        :rtype: list
-        :return: A list with the name of the batch file corresponding to user
-            command-line selection.
-        """
-        projects = self.projects
-        workflows = self.workflows
-        project_choices = [self._format_project_choice(p, workflows)
-                           for p in projects]
-
-        print("\nFound the following projects: [current workflows selected]")
-        ui.list_options(project_choices)
-        project_i = ui.input_to_int(self._select_project_prompt)
-
-        if project_i is not None:
-            return projects[project_i]
-
     def _select_workflow_prompt(self):
         """
         Display the command-line prompt for selecting an individual workflow.
@@ -113,11 +74,11 @@ class GlobusSubmitManager(object):
         :rtype: str
         :return: String collected from ``raw_input`` in response to the prompt.
         """
-        return ui.prompt_raw("Type the number of the workflow to use: ")
+        return ui.prompt_raw("Select workflow for which to create a batch: ")
 
     def _select_workflow(self):
         """
-        Select workflow for current project.
+        Select workflow for current batch.
 
         :rtype: list
         :return: A list with the name of the batch file corresponding to user
@@ -129,6 +90,43 @@ class GlobusSubmitManager(object):
         ui.list_options(workflow_choices)
         workflow_i = ui.input_to_int(self._select_workflow_prompt)
         return workflows[workflow_i]
+        
+    def _select_project_prompt(self):
+        """
+        Display the command-line prompt for selecting an individual project.
+
+        :rtype: str
+        :return: String collected from ``raw_input`` in response to the prompt.
+        """
+        return ui.prompt_raw("Type the number or numbers (separated by comma)"
+                             " of project(s) you wish to add to the current"
+                             " workflow batch, or hit enter to skip: ")
+
+    def _select_project(self):
+        """
+        Select and store project (path to unaligned folder) from among list of
+        projects found in flowcell folder.
+
+        :rtype: list
+        :return: A list with the name of the batch file corresponding to user
+            command-line selection.
+        """
+        projects = self.projects
+        project_choices = [p['name'] for p in projects]
+
+        print("\nFound the following projects: [current workflows selected]")
+        ui.list_options(project_choices)
+        project_i = ui.input_to_int(self._select_project_prompt)
+
+        if project_i is not None:
+            return projects[project_i]
+
+    def _add_workflow_project_association(self, workflow, project):
+        """
+        Create association between workflow and project.
+        """
+        workflow.setdefault('projects', []).append(project)
+        return workflow
 
     def _update_batch_workflows(self):
         """
