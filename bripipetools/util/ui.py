@@ -20,13 +20,15 @@ def input_to_int(input_func):
     """
     Collect input from function and convert to integer.
     """
-    if len(input_func()):
-        return int(input_func())
+    input_raw = input_func()
+    if len(input_raw):
+        return int(input_raw)
 
 def input_to_int_list(input_func, sep=','):
     """
     Collect input from function, split based on separator, and convert to list
     of integers.
     """
-    # input_str = input_func()
-    return [int(i) for i in input_func().split(sep)]
+    input_raw = input_func()
+    if len(input_raw):
+        return [int(i) for i in input_raw.split(sep)]

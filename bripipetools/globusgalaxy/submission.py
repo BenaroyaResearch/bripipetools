@@ -57,15 +57,14 @@ class GlobusSubmitManager(object):
                           and not re.search('^\.', f)]
         self.workflows.sort()
 
-    def _format_project_choice(self, project, workflows):
+    def _format_workflow_choice(self, workflow):
         """
         Format project for selection prompt: only print project ID and
         indexes of currently associated workflows.
         """
-        workflow_nums = [idx for idx, w in enumerate(workflows)
-                         for p in w['projects']
-                         if project['name'] == p['name']]
-        return '{} {}'.format(project['name'], workflow_nums)
+        workflow_project_names = [p['name'] for p in workflow['projects']]
+        return '{} [{}]'.format(workflow['name'],
+                              ''.join(workflow_project_names))
 
     def _select_workflow_prompt(self):
         """
@@ -85,7 +84,8 @@ class GlobusSubmitManager(object):
             command-line selection.
         """
         workflows = self.workflows
-        workflow_choices = [w['name'] for w in workflows]
+        workflow_choices = [self._format_workflow_choice(w)
+                            for w in workflows]
 
         ui.list_options(workflow_choices)
         workflow_i = ui.input_to_int(self._select_workflow_prompt)
@@ -135,18 +135,11 @@ class GlobusSubmitManager(object):
         Add workflow-project_associations for selected projects in the current
         flowcell.
         """
-        # project = self._select_project()
-        # workflow = self._select_workflow()
-        # return project
-        workflows = self.workflows
-        open_workflows = [w['name'] for w in workflows]
-        while len(open_workflows) > 5:
+        while True:
             workflow = self._select_workflow()
-            print("\nWorkflow {} selected.".format(workflow['name']))
-            open_workflows.remove(workflow['name'])
-            # sys.stderr.flush()
-
-            projects = self._select_projects()
-            workflow['projects'] = projects
-            # print("\nWorkflow {} selected.\n".format(workflow['name']))
-            # self._add_workflow_project_association(workflow, project)
+            if workflow is not None:
+                print("\nWorkflow {} selected.".format(workflow['name']))
+                projects = self._select_projects()
+                workflow['projects'] = projects
+            else:
+                break
