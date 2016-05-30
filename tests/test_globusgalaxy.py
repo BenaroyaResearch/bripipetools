@@ -31,16 +31,6 @@ class TestGlobusSubmitManager:
         assert('projects' in dir(globus_submit_manager()))
         assert('workflows' in dir(globus_submit_manager()))
 
-    def test_set_projects(self):
-        gsm = globus_submit_manager()
-        gsm._set_projects()
-        assert(isinstance(gsm.projects, list))
-        assert(len(gsm.projects) == 8)
-        assert(gsm.projects[0] ==
-               {'name': 'P109-1-21113094',
-                'path': os.path.join(TEST_UNALIGNED_DIR,
-                                     'P109-1-21113094')})
-
     def test_set_workflows(self):
         gsm = globus_submit_manager()
         gsm._set_workflows()
@@ -52,12 +42,15 @@ class TestGlobusSubmitManager:
                                      'nextera_sr_grch38_v0.1_complete.txt'),
                 'projects': []})
 
-    def test_add_workflow_project_association(self):
-        assert((globus_submit_manager()
-                ._add_workflow_project_association({'name': 'foo'},
-                                                   {'name': 'bar'})) ==
-               {'name': 'foo',
-                'projects': [{'name': 'bar'}]})
+    def test_set_projects(self):
+        gsm = globus_submit_manager()
+        gsm._set_projects()
+        assert(isinstance(gsm.projects, list))
+        assert(len(gsm.projects) == 8)
+        assert(gsm.projects[0] ==
+               {'name': 'P109-1-21113094',
+                'path': os.path.join(TEST_UNALIGNED_DIR,
+                                     'P109-1-21113094')})
 
     def test_format_workflow_choice(self):
         assert((globus_submit_manager()

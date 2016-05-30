@@ -31,19 +31,6 @@ class GlobusSubmitManager(object):
         self._set_projects()
         self._set_workflows()
 
-    def _set_projects(self):
-        """
-        Identify projects & locate corresponding raw data folders in the
-        'Unaligned' folder for the flowcell.
-        """
-        # TODO: should this be a property instead of setter method?
-        unaligned_dir = self.unaligned_dir
-        self.projects = [{'name': p,
-                          'path': os.path.join(unaligned_dir, p)}
-                         for p in os.listdir(unaligned_dir)
-                         if '.' not in p]
-        self.projects.sort()
-
     def _set_workflows(self):
         """
         Identify workflows in the workflow folder & store paths.
@@ -57,10 +44,31 @@ class GlobusSubmitManager(object):
                           and not re.search('^\.', f)]
         self.workflows.sort()
 
+    def _set_projects(self):
+        """
+        Identify projects & locate corresponding raw data folders in the
+        'Unaligned' folder for the flowcell.
+        """
+        # TODO: should this be a property instead of setter method?
+        unaligned_dir = self.unaligned_dir
+        self.projects = [{'name': p,
+                          'path': os.path.join(unaligned_dir, p)}
+                         for p in os.listdir(unaligned_dir)
+                         if '.' not in p]
+        self.projects.sort()
+
     def _format_workflow_choice(self, workflow):
         """
-        Format project for selection prompt: only print project ID and
-        indexes of currently associated workflows.
+        Format workflow for selection prompt: only print workflow name and
+        names of currently associated projects.
+
+        :type workflow: dict
+        :param workflow: A dict with name and path of workflow to be used for
+            batch processing.
+
+        :rtype: str
+        :return: A string displaying the workflow name and the list of projects
+            associated with the workflow for the current batch.
         """
         workflow_project_names = [p['name'] for p in workflow['projects']]
         return '{} [{}]'.format(workflow['name'],
@@ -73,15 +81,16 @@ class GlobusSubmitManager(object):
         :rtype: str
         :return: String collected from ``raw_input`` in response to the prompt.
         """
-        return ui.prompt_raw("Select workflow for which to create a batch: ")
+        return ui.prompt_raw("Select workflow for which to create a batch, or"
+                             " hit enter to finish: ")
 
     def _select_workflow(self):
         """
         Select workflow for current batch.
 
-        :rtype: list
-        :return: A list with the name of the batch file corresponding to user
-            command-line selection.
+        :rtype: dict
+        :return: A dict with the name of the workflow and path to the template
+            batch submit file corresponding to user command-line selection.
         """
         workflows = self.workflows
         workflow_choices = [self._format_workflow_choice(w)
@@ -106,12 +115,12 @@ class GlobusSubmitManager(object):
 
     def _select_projects(self):
         """
-        Select and store project (path to unaligned folder) from among list of
-        projects found in flowcell folder.
+        Select and store project from among list of projects found in flowcell
+        folder.
 
         :rtype: list
-        :return: A list with the name of the batch file corresponding to user
-            command-line selection.
+        :return: A list of dicts with the name and path of each project folder,
+            corresponding to user command-line selection.
         """
         projects = self.projects
         project_choices = [p['name'] for p in projects]
@@ -123,17 +132,10 @@ class GlobusSubmitManager(object):
         if project_i is not None:
             return [projects[i] for i in project_i]
 
-    def _add_workflow_project_association(self, workflow, project):
-        """
-        Create association between workflow and project.
-        """
-        workflow.setdefault('projects', []).append(project)
-        return workflow
-
     def _update_batch_workflows(self):
         """
-        Add workflow-project_associations for selected projects in the current
-        flowcell.
+        Interactively add workflow-project associations for projects in the
+        current flowcell.
         """
         while True:
             workflow = self._select_workflow()
