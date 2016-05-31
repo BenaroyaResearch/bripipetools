@@ -43,10 +43,19 @@ def test_file_get_file_compression_zip():
 def test_input_to_int_0():
     assert(ui.input_to_int(lambda: "0") == 0)
 
+def test_input_to_int_empty():
+    assert(ui.input_to_int(lambda: "") is None)
+
 def test_list_options_a_b(capsys):
     ui.list_options(["a", "b"])
     out, err = capsys.readouterr()
     assert(out == "  0 : a\n  1 : b\n")
 
-# def test_prompt_raw_foo():
-    # TODO: figure out how to test this function
+def test_prompt_raw_foo(capsys):
+    with mock.patch('__builtin__.raw_input', return_value=""):
+        ui.prompt_raw("foo")
+        out, err = capsys.readouterr()
+        assert(err == ("foo\n"))
+
+def test_input_to_int_list_1_2():
+    assert(ui.input_to_int_list(lambda: "1,2") == [1, 2])
