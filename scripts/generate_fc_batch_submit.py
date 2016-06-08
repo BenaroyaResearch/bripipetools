@@ -93,10 +93,15 @@ def format_endpoint_dir(local_dir):
 def build_ref_path(param, build = 'GRCh38'):
     ref_dict = {}
     ref_dict['GRCh38'] = dict([('gtf', 'GRCh38/Homo_sapiens.GRCh38.77.gtf'),
-                              ('refflat', 'GRCh38/Homo_sapiens.GRCh38.77.refflat.txt'),
-                              ('ribosomal_intervals',
-                               'GRCh38/Homo_sapiens.GRCh38.77.ribosomalIntervalsWheader_reorder.txt'),
+                               ('refflat', 'GRCh38/Homo_sapiens.GRCh38.77.refflat.txt'),
+                               ('ribosomal_intervals',
+                                'GRCh38/Homo_sapiens.GRCh38.77.ribosomalIntervalsWheader_reorder.txt'),
                                ('adapters', 'adapters/smarter_adapter_seqs_3p_5p.fasta')])
+    ref_dict['NCBIM37'] = dict([('gtf', 'NCBIM37/Mus_musculus.NCBIM37.67.gtf'),
+                                ('refflat', 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt'),
+                                ('ribosomal_intervals',
+                                'NCBIM37/Mus_musculus.NCBIM37.67.ribosomalIntervalsWheader_reorder.txt'),
+                                ('adapters', 'adapters/smarter_adapter_seqs_3p_5p.fasta')])
     ref_type = re.sub('^annotation_', '', param)
     ref_path = 'library::annotation::' + ref_dict[build].get(ref_type)
 
@@ -168,7 +173,7 @@ def build_result_path(lib, target_dir, param):
     return result_path
 
 # Fill in parameter values for current lib based on the keys from the template
-def build_lib_param_list(lib, endpoint, target_dir, header_keys, lane_order, fc_tag):
+def build_lib_param_list(lib, endpoint, target_dir, header_keys, lane_order, fc_tag, build='GRCh38'):
     lib_params = []
     lib_id = parse_lib_path(lib)
     target_lib = lib_id + fc_tag
@@ -181,7 +186,7 @@ def build_lib_param_list(lib, endpoint, target_dir, header_keys, lane_order, fc_
             for lane in lane_order:
                 lib_params.append(get_lane_fastq(lib, lane))
         elif 'annotation' in param:
-            ref_path = build_ref_path(param)
+            ref_path = build_ref_path(param, build)
             lib_params.append(ref_path)
         elif 'out' in param:
             if re.search('^fastq_out', param):
@@ -197,7 +202,7 @@ def build_lib_param_list(lib, endpoint, target_dir, header_keys, lane_order, fc_
 
 
 def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
-                       project_lines=None, N=None, sort=False):
+                       project_lines=None, N=None, sort=False, build='GRCh38'):
     if project_lines is None:
         project_lines = []
 
@@ -226,7 +231,8 @@ def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
     for lib in unaligned_libs:
         if "Undetermined" not in lib:
             lib_params = build_lib_param_list(lib, endpoint, target_dir,
-                                              header_keys, lane_order, fc_tag)
+                                              header_keys, lane_order, fc_tag,
+                                              build)
             project_lines.append(('\t').join(lib_params) + '\n')
 
     return (proj, fc_tag, project_lines, date_tag)
@@ -238,11 +244,14 @@ def create_workflow_file(endpoint, workflow_template, project_list, N=None, sort
     workflow_lines = template_lines
     workflow_lines[-1] = re.sub('\t$', '\n', workflow_lines[-1])
 
+    builds = ['GRCh38', 'NCBIM37']
+    build = [b for b in builds if re.search(b.lower(), workflow_template)][0]
+
     proj_list = []
     for unaligned_project in project_list:
         proj,fc_tag,proj_lines,date_tag = get_project_params(endpoint, header_keys,
                                                              lane_order, unaligned_project,
-                                                             N=N, sort=sort)
+                                                             N=N, sort=sort, build=build)
         proj_list.append(proj)
         workflow_lines += proj_lines
 

@@ -129,11 +129,14 @@ class TestGlobusOutputManager:
 
     def test_init_no_batch_list(self):
         with mock.patch('__builtin__.raw_input', return_value="0"):
-            assert(globus_output_manager(batch_list=None).batch_list ==
-                   [os.path.join(TEST_FLOWCELL_DIR,
-                        'globus_batch_submission/'
-                        '160216_P109-1_P14-12_C6VG0ANXX_'
-                        'optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt')])
+            gom = globus_output_manager(batch_list=None)
+            assert(gom.batch_list
+                == [os.path.join(
+                    TEST_FLOWCELL_DIR,
+                    'globus_batch_submission',
+                    ('160216_P109-1_P14-12_C6VG0ANXX_'
+                     'optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt')
+                     )])
 
     def test_curate_batches_dummy(self):
         with pytest.raises(IOError):
