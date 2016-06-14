@@ -128,6 +128,20 @@ class GlobusOutputManager(object):
                        'date': self._select_date_batches}
         return select_dict[select_type]
 
+    def check_batches(self):
+        """
+        For batches in ``batch_list``, check for any missing or
+        problematic outputs.
+        """
+        flowcell_dir = self.flowcell_dir
+        batch_list = self.batch_list
+        for batch_file in batch_list:
+            bc = curation.BatchCurator(batch_file, flowcell_dir)
+            if bc.report_problem_outputs():
+                print("Problems with outputs for {}".format(batch_file))
+            else:
+                print("No problem outputs for {}".format(batch_file))
+
     def curate_batches(self, dry_run=False):
         """
         For batches in ``batch_list``, organize all output files.
@@ -139,4 +153,4 @@ class GlobusOutputManager(object):
         batch_list = self.batch_list
         for batch_file in batch_list:
             bc = curation.BatchCurator(batch_file, flowcell_dir)
-            bc.organize_files(dry_run)
+            bc.organize_files(dry_run=dry_run)
