@@ -189,6 +189,6 @@ class BatchCurator(object):
             project_globus_dir = self._fix_globus_dir(project_dir)
             fpm = fileops.FilePacketManager(packet, sample,
                                             project_globus_dir)
-            fpm.munge_files(dry_run)
+            fpm.munge_files(dry_run=dry_run)
 
         # TODO: return something...
