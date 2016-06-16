@@ -135,10 +135,8 @@ class BatchCurator(object):
                            if output['status'] != 'ok']
 
         if len(problem_outputs):
-            print(problem_outputs)
-            return 1
-        else:
-            return 0
+            return problem_outputs
+
 
     def curate_outputs(self):
         """
