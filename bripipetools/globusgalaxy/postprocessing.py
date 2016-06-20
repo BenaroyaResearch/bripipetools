@@ -5,6 +5,8 @@ Organize, format, and clean up outputs from a Globus Galaxy processing run.
 import os
 import re
 
+from collections import defaultdict
+
 from bripipetools.util import ui
 from bripipetools.globusgalaxy import curation
 
@@ -128,6 +130,18 @@ class GlobusOutputManager(object):
                        'date': self._select_date_batches}
         return select_dict[select_type]
 
+    def _get_rerun_samples(self, problem_outputs):
+        """
+        Given a list of problem outputs, identify and return a list of
+        samples that need to be rerun.
+        """
+        problem_counts = defaultdict(int)
+        for o in problem_outputs:
+            problem_counts[o[0]] += 1
+
+        return [sample for sample, count in problem_counts.items()
+                if count > 10]
+
     def check_batches(self):
         """
         For batches in ``batch_list``, check for any missing or
@@ -137,8 +151,11 @@ class GlobusOutputManager(object):
         batch_list = self.batch_list
         for batch_file in batch_list:
             bc = curation.BatchCurator(batch_file, flowcell_dir)
-            if bc.report_problem_outputs():
+            problem_outputs = bc.report_problem_outputs()
+            if problem_outputs:
                 print("Problems with outputs for {}".format(batch_file))
+                return (batch_file, self._get_rerun_samples(problem_outputs))
+
             else:
                 print("No problem outputs for {}".format(batch_file))
 
