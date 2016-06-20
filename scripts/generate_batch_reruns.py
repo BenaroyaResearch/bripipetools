@@ -16,7 +16,7 @@ def locate_param_line(data):
 
 def get_header_data(batch_file):
     batch_data = read_batch_file(batch_file)
-    return batch_data[0:locate_param_line(batch_data)]
+    return batch_data[0:locate_param_line(batch_data)+1]
 
 def get_rerun_params(batch_file, rerun_samples):
     batch_data = read_batch_file(batch_file)
