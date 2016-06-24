@@ -153,7 +153,9 @@ class GlobusOutputManager(object):
             bc = curation.BatchCurator(batch_file, flowcell_dir)
             problem_outputs = bc.report_problem_outputs()
             if problem_outputs:
-                print("Problems with outputs for {}".format(batch_file))
+                print("Problems with outputs for {}:".format(batch_file))
+                for o in problem_outputs:
+                    print(" - Sample: {}, output: {}".format(o[0], o[1]))
                 return (batch_file, self._get_rerun_samples(problem_outputs))
 
             else:
