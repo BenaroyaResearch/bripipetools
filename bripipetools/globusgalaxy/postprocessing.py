@@ -130,7 +130,7 @@ class GlobusOutputManager(object):
                        'date': self._select_date_batches}
         return select_dict[select_type]
 
-    def _get_rerun_samples(self, problem_outputs):
+    def _get_rerun_samples(self, problem_outputs, cutoff=10):
         """
         Given a list of problem outputs, identify and return a list of
         samples that need to be rerun.
@@ -140,13 +140,15 @@ class GlobusOutputManager(object):
             problem_counts[o[0]] += 1
 
         return [sample for sample, count in problem_counts.items()
-                if count > 10]
+                if count > cutoff]
 
-    def check_batches(self):
+    def check_batches(self, all_problems=False):
         """
         For batches in ``batch_list``, check for any missing or
         problematic outputs.
         """
+        problem_cutoff = 0 if all_problems else 10
+
         flowcell_dir = self.flowcell_dir
         batch_list = self.batch_list
         for batch_file in batch_list:
@@ -156,7 +158,8 @@ class GlobusOutputManager(object):
                 print("Problems with outputs for {}:".format(batch_file))
                 for o in problem_outputs:
                     print(" - Sample: {}, output: {}".format(o[0], o[1]))
-                return (batch_file, self._get_rerun_samples(problem_outputs))
+                return (batch_file, self._get_rerun_samples(problem_outputs,
+                                                            problem_cutoff))
 
             else:
                 print("No problem outputs for {}".format(batch_file))

@@ -39,21 +39,19 @@ def main(argv):
                               "/mnt/genomics/Illumina/"
                               "150615_D00565_0087_AC6VG0ANXX/Unaligned"
                               "P43-12-23224208"))
-    parser.add_argument('-c', '--check_only',
+    parser.add_argument('-a', '--all_problems',
                         action='store_true',
-                        help=("check that all outputs are present, but don't "
-                              "attempt to compile"))
-    parser.add_argument('-d', '--dry_run',
-                        action='store_true',
-                        help=("only report what would be done"))
+                        help=("include all samples with problems (including) "
+                              "only one or a few missing outputs) in the "
+                              "re-run batch"))
     args = parser.parse_args()
 
     flowcell_dir = args.flowcell_dir
-    check_only = args.check_only
-    dry_run = args.dry_run
+    all_problems = args.all_problems
 
     out_manager = postprocessing.GlobusOutputManager(flowcell_dir)
-    rerun_batch, rerun_samples = out_manager.check_batches()
+    rerun_batch, rerun_samples = out_manager.check_batches(
+        all_problems=all_problems)
     if rerun_samples:
         header_data = get_header_data(rerun_batch)
         rerun_params = get_rerun_params(rerun_batch, rerun_samples)
