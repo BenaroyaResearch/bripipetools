@@ -143,7 +143,7 @@ class FilePacketManager(object):
 
             # check whether to bundle files
             bundle_subdir = self._get_bundle_subdir(source)
-            if len(bundle_subdir) and bundle_subdir != 'trinity':
+            if len(bundle_subdir) and source != 'trinity':
                 munger.bundle_files()
 
         # TODO: return something...
