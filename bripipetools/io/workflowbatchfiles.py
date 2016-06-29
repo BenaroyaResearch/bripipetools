@@ -5,6 +5,7 @@ Globus Galaxy.
 import os
 import sys
 import re
+from collections import OrderedDict
 
 class WorkflowBatchFile(object):
     def __init__(self, path, state='template'):
@@ -98,9 +99,9 @@ class WorkflowBatchFile(object):
         for each parameter.
         """
         param_line = self.data['raw'][self._locate_param_line()]
-        return {idx: self._parse_param(p)
+        return OrderedDict((idx, self._parse_param(p))
                 for idx, p in enumerate(param_line.strip().split('\t'))
-                if p != 'SampleName'}
+                if p != 'SampleName')
 
     def get_sample_params(self, sample_line):
         """
@@ -112,7 +113,7 @@ class WorkflowBatchFile(object):
             batch submit file describing the paramaters for a single sample.
 
         :rtype: list
-        :return: A dict.
+        :return: A list of dicts, one for each sample.
         """
         parameters_ordered = self.get_params()
 
@@ -130,6 +131,8 @@ class WorkflowBatchFile(object):
         """
         self.data['workflow_name'] = self.get_workflow_name()
         self.data['parameters'] = [v for k, v in self.get_params().items()]
-        # if self.state == 'submit':
-        #     self.data['samples']
+        if self.state == 'submit':
+            sample_lines = self.data['raw'][self._locate_sample_start_line():]
+            self.data['samples'] = [self.get_sample_params(l)
+                                    for l in sample_lines]
         return self.data
