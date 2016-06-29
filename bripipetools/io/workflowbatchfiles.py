@@ -83,8 +83,10 @@ class WorkflowBatchFile(object):
             param_type = 'annotation'
         elif re.search('in', param_tag):
             param_type = 'input'
-        else:
+        elif re.search('out', param_tag):
             param_type = 'output'
+        else:
+            param_type = 'sample'
 
         return {'tag': param_tag,
                 'type': param_type,
@@ -100,8 +102,7 @@ class WorkflowBatchFile(object):
         """
         param_line = self.data['raw'][self._locate_param_line()]
         return OrderedDict((idx, self._parse_param(p))
-                for idx, p in enumerate(param_line.strip().split('\t'))
-                if p != 'SampleName')
+                for idx, p in enumerate(param_line.strip().split('\t')))
 
     def get_sample_params(self, sample_line):
         """
@@ -119,10 +120,9 @@ class WorkflowBatchFile(object):
 
         sample_line_parts = sample_line.strip().split('\t')
         sample_parameters = [parameters_ordered[idx]
-                             for idx, sp in enumerate(sample_line_parts)
-                             if idx > 0]
+                             for idx, sp in enumerate(sample_line_parts)]
         for idx, sp in enumerate(sample_line_parts):
-            sample_parameters[idx - 1]['value'] = sp
+            sample_parameters[idx]['value'] = sp
         return sample_parameters
 
     def parse(self):
@@ -136,3 +136,17 @@ class WorkflowBatchFile(object):
             self.data['samples'] = [self.get_sample_params(l)
                                     for l in sample_lines]
         return self.data
+
+    def write(self, path):
+        """
+        Write workflow batch data to file.
+        """
+        self.parse()
+
+        template_lines = self.data['raw'][0:self._locate_param_line() + 1]
+        sample_lines = ['{}\n'.format(('\t').join([p['value'] for p in s]))
+                        for s in self.data['samples']]
+        workflow_lines = template_lines + sample_lines
+
+        with open(path, 'w+') as f:
+            f.writelines(workflow_lines)
