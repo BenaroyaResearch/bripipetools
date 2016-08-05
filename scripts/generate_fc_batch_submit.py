@@ -34,16 +34,20 @@ Example:
 def get_fc_tag(fc_str):
     fc_str = re.sub('EXTERNAL_[A-B]', 'EXTERNAL_', fc_str)
     fc_re = re.compile('((?<=(EXTERNAL_))|(?<=(_[A-B]))).*XX')
-    fc_tag = '_' + fc_re.search(fc_str).group()
-
-    return fc_tag
+    try:
+        fc_tag = '_' + fc_re.search(fc_str).group()
+        return fc_tag
+    except AttributeError:
+        return ''
 
 # Parse project folder from filepath part to get project ID
 def get_proj(proj_str):
     proj_re = re.compile('P+[0-9]+(-[0-9]+){,1}')
-    proj = proj_re.search(proj_str).group()
-
-    return proj
+    try:
+        proj = proj_re.search(proj_str).group()
+        return proj
+    except AttributeError:
+        return proj_str
 
 # Break unaligned filepath into relevant parts and parse to get flowcell and
 # project IDs
@@ -133,9 +137,11 @@ def prep_output_subdir(target_dir, result_type):
 
 # Parse library folder from filepath to get library ID (libID)
 def parse_lib_path(lib_dir):
-    lib_id = re.search('lib[0-9]+', lib_dir).group()
-
-    return lib_id
+    try:
+        lib_id = re.search('lib[0-9]+', lib_dir).group()
+        return lib_id
+    except AttributeError:
+        return re.search('Sample_.*[0-9]+', lib_dir).group()
 
 # Get the location of the gzipped FASTQ file for the current lib and lane
 def get_lane_fastq(lib_dir, lane):
@@ -150,8 +156,8 @@ def get_lane_fastq(lib_dir, lane):
         empty_fastq = 'empty_L00' + lane + '.fastq.gz'
         lane_fastq = os.path.join(lib_dir, empty_fastq)
 
-        if not os.path.exists(lane_fastq):
-            open(lane_fastq, 'a').close()
+        # if not os.path.exists(lane_fastq):
+        #     open(lane_fastq, 'a').close()
 
     return format_endpoint_dir(lane_fastq)
 
