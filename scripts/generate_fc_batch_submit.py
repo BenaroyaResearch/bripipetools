@@ -156,8 +156,8 @@ def get_lane_fastq(lib_dir, lane):
         empty_fastq = 'empty_L00' + lane + '.fastq.gz'
         lane_fastq = os.path.join(lib_dir, empty_fastq)
 
-        # if not os.path.exists(lane_fastq):
-        #     open(lane_fastq, 'a').close()
+        if not os.path.exists(lane_fastq):
+            open(lane_fastq, 'a').close()
 
     return format_endpoint_dir(lane_fastq)
 
