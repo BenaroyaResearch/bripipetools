@@ -3,6 +3,7 @@ import re
 import json
 
 from bripipetools.util import strings
+from bripipetools.io import labels
 
 def convert_keys(obj):
     """
@@ -38,7 +39,6 @@ class TG3Object(object):
 
     def to_json(self):
         return convert_keys(self.__dict__)
-
 
 class GenericSample(TG3Object):
     """
@@ -87,3 +87,26 @@ class SequencedLibrary(GenericSample):
         Set raw data.
         """
         self._raw_data = value
+
+class GenericRun(TG3Object):
+    """
+    GenLIMS object in the 'runs' collection
+    """
+    def __init__(self, protocol_id=None, date=None, **kwargs):
+        self.protocol_id = protocol_id
+        self.date = date
+        super(GenericRun, self).__init__(**kwargs)
+
+class FlowcellRun(GenericRun):
+    """
+    GenLIMS object in the 'runs' collection of type 'flowcell'.
+    """
+    def __init__(self, **kwargs):
+        run_type = 'flowcell'
+        run_id = kwargs.get('_id')
+        (date, inst_id, run_num, fc_id, fc_pos) = labels.parse_fc_run_id(run_id)
+        self.instrument_id = inst_id
+        self.run_number = run_num
+        self.flowcell_id = fc_id
+        self.flowcell_position = fc_pos
+        super(FlowcellRun, self).__init__(type=run_type, date=date, **kwargs)
