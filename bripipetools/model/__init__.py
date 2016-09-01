@@ -101,6 +101,8 @@ class FlowcellRun(GenericRun):
     """
     GenLIMS object in the 'runs' collection of type 'flowcell'.
     """
+    _flowcell_path = None
+
     def __init__(self, **kwargs):
         run_type = 'flowcell'
         run_id = kwargs.get('_id')
@@ -110,3 +112,17 @@ class FlowcellRun(GenericRun):
         self.flowcell_id = fc_id
         self.flowcell_position = fc_pos
         super(FlowcellRun, self).__init__(type=run_type, date=date, **kwargs)
+
+    @property
+    def flowcell_path(self):
+        """
+        Return root-agnostic path to flowcell data folder.
+        """
+        return self._flowcell_path
+
+    @flowcell_path.setter
+    def flowcell_path(self, value):
+        """
+        Set flowcell path.
+        """
+        self._flowcell_path = value

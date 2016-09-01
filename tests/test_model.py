@@ -76,3 +76,10 @@ def test_flowcellrun_creation():
     assert(flowcellrun.run_number == 0)
     assert(flowcellrun.flowcell_id == 'C00000XX')
     assert(flowcellrun.flowcell_position == 'A')
+
+def test_flowcellrun_set_flowcell_path():
+    flowcellrun = docs.FlowcellRun(_id='150101_D00000_0000_AC00000XX')
+    flowcellrun.flowcell_path = ('/~/genomics/Illumina/'
+                                 '150101_D00000_0000_AC00000XX')
+    assert(flowcellrun.flowcell_path == ('/~/genomics/Illumina/'
+                                         '150101_D00000_0000_AC00000XX'))
