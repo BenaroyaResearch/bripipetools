@@ -5,10 +5,10 @@ import pytest
 import os
 import re
 
-from bripipetools.annotation import flowcell
+from bripipetools.annotation import illuminaseq
 
 def test_flowcellrunannotator_creation_set_root():
-    fcrunannotator = flowcell.FlowcellRunAnnotator(
+    fcrunannotator = illuminaseq.FlowcellRunAnnotator(
         '150615_D00565_0087_AC6VG0ANXX',
         genomics_root='./tests/test-data/'
     )
@@ -17,14 +17,14 @@ def test_flowcellrunannotator_creation_set_root():
 
 def test_flowcellrunannotator_creation_locate_root():
     if os.path.exists('/Volumes/genomics'):
-        fcrunannotator = flowcell.FlowcellRunAnnotator(
+        fcrunannotator = illuminaseq.FlowcellRunAnnotator(
             '150101_D00000_0000_AC00000XX'
         )
         assert(fcrunannotator.flowcellrun._id ==
             '150101_D00000_0000_AC00000XX')
         assert(re.search('/Volumes/genomics', fcrunannotator.genomics_path))
     elif os.path.exists('/mnt/genomics'):
-        fcrunannotator = flowcell.FlowcellRunAnnotator(
+        fcrunannotator = illuminaseq.FlowcellRunAnnotator(
             '150101_D00000_0000_AC00000XX'
         )
         assert(fcrunannotator.flowcellrun._id ==
@@ -32,7 +32,7 @@ def test_flowcellrunannotator_creation_locate_root():
         assert(re.search('/Volumes/genomics', fcrunannotator.genomics_path))
     else: # missing root
         with pytest.raises(AttributeError):
-            fcrunannotator = flowcell.FlowcellRunAnnotator(
+            fcrunannotator = illuminaseq.FlowcellRunAnnotator(
                 '150101_D00000_0000_AC00000XX'
             )
             assert(fcrunannotator.flowcellrun._id ==
@@ -40,7 +40,7 @@ def test_flowcellrunannotator_creation_locate_root():
             assert(re.search('/.*/genomics', fcrunannotator.genomics_path))
 
 def test_flowcellrunannotator_get_flowcell_path_test_root():
-    fcrunannotator = flowcell.FlowcellRunAnnotator(
+    fcrunannotator = illuminaseq.FlowcellRunAnnotator(
         '150615_D00565_0087_AC6VG0ANXX',
         genomics_root='./tests/test-data/'
     )
@@ -48,7 +48,7 @@ def test_flowcellrunannotator_get_flowcell_path_test_root():
         './tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX')
 
 def test_flowcellrunannotator_get_flowcell_path_invalid_root():
-    fcrunannotator = flowcell.FlowcellRunAnnotator(
+    fcrunannotator = illuminaseq.FlowcellRunAnnotator(
         '150615_D00565_0087_AC6VG0ANXX',
         genomics_root='/mnt'
     )

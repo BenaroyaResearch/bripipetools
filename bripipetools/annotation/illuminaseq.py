@@ -1,3 +1,7 @@
+"""
+Classify / provide details for objects generated from an Illumina
+sequencing run performed by the BRI Genomics Core.
+"""
 
 import logging
 logger = logging.getLogger(__name__)
