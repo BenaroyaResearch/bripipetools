@@ -8,8 +8,8 @@ def get_library_id(str):
     """
     Return library ID.
 
-    :type lib_str: str
-    :param lib_str: Any string that might contain a library ID of the format
+    :type str: str
+    :param str: Any string that might contain a library ID of the format
         'lib1234'.
 
     :rtype: str
@@ -18,31 +18,31 @@ def get_library_id(str):
     """
     return strings.matchdefault('lib[1-9]+[0-9]*', str)
 
-def parse_fc_run_id(fc_run_id):
+def parse_flowcell_run_id(run_id):
     """
     Parse Illumina flowcell run ID (or folder name) and return individual
     components indicating date, instrument ID, run number, flowcell ID, and
     flowcell position.
 
-    :type fc_run_id: str
-    :param fc_run_id: String adhering to standard Illumina format (e.g.,
+    :type run_id: str
+    :param run_id: String adhering to standard Illumina format (e.g.,
         '150615_D00565_0087_AC6VG0ANXX') for a sequencing run.
 
-    :rtype: (str, str, str, str, str)
-    :return:
+    :rtype: dict
+    :return: A dict with fields for 'date', 'instrument_id', 'run_number',
+        'flowcell_id', and 'flowcell_position'.
     """
-    fc_parts = fc_run_id.split('_')
+    id_parts = run_id.split('_')
 
-    d = datetime.datetime.strptime(fc_parts[0], '%y%m%d')
-
+    d = datetime.datetime.strptime(id_parts[0], '%y%m%d')
     date = datetime.date.isoformat(d)
-    instrument_id = fc_parts[1]
-    run_num = int(fc_parts[2])
+    instr_id = id_parts[1]
+    run_num = int(id_parts[2])
+    fc_id = strings.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*XX', run_id)
+    fc_pos = strings.matchdefault('.{1}(?=%s)' % fc_id, run_id)
 
-    fc_id = strings.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*XX', fc_run_id)
-    fc_pos = strings.matchdefault('.{1}(?=%s)' % fc_id, fc_run_id)
-
-    return (date, instrument_id, run_num, fc_id, fc_pos)
+    return {'date': date, 'instrument_id': instr_id, 'run_number': run_num,
+            'flowcell_id': fc_id, 'flowcell_position': fc_pos}
 
 def get_project_label(str):
     return strings.matchdefault('P+[0-9]+(-[0-9]+){,1}', str)
