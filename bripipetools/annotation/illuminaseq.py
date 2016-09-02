@@ -33,7 +33,7 @@ class FlowcellRunAnnotator(object):
         try:
             logger.debug("getting FlowcellRun from GenLIMS")
             return genlims.get_run(_id=run_id)
-        except:
+        except NameError:
             logger.debug("creating new FlowcellRun object")
             return docs.FlowcellRun(_id=run_id)
 
@@ -87,7 +87,7 @@ class FlowcellRunAnnotator(object):
         logger.debug("searching in projects {}".format(projects))
         return [l for p in projects
                 for l in os.listdir(os.path.join(unaligned_path, p))
-                if len(illumina.get_lib_id(l))]
+                if len(illumina.get_library_id(l))]
 
     def get_sequenced_libraries(self, project=None):
         """
@@ -102,12 +102,70 @@ class FlowcellRunAnnotator(object):
         for p in projects:
             logger.info("getting sequenced libraries for project {}".format(p))
             libraries = self.get_libraries(p)
-
+            return [SequencedLibraryAnnotator(
+                        os.path.join(unaligned_path, p, l),
+                        l, p, self.run_id
+                    ).get_sequenced_library() for l in libraries]
 
 class SequencedLibraryAnnotator(object):
     """
     Identifies, stores, and updates information about a sequenced library.
     """
-    def __init__(self, path):
+    def __init__(self, path, library, project, run_id):
         logger.info("creating an instance of SequencedLibraryAnnotator")
         self.path = path
+        self.library_id = illumina.get_library_id(library)
+        self.project_label = illumina.get_project_label(project)
+        self.run_id = run_id
+        self.run_items = illumina.parse_flowcell_run_id(run_id)
+        self.seqlib_id = '{}_{}'.format(self.library_id,
+                                        self.run_items['flowcell_id'])
+        self.sequencedlibrary = self._init_sequencedlibrary(self.seqlib_id)
+
+    def _init_sequencedlibrary(self, seqlib_id):
+        """
+        Try to retrieve data for the sequenced library from GenLIMS;
+        if unsuccessful, create new ``SequencedLibrary`` object.
+        """
+        logger.info("initializing SequencedLibrary instance")
+        try:
+            logger.debug("getting SequencedLibrary from GenLIMS")
+            return genlims.get_sample(_id=seqlib_id)
+        except NameError:
+            logger.debug("creating new SequencedLibrary object")
+            return docs.SequencedLibrary(_id=seqlib_id)
+
+    def _get_raw_data(self):
+        """
+        Locate and store details about raw data for sequenced library.
+        """
+        logger.debug("collecting raw data details for library {}".format(
+            self.library_id
+        ))
+        return [illumina.parse_fastq_filename(f)
+                for f in os.listdir(self.path)
+                if not re.search('empty', f)]
+
+    def _update_sequenced_library(self):
+        """
+        Add any missing fields to SequencedLibrary object.
+        """
+        logger.debug("updating SequencedLibrary object attributes")
+
+        project_items = illumina.parse_project_label(self.project_label)
+        self.sequencedlibrary.project_id = project_items['project_id']
+        self.sequencedlibrary.subproject_id = project_items['subproject_id']
+        self.sequencedlibrary.run_id = self.run_id
+        self.sequencedlibrary.parent_id = self.library_id
+        self.sequencedlibrary.raw_data = self._get_raw_data()
+
+    def get_sequenced_library(self):
+        """
+        Return sequenced library object with updated fields.
+        """
+
+        self._update_sequenced_library()
+        logger.debug("returning sequenced library object: {}".format(
+            self.sequencedlibrary.to_json()
+        ))
+        return self.sequencedlibrary

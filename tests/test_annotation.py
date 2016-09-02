@@ -7,6 +7,7 @@ import os
 import re
 
 from bripipetools.annotation import illuminaseq
+from bripipetools import model
 
 @pytest.fixture(scope="class")
 def mock_genomics_server(request):
@@ -20,6 +21,7 @@ def mock_genomics_server(request):
     mock_project_p14_12 = 'P14-12-23221204'
     mock_project_p109_1 = 'P109-1-21113094'
     mock_lib7293 = 'lib7293-25920016'
+    mock_lib7293_fastq = 'MXU01-CO072_S1_L001_R1_001.fastq.gz'
     data = {'run_id': run_id,
             'genomics_root': mock_genomics_root,
             'genomics_path': mock_genomics_path,
@@ -27,7 +29,8 @@ def mock_genomics_server(request):
             'unaligned_path': mock_unaligned_path,
             'project_p14_12': mock_project_p14_12,
             'project_p109_1': mock_project_p109_1,
-            'lib7293': mock_lib7293}
+            'lib7293': mock_lib7293,
+            'lib7293_fastq': mock_lib7293_fastq}
     def fin():
         logger.info(("[teardown] mock 'genomics' server, disconnect "
                      "from mock 'genomics' server"))
@@ -70,9 +73,18 @@ class TestFlowcellRunAnnotatorWithProdGenomicsServer:
         request.addfinalizer(fin)
         return fcrunannotator
 
+    def test_has_valid_flowcellrun(self, annotator):
+        logger.info("test if has FlowcellRun object")
+
+        # WHEN checking whether FlowcellRun object was automatically
+        # initialized for annotator instance
+        flowcellrun = annotator.flowcellrun
+
+        # THEN object should be of type FlowcellRun
+        assert(type(flowcellrun) is model.FlowcellRun)
+
     def test_get_flowcell_path(self, annotator, prod_genomics_server):
-        class_name = self.__class__.__name__
-        logger.info("{} - test `get_flowcell_path()`".format(class_name))
+        logger.info("{} - test `get_flowcell_path()`")
 
         # WHEN searching for flowcell run ID in 'genomics' path
         flowcell_path = annotator._get_flowcell_path()
@@ -97,6 +109,16 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
             logger.info("[teardown] FlowcellRunAnnotator mock instance")
         request.addfinalizer(fin)
         return fcrunannotator
+
+    def test_has_valid_flowcellrun(self, annotator):
+        logger.info("test if has FlowcellRun object")
+
+        # WHEN checking whether FlowcellRun object was automatically
+        # initialized for annotator instance
+        flowcellrun = annotator.flowcellrun
+
+        # THEN object should be of type FlowcellRun
+        assert(type(flowcellrun) is model.FlowcellRun)
 
     def test_get_flowcell_path(self, annotator, mock_genomics_server):
         logger.info("test `_get_flowcell_path()`")
@@ -146,6 +168,16 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         # THEN should find 36 total projects
         assert(len(libraries) == 36)
 
+    def test_get_sequenced_libraries_P14_12(self, annotator, mock_genomics_server):
+        logger.info("test `get_sequenced_libraries()`, single project")
+
+        # WHEN collecting sequenced libraries for project P14-12
+        sequencedlibraries = annotator.get_sequenced_libraries('P14-12')
+
+        # THEN should find 5 total libraries, including lib7293
+        assert(len(sequencedlibraries) == 5)
+        # assert(mock_genomics_server['lib7293'] in libraries)
+
 @pytest.mark.usefixtures('mock_genomics_server')
 class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
     @pytest.fixture(scope="class")
@@ -153,20 +185,80 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
         logger.info("[setup] SequencedLibraryAnnotator mock instance")
 
         # GIVEN a SequencedLibraryAnnotator with mock 'genomics' server path,
-        # and path to library folder (i.e., where data/organization is known)
+        # and path to library folder (i.e., where data/organization is known),
+        # with specified library, project, and run ID
         seqlibannotator = illuminaseq.SequencedLibraryAnnotator(
             os.path.join(mock_genomics_server['unaligned_path'],
                          mock_genomics_server['project_p14_12'],
-                         mock_genomics_server['lib7293'])
+                         mock_genomics_server['lib7293']),
+            mock_genomics_server['lib7293'],
+            mock_genomics_server['project_p14_12'],
+            mock_genomics_server['run_id']
         )
         def fin():
             logger.info("[teardown] SequencedLibraryAnnotator mock instance")
         request.addfinalizer(fin)
         return seqlibannotator
 
-# def test_sequencedlibraryannotator_creation():
-#     seqlibannotator = illuminaseq.SequencedLibraryAnnotator(
-#         ('./tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/'
-#          'P14-12-23221204/lib7293-25920016')
-#     )
-#     assert(seqlibannotator.path)
+    def test_init_attribute_munging(self, annotator):
+        logger.info("test `__init__()` for proper attribute munging")
+
+        # WHEN checking whether input arguments were automatically munged
+        # when setting annotator attributes
+        seqlib_id = annotator.seqlib_id
+
+        # THEN the sequenced library ID should be properly constructed as the
+        # library ID and flowcell ID
+        assert(seqlib_id == 'lib7293_C6VG0ANXX')
+
+    def test_has_valid_sequencedlibrary(self, annotator):
+        logger.info("test if has SequencedLibrary object")
+
+        # WHEN checking whether SequencedLibrary object was automatically
+        # initialized for annotator instance
+        sequencedlibrary = annotator.sequencedlibrary
+
+        # THEN object should be of type SequencedLibrary
+        assert(type(sequencedlibrary) is model.SequencedLibrary)
+
+    def test_get_raw_data(self, annotator, mock_genomics_server):
+        logger.info("test `_get_raw_data()`")
+
+        # WHEN collecting raw data for a sequenced library
+        raw_data = annotator._get_raw_data()
+
+        # THEN should be a list of dicts, with the correct details for each
+        # FASTQ file identified
+        assert(isinstance(raw_data, list))
+        assert(re.search(mock_genomics_server['lib7293_fastq'],
+                         raw_data[0]['path']))
+
+    def test_update_sequenced_library(self, annotator):
+        logger.info("test `_update_sequenced_library()`")
+
+        # WHEN sequenced library object is updated
+        annotator._update_sequenced_library()
+
+        # THEN the object should have at least the 'run_id', 'project_id',
+        # 'subproject_id', 'parent_id' and 'raw_data' attributes
+        assert(hasattr(annotator.sequencedlibrary, 'run_id'))
+        assert(hasattr(annotator.sequencedlibrary, 'project_id'))
+        assert(hasattr(annotator.sequencedlibrary, 'subproject_id'))
+        assert(hasattr(annotator.sequencedlibrary, 'parent_id'))
+        assert(hasattr(annotator.sequencedlibrary, 'raw_data'))
+
+    def test_get_sequenced_library(self, annotator):
+        logger.info("test `get_sequenced_library()`")
+
+        # WHEN sequenced library object is returned
+        sequencedlibrary = annotator.get_sequenced_library()
+
+        # THEN the object should be of type SequencedLibrary and have
+        # at least the 'run_id', 'project_id', 'subproject_id', 'parent_id',
+        # and 'raw_data' attributes
+        assert(type(sequencedlibrary) is model.SequencedLibrary)
+        assert(hasattr(sequencedlibrary, 'run_id'))
+        assert(hasattr(sequencedlibrary, 'project_id'))
+        assert(hasattr(sequencedlibrary, 'subproject_id'))
+        assert(hasattr(sequencedlibrary, 'parent_id'))
+        assert(hasattr(sequencedlibrary, 'raw_data'))
