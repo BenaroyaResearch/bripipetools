@@ -4,7 +4,7 @@ from bripipetools.util import strings
 
 ### file/path/string parsing functions ###
 
-def get_lib_id(lib_str):
+def get_library_id(str):
     """
     Return library ID.
 
@@ -16,7 +16,7 @@ def get_lib_id(lib_str):
     :return: The matching substring representing the library ID or an empty
         sting ('') if no match found.
     """
-    return strings.matchdefault('lib[1-9]+[0-9]*', lib_str)
+    return strings.matchdefault('lib[1-9]+[0-9]*', str)
 
 def parse_fc_run_id(fc_run_id):
     """
