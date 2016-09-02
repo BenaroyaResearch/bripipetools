@@ -16,21 +16,13 @@ class FlowcellRunAnnotator(object):
     """
     Identifies, stores, and updates information about a flowcell run.
     """
-    def __init__(self, run_id, genomics_root=None):
+    def __init__(self, run_id, genomics_root):
         logger.info("creating an instance of FlowcellRunAnnotator")
         self.run_id = run_id
         self.flowcellrun = self._init_flowcellrun(run_id)
 
-        if genomics_root is None:
-            logger.debug("locating 'genomics' root")
-            genomics_root = self._get_genomics_root()
-
         logger.debug("setting 'genomics' path")
-        try:
-            self.genomics_path = os.path.join(genomics_root, 'genomics')
-        except AttributeError:
-            logger.error("Failed to locate 'genomics' root", exc_info=True)
-            raise
+        self.genomics_path = os.path.join(genomics_root, 'genomics')
 
     def _init_flowcellrun(self, run_id):
         """
@@ -45,12 +37,12 @@ class FlowcellRunAnnotator(object):
             logger.debug("creating new FlowcellRun object")
             return docs.FlowcellRun(_id=run_id)
 
-    def _get_genomics_root(self):
-        """
-        Locate the root directory preceding 'genomics' in the system
-        path.
-        """
-        return files.locate_root_folder('genomics')
+    # def _get_genomics_root(self):
+    #     """
+    #     Locate the root directory preceding 'genomics' in the system
+    #     path.
+    #     """
+    #     return files.locate_root_folder('genomics')
 
     def _get_flowcell_path(self):
         """
