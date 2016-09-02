@@ -7,10 +7,21 @@ def get_project_label(str):
     return strings.matchdefault('P+[0-9]+(-[0-9]+){,1}', str)
 
 def parse_project_label(project_label):
-    project_id = strings.matchdefault('(?<=P)[0-9]+', project_label)
-    subproject_id = strings.matchdefault('(?<=-)[0-9]+', project_label)
+    """
+    Parse a Genomics Core project label (e.g., P00-0) and return
+    individual components indicating project ID and subproject ID.
 
-    return (project_id, subproject_id)
+    :type project_label: str
+    :param project_label: String following Genomics Core convention for
+        project labels, P<project ID>-<subproject ID>.
+
+    :rtype: dict
+    :return: A dict with fields for 'project_id' and 'subproject_id'.
+    """
+    project_id = int(strings.matchdefault('(?<=P)[0-9]+', project_label))
+    subproject_id = int(strings.matchdefault('(?<=-)[0-9]+', project_label))
+
+    return {'project_id': project_id, 'subproject_id': subproject_id}
 
 def get_library_id(str):
     """

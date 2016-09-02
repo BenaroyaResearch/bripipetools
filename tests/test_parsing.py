@@ -17,6 +17,15 @@ def test_get_project_label_with_subproject():
 def test_get_project_label_with_basespace_tag():
     assert(illumina.get_project_label('P00-00-0000') == 'P00-00')
 
+# GIVEN any state
+def test_parse_project_label():
+    # WHEN parsing a project label of format 'P<number>-<number>'
+    project_items = illumina.parse_project_label('P1-2')
+
+    # THEN the dictionary should have the first number with key 'project_id'
+    # and the second number with key 'subproject_id'
+    assert(project_items['project_id'] == 1)
+    assert(project_items['subproject_id'] == 2)
 
 # GIVEN any state
 def test_parse_flowcell_run_id_standard():
