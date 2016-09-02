@@ -63,6 +63,12 @@ def test_sequencedlibrary_set_raw_data():
     seqlibrary.raw_data = [{'path': None}]
     assert(len(seqlibrary.raw_data))
 
+def test_sequencedlibrary_to_json():
+    seqlibrary = docs.SequencedLibrary(_id='lib0000_C000000XX',
+                                       parent_id='lib0000')
+    seqlibrary_json = seqlibrary.to_json()
+    assert('rawData' in seqlibrary_json)
+
 def test_genericrun_creation():
     run = docs.GenericRun(_id='0000')
     assert(run._id == '0000')

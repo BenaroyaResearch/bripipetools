@@ -20,7 +20,8 @@ def convert_keys(obj):
     if isinstance(obj, list):
         return [convert_keys(i) for i in obj]
     elif isinstance(obj, dict):
-        return {(strings.to_camel_case(k) if not re.search('^_', k)
+        return {(strings.to_camel_case(k.lstrip('_'))
+                 if not re.search('^_id', k)
                  else k): convert_keys(obj[k])
                 for k in obj}
     else:
@@ -66,11 +67,10 @@ class SequencedLibrary(GenericSample):
     """
     GenLIMS object in 'samples' collection of type 'sequenced library'
     """
-    _raw_data = []
-
     def __init__(self, run_id=None, **kwargs):
         sample_type = 'sequenced library'
         self.run_id = run_id
+        self._raw_data = []
         super(SequencedLibrary, self).__init__(type=sample_type, **kwargs)
 
     @property
