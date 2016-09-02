@@ -37,13 +37,6 @@ class FlowcellRunAnnotator(object):
             logger.debug("creating new FlowcellRun object")
             return docs.FlowcellRun(_id=run_id)
 
-    # def _get_genomics_root(self):
-    #     """
-    #     Locate the root directory preceding 'genomics' in the system
-    #     path.
-    #     """
-    #     return files.locate_root_folder('genomics')
-
     def _get_flowcell_path(self):
         """
         Find path to flowcell folder on the server.
