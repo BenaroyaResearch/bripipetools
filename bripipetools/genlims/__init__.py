@@ -4,6 +4,7 @@ Connect to the GenLIMS Mongo database and perform basic operations.
 import logging
 logger = logging.getLogger(__name__)
 
+import re
 import pymongo
 
 logger.info("connecting to 'tg3' Mongo database")
@@ -58,4 +59,25 @@ def put_workflowbatches(db, workflowbatches):
             wb
         ))
         db.workflowbatches.insert_one(wb)
-        
+
+def create_workflowbatch_id(db, prefix, date):
+    """
+    Check the 'workflowbatches' collection and construct ID with lowest
+    available batch number (i.e., ''<prefix>_<date>_<number>').
+    """
+    query = {'_id': {'$regex': '{}_{}_.+'.format(prefix, date)}}
+    logger.debug("searching 'workflowbatches' collection with query {}"
+                 .format(query))
+    workflowbatches = get_workflowbatches(db, query)
+    num = 1
+
+    if len(workflowbatches):
+        while True:
+            num_regex = re.compile('_{}$'.format(num))
+            logger.debug("searching for matched workflowbatches {} ending in {}"
+                         .format(workflowbatches, num))
+            if any([num_regex.search(wb['_id']) for wb in workflowbatches]):
+                num += 1
+                break
+
+    return '{}_{}_{}'.format(prefix, date, num)

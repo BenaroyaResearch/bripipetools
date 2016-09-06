@@ -84,6 +84,16 @@ class TestGenLIMSGMethodsWithMockDB:
         assert(genlims.get_workflowbatches(mock_db, query)[0]['_id'] ==
             'globus_2016-04-12_1')
 
+    def test_get_workflowbatches_regex(self, mock_db):
+        logger.info("test `get_runs()`")
+
+        # WHEN querying with a workflow batch ID regular expression
+        query = {'_id': {'$regex': 'globus_2016-04-12_'}}
+
+        # THEN ...
+        assert(genlims.get_workflowbatches(mock_db, query)[0]['_id'] ==
+            'globus_2016-04-12_1')
+
     def test_put_samples_one_sample(self, mock_db):
         logger.info("test `put_samples()`, one sample")
 
@@ -132,3 +142,27 @@ class TestGenLIMSGMethodsWithMockDB:
         assert(len(list(mock_db.workflowbatches.find(
             {'type': 'test workflow batch'}
             ))) == 3)
+
+    def test_create_workflowbatch_id_existing_date(self, mock_db):
+        logger.info("test `create_workflowbatch_id()`, existing date")
+
+        # WHEN creating new workflow batch ID with prefix 'globus' and
+        # date '2016-04-12' - an existing prefix/date combination
+        wb_id = genlims.create_workflowbatch_id(
+            mock_db, 'globus', '2016-04-12'
+        )
+
+        # THEN constructed workflow batch ID should end in number 2
+        assert(wb_id == 'globus_2016-04-12_2')
+
+    def test_create_workflowbatch_id_new_date(self, mock_db):
+        logger.info("test `create_workflowbatch_id()`, new date")
+
+        # WHEN creating new workflow batch ID with prefix 'globus' and
+        # date '2016-04-13' - an new prefix/date combination
+        wb_id = genlims.create_workflowbatch_id(
+            mock_db, 'globus', '2016-04-13'
+        )
+
+        # THEN constructed workflow batch ID should end in number 1
+        assert(wb_id == 'globus_2016-04-13_1')
