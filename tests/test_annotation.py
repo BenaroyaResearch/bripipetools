@@ -6,7 +6,7 @@ import pytest
 import os
 import re
 
-from bripipetools.annotation import illuminaseq
+from bripipetools.annotation import illuminaseq, globusgalaxy
 from bripipetools import model
 
 @pytest.fixture(scope="class")
@@ -18,19 +18,25 @@ def mock_genomics_server(request):
     mock_genomics_path = os.path.join(mock_genomics_root, 'genomics')
     mock_flowcell_path = os.path.join(mock_genomics_path, 'Illumina', run_id)
     mock_unaligned_path = os.path.join(mock_flowcell_path, 'Unaligned')
-    mock_project_p14_12 = 'P14-12-23221204'
-    mock_project_p109_1 = 'P109-1-21113094'
-    mock_lib7293 = 'lib7293-25920016'
-    mock_lib7293_fastq = 'MXU01-CO072_S1_L001_R1_001.fastq.gz'
+    # mock_batch_submit_path = os.path.join(mock_flowcell_path,
+    #                                       'globus_batch_submission')
+    mock_workflow_batch_file = os.path.join(
+        mock_flowcell_path, 'globus_batch_submission',
+        ("160412_P109-1_P14-12_C6VG0ANXX_"
+         "optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt")
+    )
+
     data = {'run_id': run_id,
             'genomics_root': mock_genomics_root,
             'genomics_path': mock_genomics_path,
             'flowcell_path': mock_flowcell_path,
             'unaligned_path': mock_unaligned_path,
-            'project_p14_12': mock_project_p14_12,
-            'project_p109_1': mock_project_p109_1,
-            'lib7293': mock_lib7293,
-            'lib7293_fastq': mock_lib7293_fastq}
+            'project_p14_12': 'P14-12-23221204',
+            'project_p109_1': 'P109-1-21113094',
+            'lib7293': 'lib7293-25920016',
+            'lib7293_fastq': 'MXU01-CO072_S1_L001_R1_001.fastq.gz',
+            'workflowbatch_file': mock_workflow_batch_file,
+            'batch_name': '160412_P109-1_P14-12_C6VG0ANXX'}
     def fin():
         logger.info(("[teardown] mock 'genomics' server, disconnect "
                      "from mock 'genomics' server"))
@@ -84,7 +90,7 @@ class TestFlowcellRunAnnotatorWithProdGenomicsServer:
         assert(type(flowcellrun) is model.FlowcellRun)
 
     def test_get_flowcell_path(self, annotator, prod_genomics_server):
-        logger.info("{} - test `get_flowcell_path()`")
+        logger.info("test `get_flowcell_path()`")
 
         # WHEN searching for flowcell run ID in 'genomics' path
         flowcell_path = annotator._get_flowcell_path()
@@ -262,3 +268,64 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
         assert(hasattr(sequencedlibrary, 'subproject_id'))
         assert(hasattr(sequencedlibrary, 'parent_id'))
         assert(hasattr(sequencedlibrary, 'raw_data'))
+
+
+@pytest.mark.usefixtures('mock_genomics_server')
+class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
+    @pytest.fixture(scope="class")
+    def annotator(self, request, mock_genomics_server):
+        logger.info("[setup] WorkflowBatchAnnotator mock instance")
+
+        # GIVEN a WorkflowBatchAnnotator with mock 'genomics' server path,
+        # and path to workflow batch file with specified genomics root
+        wflowbatchannotator = globusgalaxy.WorkflowBatchAnnotator(
+            mock_genomics_server['workflowbatch_file'],
+            mock_genomics_server['genomics_root']
+        )
+        def fin():
+            logger.info("[teardown] WorkflowBatchAnnotator mock instance")
+        request.addfinalizer(fin)
+        return wflowbatchannotator
+
+    def test_init_file_parsing(self, annotator):
+        logger.info("test `__init__()` for proper file parsing")
+
+        # WHEN checking whether input arguments were automatically munged
+        # when setting annotator attributes
+        workflowbatch_data = annotator.workflowbatch_data
+
+        # THEN the workflow batch data should be a dictionary with fields for
+        # workflow name, parameters, and samples
+        assert(workflowbatch_data['workflow_name'] ==
+            ("optimized_truseq_unstrand_sr_grch38_v0.1_complete"))
+        assert(len(workflowbatch_data['parameters']) == 35)
+        assert(len(workflowbatch_data['samples']) == 2)
+
+    def test_parse_batch_name(self, annotator, mock_genomics_server):
+        logger.info("test `_parse_batch_name()`")
+
+        # WHEN parsing batch name from workflow batch file
+        batch_items = annotator._parse_batch_name(
+            mock_genomics_server['batch_name']
+            )
+
+        # THEN items should be in a dict with fields for date (string),
+        # project labels (list of strings), and flowcell ID (string)
+        assert(batch_items['date'] == '2016-04-12')
+        assert(batch_items['projects'] == ['P109-1', 'P14-12'])
+        assert(batch_items['flowcell_id'] == 'C6VG0ANXX')
+
+    def test_init_file_parsing(self, annotator):
+        logger.info("test `__init__()` for proper file parsing")
+
+        # WHEN checking whether batch name was automatically munged
+        # when setting annotator attributes
+        date = annotator.date
+        projects = annotator.projects
+        flowcell_id = annotator.flowcell_id
+
+        # THEN the date, projects, and flowcell ID attributes should be
+        # set as expected
+        assert(date == '2016-04-12')
+        assert(projects == ['P109-1', 'P14-12'])
+        assert(flowcell_id == 'C6VG0ANXX')
