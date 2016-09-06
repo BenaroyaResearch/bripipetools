@@ -74,6 +74,14 @@ class WorkflowBatchFile(object):
                               [self._locate_workflow_name_line()])
         return workflow_name_line.strip().split('\t')[-1]
 
+    def get_batch_name(self):
+        """
+        Return name of workflow batch for batch submit file.
+        """
+        batch_name_line = (self.data['raw']
+                           [self._locate_batch_name_line()])
+        return batch_name_line.strip().split('\t')[-1]
+
     def _parse_param(self, param):
         """
         Break parameter into components.
@@ -130,6 +138,7 @@ class WorkflowBatchFile(object):
         Parse workflow batch file and return dict.
         """
         self.data['workflow_name'] = self.get_workflow_name()
+        self.data['batch_name'] = self.get_batch_name()
         self.data['parameters'] = [v for k, v in self.get_params().items()]
         if self.state == 'submit':
             sample_lines = self.data['raw'][self._locate_sample_start_line():]
