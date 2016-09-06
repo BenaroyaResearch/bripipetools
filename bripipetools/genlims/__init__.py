@@ -24,6 +24,15 @@ def get_runs(db, query):
     logger.debug("searching 'runs' collection with query {}".format(query))
     return list(db.runs.find(query))
 
+def get_workflowbatches(db, query):
+    """
+    Return list of documents from 'workflow batches' collection based on query.
+    """
+    logger.debug("searching 'workflowbatches' collection with query {}".format(
+        query
+    ))
+    return list(db.workflowbatches.find(query))
+
 def put_samples(db, samples):
     """
     Insert each document in list into 'samples' collection.
@@ -39,3 +48,14 @@ def put_runs(db, runs):
     for r in runs:
         logger.debug("inserting {} into 'runs' collection".format(r))
         db.runs.insert_one(r)
+
+def put_workflowbatches(db, workflowbatches):
+    """
+    Insert each document in list into 'workflowbatches' collection.
+    """
+    for wb in workflowbatches:
+        logger.debug("inserting {} into 'workflowbatches' collection".format(
+            wb
+        ))
+        db.workflowbatches.insert_one(wb)
+        

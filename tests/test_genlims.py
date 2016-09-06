@@ -36,6 +36,14 @@ def mock_db(request):
     	"flowcellPosition": "A",
     	"type": "flowcell"}
     )
+    db.workflowbatches.insert(
+        {"_id": "globus_2016-04-12_1",
+        "workflowbatchFile": None, # TODO: add file
+        "date": "2016-04-12",
+    	"workflowId": "optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt",
+    	"projects": ["P109-1", "P14-12"],
+    	"flowcellId": "C6VG0ANXX"}
+    )
     def fin():
         logger.info(("[teardown] mock 'tg3' database, disconnect "
                      "from mock 'tg3' Mongo database"))
@@ -66,6 +74,16 @@ class TestGenLIMSGMethodsWithMockDB:
         assert(genlims.get_runs(mock_db, query)[0]['_id'] ==
             '150615_D00565_0087_AC6VG0ANXX')
 
+    def test_get_workflowbatches(self, mock_db):
+        logger.info("test `get_runs()`")
+
+        # WHEN querying with a known workflow batch ID
+        query = {'_id': 'globus_2016-04-12_1'}
+
+        # THEN ...
+        assert(genlims.get_workflowbatches(mock_db, query)[0]['_id'] ==
+            'globus_2016-04-12_1')
+
     def test_put_samples_one_sample(self, mock_db):
         logger.info("test `put_samples()`, one sample")
 
@@ -89,7 +107,7 @@ class TestGenLIMSGMethodsWithMockDB:
         assert(len(list(mock_db.samples.find({'type': 'test lib'}))) == 3)
 
     def test_put_runs_multiple_runs(self, mock_db):
-        logger.info("test `put_samples()`, multiple runs")
+        logger.info("test `put_runs()`, multiple runs")
 
         # WHEN inserting three new runs
         runs = [{'_id': 'r000{}'.format(i), 'type': 'test run'}
@@ -99,3 +117,18 @@ class TestGenLIMSGMethodsWithMockDB:
         # THEN the 3 new runs should be in database
         assert(mock_db.runs.find_one({'_id': 'r0000'}))
         assert(len(list(mock_db.runs.find({'type': 'test run'}))) == 3)
+
+    def test_put_workflowbatches_multiple_workflowbatches(self, mock_db):
+        logger.info("test `put_workflowbatches()`, multiple workflow batches")
+
+        # WHEN inserting three new workflow batches
+        workflowbatches = [{'_id': 'wb000{}'.format(i),
+                            'type': 'test workflow batch'}
+                for i in range(3)]
+        genlims.put_workflowbatches(mock_db, workflowbatches)
+
+        # THEN the 3 new workflowbatches should be in database
+        assert(mock_db.workflowbatches.find_one({'_id': 'wb0000'}))
+        assert(len(list(mock_db.workflowbatches.find(
+            {'type': 'test workflow batch'}
+            ))) == 3)
