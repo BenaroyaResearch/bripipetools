@@ -107,5 +107,7 @@ def test_genericworkflowbatch_creation():
     assert(workflowbatch.type is None)
 
 def test_galaxyworkflowbatch_creation():
-    galaxyworkflwobatch = docs.GalaxyWorkflowBatch(_id='0000')
+    galaxyworkflwobatch = docs.GalaxyWorkflowBatch(
+        _id='0000',
+        workflowbatch_file='batchfile.txt')
     assert(galaxyworkflwobatch.type == 'Galaxy workflow batch')
