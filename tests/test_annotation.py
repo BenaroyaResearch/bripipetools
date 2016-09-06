@@ -96,7 +96,8 @@ def mock_db(request):
         "date": "2016-04-12",
     	"workflowId": "optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt",
     	"projects": ["P109-1", "P14-12"],
-    	"flowcellId": "C6VG0ANXX"}
+    	"flowcellId": "C6VG0ANXX",
+        "type": "Galaxy workflow batch"}
     )
     def fin():
         logger.info(("[teardown] mock 'tg3' database, disconnect "
@@ -367,7 +368,7 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
         workflowbatch = annotator._init_workflowbatch()
 
         # THEN existing workflow batch should be returned
-        assert(workflowbatch['_id'] == 'globusgalaxy_2016-04-12_1')
+        assert(workflowbatch._id == 'globusgalaxy_2016-04-12_1')
 
     def test_init_workflowbatch_new_batch(self, annotator):
         logger.info("test `_init_workflowbatch()` with existing batch")

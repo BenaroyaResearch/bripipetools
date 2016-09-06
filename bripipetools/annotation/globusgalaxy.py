@@ -12,6 +12,7 @@ import re
 import datetime
 from bripipetools import io
 from bripipetools import genlims
+from bripipetools.genlims import mapping as odm
 from bripipetools.model import documents as docs
 from bripipetools.util import files
 from bripipetools.parsing import illumina
@@ -60,9 +61,11 @@ class WorkflowBatchAnnotator(object):
             logger.debug("getting GalaxyWorkflowBatch from GenLIMS; "
                          "searching for record with batch file {}"
                          .format(workflowbatch_file))
-            return genlims.get_workflowbatches(self.db,
-                {'workflowbatchFile': workflowbatch_file}
-                )[0]
+            return odm.map_to_object(
+                genlims.get_workflowbatches(self.db,
+                    {'workflowbatchFile': workflowbatch_file}
+                    )[0]
+                )
         except IndexError:
             logger.debug("creating new GalaxyWorkflowBatch object",
                          exc_info=True)

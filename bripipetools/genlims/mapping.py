@@ -52,7 +52,7 @@ def map_to_object(doc):
     doc_class = get_class(doc)
     MappedClass = getattr(docs, doc_class)
     logger.debug("mapping to instance of type {}".format(doc_class))
-    obj = MappedClass(_id=doc['_id'])
+    obj = MappedClass(None)
     logger.debug("document has following fields: {}".format(doc.keys()))
     snake_doc = map_keys(doc)
     for k, v in snake_doc.items():
