@@ -153,3 +153,38 @@ class FlowcellRun(GenericRun):
         Set flowcell path.
         """
         self._flowcell_path = value
+
+
+class GenericWorkflow(TG3Object):
+    """
+    GenLIMS object in the 'workflows' collection
+    """
+    def __init__(self, **kwargs):
+        super(GenericWorkflow, self).__init__(**kwargs)
+
+
+class GlobusGalaxyWorkflow(TG3Object):
+    """
+    GenLIMS object in 'workflows' collection of type 'Globus Galaxy workflow'
+    """
+    def __init__(self, **kwargs):
+        workflow_type = 'Globus Galaxy workflow'
+        super(GlobusGalaxyWorkflow, self).__init__(type=workflow_type, **kwargs)
+
+
+class GenericWorkflowBatch(TG3Object):
+    """
+    GenLIMS object in the 'workflow batches' collection
+    """
+    def __init__(self, **kwargs):
+        super(GenericWorkflowBatch, self).__init__(**kwargs)
+
+
+class GalaxyWorkflowBatch(TG3Object):
+    """
+    GenLIMS object in 'workflow batches' collection of type 'Galaxy workflow'
+    """
+    def __init__(self, **kwargs):
+        workflow_batch_type = 'Galaxy workflow batch'
+        super(GalaxyWorkflowBatch, self).__init__(type=workflow_batch_type,
+                                                   **kwargs)

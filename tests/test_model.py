@@ -70,7 +70,8 @@ def test_sequencedlibrary_to_json():
     assert('rawData' in seqlibrary_json)
 
 def test_processedlibrary_creation():
-    pass
+    proclibrary = docs.ProcessedLibrary(_id='lib0000_C000000XX_proc')
+    assert(proclibrary.type == 'processed library')
 
 def test_genericrun_creation():
     run = docs.GenericRun(_id='0000')
@@ -94,13 +95,17 @@ def test_flowcellrun_set_flowcell_path():
                                          '150101_D00000_0000_AC00000XX'))
 
 def test_genericworkflow_creation():
-    pass
+    workflow = docs.GenericWorkflow(_id='0000')
+    assert(workflow.type is None)
 
 def test_globusgalaxyworkflow_creation():
-    pass
+    globusgalaxyworkflow = docs.GlobusGalaxyWorkflow(_id='0000')
+    assert(globusgalaxyworkflow.type == 'Globus Galaxy workflow')
 
 def test_genericworkflowbatch_creation():
-    pass
+    workflowbatch = docs.GenericWorkflowBatch(_id='0000')
+    assert(workflowbatch.type is None)
 
 def test_galaxyworkflowbatch_creation():
-    pass
+    galaxyworkflwobatch = docs.GalaxyWorkflowBatch(_id='0000')
+    assert(galaxyworkflwobatch.type == 'Galaxy workflow batch')
