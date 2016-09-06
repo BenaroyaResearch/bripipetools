@@ -159,10 +159,11 @@ class TestGenLIMSGMethodsWithMockDB:
         logger.info("test `create_workflowbatch_id()`, new date")
 
         # WHEN creating new workflow batch ID with prefix 'globus' and
-        # date '2016-04-13' - an new prefix/date combination
+        # date '2016-04-12' - an new prefix/date combination
+        mock_db.workflowbatches.delete_one({'_id': 'globus_2016-04-12_1'})
         wb_id = genlims.create_workflowbatch_id(
-            mock_db, 'globus', '2016-04-13'
+            mock_db, 'globus', '2016-04-12'
         )
 
         # THEN constructed workflow batch ID should end in number 1
-        assert(wb_id == 'globus_2016-04-13_1')
+        assert(wb_id == 'globus_2016-04-12_1')
