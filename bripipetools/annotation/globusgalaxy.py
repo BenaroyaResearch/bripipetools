@@ -12,7 +12,7 @@ import re
 import datetime
 from bripipetools import io
 from bripipetools import genlims
-import bripipetools.model as docs
+from bripipetools.model import documents as docs
 from bripipetools.util import files
 from bripipetools.parsing import illumina
 

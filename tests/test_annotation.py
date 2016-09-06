@@ -8,7 +8,7 @@ import pytest
 import mongomock
 
 from bripipetools.annotation import illuminaseq, globusgalaxy
-from bripipetools import model
+from bripipetools.model import documents as docs
 
 @pytest.fixture(scope="class")
 def mock_genomics_server(request):
@@ -130,7 +130,7 @@ class TestFlowcellRunAnnotatorWithProdGenomicsServer:
         flowcellrun = annotator.flowcellrun
 
         # THEN object should be of type FlowcellRun
-        assert(type(flowcellrun) is model.FlowcellRun)
+        assert(type(flowcellrun) is docs.FlowcellRun)
 
     def test_get_flowcell_path(self, annotator, prod_genomics_server):
         logger.info("test `get_flowcell_path()`")
@@ -167,7 +167,7 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         flowcellrun = annotator.flowcellrun
 
         # THEN object should be of type FlowcellRun
-        assert(type(flowcellrun) is model.FlowcellRun)
+        assert(type(flowcellrun) is docs.FlowcellRun)
 
     def test_get_flowcell_path(self, annotator, mock_genomics_server):
         logger.info("test `_get_flowcell_path()`")
@@ -227,6 +227,7 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         assert(len(sequencedlibraries) == 5)
         # assert(mock_genomics_server['lib7293'] in libraries)
 
+
 @pytest.mark.usefixtures('mock_genomics_server')
 class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
     @pytest.fixture(scope="class")
@@ -268,7 +269,7 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
         sequencedlibrary = annotator.sequencedlibrary
 
         # THEN object should be of type SequencedLibrary
-        assert(type(sequencedlibrary) is model.SequencedLibrary)
+        assert(type(sequencedlibrary) is docs.SequencedLibrary)
 
     def test_get_raw_data(self, annotator, mock_genomics_server):
         logger.info("test `_get_raw_data()`")
@@ -305,7 +306,7 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
         # THEN the object should be of type SequencedLibrary and have
         # at least the 'run_id', 'project_id', 'subproject_id', 'parent_id',
         # and 'raw_data' attributes
-        assert(type(sequencedlibrary) is model.SequencedLibrary)
+        assert(type(sequencedlibrary) is docs.SequencedLibrary)
         assert(hasattr(sequencedlibrary, 'run_id'))
         assert(hasattr(sequencedlibrary, 'project_id'))
         assert(hasattr(sequencedlibrary, 'subproject_id'))

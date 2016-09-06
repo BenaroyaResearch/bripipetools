@@ -1,5 +1,5 @@
 import _mypath
-import bripipetools.model as docs
+from bripipetools.model import documents as docs
 
 import pytest
 import mock

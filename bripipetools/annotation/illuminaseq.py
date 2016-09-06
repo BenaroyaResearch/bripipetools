@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 import os
 import re
-import bripipetools.model as docs
+from bripipetools.model import documents as docs
 from bripipetools.util import files
 from bripipetools.parsing import illumina
 
