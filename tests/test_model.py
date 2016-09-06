@@ -69,6 +69,9 @@ def test_sequencedlibrary_to_json():
     seqlibrary_json = seqlibrary.to_json()
     assert('rawData' in seqlibrary_json)
 
+def test_processedlibrary_creation():
+    pass
+
 def test_genericrun_creation():
     run = docs.GenericRun(_id='0000')
     assert(run._id == '0000')
@@ -89,3 +92,15 @@ def test_flowcellrun_set_flowcell_path():
                                  '150101_D00000_0000_AC00000XX')
     assert(flowcellrun.flowcell_path == ('/~/genomics/Illumina/'
                                          '150101_D00000_0000_AC00000XX'))
+
+def test_genericworkflow_creation():
+    pass
+
+def test_globusgalaxyworkflow_creation():
+    pass
+
+def test_genericworkflowbatch_creation():
+    pass
+
+def test_galaxyworkflowbatch_creation():
+    pass

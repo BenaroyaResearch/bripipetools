@@ -88,6 +88,32 @@ class SequencedLibrary(GenericSample):
         """
         self._raw_data = value
 
+
+class ProcessedLibrary(GenericSample):
+    """
+    GenLIMS object in 'samples' collection of type 'processed library'
+    """
+    def __init__(self, run_id=None, **kwargs):
+        sample_type = 'processed library'
+        self._processed_data = []
+        super(ProcessedLibrary, self).__init__(type=sample_type, **kwargs)
+
+    @property
+    def processed_data(self):
+        """
+        Return list of dictionaries with information about each set
+        of data processing outputs (i.e., from workflow batches).
+        """
+        return self._processed_data
+
+    @processed_data.setter
+    def processed_data(self, value):
+        """
+        Set processed data.
+        """
+        self._processed_data = value
+
+
 class GenericRun(TG3Object):
     """
     GenLIMS object in the 'runs' collection
@@ -96,6 +122,7 @@ class GenericRun(TG3Object):
         self.protocol_id = protocol_id
         self.date = date
         super(GenericRun, self).__init__(**kwargs)
+
 
 class FlowcellRun(GenericRun):
     """
