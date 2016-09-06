@@ -8,6 +8,8 @@ import pytest
 import mongomock
 
 from bripipetools import genlims
+from bripipetools.model import documents as docs
+from bripipetools.genlims import mapping as odm
 
 def test_genlims_connection():
     # TODO: come up with a better way to test this
@@ -174,3 +176,36 @@ class TestGenLIMSGMethodsWithMockDB:
 
         # THEN constructed workflow batch ID should end in number 1
         assert(wb_id == 'globusgalaxy_2016-04-12_1')
+
+class TestMapping:
+    # GIVEN any state
+
+    def test_map_keys(self):
+        logger.info("test `map_keys()`")
+
+        assert(odm.map_keys({'aB': None}) == {'a_b': None})
+        assert(odm.map_keys({'aB': [{'bC': None}]}) ==
+            {'a_b': [{'b_c': None}]})
+        assert(odm.map_keys({'_id': None}) == {'_id': None})
+
+    def test_get_class(self):
+
+        assert(odm.get_class({'type': 'sequenced library'}) ==
+            'SequencedLibrary')
+
+    def test_map_to_object(self):
+        doc = {'_id': 'lib7293_C6VG0ANXX',
+               'parentId': 'lib7293',
+               'type': 'sequenced library',
+               'rawData': [{'path': None,
+                            'laneId': 'L001',
+                            'sampleNumber': 1}]}
+        obj = odm.map_to_object(doc)
+        assert(type(obj) is docs.SequencedLibrary)
+        assert(hasattr(obj, '_id'))
+        assert(obj._id == 'lib7293_C6VG0ANXX')
+        assert(obj.parent_id == 'lib7293')
+        assert(obj.type == 'sequenced library')
+        assert(obj.raw_data == [{'path': None,
+                                 'lane_id': 'L001',
+                                 'sample_number': 1}])
