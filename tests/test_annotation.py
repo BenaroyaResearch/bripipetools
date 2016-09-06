@@ -315,7 +315,7 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
-    @pytest.fixture(scope='function')
+    @pytest.fixture(scope='class')
     def annotator(self, request, mock_genomics_server, mock_db):
         logger.info("[setup] WorkflowBatchAnnotator mock instance")
 
@@ -358,21 +358,6 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
         assert(batch_items['date'] == '2016-04-12')
         assert(batch_items['projects'] == ['P109-1', 'P14-12'])
         assert(batch_items['flowcell_id'] == 'C6VG0ANXX')
-    #
-    # def test_init_file_parsing(self, annotator):
-    #     logger.info("test `__init__()` for proper file parsing")
-    #
-    #     # WHEN checking whether batch name was automatically munged
-    #     # when setting annotator attributes
-    #     date = annotator.date
-    #     projects = annotator.projects
-    #     flowcell_id = annotator.flowcell_id
-    #
-    #     # THEN the date, projects, and flowcell ID attributes should be
-    #     # set as expected
-    #     assert(date == '2016-04-12')
-    #     assert(projects == ['P109-1', 'P14-12'])
-    #     assert(flowcell_id == 'C6VG0ANXX')
 
     def test_init_workflowbatch_existing_batch(self, annotator):
         logger.info("test `_init_workflowbatch()` with existing batch")
@@ -395,12 +380,25 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
         # THEN existing workflow batch should be returned
         assert(workflowbatch._id == 'globusgalaxy_2016-04-12_1')
 
-    def test_has_valid_workflowbatch(self, annotator):
-        logger.info("test if has WorkflowBatch object")
+    # def test_has_valid_workflowbatch(self, annotator):
+    #     logger.info("test if has GalaxyWorkflowBatch object")
+    #
+    #     # WHEN checking whether WorkflowBatch object was automatically
+    #     # initialized for annotator instance
+    #     workflowbatch = annotator.workflowbatch
+    #
+    #     # THEN object should be of type SequencedLibrary
+    #     assert(type(workflowbatch) is model.GalaxyWorkflowBatch)
 
-        # WHEN checking whether WorkflowBatch object was automatically
-        # initialized for annotator instance
-        workflowbatch = annotator.workflowbatch
-
-        # THEN object should be of type SequencedLibrary
-        assert(type(workflowbatch) is model.GalaxyWorkflowBatch)
+    # def test_update_workflowbatch(self, annotator):
+    #     logger.info("test `_update_workflowbatch()`")
+    #
+    #     # WHEN workflow batch object is updated
+    #     annotator._update_workflowbatch()
+    #
+    #     # THEN the object should have at least the 'workflow_id', 'date',
+    #     # 'projects', 'flowcell_id'
+    #     assert(hasattr(annotator.workflowbatch, 'workflow_id'))
+    #     assert(hasattr(annotator.workflowbatch, 'date'))
+    #     assert(hasattr(annotator.workflowbatch, 'projects'))
+    #     assert(hasattr(annotator.workflowbatch, 'flowcell_id'))

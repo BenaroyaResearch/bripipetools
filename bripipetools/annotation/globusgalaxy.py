@@ -81,6 +81,17 @@ class WorkflowBatchAnnotator(object):
                 workflowbatch_file=workflowbatch_file
             )
 
-            # self.date = batch_items['date']
-            # self.projects = batch_items['projects']
-            # self.flowcell_id = batch_items['flowcell_id']
+    def _update_workflowbatch(self):
+        """
+        Add any missing fields to GalaxyWorkflowBatch object.
+        """
+        logger.debug("updating GalaxyWorkflowBatch object attributes")
+
+        batch_items = self._parse_batch_name(
+            self.workflowbatch_data['batch_name']
+        )
+
+        # self.workflowbatch.workflow_id = self.workflowbatch_data['workflow_name']
+        self.workflowbatch.date = batch_items['date']
+        self.workflowbatch.projects = batch_items['projects']
+        self.workflowbatch.flowcell_id = batch_items['flowcell_id']
