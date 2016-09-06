@@ -2,9 +2,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-import pytest
 import os
 import re
+import pytest
+import mongomock
 
 from bripipetools.annotation import illuminaseq, globusgalaxy
 from bripipetools import model
@@ -60,6 +61,48 @@ def prod_genomics_server(request):
                      "from 'genomics' server"))
     request.addfinalizer(fin)
     return data
+
+@pytest.fixture(scope='class')
+def mock_db(request):
+    logger.info(("[setup] mock 'tg3' database, connect "
+                 "to mock 'tg3' Mongo database"))
+    db = mongomock.MongoClient().db
+    db.samples.insert(
+        {"_id": "lib7293",
+    	"projectId": 14,
+    	"projectName": "U01-Mexico 2011",
+    	"sampleId": "S2733",
+    	"libraryId": "lib7293",
+    	"parentId": "grRNA5942",
+    	"type": "library"}
+    )
+    db.runs.insert(
+        {"_id": "150615_D00565_0087_AC6VG0ANXX",
+        "date": "2015-06-15",
+    	"instrumentId": "D00565",
+    	"runNumber": 87,
+    	"flowcellId": "C6VG0ANXX",
+    	"flowcellPosition": "A",
+    	"type": "flowcell"}
+    )
+    db.workflowbatches.insert(
+        {"_id": "globusgalaxy_2016-04-12_1",
+        "workflowbatchFile": ("/genomics/Illumina/"
+                              "150615_D00565_0087_AC6VG0ANXX/"
+                              "globus_batch_submission/"
+                              "160412_P109-1_P14-12_C6VG0ANXX_"
+                              "optimized_truseq_unstrand_sr_grch38_"
+                              "v0.1_complete.txt"),
+        "date": "2016-04-12",
+    	"workflowId": "optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt",
+    	"projects": ["P109-1", "P14-12"],
+    	"flowcellId": "C6VG0ANXX"}
+    )
+    def fin():
+        logger.info(("[teardown] mock 'tg3' database, disconnect "
+                     "from mock 'tg3' Mongo database"))
+    request.addfinalizer(fin)
+    return db
 
 @pytest.mark.usefixtures('prod_genomics_server')
 class TestFlowcellRunAnnotatorWithProdGenomicsServer:
@@ -270,17 +313,18 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
         assert(hasattr(sequencedlibrary, 'raw_data'))
 
 
-@pytest.mark.usefixtures('mock_genomics_server')
+@pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
-    @pytest.fixture(scope="class")
-    def annotator(self, request, mock_genomics_server):
+    @pytest.fixture(scope='function')
+    def annotator(self, request, mock_genomics_server, mock_db):
         logger.info("[setup] WorkflowBatchAnnotator mock instance")
 
         # GIVEN a WorkflowBatchAnnotator with mock 'genomics' server path,
         # and path to workflow batch file with specified genomics root
         wflowbatchannotator = globusgalaxy.WorkflowBatchAnnotator(
-            mock_genomics_server['workflowbatch_file'],
-            mock_genomics_server['genomics_root']
+            workflowbatch_file=mock_genomics_server['workflowbatch_file'],
+            db=mock_db,
+            genomics_root=mock_genomics_server['genomics_root']
         )
         def fin():
             logger.info("[teardown] WorkflowBatchAnnotator mock instance")
@@ -314,18 +358,49 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
         assert(batch_items['date'] == '2016-04-12')
         assert(batch_items['projects'] == ['P109-1', 'P14-12'])
         assert(batch_items['flowcell_id'] == 'C6VG0ANXX')
+    #
+    # def test_init_file_parsing(self, annotator):
+    #     logger.info("test `__init__()` for proper file parsing")
+    #
+    #     # WHEN checking whether batch name was automatically munged
+    #     # when setting annotator attributes
+    #     date = annotator.date
+    #     projects = annotator.projects
+    #     flowcell_id = annotator.flowcell_id
+    #
+    #     # THEN the date, projects, and flowcell ID attributes should be
+    #     # set as expected
+    #     assert(date == '2016-04-12')
+    #     assert(projects == ['P109-1', 'P14-12'])
+    #     assert(flowcell_id == 'C6VG0ANXX')
 
-    def test_init_file_parsing(self, annotator):
-        logger.info("test `__init__()` for proper file parsing")
+    def test_init_workflowbatch_existing_batch(self, annotator):
+        logger.info("test `_init_workflowbatch()` with existing batch")
 
-        # WHEN checking whether batch name was automatically munged
-        # when setting annotator attributes
-        date = annotator.date
-        projects = annotator.projects
-        flowcell_id = annotator.flowcell_id
+        # WHEN workflow batch exists in 'workflowbatches' collection
+        workflowbatch = annotator._init_workflowbatch()
 
-        # THEN the date, projects, and flowcell ID attributes should be
-        # set as expected
-        assert(date == '2016-04-12')
-        assert(projects == ['P109-1', 'P14-12'])
-        assert(flowcell_id == 'C6VG0ANXX')
+        # THEN existing workflow batch should be returned
+        assert(workflowbatch['_id'] == 'globusgalaxy_2016-04-12_1')
+
+    def test_init_workflowbatch_new_batch(self, annotator):
+        logger.info("test `_init_workflowbatch()` with existing batch")
+
+        # WHEN workflow batch exists in 'workflowbatches' collection
+        annotator.db.workflowbatches.delete_one(
+            {'_id': 'globusgalaxy_2016-04-12_1'}
+        )
+        workflowbatch = annotator._init_workflowbatch()
+
+        # THEN existing workflow batch should be returned
+        assert(workflowbatch._id == 'globusgalaxy_2016-04-12_1')
+
+    def test_has_valid_workflowbatch(self, annotator):
+        logger.info("test if has WorkflowBatch object")
+
+        # WHEN checking whether WorkflowBatch object was automatically
+        # initialized for annotator instance
+        workflowbatch = annotator.workflowbatch
+
+        # THEN object should be of type SequencedLibrary
+        assert(type(workflowbatch) is model.GalaxyWorkflowBatch)
