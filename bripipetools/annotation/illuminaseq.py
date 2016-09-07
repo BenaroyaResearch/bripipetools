@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 import os
 import re
-import bripipetools.model as docs
+from bripipetools.model import documents as docs
 from bripipetools.util import files
 from bripipetools.parsing import illumina
 
@@ -34,7 +34,7 @@ class FlowcellRunAnnotator(object):
             logger.debug("getting FlowcellRun from GenLIMS")
             return genlims.get_run(_id=run_id)
         except NameError:
-            logger.debug("creating new FlowcellRun object")
+            logger.debug("creating new FlowcellRun object", exc_info=True)
             return docs.FlowcellRun(_id=run_id)
 
     def _get_flowcell_path(self):

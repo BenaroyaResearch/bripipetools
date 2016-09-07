@@ -4,7 +4,7 @@ import sys
 import pytest
 import mock
 
-from bripipetools.io import workflowbatchfiles
+from bripipetools import io
 
 TEST_ROOT_DIR = './tests/test-data/'
 TEST_GENOMICS_DIR = os.path.join(TEST_ROOT_DIR, 'genomics')
@@ -25,7 +25,7 @@ def workflow_batch_file(state='template', path=None):
                     ('160216_P109-1_P14-12_C6VG0ANXX_'
                      'optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt'))
 
-    return workflowbatchfiles.WorkflowBatchFile(path, state=state)
+    return io.WorkflowBatchFile(path, state=state)
 
 class TestWorkflowBatchFile:
     def test_init(self):
@@ -52,6 +52,10 @@ class TestWorkflowBatchFile:
     def test_get_workflow_name(self):
         assert(workflow_batch_file().get_workflow_name()
                == 'nextera_sr_grch38_v0.1_complete_plus_trinity')
+
+    def test_get_batch_name(self):
+        assert(workflow_batch_file(state='submit').get_batch_name()
+               == '160216_P109-1_P14-12_C6VG0ANXX')
 
     def test_parse_param_samplename(self):
         assert(workflow_batch_file()

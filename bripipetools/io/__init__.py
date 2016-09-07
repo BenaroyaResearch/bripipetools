@@ -1,1 +1,2 @@
-from bripipetools.io import (labels, parsers)
+
+from .globusgalaxy import WorkflowBatchFile

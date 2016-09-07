@@ -14,6 +14,12 @@ def test_to_camel_case_oneword():
 def test_to_camel_case_two_words():
     assert (strings.to_camel_case('two_words') == 'twoWords')
 
+def test_to_snake_case_oneword():
+    assert (strings.to_snake_case('oneword') == 'oneword')
+
+def test_to_snake_case_twowords():
+    assert (strings.to_snake_case('twoWords') == 'two_words')
+
 # test utility functions in the files submodule
 
 def test_locate_root_folder():

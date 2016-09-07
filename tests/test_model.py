@@ -1,5 +1,5 @@
 import _mypath
-import bripipetools.model as docs
+from bripipetools.model import documents as docs
 
 import pytest
 import mock
@@ -69,6 +69,10 @@ def test_sequencedlibrary_to_json():
     seqlibrary_json = seqlibrary.to_json()
     assert('rawData' in seqlibrary_json)
 
+def test_processedlibrary_creation():
+    proclibrary = docs.ProcessedLibrary(_id='lib0000_C000000XX_proc')
+    assert(proclibrary.type == 'processed library')
+
 def test_genericrun_creation():
     run = docs.GenericRun(_id='0000')
     assert(run._id == '0000')
@@ -89,3 +93,21 @@ def test_flowcellrun_set_flowcell_path():
                                  '150101_D00000_0000_AC00000XX')
     assert(flowcellrun.flowcell_path == ('/~/genomics/Illumina/'
                                          '150101_D00000_0000_AC00000XX'))
+
+def test_genericworkflow_creation():
+    workflow = docs.GenericWorkflow(_id='0000')
+    assert(workflow.type is None)
+
+def test_globusgalaxyworkflow_creation():
+    globusgalaxyworkflow = docs.GlobusGalaxyWorkflow(_id='0000')
+    assert(globusgalaxyworkflow.type == 'Globus Galaxy workflow')
+
+def test_genericworkflowbatch_creation():
+    workflowbatch = docs.GenericWorkflowBatch(_id='0000')
+    assert(workflowbatch.type is None)
+
+def test_galaxyworkflowbatch_creation():
+    galaxyworkflwobatch = docs.GalaxyWorkflowBatch(
+        _id='0000',
+        workflowbatch_file='batchfile.txt')
+    assert(galaxyworkflwobatch.type == 'Galaxy workflow batch')
