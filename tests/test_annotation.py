@@ -1,16 +1,17 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
 import os
 import re
+
 import pytest
 import mongomock
 
+from bripipetools import model as docs
 from bripipetools import io
 from bripipetools import genlims
-from bripipetools.annotation import illuminaseq, globusgalaxy
-from bripipetools.model import documents as docs
+from bripipetools import annotation
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 @pytest.fixture(scope="class")
 def mock_genomics_server(request):
@@ -90,18 +91,19 @@ def mock_db(request):
     return db
 
 
-@pytest.mark.usefixtures('mock_genomics_server')
+@pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestFlowcellRunAnnotatorWithMockGenomicsServer:
-    @pytest.fixture(scope="class")
-    def annotator(self, request, mock_genomics_server):
+    @pytest.fixture(scope='class')
+    def annotator(self, request, mock_genomics_server, mock_db):
         logger.info("[setup] FlowcellRunAnnotator test instance")
 
         # GIVEN a FlowcellRunAnnotator with mock 'genomics' server path,
         # valid run ID, and existing 'Unaligned' folder (i.e., where data
         # and organization is known)
-        fcrunannotator = illuminaseq.FlowcellRunAnnotator(
-            mock_genomics_server['run_id'],
-            mock_genomics_server['genomics_root']
+        fcrunannotator = annotation.FlowcellRunAnnotator(
+            run_id=mock_genomics_server['run_id'],
+            db=mock_db,
+            genomics_root=mock_genomics_server['genomics_root']
         )
         def fin():
             logger.info("[teardown] FlowcellRunAnnotator mock instance")
@@ -177,22 +179,23 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         # assert(mock_genomics_server['lib7293'] in libraries)
 
 
-@pytest.mark.usefixtures('mock_genomics_server')
+@pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
     @pytest.fixture(scope="class")
-    def annotator(self, request, mock_genomics_server):
+    def annotator(self, request, mock_genomics_server, mock_db):
         logger.info("[setup] SequencedLibraryAnnotator mock instance")
 
         # GIVEN a SequencedLibraryAnnotator with mock 'genomics' server path,
         # and path to library folder (i.e., where data/organization is known),
         # with specified library, project, and run ID
-        seqlibannotator = illuminaseq.SequencedLibraryAnnotator(
-            os.path.join(mock_genomics_server['unaligned_path'],
-                         mock_genomics_server['project_p14_12'],
-                         mock_genomics_server['lib7293']),
-            mock_genomics_server['lib7293'],
-            mock_genomics_server['project_p14_12'],
-            mock_genomics_server['run_id']
+        seqlibannotator = annotation.SequencedLibraryAnnotator(
+            path=os.path.join(mock_genomics_server['unaligned_path'],
+                              mock_genomics_server['project_p14_12'],
+                              mock_genomics_server['lib7293']),
+            library=mock_genomics_server['lib7293'],
+            project=mock_genomics_server['project_p14_12'],
+            run_id=mock_genomics_server['run_id'],
+            db=mock_db
         )
         def fin():
             logger.info("[teardown] SequencedLibraryAnnotator mock instance")
@@ -271,7 +274,7 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
 
         # GIVEN a WorkflowBatchAnnotator with mock 'genomics' server path,
         # and path to workflow batch file with specified genomics root
-        wflowbatchannotator = globusgalaxy.WorkflowBatchAnnotator(
+        wflowbatchannotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_genomics_server['workflowbatch_file'],
             db=mock_db,
             genomics_root=mock_genomics_server['genomics_root']
@@ -411,7 +414,7 @@ class TestProcessedLibraryAnnotatorWithMockGenomicsServer:
             state='submit'
         ).parse()
 
-        proclibannotator = globusgalaxy.ProcessedLibraryAnnotator(
+        proclibannotator = annotation.ProcessedLibraryAnnotator(
             workflowbatch_id=workflowbatch_id,
             params=workflowbatch_data['samples'][-1],
             db=mock_db

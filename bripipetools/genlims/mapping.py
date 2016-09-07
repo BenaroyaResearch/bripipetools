@@ -2,14 +2,12 @@
 Methods to map from Mongo documents to model classes.
 """
 import logging
-logger = logging.getLogger(__name__)
-
 import re
-import importlib
 
-from bripipetools.model import documents as docs
-from bripipetools.util import strings
-from bripipetools.io import labels
+from .. import util
+from .. import model as docs
+
+logger = logging.getLogger(__name__)
 
 def map_keys(obj):
     """
@@ -26,7 +24,7 @@ def map_keys(obj):
     if isinstance(obj, list):
         return [map_keys(i) for i in obj]
     elif isinstance(obj, dict):
-        return {(strings.to_snake_case(k.lstrip('_'))
+        return {(util.to_snake_case(k.lstrip('_'))
                  if not re.search('^_id', k)
              else k): map_keys(obj[k])
                 for k in obj}

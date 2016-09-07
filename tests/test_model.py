@@ -1,8 +1,6 @@
-import _mypath
-from bripipetools.model import documents as docs
-
 import pytest
-import mock
+
+from bripipetools import model as docs
 
 def test_convert_keys():
     assert(docs.convert_keys({'a_b': None}) == {'aB': None})

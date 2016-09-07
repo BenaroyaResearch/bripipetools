@@ -1,8 +1,7 @@
-# import _mypath
-from bripipetools import util
-
 import pytest
 import mock
+
+from bripipetools import util
 
 # test utility functions in the strings submodule
 

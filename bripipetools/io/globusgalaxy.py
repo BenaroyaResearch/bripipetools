@@ -5,6 +5,7 @@ Globus Galaxy.
 import os
 import sys
 import re
+
 from collections import OrderedDict
 
 class WorkflowBatchFile(object):

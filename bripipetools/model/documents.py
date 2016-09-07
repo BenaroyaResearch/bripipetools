@@ -4,8 +4,8 @@ Classes representing documents in the GenLIMS database.
 import re
 import json
 
-from bripipetools.util import strings
-from bripipetools.io import labels
+from .. import util
+from .. import parsing
 
 def convert_keys(obj):
     """
@@ -22,7 +22,7 @@ def convert_keys(obj):
     if isinstance(obj, list):
         return [convert_keys(i) for i in obj]
     elif isinstance(obj, dict):
-        return {(strings.to_camel_case(k.lstrip('_'))
+        return {(util.to_camel_case(k.lstrip('_'))
                  if not re.search('^_id', k)
                  else k): convert_keys(obj[k])
                 for k in obj}
@@ -135,12 +135,13 @@ class FlowcellRun(GenericRun):
     def __init__(self, **kwargs):
         run_type = 'flowcell'
         run_id = kwargs.get('_id')
-        (date, inst_id, run_num, fc_id, fc_pos) = labels.parse_fc_run_id(run_id)
-        self.instrument_id = inst_id
-        self.run_number = run_num
-        self.flowcell_id = fc_id
-        self.flowcell_position = fc_pos
-        super(FlowcellRun, self).__init__(type=run_type, date=date, **kwargs)
+        run_items = parsing.parse_flowcell_run_id(run_id)
+        self.instrument_id = run_items['instrument_id']
+        self.run_number = run_items['run_number']
+        self.flowcell_id = run_items['flowcell_id']
+        self.flowcell_position = run_items['flowcell_position']
+        super(FlowcellRun, self).__init__(type=run_type,
+                                          date=run_items['date'], **kwargs)
 
     @property
     def flowcell_path(self):
@@ -171,7 +172,8 @@ class GlobusGalaxyWorkflow(TG3Object):
     """
     def __init__(self, **kwargs):
         workflow_type = 'Globus Galaxy workflow'
-        super(GlobusGalaxyWorkflow, self).__init__(type=workflow_type, **kwargs)
+        super(GlobusGalaxyWorkflow, self).__init__(type=workflow_type,
+                                                   **kwargs)
 
 
 class GenericWorkflowBatch(TG3Object):
