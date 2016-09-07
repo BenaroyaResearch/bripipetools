@@ -145,7 +145,7 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         projects = annotator.get_projects()
 
         # THEN should find 8 total projects, including P14-12 and P109-1
-        assert(len(projects) == 8)
+        assert(len(projects) == 7)
         assert(mock_genomics_server['project_p14_12'] in projects)
         assert(mock_genomics_server['project_p109_1'] in projects)
 
@@ -166,7 +166,7 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         libraries = annotator.get_libraries()
 
         # THEN should find 36 total projects
-        assert(len(libraries) == 36)
+        assert(len(libraries) == 31)
 
     def test_get_sequenced_libraries_P14_12(self, annotator, mock_genomics_server):
         logger.info("test `get_sequenced_libraries()`, single project")
@@ -176,6 +176,17 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
 
         # THEN should find 5 total libraries, including lib7293
         assert(len(sequencedlibraries) == 5)
+        # assert(mock_genomics_server['lib7293'] in libraries)
+
+    def test_get_sequenced_libraries_all_projects(self, annotator,
+                                                  mock_genomics_server):
+        logger.info("test `get_sequenced_libraries()`, single project")
+
+        # WHEN collecting sequenced libraries for all projects
+        sequencedlibraries = annotator.get_sequenced_libraries()
+
+        # THEN should find 31 total libraries
+        assert(len(sequencedlibraries) == 31)
         # assert(mock_genomics_server['lib7293'] in libraries)
 
 
