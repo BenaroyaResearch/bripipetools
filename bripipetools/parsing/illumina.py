@@ -1,10 +1,10 @@
 import datetime
 
-from bripipetools.util import strings, files
+from .. import util
 
 ### file/path/string parsing functions ###
 def get_project_label(str):
-    return strings.matchdefault('P+[0-9]+(-[0-9]+){,1}', str)
+    return util.matchdefault('P+[0-9]+(-[0-9]+){,1}', str)
 
 def parse_project_label(project_label):
     """
@@ -18,8 +18,8 @@ def parse_project_label(project_label):
     :rtype: dict
     :return: A dict with fields for 'project_id' and 'subproject_id'.
     """
-    project_id = int(strings.matchdefault('(?<=P)[0-9]+', project_label))
-    subproject_id = int(strings.matchdefault('(?<=-)[0-9]+', project_label))
+    project_id = int(util.matchdefault('(?<=P)[0-9]+', project_label))
+    subproject_id = int(util.matchdefault('(?<=-)[0-9]+', project_label))
 
     return {'project_id': project_id, 'subproject_id': subproject_id}
 
@@ -35,7 +35,7 @@ def get_library_id(str):
     :return: The matching substring representing the library ID or an empty
         sting ('') if no match found.
     """
-    return strings.matchdefault('lib[1-9]+[0-9]*', str)
+    return util.matchdefault('lib[1-9]+[0-9]*', str)
 
 def parse_flowcell_run_id(run_id):
     """
@@ -57,8 +57,8 @@ def parse_flowcell_run_id(run_id):
     date = datetime.date.isoformat(d)
     instr_id = id_parts[1]
     run_num = int(id_parts[2])
-    fc_id = strings.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*XX', run_id)
-    fc_pos = strings.matchdefault('.{1}(?=%s)' % fc_id, run_id)
+    fc_id = util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*XX', run_id)
+    fc_pos = util.matchdefault('.{1}(?=%s)' % fc_id, run_id)
 
     return {'date': date, 'instrument_id': instr_id, 'run_number': run_num,
             'flowcell_id': fc_id, 'flowcell_position': fc_pos}
@@ -78,10 +78,10 @@ def parse_fastq_filename(path):
     :return: A dict with fields for 'path' (with root removed),
         'lane_id', 'read_id', and 'sample_number'.
     """
-    path = files.swap_root(path, 'genomics', '/')
-    lane_id = strings.matchdefault('(?<=_)L00[1-8]', path)
-    read_id = strings.matchdefault('(?<=_)R[1-2]', path)
-    sample_num = int(strings.matchdefault('(?<=_S)[0-9]+', path))
+    path = util.swap_root(path, 'genomics', '/')
+    lane_id = util.matchdefault('(?<=_)L00[1-8]', path)
+    read_id = util.matchdefault('(?<=_)R[1-2]', path)
+    sample_num = int(util.matchdefault('(?<=_S)[0-9]+', path))
 
     return {'path': path, 'lane_id': lane_id, 'read_id': read_id,
             'sample_number': sample_num}
