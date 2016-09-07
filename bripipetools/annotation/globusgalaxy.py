@@ -16,6 +16,7 @@ from bripipetools.genlims import mapping as odm
 from bripipetools.model import documents as docs
 from bripipetools.util import files
 from bripipetools.parsing import illumina
+from pprint import pformat
 
 class WorkflowBatchAnnotator(object):
     """
@@ -145,6 +146,7 @@ class ProcessedLibraryAnnotator(object):
     def __init__(self, workflowbatch_id, params, db):
         logger.info("creating an instance of ProcessedLibraryAnnotator")
         self.workflowbatch_id = workflowbatch_id
+        logger.debug("workflowbatch_id set to {}".format(workflowbatch_id))
         self.db = db
         self.params = params
         self.seqlib_id = self._get_seqlib_id()
@@ -186,7 +188,7 @@ class ProcessedLibraryAnnotator(object):
         submit file and return individual components indicating name,
         source, and type.
         """
-        name = output_name.rstrip('_out')
+        name = re.sub('_out', '', output_name)
         name_parts = name.split('_')
         file_format = name_parts.pop(-1)
         output_type = name_parts.pop(-1)
@@ -199,10 +201,10 @@ class ProcessedLibraryAnnotator(object):
         Organize outputs according to type and source.
         """
         outputs = self._get_outputs()
-        logger.debug("grouping outputs: {}".format(outputs))
+        # logger.debug("grouping outputs: {}".format(outputs))
         grouped_outputs = {}
         for k, v in outputs.items():
-            if 'fastq' not in k:
+            if 'fastq_' not in k:
                 output_items = self._parse_output_name(k)
                 grouped_outputs.setdefault(
                     output_items['type'],
@@ -212,5 +214,32 @@ class ProcessedLibraryAnnotator(object):
                      'file': files.swap_root(v, 'genomics', '/'),
                      'name': output_items['name']}
                 )
-        logger.debug("grouped outputs: {}".format(grouped_outputs))
+        # logger.debug("grouped outputs: {}".format(grouped_outputs))
         return grouped_outputs
+
+    def _append_processed_data(self):
+        """
+        Add details and outputs for current workflow batch to processed
+        data array field for processed library.
+        """
+        self.processedlibrary.processed_data.append(
+            {'workflowbatch_id': self.workflowbatch_id,
+             'outputs': self._group_outputs()}
+        )
+        # logger.debug(pformat(self.processedlibrary.processed_data))
+
+
+    def _update_processedlibrary(self):
+        """
+        Add or update any missing fields in ProcessedLibrary object.
+        """
+        self._append_processed_data()
+        self.processedlibrary.parent_id = self.seqlib_id
+
+
+    def get_processed_library(self):
+        """
+        Return updated ProcessedLibrary object.
+        """
+        self._update_processedlibrary()
+        return self.processedlibrary

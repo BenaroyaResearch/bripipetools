@@ -388,10 +388,12 @@ class TestProcessedLibraryAnnotatorWithMockGenomicsServer:
         # GIVEN a ProcessedLibraryAnnotator with mock 'genomics' server path,
         # and path to library folder (i.e., where data/organization is known),
         # with specified library, project, and run ID
+        workflowbatch_file = os.path.basename(
+            mock_genomics_server['workflowbatch_file'])
         workflowbatch_id = genlims.get_workflowbatches(
             mock_db,
-            {'workflowbatchFile': mock_genomics_server['workflowbatch_file']}
-        )
+            {'workflowbatchFile': {'$regex': workflowbatch_file}}
+        )[0]['_id']
         workflowbatch_data = io.WorkflowBatchFile(
             mock_genomics_server['workflowbatch_file'],
             state='submit'
@@ -479,4 +481,34 @@ class TestProcessedLibraryAnnotatorWithMockGenomicsServer:
 
         # THEN the outputs should be correctly grouped according to type
         # and source (tool)
-        assert(outputs)
+        assert(set(outputs.keys())
+               == set(['metrics', 'qc', 'counts', 'alignments', 'log']))
+        assert(set([k['source'] for k in outputs['metrics']])
+               == set(['picard_align', 'tophat_stats', 'picard_markdups',
+                       'picard_rnaseq', 'htseq']))
+
+    def test_append_processed_data(self, annotator):
+        logger.info("test `_append_processed_data()`")
+
+        # WHEN batch information and outputs are added to processed data
+        # field for processed library object
+        annotator._append_processed_data()
+
+        # THEN the length of the processed data field should be 1, containing
+        # a dictionary with workflow batch ID and outputs
+        assert(len(annotator.processedlibrary.processed_data) == 1)
+        assert(set(annotator.processedlibrary.processed_data[0].keys())
+               == set(['workflowbatch_id', 'outputs']))
+        annotator.processedlibrary.processed_data = []
+
+    def test_update_processedlibrary(self, annotator):
+        logger.info("test `_update_processedlibrary()`")
+
+        # WHEN processed library object is updated
+        annotator._update_processedlibrary()
+
+        # THEN the object should have at least the 'parent_id' and
+        # 'processed_data', and 'processed_data' should be length 1
+        assert(hasattr(annotator.processedlibrary, 'parent_id'))
+        assert(hasattr(annotator.processedlibrary, 'processed_data'))
+        assert(len(annotator.processedlibrary.processed_data) == 1)
