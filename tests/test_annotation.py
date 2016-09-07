@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 import os
@@ -46,24 +46,6 @@ def mock_genomics_server(request):
     request.addfinalizer(fin)
     return data
 
-@pytest.fixture(scope="class")
-def prod_genomics_server(request):
-    logger.info(("[setup] production 'genomics' server, connect "
-                 "to production 'genomics' server"))
-    run_id = '150615_D00565_0087_AC6VG0ANXX'
-    prod_genomics_root = '/mnt/' if os.path.exists('/mnt/') else '/Volumes/'
-    prod_genomics_path = os.path.join(prod_genomics_root, 'genomics')
-    prod_flowcell_path = os.path.join(prod_genomics_path, 'Illumina', run_id)
-    data = {'run_id': run_id,
-            'genomics_root': prod_genomics_root,
-            'genomics_path': prod_genomics_path,
-            'flowcell_path': prod_flowcell_path}
-    def fin():
-        logger.info(("[teardown] production 'genomics' server, disconnect "
-                     "from 'genomics' server"))
-    request.addfinalizer(fin)
-    return data
-
 @pytest.fixture(scope='class')
 def mock_db(request):
     logger.info(("[setup] mock 'tg3' database, connect "
@@ -107,42 +89,6 @@ def mock_db(request):
     request.addfinalizer(fin)
     return db
 
-@pytest.mark.usefixtures('prod_genomics_server')
-class TestFlowcellRunAnnotatorWithProdGenomicsServer:
-    @pytest.fixture(scope="class")
-    def annotator(self, request, prod_genomics_server):
-        logger.info("[setup] FlowcellRunAnnotator production instance")
-
-        # GIVEN a FlowcellRunAnnotator with production 'genomics' server path
-        # (i.e., either under /mnt/ or /Volumes/), valid run ID, and existing
-        # 'Unaligned' folder
-        fcrunannotator = illuminaseq.FlowcellRunAnnotator(
-            prod_genomics_server['run_id'],
-            prod_genomics_server['genomics_root']
-        )
-        def fin():
-            logger.info("[teardown] FlowcellRunAnnotator instance")
-        request.addfinalizer(fin)
-        return fcrunannotator
-
-    def test_has_valid_flowcellrun(self, annotator):
-        logger.info("test if has FlowcellRun object")
-
-        # WHEN checking whether FlowcellRun object was automatically
-        # initialized for annotator instance
-        flowcellrun = annotator.flowcellrun
-
-        # THEN object should be of type FlowcellRun
-        assert(type(flowcellrun) is docs.FlowcellRun)
-
-    def test_get_flowcell_path(self, annotator, prod_genomics_server):
-        logger.info("test `get_flowcell_path()`")
-
-        # WHEN searching for flowcell run ID in 'genomics' path
-        flowcell_path = annotator._get_flowcell_path()
-
-        # THEN correct flowcell folder should be found in 'genomics/Illumina/'
-        assert(flowcell_path == prod_genomics_server['flowcell_path'])
 
 @pytest.mark.usefixtures('mock_genomics_server')
 class TestFlowcellRunAnnotatorWithMockGenomicsServer:
@@ -525,12 +471,12 @@ class TestProcessedLibraryAnnotatorWithMockGenomicsServer:
         assert(output_items['source'] == 'picard_rnaseq')
 
 
-    # def test_group_outputs(self, annotator):
-    #     logger.info("test `_group_outputs()`")
-    #
-    #     # WHEN collecting the organized dictionary of outputs
-    #     outputs = annotator._group_outputs()
-    #
-    #     # THEN the outputs should be correctly grouped according to type
-    #     # and source (tool)
-    #     assert(outputs)
+    def test_group_outputs(self, annotator):
+        logger.info("test `_group_outputs()`")
+
+        # WHEN collecting the organized dictionary of outputs
+        outputs = annotator._group_outputs()
+
+        # THEN the outputs should be correctly grouped according to type
+        # and source (tool)
+        assert(outputs)

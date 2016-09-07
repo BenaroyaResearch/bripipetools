@@ -200,4 +200,17 @@ class ProcessedLibraryAnnotator(object):
         """
         outputs = self._get_outputs()
         logger.debug("grouping outputs: {}".format(outputs))
-        output_parts = []
+        grouped_outputs = {}
+        for k, v in outputs.items():
+            if 'fastq' not in k:
+                output_items = self._parse_output_name(k)
+                grouped_outputs.setdefault(
+                    output_items['type'],
+                    []
+                ).append(
+                    {'source': output_items['source'],
+                     'file': files.swap_root(v, 'genomics', '/'),
+                     'name': output_items['name']}
+                )
+        logger.debug("grouped outputs: {}".format(grouped_outputs))
+        return grouped_outputs
