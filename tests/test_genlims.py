@@ -1,15 +1,15 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
 import os
 import re
+
 import pytest
 import mongomock
 
+from bripipetools import model as docs
 from bripipetools import genlims
-from bripipetools.model import documents as docs
-from bripipetools.genlims import mapping as odm
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def test_genlims_connection():
     # TODO: come up with a better way to test this
@@ -184,14 +184,14 @@ class TestMapping:
     def test_map_keys(self):
         logger.info("test `map_keys()`")
 
-        assert(odm.map_keys({'aB': None}) == {'a_b': None})
-        assert(odm.map_keys({'aB': [{'bC': None}]}) ==
+        assert(genlims.map_keys({'aB': None}) == {'a_b': None})
+        assert(genlims.map_keys({'aB': [{'bC': None}]}) ==
             {'a_b': [{'b_c': None}]})
-        assert(odm.map_keys({'_id': None}) == {'_id': None})
+        assert(genlims.map_keys({'_id': None}) == {'_id': None})
 
     def test_get_class(self):
 
-        assert(odm.get_class({'type': 'sequenced library'}) ==
+        assert(genlims.get_class({'type': 'sequenced library'}) ==
             'SequencedLibrary')
 
     def test_map_to_object(self):
@@ -201,7 +201,7 @@ class TestMapping:
                'rawData': [{'path': None,
                             'laneId': 'L001',
                             'sampleNumber': 1}]}
-        obj = odm.map_to_object(doc)
+        obj = genlims.map_to_object(doc)
         assert(type(obj) is docs.SequencedLibrary)
         assert(hasattr(obj, '_id'))
         assert(obj._id == 'lib7293_C6VG0ANXX')
