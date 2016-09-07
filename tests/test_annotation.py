@@ -1,4 +1,6 @@
 import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 import os
 import re
 
@@ -9,9 +11,6 @@ from bripipetools import model as docs
 from bripipetools import io
 from bripipetools import genlims
 from bripipetools import annotation
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 @pytest.fixture(scope="class")
 def mock_genomics_server(request):
@@ -246,11 +245,11 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
         assert(re.search(mock_genomics_server['lib7293_fastq'],
                          raw_data[0]['path']))
 
-    def test_update_sequenced_library(self, annotator):
-        logger.info("test `_update_sequenced_library()`")
+    def test_update_sequencedlibrary(self, annotator):
+        logger.info("test `_update_sequencedlibrary()`")
 
         # WHEN sequenced library object is updated
-        annotator._update_sequenced_library()
+        annotator._update_sequencedlibrary()
 
         # THEN the object should have at least the 'run_id', 'project_id',
         # 'subproject_id', 'parent_id' and 'raw_data' attributes

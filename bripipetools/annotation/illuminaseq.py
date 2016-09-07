@@ -3,6 +3,7 @@ Classify / provide details for objects generated from an Illumina
 sequencing run performed by the BRI Genomics Core.
 """
 import logging
+logger = logging.getLogger(__name__)
 import os
 import re
 
@@ -10,8 +11,6 @@ from .. import util
 from .. import parsing
 from .. import genlims
 from .. import model as docs
-
-logger = logging.getLogger(__name__)
 
 class FlowcellRunAnnotator(object):
     """
@@ -156,7 +155,7 @@ class SequencedLibraryAnnotator(object):
                 for f in os.listdir(self.path)
                 if not re.search('empty', f)]
 
-    def _update_sequenced_library(self):
+    def _update_sequencedlibrary(self):
         """
         Add any missing fields to SequencedLibrary object.
         """
@@ -174,7 +173,7 @@ class SequencedLibraryAnnotator(object):
         Return sequenced library object with updated fields.
         """
 
-        self._update_sequenced_library()
+        self._update_sequencedlibrary()
         logger.debug("returning sequenced library object: {}".format(
             self.sequencedlibrary.__dict__
         ))
