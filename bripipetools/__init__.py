@@ -6,8 +6,11 @@ from . import parsing
 
 from . import io
 
-# model depends on util and parsing
+# model depends on util, parsing
 from . import model
 
-# genlims depends on util and model
+# genlims depends on util, model
 from . import genlims
+
+# annotation depends on util, parsing, io, model, genlims
+from . import annotation

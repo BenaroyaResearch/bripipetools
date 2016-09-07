@@ -3,19 +3,18 @@ Classify / provide details for objects generated from a Globus
 Galaxy workflow processing batch performed by the BRI Bioinformatics
 Core.
 """
-
 import logging
-logger = logging.getLogger(__name__)
-
 import os
 import re
 import datetime
-from bripipetools import io
-from bripipetools import genlims
-from bripipetools.genlims import mapping as odm
-from bripipetools.model import documents as docs
-from bripipetools.util import files
-from bripipetools.parsing import illumina
+
+from .. import util
+from .. import parsing
+from .. import io
+from .. import genlims
+from .. import model as docs
+
+logger = logging.getLogger(__name__)
 
 class WorkflowBatchAnnotator(object):
     """
@@ -55,13 +54,13 @@ class WorkflowBatchAnnotator(object):
         unsuccessful, create new ``GalaxyWorkflowBatch`` object.
         """
         logger.info("initializing GalaxyWorkflowBatch instance")
-        workflowbatch_file = files.swap_root(self.workflowbatch_file,
+        workflowbatch_file = util.swap_root(self.workflowbatch_file,
                                             'genomics', '/')
         try:
             logger.debug("getting GalaxyWorkflowBatch from GenLIMS; "
                          "searching for record with batch file {}"
                          .format(workflowbatch_file))
-            return odm.map_to_object(
+            return genlims.map_to_object(
                 genlims.get_workflowbatches(self.db,
                     {'workflowbatchFile': workflowbatch_file}
                     )[0]
@@ -163,7 +162,7 @@ class ProcessedLibraryAnnotator(object):
         logger.info("initializing ProcessedLibrary instance")
         try:
             logger.debug("getting ProcessedLibrary from GenLIMS")
-            return odm.map_to_object(
+            return genlims.map_to_object(
                 genlims.get_samples(self.db, {'_id': self.proclib_id})[0]
                 )
         except IndexError:
@@ -204,7 +203,7 @@ class ProcessedLibraryAnnotator(object):
                     output_items['type'], []
                     ).append(
                         {'source': output_items['source'],
-                         'file': files.swap_root(v, 'genomics', '/'),
+                         'file': util.swap_root(v, 'genomics', '/'),
                          'name': output_items['name']}
                      )
         return grouped_outputs
