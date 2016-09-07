@@ -16,7 +16,6 @@ from bripipetools.genlims import mapping as odm
 from bripipetools.model import documents as docs
 from bripipetools.util import files
 from bripipetools.parsing import illumina
-from pprint import pformat
 
 class WorkflowBatchAnnotator(object):
     """
@@ -73,17 +72,17 @@ class WorkflowBatchAnnotator(object):
 
             batch_items = self._parse_batch_name(
                 self.workflowbatch_data['batch_name']
-            )
+                )
 
             workflowbatch_id = genlims.create_workflowbatch_id(
                 db = self.db,
                 prefix = 'globusgalaxy',
                 date = batch_items['date']
-            )
+                )
             return docs.GalaxyWorkflowBatch(
                 _id=workflowbatch_id,
                 workflowbatch_file=workflowbatch_file
-            )
+                )
 
     def _update_workflowbatch(self):
         """
@@ -93,7 +92,7 @@ class WorkflowBatchAnnotator(object):
 
         batch_items = self._parse_batch_name(
             self.workflowbatch_data['batch_name']
-        )
+            )
 
         self.workflowbatch.workflow_id = self.workflowbatch_data['workflow_name']
         self.workflowbatch.date = batch_items['date']
@@ -108,7 +107,8 @@ class WorkflowBatchAnnotator(object):
         self._update_workflowbatch()
         logger.debug("returning workflow batch object: {}".format(
             self.workflowbatch.to_json()
-        ))
+            )
+        )
         return self.workflowbatch
 
     def get_sequenced_libraries(self):
@@ -121,23 +121,18 @@ class WorkflowBatchAnnotator(object):
                 for p in s
                 if p['name'] == 'SampleName']
 
-    # def get_sequenced_libraries(self, project=None):
-    #     """
-    #     Collect sequenced library objects for flowcell run.
-    #     """
-    #     unaligned_path = self._get_unaligned_path()
-    #     projects = self.get_projects()
-    #     if project is not None:
-    #         logger.debug("subsetting projects")
-    #         projects = [p for p in projects
-    #                     if re.search(project, p)]
-    #     for p in projects:
-    #         logger.info("getting sequenced libraries for project {}".format(p))
-    #         libraries = self.get_libraries(p)
-    #         return [SequencedLibraryAnnotator(
-    #                     os.path.join(unaligned_path, p, l),
-    #                     l, p, self.run_id
-    #                 ).get_sequenced_library() for l in libraries]
+    def get_processed_libraries(self, project=None):
+        """
+        Collect processed library objects for workflow batch.
+        """
+        workflowbatch_id = self.workflowbatch._id
+        logger.info("getting processed libraries for workflow batch {}"
+                    .format(workflowbatch_id))
+        return [ProcessedLibraryAnnotator(
+            workflowbatch_id, sample_params, self.db
+            ).get_processed_library()
+            for sample_params in self.workflowbatch_data['samples']]
+
 
 class ProcessedLibraryAnnotator(object):
     """
@@ -201,20 +196,17 @@ class ProcessedLibraryAnnotator(object):
         Organize outputs according to type and source.
         """
         outputs = self._get_outputs()
-        # logger.debug("grouping outputs: {}".format(outputs))
         grouped_outputs = {}
         for k, v in outputs.items():
             if 'fastq_' not in k:
                 output_items = self._parse_output_name(k)
                 grouped_outputs.setdefault(
-                    output_items['type'],
-                    []
-                ).append(
-                    {'source': output_items['source'],
-                     'file': files.swap_root(v, 'genomics', '/'),
-                     'name': output_items['name']}
-                )
-        # logger.debug("grouped outputs: {}".format(grouped_outputs))
+                    output_items['type'], []
+                    ).append(
+                        {'source': output_items['source'],
+                         'file': files.swap_root(v, 'genomics', '/'),
+                         'name': output_items['name']}
+                     )
         return grouped_outputs
 
     def _append_processed_data(self):
@@ -225,9 +217,7 @@ class ProcessedLibraryAnnotator(object):
         self.processedlibrary.processed_data.append(
             {'workflowbatch_id': self.workflowbatch_id,
              'outputs': self._group_outputs()}
-        )
-        # logger.debug(pformat(self.processedlibrary.processed_data))
-
+             )
 
     def _update_processedlibrary(self):
         """
@@ -235,7 +225,6 @@ class ProcessedLibraryAnnotator(object):
         """
         self._append_processed_data()
         self.processedlibrary.parent_id = self.seqlib_id
-
 
     def get_processed_library(self):
         """

@@ -290,8 +290,8 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
 
         # THEN the workflow batch data should be a dictionary with fields for
         # workflow name, parameters, and samples
-        assert(workflowbatch_data['workflow_name'] ==
-            ("optimized_truseq_unstrand_sr_grch38_v0.1_complete"))
+        assert(workflowbatch_data['workflow_name']
+               == "optimized_truseq_unstrand_sr_grch38_v0.1_complete")
         assert(len(workflowbatch_data['parameters']) == 35)
         assert(len(workflowbatch_data['samples']) == 2)
 
@@ -377,6 +377,18 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
         # THEN should be a list of two sequenced libraries
         assert(len(seqlibraries) == 2)
         assert('lib7294_C6VG0ANXX' in seqlibraries)
+
+    def test_get_processed_libraries(self, annotator):
+        logger.info("test `get_processed_libraries()`")
+
+        # WHEN collecting processed libraries for current workflow batch
+        processedlibraries = annotator.get_processed_libraries()
+
+        # THEN should return 2 total processed libraries, each of which
+        # is a valid ProcessedLibrary object
+        assert(len(processedlibraries) == 2)
+        assert(all([type(pl) == docs.ProcessedLibrary
+                    for pl in processedlibraries]))
 
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
