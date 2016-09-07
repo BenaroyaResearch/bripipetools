@@ -7,6 +7,8 @@ import re
 import pytest
 import mongomock
 
+from bripipetools import io
+from bripipetools import genlims
 from bripipetools.annotation import illuminaseq, globusgalaxy
 from bripipetools.model import documents as docs
 
@@ -371,36 +373,164 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
         assert(workflowbatch._id == 'globusgalaxy_2016-04-12_1')
 
     def test_init_workflowbatch_new_batch(self, annotator):
-        logger.info("test `_init_workflowbatch()` with existing batch")
+        logger.info("test `_init_workflowbatch()` with new batch")
 
-        # WHEN workflow batch exists in 'workflowbatches' collection
+        # WHEN workflow batch does not exist in 'workflowbatches' collection
         annotator.db.workflowbatches.delete_one(
             {'_id': 'globusgalaxy_2016-04-12_1'}
         )
         workflowbatch = annotator._init_workflowbatch()
 
-        # THEN existing workflow batch should be returned
+        # THEN a new workflow batch should be returned
         assert(workflowbatch._id == 'globusgalaxy_2016-04-12_1')
 
-    # def test_has_valid_workflowbatch(self, annotator):
-    #     logger.info("test if has GalaxyWorkflowBatch object")
-    #
-    #     # WHEN checking whether WorkflowBatch object was automatically
-    #     # initialized for annotator instance
-    #     workflowbatch = annotator.workflowbatch
-    #
-    #     # THEN object should be of type SequencedLibrary
-    #     assert(type(workflowbatch) is model.GalaxyWorkflowBatch)
+    def test_has_valid_workflowbatch(self, annotator):
+        logger.info("test if has GalaxyWorkflowBatch object")
 
-    # def test_update_workflowbatch(self, annotator):
-    #     logger.info("test `_update_workflowbatch()`")
+        # WHEN checking whether WorkflowBatch object was automatically
+        # initialized for annotator instance
+        workflowbatch = annotator.workflowbatch
+
+        # THEN object should be of type SequencedLibrary
+        assert(type(workflowbatch) is docs.GalaxyWorkflowBatch)
+
+    def test_update_workflowbatch(self, annotator):
+        logger.info("test `_update_workflowbatch()`")
+
+        # WHEN workflow batch object is updated
+        annotator._update_workflowbatch()
+
+        # THEN the object should have at least the 'workflow_id', 'date',
+        # 'projects', 'flowcell_id' attributes
+        assert(hasattr(annotator.workflowbatch, 'workflow_id'))
+        assert(hasattr(annotator.workflowbatch, 'date'))
+        assert(hasattr(annotator.workflowbatch, 'projects'))
+        assert(hasattr(annotator.workflowbatch, 'flowcell_id'))
+
+    def test_get_workflow_batch(self, annotator):
+        logger.info("test `get_workflow_batch()`")
+
+        # WHEN workflow batch object is returned
+        workflowbatch = annotator.get_workflow_batch()
+
+        # THEN the object should be of type GalaxyWorkflowBatch and have
+        # at least the at least the 'workflow_id', 'date',
+        # 'projects', 'flowcell_id' attributes
+        assert(type(workflowbatch) is docs.GalaxyWorkflowBatch)
+        assert(hasattr(workflowbatch, 'workflow_id'))
+        assert(hasattr(workflowbatch, 'date'))
+        assert(hasattr(workflowbatch, 'projects'))
+        assert(hasattr(workflowbatch, 'flowcell_id'))
+
+    def test_get_sequenced_libraries(self, annotator):
+        logger.info("test `get_sequenced_libraries()`")
+
+        # WHEN collecting list of sequenced libraries for batch
+        seqlibraries = annotator.get_sequenced_libraries()
+
+        # THEN should be a list of two sequenced libraries
+        assert(len(seqlibraries) == 2)
+        assert('lib7294_C6VG0ANXX' in seqlibraries)
+
+
+@pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
+class TestProcessedLibraryAnnotatorWithMockGenomicsServer:
+    @pytest.fixture(scope="class")
+    def annotator(self, request, mock_genomics_server, mock_db):
+        logger.info("[setup] SequencedLibraryAnnotator mock instance")
+
+        # GIVEN a ProcessedLibraryAnnotator with mock 'genomics' server path,
+        # and path to library folder (i.e., where data/organization is known),
+        # with specified library, project, and run ID
+        workflowbatch_id = genlims.get_workflowbatches(
+            mock_db,
+            {'workflowbatchFile': mock_genomics_server['workflowbatch_file']}
+        )
+        workflowbatch_data = io.WorkflowBatchFile(
+            mock_genomics_server['workflowbatch_file'],
+            state='submit'
+        ).parse()
+
+        proclibannotator = globusgalaxy.ProcessedLibraryAnnotator(
+            workflowbatch_id=workflowbatch_id,
+            params=workflowbatch_data['samples'][-1],
+            db=mock_db
+        )
+        def fin():
+            logger.info("[teardown] ProcessedLibraryAnnotator mock instance")
+        request.addfinalizer(fin)
+        return proclibannotator
+
+    def test_init_attribute_munging(self, annotator):
+        logger.info("test `__init__()` for proper attribute munging")
+
+        # WHEN checking whether input arguments were automatically munged
+        # when setting annotator attributes
+        proclib_id = annotator.proclib_id
+
+        # THEN the processed library ID should be properly constructed as the
+        # library ID and flowcell ID, tagged as processed
+        assert(proclib_id == 'lib7294_C6VG0ANXX_processed')
+
+    def test_init_processedlibrary_new_sample(self, annotator):
+        logger.info("test `_init_processedlibrary()` with new sample")
+
+        # WHEN workflow batch exists in 'workflowbatches' collection
+        annotator.db.samples.delete_one(
+            {'_id': 'lib7294_C6VG0ANXX_processed'}
+        )
+        processedlibrary = annotator._init_processedlibrary()
+
+        # THEN a new processed library object should be returned
+        assert(type(processedlibrary) == docs.ProcessedLibrary)
+        assert(processedlibrary._id == 'lib7294_C6VG0ANXX_processed')
+
+    def test_get_outputs(self, annotator):
+        logger.info("test `_get_outputs()`")
+
+        # WHEN collecting the list of outputs for a processed library
+        outputs = annotator._get_outputs()
+
+        # THEN the outputs should be stored in a dictionary of length 11
+        assert(len(outputs) == 11)
+
+    def test_parse_output_name_onepart_source(self, annotator):
+        logger.info("test `_parse_output_name()`, one-part source")
+
+        # WHEN parsing output name from workflow batch parameter, and the
+        # source name has one parts (i.e., 'tophat')
+        output_items = annotator._parse_output_name(
+            'tophat_alignments_bam_out'
+        )
+
+        # THEN output items should be a dictionary including fields for
+        # name, type, and source
+        assert(output_items['name'] == 'tophat_alignments_bam')
+        assert(output_items['type'] == 'alignments')
+        assert(output_items['source'] == 'tophat')
+
+    def test_parse_output_name_twopart_source(self, annotator):
+        logger.info("test `_parse_output_name()`, two-part source")
+
+        # WHEN parsing output name from workflow batch parameter, and the
+        # source name has two parts (i.e., 'picard_rnaseq')
+        output_items = annotator._parse_output_name(
+            'picard_rnaseq_metrics_html_out'
+        )
+
+        # THEN output items should be a dictionary including fields for
+        # name, type, and source
+        assert(output_items['name'] == 'picard_rnaseq_metrics_html')
+        assert(output_items['type'] == 'metrics')
+        assert(output_items['source'] == 'picard_rnaseq')
+
+
+    # def test_group_outputs(self, annotator):
+    #     logger.info("test `_group_outputs()`")
     #
-    #     # WHEN workflow batch object is updated
-    #     annotator._update_workflowbatch()
+    #     # WHEN collecting the organized dictionary of outputs
+    #     outputs = annotator._group_outputs()
     #
-    #     # THEN the object should have at least the 'workflow_id', 'date',
-    #     # 'projects', 'flowcell_id'
-    #     assert(hasattr(annotator.workflowbatch, 'workflow_id'))
-    #     assert(hasattr(annotator.workflowbatch, 'date'))
-    #     assert(hasattr(annotator.workflowbatch, 'projects'))
-    #     assert(hasattr(annotator.workflowbatch, 'flowcell_id'))
+    #     # THEN the outputs should be correctly grouped according to type
+    #     # and source (tool)
+    #     assert(outputs)

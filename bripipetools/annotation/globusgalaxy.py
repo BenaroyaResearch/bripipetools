@@ -94,7 +94,110 @@ class WorkflowBatchAnnotator(object):
             self.workflowbatch_data['batch_name']
         )
 
-        # self.workflowbatch.workflow_id = self.workflowbatch_data['workflow_name']
+        self.workflowbatch.workflow_id = self.workflowbatch_data['workflow_name']
         self.workflowbatch.date = batch_items['date']
         self.workflowbatch.projects = batch_items['projects']
         self.workflowbatch.flowcell_id = batch_items['flowcell_id']
+
+    def get_workflow_batch(self):
+        """
+        Return workflow batch object with updated fields.
+        """
+
+        self._update_workflowbatch()
+        logger.debug("returning workflow batch object: {}".format(
+            self.workflowbatch.to_json()
+        ))
+        return self.workflowbatch
+
+    def get_sequenced_libraries(self):
+        """
+        Collect list of sequenced libraries processed as part of
+        workflow batch.
+        """
+        return [p['value']
+                for s in self.workflowbatch_data['samples']
+                for p in s
+                if p['name'] == 'SampleName']
+
+    # def get_sequenced_libraries(self, project=None):
+    #     """
+    #     Collect sequenced library objects for flowcell run.
+    #     """
+    #     unaligned_path = self._get_unaligned_path()
+    #     projects = self.get_projects()
+    #     if project is not None:
+    #         logger.debug("subsetting projects")
+    #         projects = [p for p in projects
+    #                     if re.search(project, p)]
+    #     for p in projects:
+    #         logger.info("getting sequenced libraries for project {}".format(p))
+    #         libraries = self.get_libraries(p)
+    #         return [SequencedLibraryAnnotator(
+    #                     os.path.join(unaligned_path, p, l),
+    #                     l, p, self.run_id
+    #                 ).get_sequenced_library() for l in libraries]
+
+class ProcessedLibraryAnnotator(object):
+    """
+    Identifies, stores, and updates information about a processed library.
+    """
+    def __init__(self, workflowbatch_id, params, db):
+        logger.info("creating an instance of ProcessedLibraryAnnotator")
+        self.workflowbatch_id = workflowbatch_id
+        self.db = db
+        self.params = params
+        self.seqlib_id = self._get_seqlib_id()
+        self.proclib_id = '{}_processed'.format(self.seqlib_id)
+        self.processedlibrary = self._init_processedlibrary()
+
+    def _get_seqlib_id(self):
+        """
+        Return the ID of the parent sequenced library.
+        """
+        return [p['value'] for p in self.params
+                if p['name'] == 'SampleName'][0]
+
+    def _init_processedlibrary(self):
+        """
+        Try to retrieve data for the processed library from GenLIMS;
+        if unsuccessful, create new ``ProcessedLibrary`` object.
+        """
+        logger.info("initializing ProcessedLibrary instance")
+        try:
+            logger.debug("getting ProcessedLibrary from GenLIMS")
+            return odm.map_to_object(
+                genlims.get_samples(self.db, {'_id': self.proclib_id})[0]
+                )
+        except IndexError:
+            logger.debug("creating new ProcessedLibrary object")
+            return docs.ProcessedLibrary(_id=self.proclib_id)
+
+    def _get_outputs(self):
+        """
+        Return the list of outputs from the processing workflow batch.
+        """
+        return {p['tag']: p['value'] for p in self.params
+                if p['type'] == 'output' and p['name'] == 'to_path'}
+
+    def _parse_output_name(self, output_name):
+        """
+        Parse output name indicated by parameter tag in workflow batch
+        submit file and return individual components indicating name,
+        source, and type.
+        """
+        name = output_name.rstrip('_out')
+        name_parts = name.split('_')
+        file_format = name_parts.pop(-1)
+        output_type = name_parts.pop(-1)
+        source = ('_').join(name_parts)
+
+        return {'name': name, 'type': output_type, 'source': source}
+
+    def _group_outputs(self):
+        """
+        Organize outputs according to type and source.
+        """
+        outputs = self._get_outputs()
+        logger.debug("grouping outputs: {}".format(outputs))
+        output_parts = []
