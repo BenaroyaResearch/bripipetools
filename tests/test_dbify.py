@@ -8,7 +8,7 @@ import mongomock
 import pymongo
 
 from bripipetools import model as docs
-from bripipetools import importing
+from bripipetools import dbify
 
 @pytest.fixture(scope='class')
 def mock_genomics_server(request):
