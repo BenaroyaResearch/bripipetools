@@ -25,6 +25,10 @@ def mock_genomics_server(request):
     mock_metrics_path = os.path.join(mock_processed_project_path, 'metrics')
     mock_picard_markdups_file = os.path.join(
         mock_metrics_path, 'lib7294_C6VG0ANXX_picard_markdups_metrics.html')
+    mock_picard_align_file = os.path.join(
+        mock_metrics_path, 'lib7294_C6VG0ANXX_picard_align_metrics.html')
+    mock_picard_rnaseq_file = os.path.join(
+        mock_metrics_path, 'lib7294_C6VG0ANXX_picard_rnaseq_metrics.html')
 
     data = {'run_id': run_id,
             'genomics_root': mock_genomics_root,
@@ -40,7 +44,9 @@ def mock_genomics_server(request):
             'batch_name': '160412_P109-1_P14-12_C6VG0ANXX',
             'processed_project_path': mock_processed_project_path,
             'metrics_path': mock_metrics_path,
-            'picard_markdups_file': mock_picard_markdups_file}
+            'picard_markdups_file': mock_picard_markdups_file,
+            'picard_align_file': mock_picard_align_file,
+            'picard_rnaseq_file': mock_picard_rnaseq_file}
     def fin():
         logger.info(("[teardown] mock 'genomics' server, disconnect "
                      "from mock 'genomics' server"))

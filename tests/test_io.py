@@ -141,19 +141,66 @@ class TestWorkflowBatchFile:
 
 @pytest.mark.usefixtures('mock_genomics_server')
 class TestPicardMetrics:
-    @pytest.fixture(scope='class')
-    def metricsfile(self, request, mock_genomics_server):
-        logger.info("[setup] PicardMetricsFile test instance")
+    @pytest.fixture(scope='class',
+                    params=[('picard_markdups_file', {'len': 24,
+                                                      'format': 'long'}),
+                            ('picard_align_file', {'len': 56,
+                                                   'format': 'long'}),
+                            ('picard_rnaseq_file', {'len': 215,
+                                                    'format': 'wide'})
+                            ])
+    def metricsfiledata(self, request, mock_genomics_server):
+        logger.info("[setup] PicardMetricsFile test instance "
+                    "for file type '{}'".format(request.param))
 
         # GIVEN a PicardMetricsFile with mock 'genomics' server path to
         # a metrics file
         picardmetricsfile = io.PicardMetricsFile(
-            path=mock_genomics_server['picard_markdups_file']
+            path=mock_genomics_server[request.param[0]]
         )
         def fin():
             logger.info("[teardown] PicardMetricsFile mock instance")
         request.addfinalizer(fin)
-        return picardmetricsfile
+        return (picardmetricsfile, request.param[1])
 
-    def test_init(self, metricsfile, mock_genomics_server):
-        assert(metricsfile.path == mock_genomics_server['picard_markdups_file'])
+    def test_read_file(self, metricsfiledata):
+        logger.info("test `_read_file()`")
+        (metricsfile, _) = metricsfiledata
+
+        # WHEN the file specified by path is read
+        metricsfile._read_file()
+        raw_html = metricsfile.data['raw']
+
+        # THEN class should have raw HTML stored in data attribute and raw
+        # HTML should be a single string
+        assert(raw_html)
+        assert(type(raw_html) == str)
+
+    def test_get_table(self, metricsfiledata):
+        logger.info("test `_get_table()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN metrics table is found in raw HTML
+        metrics_table = metricsfile._get_table()
+
+        # THEN the first table found should have the expected number of rows
+        assert(len(metrics_table[0]) == expected_output['len'])
+    #
+    def test_check_table_format(self, metricsfiledata):
+        logger.info("test `_get_table()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN checking whether table in metrics HTML is long or wide
+        table_format = metricsfile._check_table_format()
+
+        # THEN should return 'long'
+        assert(table_format == expected_output['format'])
+
+    # def test_parse_long(self, metricsfile):
+        # logger.info("test `_parse_long()`")
+        #
+        # # WHEN parsing long format table
+        # metrics = metricsfile._parse_long()
+        #
+        # # THEN
+        # assert(metrics)
