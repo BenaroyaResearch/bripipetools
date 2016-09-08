@@ -63,7 +63,7 @@ class TestSequencingImporter:
 
         # GIVEN a SequencingImporter with mock 'genomics' server path to
         # flowcell run directory and mock database connection
-        sequencingimporter = importing.SequencingImporter(
+        sequencingimporter = dbify.SequencingImporter(
             path=mock_genomics_server['flowcell_path'],
             db=mock_db
         )
@@ -194,7 +194,7 @@ class TestProcessingImporter:
 
         # GIVEN a ProcessingImporter with mock 'genomics' server path to
         # workflow batch file and mock database connection
-        processingimporter = importing.ProcessingImporter(
+        processingimporter = dbify.ProcessingImporter(
             path=mock_genomics_server['workflowbatch_file'],
             db=mock_db
         )
@@ -320,3 +320,123 @@ class TestProcessingImporter:
         logger.info(("[semi-teardown] mock 'tg3' database, "
                      "drop samples collection from mock database"))
         mock_db.samples.drop()
+
+
+@pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
+class TestImportManagerWithFlowcellPath:
+    @pytest.fixture(scope='class')
+    def manager(self, request, mock_genomics_server, mock_db):
+        logger.info("[setup] ImportManager test instance")
+
+        # GIVEN a ImportManager with mock database connection and path
+        # to a flowcell directory
+        importmanager = dbify.ImportManager(
+            path=mock_genomics_server['flowcell_path'],
+            db=mock_db
+        )
+        def fin():
+            logger.info("[teardown] ImportManager mock instance")
+        request.addfinalizer(fin)
+        return importmanager
+
+    def test_sniff_path_flowcell_path(self, manager, mock_genomics_server):
+        logger.info("test `_sniff_path()` for flowcell path")
+
+        # WHEN a flowcell path is checked to determine type
+        path_type = manager._sniff_path(mock_genomics_server['flowcell_path'])
+
+        # THEN path type should be 'flowcell_path'
+        assert(path_type == 'flowcell_path')
+
+    def test_sniff_path_workflowbatch_file(self, manager, mock_genomics_server):
+        logger.info("test `_sniff_path()` for workflow batch file")
+
+        # WHEN a flowcell path is checked to determine type
+        path_type = manager._sniff_path(
+            mock_genomics_server['workflowbatch_file'])
+
+        # THEN path type should be 'flowcell_path'
+        assert(path_type == 'workflowbatch_file')
+
+    def test_init_importer(self, manager):
+        logger.info("test `_init_importer()`")
+
+        # WHEN importer is selected
+        manager._init_importer()
+        importer = manager.importer
+
+        # THEN should be of type SequencingImporter
+        assert(type(importer) == dbify.SequencingImporter)
+
+    def test_run(self, manager, mock_db):
+        logger.info("test `run()`")
+
+        # WHEN using run to execute the importer insert method
+        manager.run()
+
+        # THEN documents should be present in both runs and samples collections
+        assert(len(list(mock_db.runs.find({'type': 'flowcell'})))
+               == 1)
+        assert(len(list(mock_db.samples.find({'type': 'sequenced library'})))
+               == 31)
+
+
+@pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
+class TestImportManagerWithWorkflowBatchFile:
+    @pytest.fixture(scope='class')
+    def manager(self, request, mock_genomics_server, mock_db):
+        logger.info("[setup] ImportManager test instance")
+
+        # GIVEN a ImportManager with mock database connection and path
+        # to a workflow batch file
+        importmanager = dbify.ImportManager(
+            path=mock_genomics_server['workflowbatch_file'],
+            db=mock_db
+        )
+        def fin():
+            logger.info("[teardown] ImportManager mock instance")
+        request.addfinalizer(fin)
+        return importmanager
+
+    def test_sniff_path_flowcell_path(self, manager, mock_genomics_server):
+        logger.info("test `_sniff_path()` for flowcell path")
+
+        # WHEN a flowcell path is checked to determine type
+        path_type = manager._sniff_path(mock_genomics_server['flowcell_path'])
+
+        # THEN path type should be 'flowcell_path'
+        assert(path_type == 'flowcell_path')
+
+    def test_sniff_path_workflowbatch_file(self, manager, mock_genomics_server):
+        logger.info("test `_sniff_path()` for workflow batch file")
+
+        # WHEN a flowcell path is checked to determine type
+        path_type = manager._sniff_path(
+            mock_genomics_server['workflowbatch_file'])
+
+        # THEN path type should be 'flowcell_path'
+        assert(path_type == 'workflowbatch_file')
+
+    def test_init_importer(self, manager):
+        logger.info("test `_init_importer()`")
+
+        # WHEN importer is selected
+        manager._init_importer()
+        importer = manager.importer
+
+        # THEN should be of type SequencingImporter
+        assert(type(importer) == dbify.ProcessingImporter)
+
+    def test_run(self, manager, mock_db):
+        logger.info("test `run()`")
+
+        # WHEN using run to execute the importer insert method
+        manager.run()
+
+        # THEN documents should be present in both workflowbatches and
+        # samples collections
+        assert(len(list(mock_db.workflowbatches.find(
+               {'type': 'Galaxy workflow batch'})))
+               == 1)
+        assert(len(list(mock_db.samples.find({'type': 'processed library'})))
+               == 2)

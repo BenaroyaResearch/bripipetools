@@ -4,3 +4,4 @@ the GenLIMS database.
 """
 from .sequencing import SequencingImporter
 from .processing import ProcessingImporter
+from .control import ImportManager
