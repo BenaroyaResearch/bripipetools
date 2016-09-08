@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 import os
 import sys
 
@@ -12,7 +15,7 @@ TEST_FLOWCELL_DIR = os.path.join(TEST_GENOMICS_DIR,
 TEST_UNALIGNED_DIR = os.path.join(TEST_FLOWCELL_DIR, 'Unaligned')
 TEST_WORKFLOW_DIR = os.path.join(TEST_GENOMICS_DIR, 'galaxy_workflows')
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope='class')
 def workflow_batch_file(state='template', path=None):
     if path is None:
         if state == "template":
@@ -134,3 +137,23 @@ class TestWorkflowBatchFile:
                 'globus_batch_submission', 'foo.txt')
         wbf.write(path)
         assert(workflow_batch_file(path).data['raw'] == wbf.data['raw'])
+
+
+@pytest.mark.usefixtures('mock_genomics_server')
+class TestPicardMetrics:
+    @pytest.fixture(scope='class')
+    def metricsfile(self, request, mock_genomics_server):
+        logger.info("[setup] PicardMetricsFile test instance")
+
+        # GIVEN a PicardMetricsFile with mock 'genomics' server path to
+        # a metrics file
+        picardmetricsfile = io.PicardMetricsFile(
+            path=mock_genomics_server['picard_markdups_file']
+        )
+        def fin():
+            logger.info("[teardown] PicardMetricsFile mock instance")
+        request.addfinalizer(fin)
+        return picardmetricsfile
+
+    def test_init(self, metricsfile, mock_genomics_server):
+        assert(metricsfile.path == mock_genomics_server['picard_markdups_file'])
