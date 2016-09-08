@@ -106,7 +106,7 @@ class TestGenLIMSGMethodsWithMockDB:
         logger.info("test `put_samples()`, one sample")
 
         # WHEN inserting one new sample
-        samples = [{'_id': 'lib0000', 'type': 'library'}]
+        samples = {'_id': 'lib0000', 'type': 'library'}
         genlims.put_samples(mock_db, samples)
 
         # THEN new sample should be in database

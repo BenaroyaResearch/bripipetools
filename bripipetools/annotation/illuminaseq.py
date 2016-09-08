@@ -3,6 +3,7 @@ Classify / provide details for objects generated from an Illumina
 sequencing run performed by the BRI Genomics Core.
 """
 import logging
+logger = logging.getLogger(__name__)
 import os
 import re
 
@@ -10,8 +11,6 @@ from .. import util
 from .. import parsing
 from .. import genlims
 from .. import model as docs
-
-logger = logging.getLogger(__name__)
 
 class FlowcellRunAnnotator(object):
     """
@@ -103,13 +102,16 @@ class FlowcellRunAnnotator(object):
             logger.debug("subsetting projects")
             projects = [p for p in projects
                         if re.search(project, p)]
+        sequencedlibraries = []
         for p in projects:
             logger.info("getting sequenced libraries for project {}".format(p))
             libraries = self.get_libraries(p)
-            return [SequencedLibraryAnnotator(
+            sequencedlibraries += [SequencedLibraryAnnotator(
                         os.path.join(unaligned_path, p, l),
                         l, p, self.run_id, self.db
-                    ).get_sequenced_library() for l in libraries]
+                        ).get_sequenced_library()
+                        for l in libraries]
+        return sequencedlibraries
 
 class SequencedLibraryAnnotator(object):
     """
@@ -153,7 +155,7 @@ class SequencedLibraryAnnotator(object):
                 for f in os.listdir(self.path)
                 if not re.search('empty', f)]
 
-    def _update_sequenced_library(self):
+    def _update_sequencedlibrary(self):
         """
         Add any missing fields to SequencedLibrary object.
         """
@@ -171,8 +173,8 @@ class SequencedLibraryAnnotator(object):
         Return sequenced library object with updated fields.
         """
 
-        self._update_sequenced_library()
+        self._update_sequencedlibrary()
         logger.debug("returning sequenced library object: {}".format(
-            self.sequencedlibrary.to_json()
+            self.sequencedlibrary.__dict__
         ))
         return self.sequencedlibrary

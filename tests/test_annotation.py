@@ -1,4 +1,6 @@
 import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 import os
 import re
 
@@ -9,9 +11,6 @@ from bripipetools import model as docs
 from bripipetools import io
 from bripipetools import genlims
 from bripipetools import annotation
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 @pytest.fixture(scope="class")
 def mock_genomics_server(request):
@@ -145,7 +144,7 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         projects = annotator.get_projects()
 
         # THEN should find 8 total projects, including P14-12 and P109-1
-        assert(len(projects) == 8)
+        assert(len(projects) == 7)
         assert(mock_genomics_server['project_p14_12'] in projects)
         assert(mock_genomics_server['project_p109_1'] in projects)
 
@@ -166,7 +165,7 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
         libraries = annotator.get_libraries()
 
         # THEN should find 36 total projects
-        assert(len(libraries) == 36)
+        assert(len(libraries) == 31)
 
     def test_get_sequenced_libraries_P14_12(self, annotator, mock_genomics_server):
         logger.info("test `get_sequenced_libraries()`, single project")
@@ -176,6 +175,17 @@ class TestFlowcellRunAnnotatorWithMockGenomicsServer:
 
         # THEN should find 5 total libraries, including lib7293
         assert(len(sequencedlibraries) == 5)
+        # assert(mock_genomics_server['lib7293'] in libraries)
+
+    def test_get_sequenced_libraries_all_projects(self, annotator,
+                                                  mock_genomics_server):
+        logger.info("test `get_sequenced_libraries()`, single project")
+
+        # WHEN collecting sequenced libraries for all projects
+        sequencedlibraries = annotator.get_sequenced_libraries()
+
+        # THEN should find 31 total libraries
+        assert(len(sequencedlibraries) == 31)
         # assert(mock_genomics_server['lib7293'] in libraries)
 
 
@@ -235,11 +245,11 @@ class TestSequencedLibraryAnnotatorWithMockGenomicsServer:
         assert(re.search(mock_genomics_server['lib7293_fastq'],
                          raw_data[0]['path']))
 
-    def test_update_sequenced_library(self, annotator):
-        logger.info("test `_update_sequenced_library()`")
+    def test_update_sequencedlibrary(self, annotator):
+        logger.info("test `_update_sequencedlibrary()`")
 
         # WHEN sequenced library object is updated
-        annotator._update_sequenced_library()
+        annotator._update_sequencedlibrary()
 
         # THEN the object should have at least the 'run_id', 'project_id',
         # 'subproject_id', 'parent_id' and 'raw_data' attributes

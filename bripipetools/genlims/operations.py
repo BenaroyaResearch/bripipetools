@@ -33,6 +33,7 @@ def put_samples(db, samples):
     """
     Insert each document in list into 'samples' collection.
     """
+    samples = [samples] if not isinstance(samples, list) else samples
     for s in samples:
         logger.debug("inserting {} into 'samples' collection".format(s))
         db.samples.insert_one(s)
@@ -41,6 +42,7 @@ def put_runs(db, runs):
     """
     Insert each document in list into 'runs' collection.
     """
+    runs = [runs] if not isinstance(runs, list) else runs
     for r in runs:
         logger.debug("inserting {} into 'runs' collection".format(r))
         db.runs.insert_one(r)
@@ -49,6 +51,9 @@ def put_workflowbatches(db, workflowbatches):
     """
     Insert each document in list into 'workflowbatches' collection.
     """
+    workflowbatches = ([workflowbatches]
+                      if not isinstance(workflowbatches, list)
+                      else workflowbatches)
     for wb in workflowbatches:
         logger.debug("inserting {} into 'workflowbatches' collection".format(
             wb

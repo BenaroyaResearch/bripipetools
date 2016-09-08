@@ -20,7 +20,7 @@ class WorkflowBatchAnnotator(object):
     """
     Identifies, stores, and updates information about a workflow batch.
     """
-    def __init__(self, workflowbatch_file, db, genomics_root):
+    def __init__(self, workflowbatch_file, genomics_root, db):
         logger.info("creating an instance of WorkflowBatchAnnotator")
         self.workflowbatch_file = workflowbatch_file
         self.db = db
