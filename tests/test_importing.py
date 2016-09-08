@@ -68,7 +68,7 @@ class TestSequencingImporter:
             db=mock_db
         )
         def fin():
-            logger.info("[teardown] FlowcellRunAnnotator mock instance")
+            logger.info("[teardown] SequencingImporter mock instance")
         request.addfinalizer(fin)
         return sequencingimporter
 
@@ -88,7 +88,7 @@ class TestSequencingImporter:
     def test_collect_flowcellrun(self, importer):
         logger.info("test `_collect_flowcellrun()`")
 
-        # WHEN collecting FlowcellRunAnnotator object for flowcell run
+        # WHEN collecting FlowcellRun object for flowcell run
         flowcellrun = importer._collect_flowcellrun()
 
         # THEN should return object of correct type
@@ -168,7 +168,7 @@ class TestSequencingImporter:
         mock_db.samples.drop()
 
     def test_insert_samples(self, importer, mock_db):
-        logger.info("test `_insert()` for runs only")
+        logger.info("test `_insert()` for samples only")
 
         # WHEN inserting with collection argument set to 'samples'
         importer.insert(collection='samples')
@@ -181,6 +181,142 @@ class TestSequencingImporter:
         logger.info(("[semi-teardown] mock 'tg3' database, "
                      "drop runs collection from mock database"))
         mock_db.runs.drop()
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop samples collection from mock database"))
+        mock_db.samples.drop()
+
+
+@pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
+class TestProcessingImporter:
+    @pytest.fixture(scope='class')
+    def importer(self, request, mock_genomics_server, mock_db):
+        logger.info("[setup] ProcessingImporter test instance")
+
+        # GIVEN a ProcessingImporter with mock 'genomics' server path to
+        # workflow batch file and mock database connection
+        processingimporter = importing.ProcessingImporter(
+            path=mock_genomics_server['workflowbatch_file'],
+            db=mock_db
+        )
+        def fin():
+            logger.info("[teardown] ProcessingImporter mock instance")
+        request.addfinalizer(fin)
+        return processingimporter
+
+    def test_parse_batch_file_path(self, importer, mock_genomics_server):
+        logger.info("test `_get_genomics_root()`")
+
+        # WHEN the path argument is parsed to find the 'genomics' root
+        # and workflow batch file name
+        path_items = importer._parse_batch_file_path()
+
+        # THEN the 'genomics' root and run ID should match the mock server
+        assert(path_items['genomics_root']
+               == mock_genomics_server['genomics_root'])
+        assert(path_items['workflowbatch_filename']
+               == os.path.basename(mock_genomics_server['workflowbatch_file']))
+
+    def test_collect_workflowbatch(self, importer):
+        logger.info("test `_collect_workflowbatch()`")
+
+        # WHEN collecting WorkflowBatch object for processing batch
+        workflowbatch = importer._collect_workflowbatch()
+
+        # THEN should return object of correct type
+        assert(type(workflowbatch) == docs.GalaxyWorkflowBatch)
+
+    def test_collect_processedlibraries(self, importer):
+        logger.info("test `_collect_processedlibraries()`")
+
+        # WHEN collecting list of ProcessedLibrary objects for workflow batch
+        processedlibraries = importer._collect_processedlibraries()
+
+        # THEN should return 2 total objects of correct type
+        assert(len(processedlibraries) == 2)
+        assert(all([type(pl) == docs.ProcessedLibrary
+                    for pl in processedlibraries]))
+
+    def test_insert_workflowbatch(self, importer, mock_db):
+        logger.info("test `_insert_workflowbatch()`")
+
+        # WHEN workflow batch is inserted into database
+        importer._insert_workflowbatch()
+
+        # THEN documents should be present in the workflowbatches collection
+        assert(len(list(mock_db.workflowbatches.find(
+               {'type': 'Galaxy workflow batch'})))
+               == 1)
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop workflowbatches collection from mock database"))
+        mock_db.workflowbatches.drop()
+
+    def test_insert_processedlibraries(self, importer, mock_db):
+        logger.info("test `_insert_processedlibraries()`")
+
+        # WHEN processed libraries are inserted into database
+        importer._insert_processedlibraries()
+
+        # THEN documents should be present in the samples collection
+        assert(len(list(mock_db.samples.find({'type': 'processed library'})))
+               == 2)
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop samples collection from mock database"))
+        mock_db.samples.drop()
+
+    def test_insert_all(self, importer, mock_db):
+        logger.info("test `_insert()` for all collections")
+
+        # WHEN inserting with collection argument set to 'all' (default)
+        importer.insert()
+
+        # THEN documents should be present in both workflowbatches and
+        # samples collections
+        assert(len(list(mock_db.workflowbatches.find(
+               {'type': 'Galaxy workflow batch'})))
+               == 1)
+        assert(len(list(mock_db.samples.find({'type': 'processed library'})))
+               == 2)
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop workflowbatches collection from mock database"))
+        mock_db.workflowbatches.drop()
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop samples collection from mock database"))
+        mock_db.samples.drop()
+
+    def test_insert_workflowbatches(self, importer, mock_db):
+        logger.info("test `_insert()` for workflowbatches only")
+
+        # WHEN inserting with collection argument set to 'workflowbatches'
+        importer.insert(collection='workflowbatches')
+
+        # THEN documents should be present in only workflowbatches collections
+        assert(len(list(mock_db.workflowbatches.find(
+               {'type': 'Galaxy workflow batch'})))
+               == 1)
+        assert(len(list(mock_db.samples.find({'type': 'processed library'})))
+               == 0)
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop workflowbatches collection from mock database"))
+        mock_db.workflowbatches.drop()
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop samples collection from mock database"))
+        mock_db.samples.drop()
+
+    def test_insert_samples(self, importer, mock_db):
+        logger.info("test `_insert()` for samples only")
+
+        # WHEN inserting with collection argument set to 'samples'
+        importer.insert(collection='samples')
+
+        # THEN documents should be present in only runs collections
+        assert(len(list(mock_db.workflowbatches.find(
+               {'type': 'Galaxy workflow batch'})))
+               == 0)
+        assert(len(list(mock_db.samples.find({'type': 'processed library'})))
+               == 2)
+        logger.info(("[semi-teardown] mock 'tg3' database, "
+                     "drop workflowbatches collection from mock database"))
+        mock_db.workflowbatches.drop()
         logger.info(("[semi-teardown] mock 'tg3' database, "
                      "drop samples collection from mock database"))
         mock_db.samples.drop()
