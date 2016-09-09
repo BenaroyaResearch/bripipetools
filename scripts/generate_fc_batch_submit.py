@@ -33,7 +33,7 @@ Example:
 # Parse flowcell folder from filepath part to get flowcell ID
 def get_fc_tag(fc_str):
     fc_str = re.sub('EXTERNAL_[A-B]', 'EXTERNAL_', fc_str)
-    fc_re = re.compile('((?<=(EXTERNAL_))|(?<=(_[A-B]))).*XX')
+    fc_re = re.compile('((?<=(EXTERNAL_))|(?<=(_[A-B]))).*X[X|Y]')
     try:
         fc_tag = '_' + fc_re.search(fc_str).group()
         return fc_tag
