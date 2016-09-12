@@ -272,8 +272,61 @@ class TestTophatStatsFile:
         # WHEN text lines are parsed into key-value pairs based on column
         metrics = metricsfile._parse_lines()
 
+        # THEN output dictionary should be length 5 and have the correct keys
+        assert(len(metrics) == 5)
+        assert(set(metrics.keys()) == set(['fastq_total_reads',
+                                           'reads_aligned_sam', 'aligned',
+                                           'reads_with_mult_align',
+                                           'algn_seg_with_mult_algn']))
+
+    def test_parse(self, metricsfile):
+        logger.info("test `_parse()`")
+
+        # WHEN file is parsed
+        metrics = metricsfile.parse()
+
         # THEN output dictionary should be length 5
         assert(len(metrics) == 5)
+
+@pytest.mark.usefixtures('mock_genomics_server')
+class TestHtseqMetricsFile:
+    @pytest.fixture(scope='class')
+    def metricsfile(self, request, mock_genomics_server):
+        logger.info("[setup] HtseqMetricsFile test instance")
+
+        # GIVEN a HtseqMetricsFile with mock 'genomics' server path to
+        # a metrics file
+        htseqmetricsfile = io.HtseqMetricsFile(
+            path=mock_genomics_server['htseq_metrics_file']
+        )
+        def fin():
+            logger.info("[teardown] HtseqMetricsFile mock instance")
+        request.addfinalizer(fin)
+        return htseqmetricsfile
+
+    def test_read_file(self, metricsfile):
+        logger.info("test `_read_file()`")
+
+        # WHEN the file specified by path is read
+        metricsfile._read_file()
+        raw_text = metricsfile.data['raw']
+
+        # THEN class should have raw text stored in data attribute and raw
+        # text should be a list of length 5
+        assert(raw_text)
+        assert(len(raw_text) == 5)
+
+    def test_parse_lines(self, metricsfile):
+        logger.info("test `_parse_lines()`")
+
+        # WHEN text lines are parsed into key-value pairs based on column
+        metrics = metricsfile._parse_lines()
+
+        # THEN output dictionary should be length 5 and have the correct keys
+        assert(len(metrics) == 5)
+        assert(set(metrics.keys()) == set(['no_feature', 'ambiguous',
+                                           'too_low_aQual', 'not_aligned',
+                                           'alignment_not_unique']))
 
     def test_parse(self, metricsfile):
         logger.info("test `_parse()`")
