@@ -236,3 +236,50 @@ class TestPicardMetrics:
 
         # THEN should return parsed dict from table with expected length
         assert(len(metrics) == expected_output['len_parse'])
+
+
+@pytest.mark.usefixtures('mock_genomics_server')
+class TestTophatStatsFile:
+    @pytest.fixture(scope='class')
+    def metricsfile(self, request, mock_genomics_server):
+        logger.info("[setup] TophatStatsFile test instance")
+
+        # GIVEN a TophatStatsFile with mock 'genomics' server path to
+        # a metrics file
+        tophatstatsfile = io.TophatStatsFile(
+            path=mock_genomics_server['tophat_stats_file']
+        )
+        def fin():
+            logger.info("[teardown] TophatStatsFile mock instance")
+        request.addfinalizer(fin)
+        return tophatstatsfile
+
+    def test_read_file(self, metricsfile):
+        logger.info("test `_read_file()`")
+
+        # WHEN the file specified by path is read
+        metricsfile._read_file()
+        raw_text = metricsfile.data['raw']
+
+        # THEN class should have raw text stored in data attribute and raw
+        # text should be a list of length 5
+        assert(raw_text)
+        assert(len(raw_text) == 5)
+
+    def test_parse_lines(self, metricsfile):
+        logger.info("test `_parse_lines()`")
+
+        # WHEN text lines are parsed into key-value pairs based on column
+        metrics = metricsfile._parse_lines()
+
+        # THEN output dictionary should be length 5
+        assert(len(metrics) == 5)
+
+    def test_parse(self, metricsfile):
+        logger.info("test `_parse()`")
+
+        # WHEN file is parsed
+        metrics = metricsfile.parse()
+
+        # THEN output dictionary should be length 5
+        assert(len(metrics) == 5)
