@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 import os
 import sys
 
@@ -12,7 +15,7 @@ TEST_FLOWCELL_DIR = os.path.join(TEST_GENOMICS_DIR,
 TEST_UNALIGNED_DIR = os.path.join(TEST_FLOWCELL_DIR, 'Unaligned')
 TEST_WORKFLOW_DIR = os.path.join(TEST_GENOMICS_DIR, 'galaxy_workflows')
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope='class')
 def workflow_batch_file(state='template', path=None):
     if path is None:
         if state == "template":
@@ -134,3 +137,102 @@ class TestWorkflowBatchFile:
                 'globus_batch_submission', 'foo.txt')
         wbf.write(path)
         assert(workflow_batch_file(path).data['raw'] == wbf.data['raw'])
+
+
+@pytest.mark.usefixtures('mock_genomics_server')
+class TestPicardMetrics:
+    @pytest.fixture(scope='class',
+                    params=[('picard_markdups_file', {'len': 24,
+                                                      'format': 'long',
+                                                      'len_long': 9,
+                                                      'len_wide': 0,
+                                                      'len_parse': 9}),
+                            ('picard_align_file', {'len': 56,
+                                                   'format': 'long',
+                                                   'len_long': 24,
+                                                   'len_wide': 0,
+                                                   'len_parse': 24}),
+                            ('picard_rnaseq_file', {'len': 215,
+                                                    'format': 'wide',
+                                                    'len_long': 0,
+                                                    'len_wide': 22,
+                                                    'len_parse': 22})
+                            ])
+    def metricsfiledata(self, request, mock_genomics_server):
+        logger.info("[setup] PicardMetricsFile test instance "
+                    "for file type '{}'".format(request.param))
+
+        # GIVEN a PicardMetricsFile with mock 'genomics' server path to
+        # a metrics file
+        picardmetricsfile = io.PicardMetricsFile(
+            path=mock_genomics_server[request.param[0]]
+        )
+        def fin():
+            logger.info("[teardown] PicardMetricsFile mock instance")
+        request.addfinalizer(fin)
+        return (picardmetricsfile, request.param[1])
+
+    def test_read_file(self, metricsfiledata):
+        logger.info("test `_read_file()`")
+        (metricsfile, _) = metricsfiledata
+
+        # WHEN the file specified by path is read
+        metricsfile._read_file()
+        raw_html = metricsfile.data['raw']
+
+        # THEN class should have raw HTML stored in data attribute and raw
+        # HTML should be a single string
+        assert(raw_html)
+        assert(type(raw_html) == str)
+
+    def test_get_table(self, metricsfiledata):
+        logger.info("test `_get_table()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN metrics table is found in raw HTML
+        metrics_table = metricsfile._get_table()
+
+        # THEN the first table found should have the expected number of rows
+        assert(len(metrics_table[0]) == expected_output['len'])
+    #
+    def test_check_table_format(self, metricsfiledata):
+        logger.info("test `_get_table()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN checking whether table in metrics HTML is long or wide
+        table_format = metricsfile._check_table_format()
+
+        # THEN should return the expected format
+        assert(table_format == expected_output['format'])
+
+    def test_parse_long(self, metricsfiledata):
+        logger.info("test `_parse_long()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN parsing long format table
+        metrics = metricsfile._parse_long()
+
+        # THEN should return parsed dict from long-formatted table with
+        # expected length
+        assert(len(metrics) == expected_output['len_long'])
+
+    def test_parse_wide(self, metricsfiledata):
+        logger.info("test `_parse_wide()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN parsing wide format table
+        metrics = metricsfile._parse_wide()
+
+        # THEN should return parsed dict from wide-formatted table with
+        # expected length
+        assert(len(metrics) == expected_output['len_wide'])
+
+    def test_parse(self, metricsfiledata):
+        logger.info("test `parse()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN parsing metrics table
+        metrics = metricsfile.parse()
+
+        # THEN should return parsed dict from table with expected length
+        assert(len(metrics) == expected_output['len_parse'])

@@ -1,4 +1,5 @@
 """
 Classes for reading and writing common file types.
 """
-from .globusgalaxy import WorkflowBatchFile
+from .workflowbatch import WorkflowBatchFile
+from .picardmetrics import PicardMetricsFile
