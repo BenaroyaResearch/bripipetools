@@ -143,11 +143,20 @@ class TestWorkflowBatchFile:
 class TestPicardMetrics:
     @pytest.fixture(scope='class',
                     params=[('picard_markdups_file', {'len': 24,
-                                                      'format': 'long'}),
+                                                      'format': 'long',
+                                                      'len_long': 9,
+                                                      'len_wide': 0,
+                                                      'len_parse': 9}),
                             ('picard_align_file', {'len': 56,
-                                                   'format': 'long'}),
+                                                   'format': 'long',
+                                                   'len_long': 24,
+                                                   'len_wide': 0,
+                                                   'len_parse': 24}),
                             ('picard_rnaseq_file', {'len': 215,
-                                                    'format': 'wide'})
+                                                    'format': 'wide',
+                                                    'len_long': 0,
+                                                    'len_wide': 22,
+                                                    'len_parse': 22})
                             ])
     def metricsfiledata(self, request, mock_genomics_server):
         logger.info("[setup] PicardMetricsFile test instance "
@@ -193,14 +202,37 @@ class TestPicardMetrics:
         # WHEN checking whether table in metrics HTML is long or wide
         table_format = metricsfile._check_table_format()
 
-        # THEN should return 'long'
+        # THEN should return the expected format
         assert(table_format == expected_output['format'])
 
-    # def test_parse_long(self, metricsfile):
-        # logger.info("test `_parse_long()`")
-        #
-        # # WHEN parsing long format table
-        # metrics = metricsfile._parse_long()
-        #
-        # # THEN
-        # assert(metrics)
+    def test_parse_long(self, metricsfiledata):
+        logger.info("test `_parse_long()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN parsing long format table
+        metrics = metricsfile._parse_long()
+
+        # THEN should return parsed dict from long-formatted table with
+        # expected length
+        assert(len(metrics) == expected_output['len_long'])
+
+    def test_parse_wide(self, metricsfiledata):
+        logger.info("test `_parse_wide()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN parsing wide format table
+        metrics = metricsfile._parse_wide()
+
+        # THEN should return parsed dict from wide-formatted table with
+        # expected length
+        assert(len(metrics) == expected_output['len_wide'])
+
+    def test_parse(self, metricsfiledata):
+        logger.info("test `parse()`")
+        (metricsfile, expected_output) = metricsfiledata
+
+        # WHEN parsing metrics table
+        metrics = metricsfile.parse()
+
+        # THEN should return parsed dict from table with expected length
+        assert(len(metrics) == expected_output['len_parse'])
