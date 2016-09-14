@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 import datetime
 
 from .. import util
@@ -52,6 +54,8 @@ def parse_flowcell_run_id(run_id):
         'flowcell_id', and 'flowcell_position'.
     """
     id_parts = run_id.split('_')
+    logger.debug("collecting the following parts from run ID {}: {}"
+                 .format(run_id, id_parts))
 
     d = datetime.datetime.strptime(id_parts[0], '%y%m%d')
     date = datetime.date.isoformat(d)
