@@ -68,7 +68,7 @@ class OutputStitcher(object):
                                'picard_markdups': getattr(io, 'PicardMetricsFile'),
                                'picard_align': getattr(io, 'PicardMetricsFile'),
                                'tophat_stats': getattr(io, 'TophatStatsFile')},
-                   'counts': {'htseq': getattr(io, 'PicardMetricsFile')}}
+                   'counts': {'htseq': getattr(io, 'HtseqCountsFile')}}
         logger.debug("matched parser {} for output type {} and source {}"
                      .format(parsers[output_type][output_source],
                              output_type, output_source))
@@ -95,22 +95,34 @@ class OutputStitcher(object):
 
     def _build_table(self):
         """
-        Combine parsed data into rows of a table for writing.
+        Combine parsed data into table for writing.
         """
-        table_rows = []
-        for sample_id, sample_data in self.data[self.type].items():
-            if not len(table_rows):
-                table_rows.append(['libId'] + [field
+        output_data = self.data[self.type]
+        if self.type == 'counts':
+            logger.info("combining counts data")
+            for idx, (sample_id, sample_data) in enumerate(output_data.items()):
+                data = sample_data[0]['htseq']
+                data = data.rename(index=str, columns={'count': sample_id})
+                if idx == 0:
+                    table_data = data
+                else:
+                    table_data = pd.merge(table_data, data, on='geneName')
+        else:
+            logger.info("combining non-counts data")
+            table_data = []
+            for sample_id, sample_data in output_data.items():
+                if not len(table_data):
+                    table_data.append(['libId'] + [field
+                                       for source in sample_data
+                                       for name, data in source.items()
+                                       for field in data.keys()])
+                    logger.debug("added header row: {}".format(table_data[-1]))
+                table_data.append([sample_id] + [value
                                    for source in sample_data
                                    for name, data in source.items()
-                                   for field in data.keys()])
-                logger.debug("added header row: {}".format(table_rows[-1]))
-            table_rows.append([sample_id] + [value
-                               for source in sample_data
-                               for name, data in source.items()
-                               for value in data.values()])
-            logger.debug("added values row: {}".format(table_rows[-1]))
-        return table_rows
+                                   for value in data.values()])
+                logger.debug("added values row: {}".format(table_data[-1]))
+        return table_data
 
     def _build_combined_filename(self):
         """
@@ -133,11 +145,14 @@ class OutputStitcher(object):
         Write the combined table to a CSV file.
         """
         self._read_data()
-        table_rows = self._build_table()
+        table_data = self._build_table()
         table_path = os.path.join(self.path,
                                   self._build_combined_filename())
         logger.debug("writing to file {}".format(table_path))
-        with open(table_path, 'w') as f:
-            writer = csv.writer(f)
-            for row in table_rows:
-                writer.writerow(row)
+        if self.type == 'counts':
+            table_data.to_csv(table_path, index=False)
+        else:
+            with open(table_path, 'w') as f:
+                writer = csv.writer(f)
+                for row in table_data:
+                    writer.writerow(row)

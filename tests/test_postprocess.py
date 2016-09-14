@@ -16,9 +16,13 @@ class TestOutputStitcher:
                     params=[('metrics_path', {'type': 'metrics',
                                               'len_outputs': 5,
                                               'lib': 'lib7294_C6VG0ANXX',
-                                              'len_data': 5})
-                            # ('counts_path', {'type': 'counts',
-                            #                  'len_outputs': 1})
+                                              'len_data': 5,
+                                              'len_table': 2}),
+                            ('counts_path', {'type': 'counts',
+                                             'len_outputs': 1,
+                                             'lib': 'lib7294_C6VG0ANXX',
+                                             'len_data': 1,
+                                             'len_table': 100})
                             ])
     def outputstitcherdata(self, request, mock_genomics_server):
         logger.info("[setup] OutputStitcher test instance "
@@ -59,7 +63,8 @@ class TestOutputStitcher:
          (('metrics', 'picard_rnaseq'), getattr(io, 'PicardMetricsFile')),
          (('metrics', 'picard_markdups'), getattr(io, 'PicardMetricsFile')),
          (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile')),
-         (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile'))])
+         (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile')),
+         (('counts', 'htseq'), getattr(io, 'HtseqCountsFile'))])
     def test_get_parser(self, outputstitcherdata, output, expected):
         logger.info("test `_get_parser()`")
         (outputstitcher, _) = outputstitcherdata
@@ -85,17 +90,16 @@ class TestOutputStitcher:
 
     def test_build_table(self, outputstitcherdata):
         logger.info("test `_build_table()`")
-        (outputstitcher, _) = outputstitcherdata
+        (outputstitcher, expected_output) = outputstitcherdata
 
-        # WHEN data is combined into a table (one row for each sample,
-        # plus the header row)
+        # WHEN data is combined into a table
         outputstitcher._read_data()
-        table_rows = outputstitcher._build_table()
+        table_data = outputstitcher._build_table()
 
-        # THEN there should be one row for each sample, plus one header row,
-        # and rows should be the same length
-        assert(len(table_rows) == 2)
-        assert(len(set([len(row) for row in table_rows])) == 1)
+        # THEN table should have expected number of rows, and rows should
+        # be the same length
+        assert(len(table_data) == expected_output['len_table'])
+        # assert(len(set([len(row) for row in table_data])) == 1)
 
     def test_build_combined_filename(self, outputstitcherdata,
                                      mock_genomics_server):
@@ -110,7 +114,6 @@ class TestOutputStitcher:
         assert(combined_filename
                == mock_genomics_server['{}_combined_filename'.format(
                 output_type)])
-
 
     def test_write_table(self, outputstitcherdata, mock_genomics_server):
         logger.info("test `write_table()`")
