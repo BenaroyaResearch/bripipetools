@@ -1,12 +1,10 @@
 """
-Class for reading and parsing Tophat Stats metrics files.
+Class for reading and parsing htseq files.
 """
 import logging
 logger = logging.getLogger(__name__)
-import os
-import sys
-import re
 
+import pandas as pd
 
 class HtseqCountsFile(object):
     """
@@ -20,21 +18,15 @@ class HtseqCountsFile(object):
 
     def _read_file(self):
         """
-        Read file into list of raw strings.
+        Read file into Pandas data frame.
         """
-        logger.debug("reading file {} as to raw string list".format(self.path))
-        with open(self.path) as f:
-            self.data['raw'] = f.readlines()
-
-    def _parse_lines(self):
-        """
-        Get key-value pairs from text lines and return dictionary.
-        """
-        return {l.strip().split('\t')[0].lstrip('__'): l.strip().split('\t')[1]
-                for l in self.data['raw']}
+        logger.debug("reading file {} to data frame".format(self.path))
+        # with open(self.path) as f:
+        self.data['raw'] = pd.read_table(self.path,
+                                         names=['geneName', 'count'])
 
     def parse(self):
         """
-        Parse metrics table and return dictionary.
+        Parse counts file and return data frame.
         """
-        return self._parse_lines()
+        return self.data['raw']
