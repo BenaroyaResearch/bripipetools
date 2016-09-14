@@ -14,9 +14,11 @@ from bripipetools import io
 class TestOutputStitcher:
     @pytest.fixture(scope='class',
                     params=[('metrics_path', {'type': 'metrics',
-                                              'len_outputs': 5}),
-                            ('counts_path', {'type': 'counts',
-                                             'len_outputs': 1})
+                                              'len_outputs': 5,
+                                              'lib': 'lib7294_C6VG0ANXX',
+                                              'len_data': 5})
+                            # ('counts_path', {'type': 'counts',
+                            #                  'len_outputs': 1})
                             ])
     def outputstitcherdata(self, request, mock_genomics_server):
         logger.info("[setup] OutputStitcher test instance "
@@ -56,7 +58,8 @@ class TestOutputStitcher:
         [(('metrics', 'htseq'), getattr(io, 'HtseqMetricsFile')),
          (('metrics', 'picard_rnaseq'), getattr(io, 'PicardMetricsFile')),
          (('metrics', 'picard_markdups'), getattr(io, 'PicardMetricsFile')),
-         (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile'))])
+         (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile')),
+         (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile'))])
     def test_get_parser(self, outputstitcherdata, output, expected):
         logger.info("test `_get_parser()`")
         (outputstitcher, _) = outputstitcherdata
@@ -66,3 +69,28 @@ class TestOutputStitcher:
 
         # THEN the expected number of outputs should be found
         assert(parser == expected)
+
+    def test_read_data(self, outputstitcherdata):
+        logger.info("test `_read_data()`")
+        (outputstitcher, expected_output) = outputstitcherdata
+
+        # WHEN data from each output file is read and parsed
+        outputstitcher._read_data()
+        data = outputstitcher.data[expected_output['type']]
+
+        # THEN data should be stored in a dictionary named for the current
+        # output type, with a sub-dict for each output source
+        assert(len(data[expected_output['lib']])
+               == expected_output['len_data'])
+
+    def test_build_table(self, outputstitcherdata):
+        logger.info("test `_build_table()`")
+        (outputstitcher, expected_output) = outputstitcherdata
+
+        # WHEN data is combined into a table (one row for each sample,
+        # plus the header row)
+        outputstitcher._read_data()
+        table_rows = outputstitcher._build_table()
+
+        assert(len(table_rows) == 2)
+        assert(len(set([len(row) for row in table_rows])) == 1)
