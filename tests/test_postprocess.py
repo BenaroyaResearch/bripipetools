@@ -85,12 +85,49 @@ class TestOutputStitcher:
 
     def test_build_table(self, outputstitcherdata):
         logger.info("test `_build_table()`")
-        (outputstitcher, expected_output) = outputstitcherdata
+        (outputstitcher, _) = outputstitcherdata
 
         # WHEN data is combined into a table (one row for each sample,
         # plus the header row)
         outputstitcher._read_data()
         table_rows = outputstitcher._build_table()
 
+        # THEN there should be one row for each sample, plus one header row,
+        # and rows should be the same length
         assert(len(table_rows) == 2)
         assert(len(set([len(row) for row in table_rows])) == 1)
+
+    def test_build_combined_filename(self, outputstitcherdata,
+                                     mock_genomics_server):
+        logger.info("test `_build_combined_filename()`")
+        (outputstitcher, _) = outputstitcherdata
+
+        # WHEN path to outputs is parsed to build combined CSV file_name
+        combined_filename = outputstitcher._build_combined_filename()
+
+        # THEN combined filename should be correctly formatted
+        output_type = outputstitcher.type
+        assert(combined_filename
+               == mock_genomics_server['{}_combined_filename'.format(
+                output_type)])
+
+
+    def test_write_table(self, outputstitcherdata, mock_genomics_server):
+        logger.info("test `write_table()`")
+        (outputstitcher, _) = outputstitcherdata
+
+        # AND combined file does not already exist
+        output_type = outputstitcher.type
+        expected_path = os.path.join(
+            mock_genomics_server['{}_path'.format(output_type)],
+            mock_genomics_server['{}_combined_filename'.format(output_type)])
+        try:
+            os.remove(expected_path)
+        except OSError:
+            pass
+
+        # WHEN data is read, combined, and written to file
+        outputstitcher.write_table()
+
+        # THEN file should exist at expected path
+        assert(os.path.exists(expected_path))

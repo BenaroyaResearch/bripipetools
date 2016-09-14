@@ -9,6 +9,8 @@ import re
 import csv
 
 from .. import io
+from .. import parsing
+from .. import util
 
 class OutputStitcher(object):
     """
@@ -34,7 +36,8 @@ class OutputStitcher(object):
         """
         return [os.path.join(self.path, f)
                 for f in os.listdir(self.path)
-                if re.search(output_type, f)]
+                if re.search(output_type, f)
+                and not re.search('combined', f)]
 
     def _parse_output_filename(self, output_filename):
         """
@@ -102,9 +105,39 @@ class OutputStitcher(object):
                                    for name, data in source.items()
                                    for field in data.keys()])
                 logger.debug("added header row: {}".format(table_rows[-1]))
-            table_rows.append(['libId'] + [value
+            table_rows.append([sample_id] + [value
                                for source in sample_data
                                for name, data in source.items()
                                for value in data.values()])
             logger.debug("added values row: {}".format(table_rows[-1]))
         return table_rows
+
+    def _build_combined_filename(self):
+        """
+        Parse input path to create filename for combined CSV file.
+        """
+        path_parts = re.sub('.*Illumina/', '', self.path).split('/')
+        logger.debug("building combined filename from path parts {}"
+                     .format(path_parts))
+        run_items = parsing.parse_flowcell_run_id(path_parts[0])
+        project_label = parsing.get_project_label(path_parts[1])
+        date = util.matchdefault('[0-9]{6}', path_parts[1])
+        filename_base = '{}_{}_{}'.format(project_label,
+                                          run_items['flowcell_id'],
+                                          date)
+        return '{}_combined_{}.csv'.format(filename_base.rstrip('_'),
+                                           self.type)
+
+    def write_table(self):
+        """
+        Write the combined table to a CSV file.
+        """
+        self._read_data()
+        table_rows = self._build_table()
+        table_path = os.path.join(self.path,
+                                  self._build_combined_filename())
+        logger.debug("writing to file {}".format(table_path))
+        with open(table_path, 'w') as f:
+            writer = csv.writer(f)
+            for row in table_rows:
+                writer.writerow(row)
