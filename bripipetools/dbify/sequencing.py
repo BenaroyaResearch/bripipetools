@@ -26,7 +26,7 @@ class SequencingImporter(object):
         Return 'genomics' root and run ID based on directory path.
         """
         return {'genomics_root': util.matchdefault('.*(?=genomics)', self.path),
-                'run_id': os.path.basename(self.path)}
+                'run_id': os.path.basename(self.path.rstrip('/'))}
 
     def _collect_flowcellrun(self):
         """

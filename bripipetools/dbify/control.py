@@ -30,7 +30,7 @@ class ImportManager(object):
             'workflowbatch_file': re.compile('batch_submission.*\.txt$')
         }
         return [k for k, v in path_types.items()
-                if v.search(path)][0]
+                if v.search(path.rstrip('/'))][0]
 
     def _init_importer(self):
         """
