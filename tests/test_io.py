@@ -336,3 +336,31 @@ class TestHtseqMetricsFile:
 
         # THEN output dictionary should be length 5
         assert(len(metrics) == 5)
+
+@pytest.mark.usefixtures('mock_genomics_server')
+class TestHtseqCountsFile:
+    @pytest.fixture(scope='class')
+    def countsfile(self, request, mock_genomics_server):
+        logger.info("[setup] HtseqCountsFile test instance")
+
+        # GIVEN a HtseqCountsFile with mock 'genomics' server path to
+        # a counts file
+        htseqcountsfile = io.HtseqCountsFile(
+            path=mock_genomics_server['htseq_counts_file']
+        )
+        def fin():
+            logger.info("[teardown] HtseqCountsFile mock instance")
+        request.addfinalizer(fin)
+        return htseqcountsfile
+
+    def test_read_file(self, countsfile):
+        logger.info("test `_read_file()`")
+
+        # WHEN the file specified by path is read
+        countsfile._read_file()
+        counts_df = countsfile.data['raw']
+
+        # THEN class should have counts stored in a data frame with 100 rows
+        # and two columns
+        assert(len(counts_df) == 100)
+        assert(len(counts_df.columns) == 2)
