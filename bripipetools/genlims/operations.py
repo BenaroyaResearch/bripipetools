@@ -2,9 +2,10 @@
 Basic operations for the GenLIMS Mongo database.
 """
 import logging
+logger = logging.getLogger(__name__)
 import re
 
-logger = logging.getLogger(__name__)
+import pymongo
 
 def get_samples(db, query):
     """
@@ -36,7 +37,10 @@ def put_samples(db, samples):
     samples = [samples] if not isinstance(samples, list) else samples
     for s in samples:
         logger.debug("inserting {} into 'samples' collection".format(s))
-        db.samples.insert_one(s)
+        try:
+            db.samples.insert_one(s)
+        except pymongo.errors.DuplicateKeyError:
+            db.samples.replace_one(s, {'_id': s['_id']})
 
 def put_runs(db, runs):
     """
@@ -45,7 +49,10 @@ def put_runs(db, runs):
     runs = [runs] if not isinstance(runs, list) else runs
     for r in runs:
         logger.debug("inserting {} into 'runs' collection".format(r))
-        db.runs.insert_one(r)
+        try:
+            db.runs.insert_one(r)
+        except pymongo.errors.DuplicateKeyError:
+            db.runs.replace_one(r, {'_id': r['_id']})
 
 def put_workflowbatches(db, workflowbatches):
     """
@@ -58,7 +65,10 @@ def put_workflowbatches(db, workflowbatches):
         logger.debug("inserting {} into 'workflowbatches' collection".format(
             wb
         ))
-        db.workflowbatches.insert_one(wb)
+        try:
+            db.workflowbatches.insert_one(wb)
+        except pymongo.errors.DuplicateKeyError:
+            db.workflowbatches.replace_one(wb, {'_id': wb['_id']})
 
 def create_workflowbatch_id(db, prefix, date):
     """

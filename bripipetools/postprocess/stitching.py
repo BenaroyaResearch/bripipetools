@@ -8,6 +8,8 @@ import os
 import re
 import csv
 
+import pandas as pd
+
 from .. import io
 from .. import parsing
 from .. import util
@@ -90,8 +92,8 @@ class OutputStitcher(object):
             out_parser = self._get_parser(out_type, out_source)(path=o)
 
             self.data.setdefault(
-                out_type, {proclib_id: []})[proclib_id].append(
-                    {out_source: out_parser.parse()})
+                out_type, {}).setdefault(proclib_id, []).append(
+                {out_source: out_parser.parse()})
 
     def _build_table(self):
         """
@@ -111,18 +113,37 @@ class OutputStitcher(object):
             logger.info("combining non-counts data")
             table_data = []
             for sample_id, sample_data in output_data.items():
+                header = [field for source in sample_data
+                          for name, data in source.items()
+                          for field in data.keys()]
+                logger.debug("header row: {}".format(header))
+
+                values = [value for source in sample_data
+                          for name, data in source.items()
+                          for value in data.values()]
+                logger.debug("values: {}".format(values))
+
                 if not len(table_data):
-                    table_data.append(['libId'] + [field
-                                       for source in sample_data
-                                       for name, data in source.items()
-                                       for field in data.keys()])
+                    table_data.append(['libId'] + sorted(header))
                     logger.debug("added header row: {}".format(table_data[-1]))
-                table_data.append([sample_id] + [value
-                                   for source in sample_data
-                                   for name, data in source.items()
-                                   for value in data.values()])
+
+                table_data.append([sample_id] + [v for h, v
+                                                 in sorted(zip(header,
+                                                               values))])
                 logger.debug("added values row: {}".format(table_data[-1]))
         return table_data
+
+    def _add_mapped_reads_column(self, data):
+        """
+        Add mapped_reads_w_dups column to table data.
+        """
+        for idx, row in enumerate(data[1:]):
+            metrics = dict(zip(data[0], row))
+            mapped_reads = (float(metrics['UNPAIRED_READS_EXAMINED'])
+                            / float(metrics['fastq_total_reads']))
+            data[idx + 1].append(mapped_reads)
+        data[0].append('mapped_reads_w_dups')
+        return data
 
     def _build_combined_filename(self):
         """
@@ -146,6 +167,8 @@ class OutputStitcher(object):
         """
         self._read_data()
         table_data = self._build_table()
+        if self.type == 'metrics':
+            table_data = self._add_mapped_reads_column(table_data)
         table_path = os.path.join(self.path,
                                   self._build_combined_filename())
         logger.debug("writing to file {}".format(table_path))

@@ -17,7 +17,8 @@ class FlowcellRunAnnotator(object):
     Identifies, stores, and updates information about a flowcell run.
     """
     def __init__(self, run_id, genomics_root, db):
-        logger.info("creating an instance of FlowcellRunAnnotator")
+        logger.info("creating instance of FlowcellRunAnnotator for run ID {}"
+                    .format(run_id))
         self.run_id = run_id
         self.db = db
         self.flowcellrun = self._init_flowcellrun()
