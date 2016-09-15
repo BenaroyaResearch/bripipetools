@@ -68,7 +68,7 @@ class PicardMetricsFile(object):
                     td_val = td_val.replace('\n', '')
                     logger.debug("with corresponding value {}".format(td_val))
 
-                    if len(td_val) and not re.search('[a-z]', td_val.lower()):
+                    if len(td_val) and not re.search(r'[^\d.]+', td_val.lower()):
                         td_val = float(td_val)
                     metrics[td_key] = td_val
         logger.debug("parsed metrics table: {}".format(metrics))
@@ -94,7 +94,7 @@ class PicardMetricsFile(object):
                                  .format(td_vals))
 
                     metrics_tmp = dict(zip(td_keys, td_vals))
-                    metrics.update({k: float(v) if not re.search('[a-z]', v)
+                    metrics.update({k: float(v) if not re.search(r'[^\d.]+', v)
                                     else v
                                     for k, v in metrics_tmp.items()})
         logger.debug("parsed metrics table: {}".format(metrics))
