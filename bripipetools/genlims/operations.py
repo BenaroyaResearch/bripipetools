@@ -4,71 +4,84 @@ Basic operations for the GenLIMS Mongo database.
 import logging
 logger = logging.getLogger(__name__)
 import re
+from functools import wraps
 
 import pymongo
 
+def find_objects(collection):
+    """
+    Return documents from specified collection based on query.
+    """
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args):
+            db, query = f(*args)
+            logger.debug("searching {} collection with query {}"
+                         .format(collection, query))
+            return list(db[collection].find(query))
+        return wrapper
+    return decorator
+
+def insert_objects(collection):
+    """
+    Insert each object in list into specified collection.
+    """
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args):
+            db, objects = f(*args)
+            objects = [objects] if not isinstance(objects, list) else objects
+            for o in objects:
+                logger.debug("inserting {} into {} collection"
+                             .format(o, collection))
+                try:
+                    db[collection].insert_one(o)
+                except pymongo.errors.DuplicateKeyError:
+                    db[collection].replace_one(o, {'_id': o['_id']})
+        return wrapper
+    return decorator
+
+@find_objects('samples')
 def get_samples(db, query):
     """
     Return list of documents from 'samples' collection based on query.
     """
-    logger.debug("searching 'samples' collection with query {}".format(query))
-    return list(db.samples.find(query))
+    return db, query
 
+@find_objects('runs')
 def get_runs(db, query):
     """
     Return list of documents from 'runs' collection based on query.
     """
-    logger.debug("searching 'runs' collection with query {}".format(query))
-    return list(db.runs.find(query))
+    return db, query
 
+@find_objects('workflowbatches')
 def get_workflowbatches(db, query):
     """
     Return list of documents from 'workflow batches' collection based on query.
     """
-    logger.debug("searching 'workflowbatches' collection with query {}".format(
-        query
-    ))
-    return list(db.workflowbatches.find(query))
+    return db, query
 
+@insert_objects('samples')
 def put_samples(db, samples):
     """
     Insert each document in list into 'samples' collection.
     """
-    samples = [samples] if not isinstance(samples, list) else samples
-    for s in samples:
-        logger.debug("inserting {} into 'samples' collection".format(s))
-        try:
-            db.samples.insert_one(s)
-        except pymongo.errors.DuplicateKeyError:
-            db.samples.replace_one(s, {'_id': s['_id']})
+    return db, samples
 
+@insert_objects('runs')
 def put_runs(db, runs):
     """
     Insert each document in list into 'runs' collection.
     """
-    runs = [runs] if not isinstance(runs, list) else runs
-    for r in runs:
-        logger.debug("inserting {} into 'runs' collection".format(r))
-        try:
-            db.runs.insert_one(r)
-        except pymongo.errors.DuplicateKeyError:
-            db.runs.replace_one(r, {'_id': r['_id']})
+    return db, runs
 
+@insert_objects('workflowbatches')
 def put_workflowbatches(db, workflowbatches):
     """
     Insert each document in list into 'workflowbatches' collection.
     """
-    workflowbatches = ([workflowbatches]
-                      if not isinstance(workflowbatches, list)
-                      else workflowbatches)
-    for wb in workflowbatches:
-        logger.debug("inserting {} into 'workflowbatches' collection".format(
-            wb
-        ))
-        try:
-            db.workflowbatches.insert_one(wb)
-        except pymongo.errors.DuplicateKeyError:
-            db.workflowbatches.replace_one(wb, {'_id': wb['_id']})
+    return db, workflowbatches
 
 def create_workflowbatch_id(db, prefix, date):
     """
