@@ -8,7 +8,7 @@ import mongomock
 from bripipetools import model as docs
 from bripipetools import genlims
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def test_genlims_connection():
@@ -51,6 +51,10 @@ def mock_db(request):
     	"projects": ["P109-1", "P14-12"],
     	"flowcellId": "C6VG0ANXX",
         "type": "Galaxy workflow batch"}
+    )
+    db.beans.insert(
+        {'_id': 'foo',
+         'name': 'bar'}
     )
     def fin():
         logger.info(("[teardown] mock 'tg3' database, disconnect "
