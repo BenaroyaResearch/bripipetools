@@ -11,6 +11,11 @@ config = {
     'url': 'https://github.com/jaeddy/bripipetools',
     'license': 'MIT',
     'packages': ['bripipetools'],
+    'install_requires': [
+        'bs4',
+        'pymongo',
+        'pandas'
+    ],
     'zip_safe': False
 }
 
