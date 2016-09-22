@@ -11,9 +11,9 @@ from bripipetools import genlims
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-def test_genlims_connection():
-    # TODO: come up with a better way to test this
-    assert('samples' in genlims.db.collection_names())
+# def test_genlims_connection():
+#     # TODO: come up with a better way to test this
+#     assert('samples' in genlims.db.collection_names())
 
 @pytest.fixture(scope='function')
 def mock_db(request):
