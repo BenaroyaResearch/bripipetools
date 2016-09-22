@@ -16,6 +16,8 @@ config = {
         'pymongo',
         'pandas'
     ],
+    'setup_requires': ['pytest-runner'],
+    'tests_require': ['pytest', 'mock', 'mongomock'],
     'zip_safe': False
 }
 

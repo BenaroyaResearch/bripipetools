@@ -1,7 +1,11 @@
 .cache
-.pyc
 .Rproj.user
 .Rhistory
 .RData
 data
 tmp
+
+*.pyc
+/*.egg-info
+.eggs
+/dist/
