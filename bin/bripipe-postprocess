@@ -6,7 +6,6 @@ import sys
 
 import argparse
 
-import _mypath
 from bripipetools import postprocess
 
 def parse_input_args(parser=None):
