@@ -61,7 +61,8 @@ class SequencingImporter(object):
         Convert FlowcellRun object and insert into GenLIMS database.
         """
         flowcellrun = self._collect_flowcellrun()
-        logger.debug("inserting flowcell run {}".format(flowcellrun))
+        logger.debug("inserting flowcell run {} into {}"
+                     .format(flowcellrun, self.db.name))
         genlims.put_runs(self.db, flowcellrun.to_json())
 
     def _insert_sequencedlibraries(self):

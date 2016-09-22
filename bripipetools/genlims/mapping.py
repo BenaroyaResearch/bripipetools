@@ -41,7 +41,7 @@ def get_class(doc):
     doc_type = re.sub(' ', '', doc['type'].title())
     logger.debug("searching for {}".format(doc_type))
     return [c for c in classes
-            if c == doc_type][0]
+            if re.search(doc_type, c)][0]
 
 def map_to_object(doc):
     """
@@ -49,8 +49,8 @@ def map_to_object(doc):
     """
     doc_class = get_class(doc)
     MappedClass = getattr(docs, doc_class)
-    logger.debug("mapping to instance of type {}".format(doc_class))
-    obj = MappedClass(None)
+    logger.debug("mapping {} to instance of type {}".format(doc, doc_class))
+    obj = MappedClass(_id=doc['_id'])
     logger.debug("document has following fields: {}".format(doc.keys()))
     snake_doc = map_keys(doc)
     for k, v in snake_doc.items():

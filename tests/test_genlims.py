@@ -3,7 +3,7 @@ import os
 import re
 
 import pytest
-import mongomock
+from mock import Mock
 
 from bripipetools import model as docs
 from bripipetools import genlims
@@ -15,57 +15,38 @@ logger = logging.getLogger(__name__)
 #     # TODO: come up with a better way to test this
 #     assert('samples' in genlims.db.collection_names())
 
-@pytest.fixture(scope='function')
-def mock_db(request):
-    logger.info(("[setup] mock 'tg3' database, connect "
-                 "to mock 'tg3' Mongo database"))
-    db = mongomock.MongoClient().db
-    db.samples.insert(
-        {"_id": "lib7293",
-    	"projectId": 14,
-    	"projectName": "U01-Mexico 2011",
-    	"sampleId": "S2733",
-    	"libraryId": "lib7293",
-    	"parentId": "grRNA5942",
-    	"type": "library"}
-    )
-    db.runs.insert(
-        {"_id": "150615_D00565_0087_AC6VG0ANXX",
-        "date": "2015-06-15",
-    	"instrumentId": "D00565",
-    	"runNumber": 87,
-    	"flowcellId": "C6VG0ANXX",
-    	"flowcellPosition": "A",
-    	"type": "flowcell"}
-    )
-    db.workflowbatches.insert(
-        {"_id": "globusgalaxy_2016-04-12_1",
-        "workflowbatchFile": ("/genomics/Illumina/"
-                              "150615_D00565_0087_AC6VG0ANXX/"
-                              "globus_batch_submission/"
-                              "160412_P109-1_P14-12_C6VG0ANXX_"
-                              "optimized_truseq_unstrand_sr_grch38_"
-                              "v0.1_complete.txt"),
-        "date": "2016-04-12",
-    	"workflowId": "optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt",
-    	"projects": ["P109-1", "P14-12"],
-    	"flowcellId": "C6VG0ANXX",
-        "type": "Galaxy workflow batch"}
-    )
-    db.beans.insert(
-        {'_id': 'foo',
-         'name': 'bar'}
-    )
-    def fin():
-        logger.info(("[teardown] mock 'tg3' database, disconnect "
-                     "from mock 'tg3' Mongo database"))
-    request.addfinalizer(fin)
-    return db
-
 @pytest.mark.usefixtures('mock_db')
 class TestGenLIMSGMethodsWithMockDB:
 
     # GIVEN a mocked version of the TG3 Mongo database with example documents
+
+    def test_find_objects_exist(self, mock_db):
+        logger.info("test `find_objects()` when objects exist")
+
+        # WHEN querying for an object that exists in the database
+        mock_fn = Mock(name='mock_fn',
+                       return_value=(mock_db, {'_id': 'lib7293'}))
+        mock_fn.__name__ = 'mock_fn'
+        wrapped_fn = genlims.find_objects('samples')(mock_fn)
+        objects = wrapped_fn()
+
+        # THEN should return a non-empty list
+        assert(len(objects))
+
+    def test_find_objects_new(self, mock_db):
+        logger.info("test `find_objects()` when objects do not exist")
+
+        # WHEN querying for an object that does not exist in the database
+        mock_fn = Mock(name='mock_fn',
+                       return_value=(mock_db, {'_id': 'foo'}))
+        mock_fn.__name__ = 'mock_fn'
+        wrapped_fn = genlims.find_objects('samples')(mock_fn)
+        objects = wrapped_fn()
+
+        # THEN should return an empty list
+        assert(len(objects) == 0)
+
+    # TODO: test insert objects
 
     def test_get_samples(self, mock_db):
         logger.info("test `get_samples()`")
