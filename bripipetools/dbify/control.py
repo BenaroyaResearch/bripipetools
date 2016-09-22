@@ -16,7 +16,7 @@ class ImportManager(object):
     def __init__(self, path, db):
         logger.info("creating an instance of ImportManager")
         logger.debug("...with arguments (path: {}, db: {})"
-                     .format(path, db))
+                     .format(path, db.name))
         self.path = path
         self.db = db
         self._init_importer()
