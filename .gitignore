@@ -6,3 +6,5 @@ tmp
 /*.egg-info
 .eggs
 /dist/
+
+.coverage

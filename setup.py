@@ -17,7 +17,7 @@ config = {
         'pandas'
     ],
     'setup_requires': ['pytest-runner'],
-    'tests_require': ['pytest', 'mock', 'mongomock'],
+    'tests_require': ['pytest', 'pytest-cov', 'mock', 'mongomock'],
     'scripts' : [
         'bin/bripipe-dbify',
         'bin/bripipe-postprocess'
