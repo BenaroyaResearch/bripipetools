@@ -18,6 +18,10 @@ config = {
     ],
     'setup_requires': ['pytest-runner'],
     'tests_require': ['pytest', 'mock', 'mongomock'],
+    'scripts' : [
+        'bin/bripipe-dbify',
+        'bin/bripipe-postprocess'
+    ],
     'zip_safe': False
 }
 
