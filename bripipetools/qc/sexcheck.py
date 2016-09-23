@@ -64,4 +64,24 @@ class SexChecker(object):
                                how='inner')['count'] > 0)
         return float(total_y) / float(total_x)
 
-    # def _read_counts(self):
+    def _predict_sex(self, x_y_ratio):
+        """
+        Returns predicted sex based on ratio of detected Y to X genes.
+        """
+        return 'male' if x_y_ratio > 0.1 else 'female'
+
+    def update(self):
+        """
+        Add predicted sex validation field to processed library outputs and
+        return processed library object.
+        """
+        y_x_ratio = self._compute_y_x_ratio()
+        processed_data = [d for d in self.processedlibrary.processed_data
+                          if d['workflowbatch_id'] == self.workflowbatch_id][0]
+        processed_data.setdefault('validations', {})['sex_check'] = {
+            'y_x_ratio': y_x_ratio,
+            'predicted_sex': self._predict_sex(y_x_ratio),
+            'pass': None
+        }
+        logger.info("{}".format(processed_data))
+        return self.processedlibrary

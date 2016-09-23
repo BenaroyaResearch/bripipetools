@@ -89,3 +89,33 @@ class TestSexChecker:
 
         # THEN ratio should be expected value
         assert(y_x_ratio == 0)
+
+    def test_predict_sex_male(self, checker):
+        logger.info("test `_predict_sex()`, male ratio")
+
+        # WHEN sex is predicted from a ratio that should indicate male (> 0.1)
+        predicted_sex = checker._predict_sex(0.5)
+
+        # THEN predicted sex should be 'male'
+        assert(predicted_sex == 'male')
+
+    def test_predict_sex_female(self, checker):
+        logger.info("test `_predict_sex()`, female ratio")
+
+        # WHEN sex is predicted from a ratio that indicates female (<= 0.1)
+        predicted_sex = checker._predict_sex(0.05)
+
+        # THEN predicted sex should be 'female'
+        assert(predicted_sex == 'female')
+
+    def test_update(self, checker):
+        logger.info("test `append()`")
+
+        # WHEN sex check validation is appended to processed data for the
+        # processed library
+        processedlibrary = checker.update()
+
+        # THEN the processed library object should include the expected
+        # validation fields
+        assert(processedlibrary.processed_data[0]['validations']['sex_check']
+               == {'y_x_ratio': 0.0, 'predicted_sex': 'female', 'pass': None})
