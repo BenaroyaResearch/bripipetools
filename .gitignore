@@ -1,7 +1,8 @@
 .cache
-data
+data/_deprecated/
 tmp
 
+__pycache__
 *.pyc
 /*.egg-info
 .eggs
