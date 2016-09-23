@@ -403,6 +403,20 @@ class TestWorkflowBatchAnnotatorWithMockGenomicsServer:
         assert(all([type(pl) == docs.ProcessedLibrary
                     for pl in processedlibraries]))
 
+    def test_get_processed_libraries_w_qc(self, annotator):
+        logger.info("test `get_processed_libraries()`, add qc")
+
+        # WHEN collecting processed libraries for current workflow batch,
+        # and QC flag is set to True
+        processedlibraries = annotator.get_processed_libraries(qc=True)
+
+        # THEN should return 2 total processed libraries, each of which
+        # is a valid ProcessedLibrary object
+        assert(len(processedlibraries) == 2)
+        assert(all([type(pl) == docs.ProcessedLibrary
+                    for pl in processedlibraries]))
+        assert('validations' in processedlibraries[0].processed_data[0])
+
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestProcessedLibraryAnnotatorWithMockGenomicsServer:
