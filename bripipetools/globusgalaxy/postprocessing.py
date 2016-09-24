@@ -164,15 +164,15 @@ class GlobusOutputManager(object):
             else:
                 print("No problem outputs for {}".format(batch_file))
 
-    def curate_batches(self, dry_run=False):
-        """
-        For batches in ``batch_list``, organize all output files.
-
-        :type dry_run: bool
-        :param dry_run: If flag is ``True``, only print what would be done.
-        """
-        flowcell_dir = self.flowcell_dir
-        batch_list = self.batch_list
-        for batch_file in batch_list:
-            bc = curation.BatchCurator(batch_file, flowcell_dir)
-            bc.organize_files(dry_run=dry_run)
+    # def curate_batches(self, dry_run=False):
+    #     """
+    #     For batches in ``batch_list``, organize all output files.
+    #
+    #     :type dry_run: bool
+    #     :param dry_run: If flag is ``True``, only print what would be done.
+    #     """
+    #     flowcell_dir = self.flowcell_dir
+    #     batch_list = self.batch_list
+    #     for batch_file in batch_list:
+    #         bc = curation.BatchCurator(batch_file, flowcell_dir)
+    #         bc.organize_files(dry_run=dry_run)
