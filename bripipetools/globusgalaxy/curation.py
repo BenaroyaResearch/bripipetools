@@ -10,8 +10,8 @@ from bripipetools.util import strings
 from bripipetools.util import files
 from bripipetools.io import labels
 from bripipetools.io.parsers import WorkflowParser
-from bripipetools.globusgalaxy import fileops
-from bripipetools.globusgalaxy.annotation import GlobusOutputAnnotator
+# from bripipetools.globusgalaxy import fileops
+# from bripipetools.globusgalaxy.annotation import GlobusOutputAnnotator
 
 class BatchCurator(object):
     def __init__(self, batch_submit_file, flowcell_dir=None):
@@ -138,55 +138,55 @@ class BatchCurator(object):
             return problem_outputs
 
 
-    def curate_outputs(self):
-        """
-        For each sample in the processed batch, identify and classify each
-        output file present in the flowcell folder.
-
-        :rtype: dict
-        :return: A dict, where for each ``sample``, output files are detailed
-            and grouped by source.
-        """
-        workflow_name = self.workflow_name
-        sample_output_map = self.sample_output_map
-
-        print('\nWorkflow: {}'.format(workflow_name))
-        sample_output_info = {}
-        for idx, sample in enumerate(sample_output_map):
-
-            goa = GlobusOutputAnnotator(sample_output_map, sample)
-            sample_output_info[sample] = goa.get_output_info()
-        return sample_output_info
-
-    def organize_files(self, target_dir=None, sample_output_info=None,
-                       dry_run=False):
-        """
-        For the outputs identified, rename and reorganize files as needed.
-
-        :type target_dir: str
-        :param target_dir: path to folder where final output files are to be
-            saved
-        :type sample_output_info:
-        :param sample_output_info: A dict, where for each ``sample``, output
-            files are detailed with type, path, etc. and grouped by source
-            (usually shouldn't need to provide this as an input).
-        :type dry_run: bool
-        :param dry_run: If flag is ``True``, only print what would be done.
-        """
-        if sample_output_info is None:
-            sample_output_info = self.curate_outputs()
-
-        for idx, (sample, packet) in enumerate(sample_output_info.items()):
-            project_dir = self._match_sample_project(sample)
-            project_id, subproject_id = labels.get_project_id(project_dir)
-
-            print('>> Compiling ouputs for {} [P{}-{}] ({} of {})\n'
-                  .format(sample, project_id, subproject_id,
-                          idx + 1, len(sample_output_info)))
-
-            project_globus_dir = self._fix_globus_dir(project_dir)
-            fpm = fileops.FilePacketManager(packet, sample,
-                                            project_globus_dir)
-            fpm.munge_files(dry_run=dry_run)
+    # def curate_outputs(self):
+    #     """
+    #     For each sample in the processed batch, identify and classify each
+    #     output file present in the flowcell folder.
+    #
+    #     :rtype: dict
+    #     :return: A dict, where for each ``sample``, output files are detailed
+    #         and grouped by source.
+    #     """
+    #     workflow_name = self.workflow_name
+    #     sample_output_map = self.sample_output_map
+    #
+    #     print('\nWorkflow: {}'.format(workflow_name))
+    #     sample_output_info = {}
+    #     for idx, sample in enumerate(sample_output_map):
+    #
+    #         goa = GlobusOutputAnnotator(sample_output_map, sample)
+    #         sample_output_info[sample] = goa.get_output_info()
+    #     return sample_output_info
+    #
+    # def organize_files(self, target_dir=None, sample_output_info=None,
+    #                    dry_run=False):
+    #     """
+    #     For the outputs identified, rename and reorganize files as needed.
+    #
+    #     :type target_dir: str
+    #     :param target_dir: path to folder where final output files are to be
+    #         saved
+    #     :type sample_output_info:
+    #     :param sample_output_info: A dict, where for each ``sample``, output
+    #         files are detailed with type, path, etc. and grouped by source
+    #         (usually shouldn't need to provide this as an input).
+    #     :type dry_run: bool
+    #     :param dry_run: If flag is ``True``, only print what would be done.
+    #     """
+    #     if sample_output_info is None:
+    #         sample_output_info = self.curate_outputs()
+    #
+    #     for idx, (sample, packet) in enumerate(sample_output_info.items()):
+    #         project_dir = self._match_sample_project(sample)
+    #         project_id, subproject_id = labels.get_project_id(project_dir)
+    #
+    #         print('>> Compiling ouputs for {} [P{}-{}] ({} of {})\n'
+    #               .format(sample, project_id, subproject_id,
+    #                       idx + 1, len(sample_output_info)))
+    #
+    #         project_globus_dir = self._fix_globus_dir(project_dir)
+    #         fpm = fileops.FilePacketManager(packet, sample,
+    #                                         project_globus_dir)
+    #         fpm.munge_files(dry_run=dry_run)
 
         # TODO: return something...

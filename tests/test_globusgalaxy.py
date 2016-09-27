@@ -22,67 +22,67 @@ def globus_submit_manager():
     endpoint = 'jeddy#srvgridftp01'
     return submission.GlobusSubmitManager(flowcell_dir, workflow_dir, endpoint)
 
-class TestGlobusSubmitManager:
-    def test_init(self):
-        assert(globus_submit_manager())
-        assert('flowcell_dir' in dir(globus_submit_manager()))
-        assert('workflow_dir' in dir(globus_submit_manager()))
-        assert('endpoint' in dir(globus_submit_manager()))
-        assert('projects' in dir(globus_submit_manager()))
-        assert('workflows' in dir(globus_submit_manager()))
-
-    def test_set_workflows(self):
-        gsm = globus_submit_manager()
-        gsm._set_workflows()
-        assert(isinstance(gsm.workflows, list))
-        assert(len(gsm.workflows) == 6)
-        assert(gsm.workflows[0] ==
-               {'name': 'nextera_sr_grch38_v0.1_complete.txt',
-                'path': os.path.join(TEST_WORKFLOW_DIR,
-                                     'nextera_sr_grch38_v0.1_complete.txt'),
-                'projects': []})
-
-    def test_set_projects(self):
-        gsm = globus_submit_manager()
-        gsm._set_projects()
-        assert(isinstance(gsm.projects, list))
-        assert(len(gsm.projects) == 8)
-        assert(gsm.projects[0] ==
-               {'name': 'P109-1-21113094',
-                'path': os.path.join(TEST_UNALIGNED_DIR,
-                                     'P109-1-21113094')})
-
-    def test_format_workflow_choice(self):
-        assert((globus_submit_manager()
-                ._format_workflow_choice(
-                {'name': 'foo',
-                 'projects': [{'name': 'bar'}]}) ==
-               'foo [bar]'))
-
-    def test_select_workflow_0(self):
-        with mock.patch('__builtin__.raw_input', return_value="0"):
-            assert(globus_submit_manager()._select_workflow() ==
-                   {'name': 'nextera_sr_grch38_v0.1_complete.txt',
-                    'path': os.path.join(TEST_WORKFLOW_DIR,
-                                         'nextera_sr_grch38_v0.1_complete.txt'),
-                    'projects': []})
-
-    def test_select_projects_0(self):
-        with mock.patch('__builtin__.raw_input', return_value="0"):
-            assert(globus_submit_manager()._select_projects() ==
-                   [{'name': 'P109-1-21113094',
-                     'path': os.path.join(TEST_UNALIGNED_DIR,
-                                          'P109-1-21113094')}])
-
-    def test_update_batch_workflows_0_0_break(self):
-        with mock.patch('__builtin__.raw_input',
-                        side_effect=iter(["0", "0", ""])):
-            gsm = globus_submit_manager()
-            gsm._update_batch_workflows()
-            assert(gsm.workflows[0]['projects']
-                   == [{'name': 'P109-1-21113094',
-                        'path': os.path.join(TEST_UNALIGNED_DIR,
-                                             'P109-1-21113094')}])
+# class TestGlobusSubmitManager:
+#     def test_init(self):
+#         assert(globus_submit_manager())
+#         assert('flowcell_dir' in dir(globus_submit_manager()))
+#         assert('workflow_dir' in dir(globus_submit_manager()))
+#         assert('endpoint' in dir(globus_submit_manager()))
+#         assert('projects' in dir(globus_submit_manager()))
+#         assert('workflows' in dir(globus_submit_manager()))
+#
+#     def test_set_workflows(self):
+#         gsm = globus_submit_manager()
+#         gsm._set_workflows()
+#         assert(isinstance(gsm.workflows, list))
+#         assert(len(gsm.workflows) == 6)
+#         assert(gsm.workflows[0] ==
+#                {'name': 'nextera_sr_grch38_v0.1_complete.txt',
+#                 'path': os.path.join(TEST_WORKFLOW_DIR,
+#                                      'nextera_sr_grch38_v0.1_complete.txt'),
+#                 'projects': []})
+#
+#     def test_set_projects(self):
+#         gsm = globus_submit_manager()
+#         gsm._set_projects()
+#         assert(isinstance(gsm.projects, list))
+#         assert(len(gsm.projects) == 8)
+#         assert(gsm.projects[0] ==
+#                {'name': 'P109-1-21113094',
+#                 'path': os.path.join(TEST_UNALIGNED_DIR,
+#                                      'P109-1-21113094')})
+#
+#     def test_format_workflow_choice(self):
+#         assert((globus_submit_manager()
+#                 ._format_workflow_choice(
+#                 {'name': 'foo',
+#                  'projects': [{'name': 'bar'}]}) ==
+#                'foo [bar]'))
+#
+#     def test_select_workflow_0(self):
+#         with mock.patch('__builtin__.raw_input', return_value="0"):
+#             assert(globus_submit_manager()._select_workflow() ==
+#                    {'name': 'nextera_sr_grch38_v0.1_complete.txt',
+#                     'path': os.path.join(TEST_WORKFLOW_DIR,
+#                                          'nextera_sr_grch38_v0.1_complete.txt'),
+#                     'projects': []})
+#
+#     def test_select_projects_0(self):
+#         with mock.patch('__builtin__.raw_input', return_value="0"):
+#             assert(globus_submit_manager()._select_projects() ==
+#                    [{'name': 'P109-1-21113094',
+#                      'path': os.path.join(TEST_UNALIGNED_DIR,
+#                                           'P109-1-21113094')}])
+#
+#     def test_update_batch_workflows_0_0_break(self):
+#         with mock.patch('__builtin__.raw_input',
+#                         side_effect=iter(["0", "0", ""])):
+#             gsm = globus_submit_manager()
+#             gsm._update_batch_workflows()
+#             assert(gsm.workflows[0]['projects']
+#                    == [{'name': 'P109-1-21113094',
+#                         'path': os.path.join(TEST_UNALIGNED_DIR,
+#                                              'P109-1-21113094')}])
 
 from bripipetools.globusgalaxy import postprocessing
 
@@ -138,6 +138,6 @@ class TestGlobusOutputManager:
                      'optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt')
                      )])
 
-    def test_curate_batches_dummy(self):
-        with pytest.raises(IOError):
-            assert(globus_output_manager().curate_batches())
+    # def test_curate_batches_dummy(self):
+    #     with pytest.raises(IOError):
+    #         assert(globus_output_manager().curate_batches())

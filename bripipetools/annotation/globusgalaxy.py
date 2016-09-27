@@ -12,6 +12,7 @@ from .. import util
 from .. import parsing
 from .. import io
 from .. import genlims
+from .. import qc
 from .. import model as docs
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ class WorkflowBatchAnnotator(object):
         self.workflowbatch = self._init_workflowbatch()
 
         logger.debug("setting 'genomics' path")
+        self.genomics_root = genomics_root
         self.genomics_path = os.path.join(genomics_root, 'genomics')
 
     def _parse_batch_name(self, batch_name):
@@ -120,17 +122,35 @@ class WorkflowBatchAnnotator(object):
                 for p in s
                 if p['name'] == 'SampleName']
 
-    def get_processed_libraries(self, project=None):
+    def _add_qc_fields(self, processedlibrary):
+        """
+        Append QC metrics for specified sample validations to processed
+        data for a processed library.
+        """
+        logger.debug("adding sex check QC info for {}"
+                     .format(processedlibrary._id))
+        return qc.SexChecker(
+            processedlibrary=processedlibrary,
+            workflowbatch_id=self.workflowbatch._id,
+            genomics_root=self.genomics_root).update()
+
+    def get_processed_libraries(self, project=None, qc=False):
         """
         Collect processed library objects for workflow batch.
         """
         workflowbatch_id = self.workflowbatch._id
         logger.info("getting processed libraries for workflow batch {}"
                     .format(workflowbatch_id))
+
         return [ProcessedLibraryAnnotator(
             workflowbatch_id, sample_params, self.db
             ).get_processed_library()
-            for sample_params in self.workflowbatch_data['samples']]
+            if not qc else self._add_qc_fields(
+            ProcessedLibraryAnnotator(
+                workflowbatch_id, sample_params, self.db
+                ).get_processed_library())
+            for sample_params in self.workflowbatch_data['samples']
+            ]
 
 
 class ProcessedLibraryAnnotator(object):
