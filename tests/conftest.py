@@ -82,6 +82,7 @@ def mock_db(request):
         {"_id": "lib7293",
     	"projectId": 14,
     	"projectName": "U01-Mexico 2011",
+        "protocol": None,
     	"sampleId": "S2733",
     	"libraryId": "lib7293",
     	"parentId": "grRNA5942",

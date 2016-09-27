@@ -31,6 +31,7 @@ def insert_objects(collection):
         def wrapper(*args):
             db, objects = f(*args)
             objects = [objects] if not isinstance(objects, list) else objects
+            logger.debug("inserting list of objects: {}".format(objects))
             for o in objects:
                 logger.debug("inserting {} into {} collection"
                              .format(o, collection))
