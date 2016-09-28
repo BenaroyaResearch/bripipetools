@@ -36,6 +36,7 @@ def mock_db(request):
 
 @pytest.mark.usefixtures('mock_db')
 class TestGenLIMSOperations:
+
     # GIVEN a mocked version of the TG3 Mongo database with example documents
     # for samples, runs, and workflow batches collections
     @pytest.fixture(
@@ -158,7 +159,6 @@ class TestGenLIMSOperations:
         assert('skipField' not in new_object)
         assert(isinstance(new_object['arrayField'], list))
 
-
     def test_insert_objects_multiple_new(self, mock_db, testdata):
         # AND the target objects does not exist in the database
         logger.info("test `insert_objects()` with multiple new objects")
@@ -204,95 +204,50 @@ class TestGenLIMSOperations:
         assert(updated_object['updateField'] is not None)
         assert('baz' in updated_object['arrayField'])
 
+    # GIVEN wrapped get/put functions for specific collections
+    @pytest.fixture(
+        scope='function',
+        params=[
+            ('samples', {'get_fn': genlims.get_samples,
+                         'put_fn': genlims.put_samples}),
+            ('runs', {'get_fn': genlims.get_runs,
+                      'put_fn': genlims.put_runs}),
+            ('workflowbatches', {'get_fn': genlims.get_workflowbatches,
+                                 'put_fn': genlims.put_workflowbatches}),
+        ])
+    def wrappedfndata(self, request, mock_db):
+        # AND a minimal object present in the collection
+        logger.info("[setup] test data & wrapped functions for collection '{}'"
+                    .format(request.param[0]))
+        mock_db[request.param[0]].insert({'_id': 'mockobject'})
 
-    # def test_get_samples(self, mock_db):
-    #     logger.info("test `get_samples()`")
-    #
-    #     # WHEN querying with a known sample ID
-    #     query = {'_id': 'lib7293'}
-    #
-    #     # THEN ...
-    #     assert(genlims.get_samples(mock_db, query)[0]['_id'] == 'lib7293')
-    #
-    # def test_get_runs(self, mock_db):
-    #     logger.info("test `get_runs()`")
-    #
-    #     # WHEN querying with a known run ID
-    #     query = {'_id': '150615_D00565_0087_AC6VG0ANXX'}
-    #
-    #     # THEN ...
-    #     assert(genlims.get_runs(mock_db, query)[0]['_id'] ==
-    #         '150615_D00565_0087_AC6VG0ANXX')
-    #
-    # def test_get_workflowbatches(self, mock_db):
-    #     logger.info("test `get_workflowbatches()`")
-    #
-    #     # WHEN querying with a known workflow batch ID
-    #     query = {'_id': 'globusgalaxy_2016-04-12_1'}
-    #
-    #     # THEN ...
-    #     assert(genlims.get_workflowbatches(mock_db, query)[0]['_id'] ==
-    #         'globusgalaxy_2016-04-12_1')
-    #
-    # def test_get_workflowbatches_regex(self, mock_db):
-    #     logger.info("test `get_workflowbatches()`, regex")
-    #
-    #     # WHEN querying with a workflow batch ID regular expression
-    #     query = {'_id': {'$regex': 'globusgalaxy_2016-04-12_'}}
-    #
-    #     # THEN ...
-    #     assert(genlims.get_workflowbatches(mock_db, query)[0]['_id'] ==
-    #         'globusgalaxy_2016-04-12_1')
-    #
-    # def test_put_samples_one_sample(self, mock_db):
-    #     logger.info("test `put_samples()`, one sample")
-    #
-    #     # WHEN inserting one new sample
-    #     samples = {'_id': 'lib0000', 'type': 'library'}
-    #     genlims.put_samples(mock_db, samples)
-    #
-    #     # THEN new sample should be in database
-    #     assert(mock_db.samples.find_one({'_id': 'lib0000'}))
-    #
-    # def test_put_samples_multiple_samples(self, mock_db):
-    #     logger.info("test `put_samples()`, multiple samples")
-    #
-    #     # WHEN inserting three new samples
-    #     samples = [{'_id': 't000{}'.format(i), 'type': 'test lib'}
-    #                for i in range(3)]
-    #     genlims.put_samples(mock_db, samples)
-    #
-    #     # THEN the 3 new samples should be in database
-    #     assert(mock_db.samples.find_one({'_id': 't0000'}))
-    #     assert(len(list(mock_db.samples.find({'type': 'test lib'}))) == 3)
-    #
-    # def test_put_runs_multiple_runs(self, mock_db):
-    #     logger.info("test `put_runs()`, multiple runs")
-    #
-    #     # WHEN inserting three new runs
-    #     runs = [{'_id': 'r000{}'.format(i), 'type': 'test run'}
-    #             for i in range(3)]
-    #     genlims.put_runs(mock_db, runs)
-    #
-    #     # THEN the 3 new runs should be in database
-    #     assert(mock_db.runs.find_one({'_id': 'r0000'}))
-    #     assert(len(list(mock_db.runs.find({'type': 'test run'}))) == 3)
-    #
-    # def test_put_workflowbatches_multiple_workflowbatches(self, mock_db):
-    #     logger.info("test `put_workflowbatches()`, multiple workflow batches")
-    #
-    #     # WHEN inserting three new workflow batches
-    #     workflowbatches = [{'_id': 'wb000{}'.format(i),
-    #                         'type': 'test workflow batch'}
-    #             for i in range(3)]
-    #     genlims.put_workflowbatches(mock_db, workflowbatches)
-    #
-    #     # THEN the 3 new workflowbatches should be in database
-    #     assert(mock_db.workflowbatches.find_one({'_id': 'wb0000'}))
-    #     assert(len(list(mock_db.workflowbatches.find(
-    #         {'type': 'test workflow batch'}
-    #         ))) == 3)
-    #
+        def fin():
+            logger.info("[teardown] test data for collection '{}', "
+                        "drop collection"
+                        .format(request.param[0]))
+            mock_db[request.param[0]].drop()
+        request.addfinalizer(fin)
+        return request.param
+
+    def test_wrapped_get_functions(self, mock_db, wrappedfndata):
+        logger.info("test `get_{}()`".format(wrappedfndata[0]))
+
+        # WHEN inserting new object(s)
+        objects = wrappedfndata[1]['get_fn'](mock_db, {'_id': 'mockobject'})
+
+        # THEN should be list of length 1
+        assert(len(objects) == 1)
+
+    def test_wrapped_put_functions(self, mock_db, wrappedfndata):
+        logger.info("test `get_{}()`".format(wrappedfndata[0]))
+
+        # WHEN inserting new object(s)
+        wrappedfndata[1]['put_fn'](mock_db, {'_id': 'new_object'})
+
+        # THEN should be list of length 1
+        assert(len(list(mock_db[wrappedfndata[0]].find()))
+               == 2)
+
     # def test_create_workflowbatch_id_existing_date(self, mock_db):
     #     logger.info("test `create_workflowbatch_id()`, existing date")
     #
