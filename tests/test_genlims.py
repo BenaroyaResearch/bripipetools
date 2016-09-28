@@ -248,32 +248,39 @@ class TestGenLIMSOperations:
         assert(len(list(mock_db[wrappedfndata[0]].find()))
                == 2)
 
-    # def test_create_workflowbatch_id_existing_date(self, mock_db):
-    #     logger.info("test `create_workflowbatch_id()`, existing date")
-    #
-    #     # WHEN creating new workflow batch ID with prefix 'globus' and
-    #     # date '2016-04-12' - an existing prefix/date combination
-    #     wb_id = genlims.create_workflowbatch_id(
-    #         mock_db, 'globusgalaxy', '2016-04-12'
-    #     )
-    #
-    #     # THEN constructed workflow batch ID should end in number 2
-    #     assert(wb_id == 'globusgalaxy_2016-04-12_2')
-    #
-    # def test_create_workflowbatch_id_new_date(self, mock_db):
-    #     logger.info("test `create_workflowbatch_id()`, new date")
-    #
-    #     # WHEN creating new workflow batch ID with prefix 'globus' and
-    #     # date '2016-04-12' - an new prefix/date combination
-    #     mock_db.workflowbatches.delete_one(
-    #         {'_id': 'globusgalaxy_2016-04-12_1'}
-    #     )
-    #     wb_id = genlims.create_workflowbatch_id(
-    #         mock_db, 'globusgalaxy', '2016-04-12'
-    #     )
-    #
-    #     # THEN constructed workflow batch ID should end in number 1
-    #     assert(wb_id == 'globusgalaxy_2016-04-12_1')
+    def test_create_workflowbatch_id_new(self, mock_db):
+        # GIVEN a prefix/date combination that does not yet exist in
+        # the database
+        logger.info("test `create_workflowbatch_id()`, new prefix/date")
+
+        # WHEN creating new workflow batch ID
+        wb_id = genlims.create_workflowbatch_id(
+            db=mock_db,
+            prefix='mockprefix',
+            date='mockdate')
+
+        # THEN constructed workflow batch ID should end in number 1
+        assert(wb_id == 'mockprefix_mockdate_1')
+
+    def test_create_workflowbatch_id_existing(self, mock_db):
+        # GIVEN a prefix/date combination that already exists in
+        # the database
+        logger.info("test `create_workflowbatch_id()`, existing prefix/date")
+
+        mock_db.workflowbatches.insert(
+            {'_id': 'mockprefix_mockdate_1',
+             'date': 'mockdate'})
+
+        # WHEN creating new workflow batch ID
+        wb_id = genlims.create_workflowbatch_id(
+            db=mock_db,
+            prefix='mockprefix',
+            date='mockdate')
+
+        # THEN constructed workflow batch ID should end in number 2
+        assert(wb_id == 'mockprefix_mockdate_2')
+
+
 
 # class TestMapping:
 #     # GIVEN any state

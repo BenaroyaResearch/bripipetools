@@ -101,7 +101,7 @@ def create_workflowbatch_id(db, prefix, date):
     if len(workflowbatches):
         while True:
             num_regex = re.compile('_{}$'.format(num))
-            logger.debug("searching for matched workflowbatches {} ending in {}"
+            logger.debug("searching for workflowbatches {} ending in {}"
                          .format(workflowbatches, num))
             if any([num_regex.search(wb['_id']) for wb in workflowbatches]):
                 num += 1
