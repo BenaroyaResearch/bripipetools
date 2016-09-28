@@ -236,6 +236,82 @@ class TestHtseqCountsFile:
         assert(len(counts_df.columns) == 2)
 
 
+@pytest.mark.usefixtures('mock_genomics_server')
+class TestFastQCFile:
+    @pytest.fixture(scope='class')
+    def qcfile(self, request, mock_genomics_server):
+        # GIVEN a FastQCFile with mock 'genomics' server path to file
+        logger.info("[setup] FastQCFile test instance")
+
+        fastqcfile = io.FastQCFile(
+            path=mock_genomics_server['fastqc_qc_file'])
+
+        def fin():
+            logger.info("[teardown] FastQCFile mock instance")
+        request.addfinalizer(fin)
+        return fastqcfile
+
+    def test_read_file(self, qcfile):
+        logger.info("test `_read_file()`")
+
+        # WHEN the file specified by path is read
+        qcfile._read_file()
+        raw_text = qcfile.data['raw']
+
+        # THEN class should have raw text stored in data attribute and raw
+        # text should be a list of length 5
+        assert(raw_text)
+        assert(len(raw_text) == 6028)
+
+    def test_clean_header(self, qcfile):
+        logger.info("test `_clean_header()`")
+
+        # WHEN header is cleaned of extra characters and converted to
+        # snake case
+
+        # THEN cleaned header should match expected result
+        assert(qcfile._clean_header('>>HEADER One') == 'header_one')
+        assert(qcfile._clean_header('#HEADER Two') == 'header_two')
+
+    def test_locate_sections(self, qcfile):
+        logger.info("test `_locate_sections()`")
+
+        # WHEN sections are located in the file
+        sections = qcfile._locate_sections()
+
+        # THEN should be dictionary of length 12 with correct structure
+        assert(len(sections) == 12)
+        assert(sections['basic_statistics'] == (1, 10))
+
+    def test_get_section_status(self, qcfile):
+        logger.info("test `_get_section_status()`")
+
+        # WHEN section header line is parsed to retrieve status
+        (section_name, section_status) = qcfile._get_section_status(
+            'basic_statistics', (1, 10))
+
+        # THEN should return a tuple with the expected status
+        assert((section_name, section_status) == ('basic_statistics', 'pass'))
+
+    def test_parse_section_table(self, qcfile):
+        logger.info("test `_parse_section_table()`")
+
+        # WHEN a table of key-value pairs within a section is parsed
+        section_data = qcfile._parse_section_table((1, 10))
+
+        # THEN should return a list of expected length
+        assert(len(section_data) == 7)
+
+    def test_parse(self, qcfile):
+        logger.info("test `parse()`")
+
+        # WHEN FastQC file is parsed
+        fastqcdata = qcfile.parse()
+
+        # THEN should return a dictionary of expected length
+        assert(isinstance(fastqcdata, dict))
+        assert(len(fastqcdata) == 20)
+
 # TODO: clean up old testing setup for workflow batch file IO!
 
 TEST_ROOT_DIR = './tests/test-data/'
