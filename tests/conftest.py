@@ -40,6 +40,9 @@ def mock_genomics_server(request):
         mock_counts_path, 'lib7294_C6VG0ANXX_htseq_counts.txt')
     mock_fastqc_qc_file = os.path.join(
         mock_qc_path, 'lib7294_C6VG0ANXX_fastqc_qc.txt')
+    mock_fastqc_qc_file_overrep_seqs = os.path.join(
+        mock_flowcell_path, 'Project_P109-1Processed_160412',
+        'QC', 'lib6605_C6VG0ANXX_fastqc_qc.txt')
     mock_metrics_combined_filename = '{}_combined_metrics.csv'.format(
         'P14-12_C6VG0ANXX_160412')
     mock_counts_combined_filename = '{}_combined_counts.csv'.format(
@@ -68,6 +71,7 @@ def mock_genomics_server(request):
             'htseq_metrics_file': mock_htseq_metrics_file,
             'htseq_counts_file': mock_htseq_counts_file,
             'fastqc_qc_file': mock_fastqc_qc_file,
+            'fastqc_qc_file_overrep_seqs': mock_fastqc_qc_file_overrep_seqs,
             'metrics_combined_filename': mock_metrics_combined_filename,
             'counts_combined_filename': mock_counts_combined_filename}
     def fin():

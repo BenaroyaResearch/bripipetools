@@ -312,6 +312,33 @@ class TestFastQCFile:
         assert(isinstance(fastqcdata, dict))
         assert(len(fastqcdata) == 20)
 
+    @pytest.fixture(scope='class')
+    def qcfile_overrep_seqs(self, request, mock_genomics_server):
+        # GIVEN a FastQCFile with mock 'genomics' server path to file
+        # that includes overrepresented sequences
+        logger.info("[setup] FastQCFile test instance")
+
+        fastqcfile = io.FastQCFile(
+            path=mock_genomics_server['fastqc_qc_file_overrep_seqs'])
+
+        def fin():
+            logger.info("[teardown] FastQCFile mock instance")
+        request.addfinalizer(fin)
+        return fastqcfile
+
+    def test_parse_overrepresented_seqs(self, qcfile_overrep_seqs):
+        logger.info("test `parse_overrepresented_seqs()`")
+
+        # WHEN FastQC file is parsed
+        overrepseqs = qcfile_overrep_seqs.parse_overrepresented_seqs()
+
+        # THEN should return a list of dictionaries with overrepresented
+        # sequence info
+        assert(isinstance(overrepseqs, list))
+        assert(len(overrepseqs) == 2)
+        assert(isinstance(overrepseqs[0], dict))
+        assert(len(overrepseqs[0]) == 4)
+
 # TODO: clean up old testing setup for workflow batch file IO!
 
 TEST_ROOT_DIR = './tests/test-data/'
