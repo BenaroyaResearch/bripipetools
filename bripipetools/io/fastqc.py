@@ -96,12 +96,18 @@ class FastQCFile(object):
         dictionaries.
         """
         sections = self._locate_sections()
-        section_start, section_end = sections['overrepresented_sequences']
-        overrep_seq_table = self.data['raw'][section_start+1:section_end]
+        section_status = self._get_section_status(
+            'overrepresented_sequences',
+            sections['overrepresented_sequences'])
+        if section_status[-1] != 'pass':
+            section_start, section_end = sections['overrepresented_sequences']
+            overrep_seq_table = self.data['raw'][section_start+1:section_end]
 
-        headers = [self._clean_header(item)
-                   for item in overrep_seq_table[0].rstrip().split('\t')]
-        return [dict(zip(headers,
-                         [self._clean_value(item)
-                          for item in l.rstrip().split('\t')]))
-                for l in overrep_seq_table[1:]]
+            headers = [self._clean_header(item)
+                       for item in overrep_seq_table[0].rstrip().split('\t')]
+            return [dict(zip(headers,
+                             [self._clean_value(item)
+                              for item in l.rstrip().split('\t')]))
+                    for l in overrep_seq_table[1:]]
+        else:
+            return []

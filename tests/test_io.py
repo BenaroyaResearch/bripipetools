@@ -326,10 +326,10 @@ class TestFastQCFile:
         request.addfinalizer(fin)
         return fastqcfile
 
-    def test_parse_overrepresented_seqs(self, qcfile_overrep_seqs):
-        logger.info("test `parse_overrepresented_seqs()`")
+    def test_parse_overrepresented_seqs_present(self, qcfile_overrep_seqs):
+        logger.info("test `parse_overrepresented_seqs()`, seqs present")
 
-        # WHEN FastQC file is parsed
+        # WHEN FastQC file is parsed and overrepresented sequences are present
         overrepseqs = qcfile_overrep_seqs.parse_overrepresented_seqs()
 
         # THEN should return a list of dictionaries with overrepresented
@@ -338,6 +338,16 @@ class TestFastQCFile:
         assert(len(overrepseqs) == 2)
         assert(isinstance(overrepseqs[0], dict))
         assert(len(overrepseqs[0]) == 4)
+
+    def test_parse_overrepresented_seqs_absent(self, qcfile):
+        logger.info("test `parse_overrepresented_seqs()`, no seqs")
+
+        # WHEN FastQC file is parsed and overrepresented sequences are absent
+        overrepseqs = qcfile.parse_overrepresented_seqs()
+
+        # THEN should return an empty list
+        assert(isinstance(overrepseqs, list))
+        assert(len(overrepseqs) == 0)
 
 # TODO: clean up old testing setup for workflow batch file IO!
 
