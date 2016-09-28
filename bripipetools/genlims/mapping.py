@@ -1,5 +1,6 @@
 """
-Methods to map from Mongo documents to model classes.
+bripipetools mapping submodule: methods to map from Mongo documents to model
+classes.
 """
 import logging
 import re
@@ -31,9 +32,15 @@ def map_keys(obj):
     else:
         return obj
 
-def get_class(doc):
+def get_model_class(doc):
     """
     Find the matching class for the document, based on its type.
+
+    :type doc: dict
+    :param doc: A dict representing a MongoDB document/object.
+    :rtype: str
+    :return: A string representing the name of the matched class
+        from the model module.
     """
     classes = [n for n in dir(docs)
                if re.search('^[A-Z]', n)]
@@ -46,8 +53,13 @@ def get_class(doc):
 def map_to_object(doc):
     """
     Convert document to model class of appropriate type.
+
+    :type doc: dict
+    :param doc: A dict representing a MongoDB document/object.
+    :rtype: type[docs.TG3Object]
+    :return: An new instance of the matched model class. 
     """
-    doc_class = get_class(doc)
+    doc_class = get_model_class(doc)
     MappedClass = getattr(docs, doc_class)
     logger.debug("mapping {} to instance of type {}".format(doc, doc_class))
     obj = MappedClass(_id=doc['_id'])

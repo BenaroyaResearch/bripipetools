@@ -10,7 +10,11 @@ import pymongo
 
 def find_objects(collection):
     """
-    Return documents from specified collection based on query.
+    Return a decorator that retrieves objects from the specified
+    collection, given a db connection and query.
+
+    :type collection: str
+    :param collection: String indicating the name of the collection.
     """
     def decorator(f):
         @wraps(f)
@@ -24,8 +28,12 @@ def find_objects(collection):
 
 def insert_objects(collection):
     """
-    Insert each object in list into specified collection; if object exists,
-    update any individual fields that are not empty in the input object.
+    Return a decorator that inserts one or more objectsin into
+    specified collection; if object exists, updates any individual
+    fields that are not empty in the input object.
+
+    :type collection: str
+    :param collection: String indicating the name of the collection.
     """
     def decorator(f):
         @wraps(f)

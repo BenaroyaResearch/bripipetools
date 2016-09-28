@@ -296,15 +296,15 @@ class TestMapping:
             {'a_b': [{'b_c': None}]})
         assert(genlims.map_keys({'_id': None}) == {'_id': None})
 
-    def test_get_class(self):
-        logger.info("test `_get_class()`")
+    def test_get_model_class(self):
+        logger.info("test `_get_model_class()`")
 
         # WHEN searching for matched model class based on object type
 
         # THEN should return expected class name
-        assert(genlims.get_class({'type': 'sequenced library'})
+        assert(genlims.get_model_class({'type': 'sequenced library'})
                == 'SequencedLibrary')
-        assert(genlims.get_class({'type': 'library'})
+        assert(genlims.get_model_class({'type': 'library'})
                == 'Library')
 
     def test_map_to_object(self):
@@ -319,12 +319,12 @@ class TestMapping:
                             'sampleNumber': 1}]}
         obj = genlims.map_to_object(doc)
 
-        # THEN ...
+        # THEN the model class instance should be the correct type and
+        # include the appropriately formatted fields/attributes
+        # TODO: try to remove dependency on model/docs module when testing,
+        # if possible (and maybe even in the method itself)
         assert(type(obj) is docs.SequencedLibrary)
-        assert(hasattr(obj, '_id'))
-        assert(obj._id == 'lib7293_C6VG0ANXX')
-        assert(obj.parent_id == 'lib7293')
-        assert(obj.type == 'sequenced library')
-        assert(obj.raw_data == [{'path': None,
-                                 'lane_id': 'L001',
-                                 'sample_number': 1}])
+        assert(all([hasattr(obj, field)
+                    for field in ['_id', 'parent_id', 'type', 'raw_data']]))
+        assert(all([field in obj.raw_data]
+                    for field in ['path', 'lane_id', 'sample_number']))
