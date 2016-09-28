@@ -10,7 +10,11 @@ import pymongo
 
 def find_objects(collection):
     """
-    Return documents from specified collection based on query.
+    Return a decorator that retrieves objects from the specified
+    collection, given a db connection and query.
+
+    :type collection: str
+    :param collection: String indicating the name of the collection.
     """
     def decorator(f):
         @wraps(f)
@@ -24,20 +28,28 @@ def find_objects(collection):
 
 def insert_objects(collection):
     """
-    Insert each object in list into specified collection.
+    Return a decorator that inserts one or more objectsin into
+    specified collection; if object exists, updates any individual
+    fields that are not empty in the input object.
+
+    :type collection: str
+    :param collection: String indicating the name of the collection.
     """
     def decorator(f):
         @wraps(f)
         def wrapper(*args):
             db, objects = f(*args)
             objects = [objects] if not isinstance(objects, list) else objects
+            logger.debug("inserting list of objects: {}".format(objects))
             for o in objects:
                 logger.debug("inserting {} into {} collection"
                              .format(o, collection))
-                try:
-                    db[collection].insert_one(o)
-                except pymongo.errors.DuplicateKeyError:
-                    db[collection].replace_one(o, {'_id': o['_id']})
+                for k, v in o.items():
+                    if v is not None:
+                        logger.debug("updating field {}".format(k))
+                        db[collection].update_one({'_id': o['_id']},
+                            {'$set': {k: v}}, upsert=True)
+
         return wrapper
     return decorator
 
@@ -97,7 +109,7 @@ def create_workflowbatch_id(db, prefix, date):
     if len(workflowbatches):
         while True:
             num_regex = re.compile('_{}$'.format(num))
-            logger.debug("searching for matched workflowbatches {} ending in {}"
+            logger.debug("searching for workflowbatches {} ending in {}"
                          .format(workflowbatches, num))
             if any([num_regex.search(wb['_id']) for wb in workflowbatches]):
                 num += 1

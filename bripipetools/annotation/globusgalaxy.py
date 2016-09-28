@@ -58,6 +58,7 @@ class WorkflowBatchAnnotator(object):
         logger.info("initializing GalaxyWorkflowBatch instance")
         workflowbatch_file = util.swap_root(self.workflowbatch_file,
                                             'genomics', '/')
+
         try:
             logger.debug("getting GalaxyWorkflowBatch from GenLIMS; "
                          "searching for record with batch file {}"
@@ -65,25 +66,21 @@ class WorkflowBatchAnnotator(object):
             return genlims.map_to_object(
                 genlims.get_workflowbatches(self.db,
                     {'workflowbatchFile': workflowbatch_file}
-                    )[0]
-                )
+                    )[0])
         except IndexError:
             logger.debug("creating new GalaxyWorkflowBatch object",
                          exc_info=True)
 
             batch_items = self._parse_batch_name(
-                self.workflowbatch_data['batch_name']
-                )
+                self.workflowbatch_data['batch_name'])
 
             workflowbatch_id = genlims.create_workflowbatch_id(
                 db = self.db,
                 prefix = 'globusgalaxy',
-                date = batch_items['date']
-                )
+                date = batch_items['date'])
             return docs.GalaxyWorkflowBatch(
                 _id=workflowbatch_id,
-                workflowbatch_file=workflowbatch_file
-                )
+                workflowbatch_file=workflowbatch_file)
 
     def _update_workflowbatch(self):
         """
@@ -92,8 +89,7 @@ class WorkflowBatchAnnotator(object):
         logger.debug("updating GalaxyWorkflowBatch object attributes")
 
         batch_items = self._parse_batch_name(
-            self.workflowbatch_data['batch_name']
-            )
+            self.workflowbatch_data['batch_name'])
 
         self.workflowbatch.workflow_id = self.workflowbatch_data['workflow_name']
         self.workflowbatch.date = batch_items['date']
@@ -180,11 +176,11 @@ class ProcessedLibraryAnnotator(object):
         if unsuccessful, create new ``ProcessedLibrary`` object.
         """
         logger.info("initializing ProcessedLibrary instance")
+
         try:
             logger.debug("getting ProcessedLibrary from GenLIMS")
             return genlims.map_to_object(
-                genlims.get_samples(self.db, {'_id': self.proclib_id})[0]
-                )
+                genlims.get_samples(self.db, {'_id': self.proclib_id})[0])
         except IndexError:
             logger.debug("creating new ProcessedLibrary object")
             return docs.ProcessedLibrary(_id=self.proclib_id)
@@ -224,8 +220,7 @@ class ProcessedLibraryAnnotator(object):
                     ).append(
                         {'source': output_items['source'],
                          'file': util.swap_root(v, 'genomics', '/'),
-                         'name': output_items['name']}
-                     )
+                         'name': output_items['name']})
         return grouped_outputs
 
     def _append_processed_data(self):
@@ -235,8 +230,7 @@ class ProcessedLibraryAnnotator(object):
         """
         self.processedlibrary.processed_data.append(
             {'workflowbatch_id': self.workflowbatch_id,
-             'outputs': self._group_outputs()}
-             )
+             'outputs': self._group_outputs()})
 
     def _update_processedlibrary(self):
         """

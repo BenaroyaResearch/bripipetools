@@ -188,7 +188,7 @@ class GalaxyWorkflowBatch(TG3Object):
     """
     GenLIMS object in 'workflow batches' collection of type 'Galaxy workflow'
     """
-    def __init__(self, workflowbatch_file, **kwargs):
+    def __init__(self, workflowbatch_file=None, **kwargs):
         workflow_batch_type = 'Galaxy workflow batch'
         self.workflowbatch_file = workflowbatch_file
         super(GalaxyWorkflowBatch, self).__init__(type=workflow_batch_type,
