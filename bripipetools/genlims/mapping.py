@@ -18,6 +18,7 @@ def map_keys(obj):
     :type obj: dict, list
     :param obj: A dict or list of dicts with string keys to be
         converted.
+
     :rtype: dict, list
     :return: A dict or list of dicts with string keys converted from
         camelCase to snake_case.
@@ -38,6 +39,7 @@ def get_model_class(doc):
 
     :type doc: dict
     :param doc: A dict representing a MongoDB document/object.
+
     :rtype: str
     :return: A string representing the name of the matched class
         from the model module.
@@ -56,8 +58,9 @@ def map_to_object(doc):
 
     :type doc: dict
     :param doc: A dict representing a MongoDB document/object.
+
     :rtype: type[docs.TG3Object]
-    :return: An new instance of the matched model class. 
+    :return: An new instance of the matched model class.
     """
     doc_class = get_model_class(doc)
     MappedClass = getattr(docs, doc_class)

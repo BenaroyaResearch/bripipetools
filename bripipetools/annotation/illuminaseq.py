@@ -35,8 +35,7 @@ class FlowcellRunAnnotator(object):
         try:
             logger.debug("getting FlowcellRun from GenLIMS")
             return genlims.map_to_object(
-                genlims.get_runs(self.db, {'_id': self.run_id})[0]
-                )
+                genlims.get_runs(self.db, {'_id': self.run_id})[0])
         except IndexError:
             logger.debug("creating new FlowcellRun object", exc_info=True)
             return docs.FlowcellRun(_id=self.run_id)
@@ -53,8 +52,7 @@ class FlowcellRunAnnotator(object):
                     if p == self.flowcellrun._id][0]
         except OSError:
             logger.error("'genomics' path '{}' is invalid".format(
-                self.genomics_path
-            ))
+                self.genomics_path))
             raise
 
     def _get_unaligned_path(self):
@@ -73,8 +71,7 @@ class FlowcellRunAnnotator(object):
         """
         unaligned_path = self._get_unaligned_path()
         logger.info("collecting list of projects")
-        return [p
-                for p in os.listdir(unaligned_path)
+        return [p for p in os.listdir(unaligned_path)
                 if len(parsing.get_project_label(p))]
 
     def get_libraries(self, project=None):
@@ -114,6 +111,7 @@ class FlowcellRunAnnotator(object):
                         for l in libraries]
         return sequencedlibraries
 
+
 class SequencedLibraryAnnotator(object):
     """
     Identifies, stores, and updates information about a sequenced library.
@@ -139,8 +137,7 @@ class SequencedLibraryAnnotator(object):
         try:
             logger.debug("getting SequencedLibrary from GenLIMS")
             return genlims.map_to_object(
-                genlims.get_samples(self.db, {'_id': self.seqlib_id})[0]
-                )
+                genlims.get_samples(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
             logger.debug("creating new SequencedLibrary object")
             return docs.SequencedLibrary(_id=self.seqlib_id)
@@ -150,8 +147,7 @@ class SequencedLibraryAnnotator(object):
         Locate and store details about raw data for sequenced library.
         """
         logger.debug("collecting raw data details for library {}".format(
-            self.library_id
-        ))
+            self.library_id))
         return [parsing.parse_fastq_filename(f)
                 for f in os.listdir(self.path)
                 if not re.search('empty', f)]
@@ -173,9 +169,7 @@ class SequencedLibraryAnnotator(object):
         """
         Return sequenced library object with updated fields.
         """
-
         self._update_sequencedlibrary()
         logger.debug("returning sequenced library object: {}".format(
-            self.sequencedlibrary.__dict__
-        ))
+            self.sequencedlibrary.__dict__))
         return self.sequencedlibrary
