@@ -16,17 +16,20 @@ class TestOutputStitcher:
                                               'len_outputs': 5,
                                               'lib': 'lib7294_C6VG0ANXX',
                                               'len_data': 5,
-                                              'len_table': 2}),
+                                              'len_table': 2,
+                                              'len_os_df': 0}),
                             ('qc_path', {'type': 'qc',
                                          'len_outputs': 1,
                                          'lib': 'lib7294_C6VG0ANXX',
                                          'len_data': 1,
-                                         'len_table': 2}),
+                                         'len_table': 2,
+                                         'len_os_df': 0}),
                             ('counts_path', {'type': 'counts',
                                              'len_outputs': 1,
                                              'lib': 'lib7294_C6VG0ANXX',
                                              'len_data': 1,
-                                             'len_table': 100})
+                                             'len_table': 100,
+                                             'len_os_df': 0})
                             ])
     def outputstitcherdata(self, request, mock_genomics_server):
         logger.info("[setup] OutputStitcher test instance "
@@ -118,6 +121,13 @@ class TestOutputStitcher:
         assert(combined_filename
                == mock_genomics_server['{}_combined_filename'.format(
                 output_type)])
+
+    def test_build_overrepresented_seq_df(self, outputstitcherdata):
+        (outputstitcher, expected_output) = outputstitcherdata
+
+        overrep_seq_df = outputstitcher._build_overrepresented_seq_df()
+
+        assert(len(overrep_seq_df) == expected_output['len_os_df'])
 
     def test_write_table(self, outputstitcherdata, mock_genomics_server):
         logger.info("test `write_table()`")

@@ -141,7 +141,7 @@ class OutputStitcher(object):
 
     def _add_mapped_reads_column(self, data):
         """
-        Add mapped_reads_w_dups column to table data.
+        Add mapped_reads_w_dups column to metrics table data.
         """
         for idx, row in enumerate(data[1:]):
             metrics = dict(zip(data[0], row))
@@ -166,6 +166,27 @@ class OutputStitcher(object):
                                           date)
         return '{}_combined_{}.csv'.format(filename_base.rstrip('_'),
                                            self.type)
+
+    def _build_overrepresented_seq_df(self):
+        """
+        Parse and combine overrepresented sequences tables from
+        FastQC files.
+        """
+        outputs = self._get_outputs(self.type)
+        overrep_seq_df = pd.DataFrame([])
+        if self.type == 'qc':
+            for o in outputs:
+                logger.debug("parsing overrepresented sequences "
+                             "from output file {}".format(o))
+                out_items = self._parse_output_filename(o)
+                out_source, out_type, proclib_id = out_items.values()
+                logger.debug("storing data from {} in {} {}".format(
+                    out_source, proclib_id, out_type))
+                out_parser = io.FastQCFile(path=o)
+                o_df = (pd.DataFrame(out_parser.parse_overrepresented_seqs())
+                        .assign(libId=proclib_id))
+                overrep_seq_df = overrep_seq_df.append(o_df)
+        return overrep_seq_df
 
     def write_table(self):
         """
