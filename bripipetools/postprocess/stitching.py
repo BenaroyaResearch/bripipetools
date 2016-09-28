@@ -29,17 +29,22 @@ class OutputStitcher(object):
         """
         Return predicted output type based on specified path.
         """
-        output_types = ['metrics', 'counts']
-        return [t for t in output_types if re.search(t, self.path)][0]
+        output_types = ['metrics', 'QC', 'counts']
+        return [t.lower() for t in output_types if re.search(t, self.path)][0]
 
     def _get_outputs(self, output_type):
         """
         Return list of outputs of specified type.
         """
+        output_filetypes = {'metrics': 'txt|html',
+                            'qc': 'txt',
+                            'counts': 'txt'}
         return [os.path.join(self.path, f)
                 for f in os.listdir(self.path)
                 if re.search(output_type, f)
-                and not re.search('combined', f)]
+                and not re.search('combined', f)
+                and re.search(output_filetypes[output_type],
+                              os.path.splitext(f)[-1])]
 
     def _parse_output_filename(self, output_filename):
         """
@@ -70,6 +75,7 @@ class OutputStitcher(object):
                                'picard_markdups': getattr(io, 'PicardMetricsFile'),
                                'picard_align': getattr(io, 'PicardMetricsFile'),
                                'tophat_stats': getattr(io, 'TophatStatsFile')},
+                   'qc': {'fastqc': getattr(io, 'FastQCFile')},
                    'counts': {'htseq': getattr(io, 'HtseqCountsFile')}}
         logger.debug("matched parser {} for output type {} and source {}"
                      .format(parsers[output_type][output_source],

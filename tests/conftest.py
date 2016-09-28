@@ -45,6 +45,8 @@ def mock_genomics_server(request):
         'QC', 'lib6605_C6VG0ANXX_fastqc_qc.txt')
     mock_metrics_combined_filename = '{}_combined_metrics.csv'.format(
         'P14-12_C6VG0ANXX_160412')
+    mock_qc_combined_filename = '{}_combined_qc.csv'.format(
+        'P14-12_C6VG0ANXX_160412')
     mock_counts_combined_filename = '{}_combined_counts.csv'.format(
         'P14-12_C6VG0ANXX_160412')
 
@@ -73,6 +75,7 @@ def mock_genomics_server(request):
             'fastqc_qc_file': mock_fastqc_qc_file,
             'fastqc_qc_file_overrep_seqs': mock_fastqc_qc_file_overrep_seqs,
             'metrics_combined_filename': mock_metrics_combined_filename,
+            'qc_combined_filename': mock_qc_combined_filename,
             'counts_combined_filename': mock_counts_combined_filename}
     def fin():
         logger.info(("[teardown] mock 'genomics' server, disconnect "
