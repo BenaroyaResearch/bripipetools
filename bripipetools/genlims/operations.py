@@ -24,7 +24,8 @@ def find_objects(collection):
 
 def insert_objects(collection):
     """
-    Insert each object in list into specified collection.
+    Insert each object in list into specified collection; if object exists,
+    update any individual fields that are not empty in the input object.
     """
     def decorator(f):
         @wraps(f)
@@ -35,10 +36,12 @@ def insert_objects(collection):
             for o in objects:
                 logger.debug("inserting {} into {} collection"
                              .format(o, collection))
-                try:
-                    db[collection].insert_one(o)
-                except pymongo.errors.DuplicateKeyError:
-                    db[collection].replace_one(o, {'_id': o['_id']})
+                for k, v in o.items():
+                    if v is not None:
+                        logger.debug("updating field {}".format(k))
+                        db[collection].update_one({'_id': o['_id']},
+                            {'$set': {k: v}}, upsert=True)
+
         return wrapper
     return decorator
 

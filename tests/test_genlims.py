@@ -3,6 +3,7 @@ import os
 import re
 
 import pytest
+import mongomock
 from mock import Mock
 
 from bripipetools import model as docs
@@ -15,6 +16,24 @@ logger = logging.getLogger(__name__)
 #     # TODO: come up with a better way to test this
 #     assert('samples' in genlims.db.collection_names())
 
+@pytest.fixture(scope='function')
+def mock_db(request):
+    logger.info(("[setup] mock database, connect "
+                 "to mock Mongo database"))
+    db = mongomock.MongoClient().db
+    db.mockcollection.insert(
+        {'_id': 'mockobject',
+         'type': 'mocked object',
+         'updateField': None,
+         'skipField': 'mockvalue',
+         'arrayField': ['foo', 'bar']}
+    )
+    def fin():
+        logger.info(("[teardown] mock database, disconnect "
+                     "from mock Mongo database"))
+    request.addfinalizer(fin)
+    return db
+
 @pytest.mark.usefixtures('mock_db')
 class TestGenLIMSOperations:
     # GIVEN a mocked version of the TG3 Mongo database with example documents
@@ -22,24 +41,42 @@ class TestGenLIMSOperations:
     @pytest.fixture(
         scope='function',
         params=[
-            ('dummy', {
-                'obj_exists': {'target': {},
+            ('dummycollection', {
+                'obj_exists': {'target': {'_id': 'foo',
+                                          'newField': 'value',
+                                          'updateField': 'newvalue',
+                                          'skipField': None,
+                                          'arrayField': ['foo', 'baz']},
                                'expect_get_len': 0,
-                               'expect_put_len': 1},
-                'obj_new': {'target': {'_id': 'foo', 'type': 'new_object'},
+                               'expect_put_len': 1,
+                               'expect_get_fields': 3,
+                               'expect_put_fields': 4},
+                'obj_new': {'target': {'_id': 'foo', 'type': 'new_object',
+                                       'skipField': None,
+                                       'arrayField': ['foo', 'bar']},
                             'expect_get_len': 0,
-                            'expect_put_len': 1},
+                            'expect_put_len': 1,
+                            'expect_put_fields': 3},
                 'objs_new': {'target': [{'_id': 'foo', 'type': 'new_object'},
                                         {'_id': 'bar', 'type': 'new_object'}],
                              'expect_put_len': 2}
             }),
-            ('samples', {
-                'obj_exists': {'target': {'_id': 'lib7293'},
+            ('mockcollection', {
+                'obj_exists': {'target': {'_id': 'mockobject',
+                                          'newField': 'value',
+                                          'updateField': 'newvalue',
+                                          'skipField': None,
+                                          'arrayField': ['foo', 'baz']},
                                'expect_get_len': 1,
-                               'expect_put_len': 1},
-                'obj_new': {'target': {'_id': 'foo', 'type': 'new_object'},
+                               'expect_put_len': 1,
+                               'expect_get_fields': 5,
+                               'expect_put_fields': 6},
+                'obj_new': {'target': {'_id': 'foo', 'type': 'new_object',
+                                       'skipField': None,
+                                       'arrayField': ['foo', 'bar']},
                             'expect_get_len': 0,
-                            'expect_put_len': 1},
+                            'expect_put_len': 1,
+                            'expect_put_fields': 3},
                 'objs_new': {'target': [{'_id': 'foo', 'type': 'new_object'},
                                         {'_id': 'bar', 'type': 'new_object'}],
                              'expect_put_len': 2}
@@ -60,22 +97,6 @@ class TestGenLIMSOperations:
         request.addfinalizer(fin)
         return request.param
 
-    def test_find_objects_that_exist(self, mock_db, testdata):
-        # AND the target object exists in the database
-        logger.info("test `find_objects()` when objects exist")
-
-        test_collection, test_object = testdata[0], testdata[1]['obj_exists']
-
-        # WHEN querying for the object
-        mock_fn = Mock(name='mock_fn',
-                       return_value=(mock_db, test_object['target']))
-        mock_fn.__name__ = 'mock_fn'
-        wrapped_fn = genlims.find_objects(test_collection)(mock_fn)
-        objects = wrapped_fn()
-
-        # THEN should return a non-empty list of length 1
-        assert(len(objects) == test_object['expect_get_len'])
-
     def test_find_objects_that_are_new(self, mock_db, testdata):
         # AND the target object does not exist in the database
         logger.info("test `find_objects()` when objects do not exist")
@@ -84,13 +105,34 @@ class TestGenLIMSOperations:
 
         # WHEN querying for the object
         mock_fn = Mock(name='mock_fn',
-                       return_value=(mock_db, test_object['target']))
+                       return_value=(mock_db,
+                                     {'_id': test_object['target']['_id']}))
         mock_fn.__name__ = 'mock_fn'
         wrapped_fn = genlims.find_objects(test_collection)(mock_fn)
         objects = wrapped_fn()
 
         # THEN should return an empty list
         assert(len(objects) == test_object['expect_get_len'])
+
+    def test_find_objects_that_exist(self, mock_db, testdata):
+        # AND the target object exists in the database
+        logger.info("test `find_objects()` when objects exist")
+
+        test_collection, test_object = testdata[0], testdata[1]['obj_exists']
+
+        # WHEN querying for the object
+        mock_fn = Mock(name='mock_fn',
+                       return_value=(mock_db,
+                                     {'_id': test_object['target']['_id']}))
+        mock_fn.__name__ = 'mock_fn'
+        wrapped_fn = genlims.find_objects(test_collection)(mock_fn)
+        objects = wrapped_fn()
+
+        # THEN should return a non-empty list of length 1 and object
+        # should have expected number of fields
+        assert(len(objects) == test_object['expect_get_len'])
+        if len(objects):
+            assert(len(objects[0]) == test_object['expect_get_fields'])
 
     def test_insert_objects_one_new(self, mock_db, testdata):
         # AND the target object does not exist in the database
@@ -104,10 +146,18 @@ class TestGenLIMSOperations:
         mock_fn.__name__ = 'mock_fn'
         wrapped_fn = genlims.insert_objects(test_collection)(mock_fn)
         wrapped_fn()
+        new_object = (mock_db[test_collection]
+                      .find_one({'_id': test_object['target']['_id']}))
 
-        # THEN new object should be in database
+        # THEN new object should be in database, should have the expected
+        # number of fields, should not include the empty (skipped) field from
+        # the input object, and the array field should be a list
         assert(len(list(mock_db[test_collection].find({'type': 'new_object'})))
                == test_object['expect_put_len'])
+        assert(len(new_object) == test_object['expect_put_fields'])
+        assert('skipField' not in new_object)
+        assert(isinstance(new_object['arrayField'], list))
+
 
     def test_insert_objects_multiple_new(self, mock_db, testdata):
         # AND the target objects does not exist in the database
@@ -131,9 +181,6 @@ class TestGenLIMSOperations:
         logger.info("test `insert_objects()` with one object that exists")
 
         test_collection, test_object = testdata[0], testdata[1]['obj_exists']
-        existing_object = (mock_db[test_collection]
-                           .find_one(test_object['target']))
-        existing_object = {} if existing_object is None else existing_object
 
         # WHEN inserting the object
         mock_fn = Mock(name='mock_fn',
@@ -141,13 +188,21 @@ class TestGenLIMSOperations:
         mock_fn.__name__ = 'mock_fn'
         wrapped_fn = genlims.insert_objects(test_collection)(mock_fn)
         wrapped_fn()
+        updated_object = (mock_db[test_collection]
+                          .find_one({'_id': test_object['target']['_id']}))
 
-        # THEN new object should be in database and should have at least
-        # the same number of fields
-        assert(len(list(mock_db[test_collection].find(test_object['target'])))
+        # THEN new object should be in database, should have the expected
+        # number of fields, should have the original value for the skipped
+        # field, should have the updated value for the update field, and
+        # should have updated values in the array field
+        assert(len(list(mock_db[test_collection]
+                        .find({'_id': test_object['target']['_id']})))
                == test_object['expect_put_len'])
-        assert(len(mock_db[test_collection].find_one(test_object['target']))
-               >= len(existing_object))
+        assert(len(updated_object) == test_object['expect_put_fields'])
+        if 'skipField' in updated_object:
+            assert(updated_object['skipField'] is not None)
+        assert(updated_object['updateField'] is not None)
+        assert('baz' in updated_object['arrayField'])
 
 
     # def test_get_samples(self, mock_db):
