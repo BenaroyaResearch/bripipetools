@@ -281,36 +281,50 @@ class TestGenLIMSOperations:
         assert(wb_id == 'mockprefix_mockdate_2')
 
 
+class TestMapping:
+    # GIVEN any state
 
-# class TestMapping:
-#     # GIVEN any state
-#
-#     def test_map_keys(self):
-#         logger.info("test `map_keys()`")
-#
-#         assert(genlims.map_keys({'aB': None}) == {'a_b': None})
-#         assert(genlims.map_keys({'aB': [{'bC': None}]}) ==
-#             {'a_b': [{'b_c': None}]})
-#         assert(genlims.map_keys({'_id': None}) == {'_id': None})
-#
-#     def test_get_class(self):
-#
-#         assert(genlims.get_class({'type': 'sequenced library'}) ==
-#             'SequencedLibrary')
-#
-#     def test_map_to_object(self):
-#         doc = {'_id': 'lib7293_C6VG0ANXX',
-#                'parentId': 'lib7293',
-#                'type': 'sequenced library',
-#                'rawData': [{'path': None,
-#                             'laneId': 'L001',
-#                             'sampleNumber': 1}]}
-#         obj = genlims.map_to_object(doc)
-#         assert(type(obj) is docs.SequencedLibrary)
-#         assert(hasattr(obj, '_id'))
-#         assert(obj._id == 'lib7293_C6VG0ANXX')
-#         assert(obj.parent_id == 'lib7293')
-#         assert(obj.type == 'sequenced library')
-#         assert(obj.raw_data == [{'path': None,
-#                                  'lane_id': 'L001',
-#                                  'sample_number': 1}])
+    def test_map_keys(self):
+        logger.info("test `map_keys()`")
+
+        # WHEN formatting camel-case keys/fields in an object
+
+        # THEN keys at all nested levels should be converted to snake case
+        # (with the exception of '_id', which should be unchangedj)
+        assert(genlims.map_keys({'aB': None}) == {'a_b': None})
+        assert(genlims.map_keys({'aB': [{'bC': None}]}) ==
+            {'a_b': [{'b_c': None}]})
+        assert(genlims.map_keys({'_id': None}) == {'_id': None})
+
+    def test_get_class(self):
+        logger.info("test `_get_class()`")
+
+        # WHEN searching for matched model class based on object type
+
+        # THEN should return expected class name
+        assert(genlims.get_class({'type': 'sequenced library'})
+               == 'SequencedLibrary')
+        assert(genlims.get_class({'type': 'library'})
+               == 'Library')
+
+    def test_map_to_object(self):
+        logger.info("test `map_to_object()`")
+
+        # WHEN mapping a database object to a class instance
+        doc = {'_id': 'lib7293_C6VG0ANXX',
+               'parentId': 'lib7293',
+               'type': 'sequenced library',
+               'rawData': [{'path': None,
+                            'laneId': 'L001',
+                            'sampleNumber': 1}]}
+        obj = genlims.map_to_object(doc)
+
+        # THEN ...
+        assert(type(obj) is docs.SequencedLibrary)
+        assert(hasattr(obj, '_id'))
+        assert(obj._id == 'lib7293_C6VG0ANXX')
+        assert(obj.parent_id == 'lib7293')
+        assert(obj.type == 'sequenced library')
+        assert(obj.raw_data == [{'path': None,
+                                 'lane_id': 'L001',
+                                 'sample_number': 1}])
