@@ -1,0 +1,77 @@
+out_types:
+    metrics:
+        picard_align: &picard_align picard_align_metrics.html
+        picard_markdups: &picard_markdups picard_markdups_metrics.html
+        picard_rnaseq: &picard_rnaseq picard_rnaseq_metrics.html
+        tophat_stats: &tophat_stats tophat_stats_metrics.txt
+genomics:
+    path: genomics
+    illumina:
+        path: Illumina
+        run1:
+            path: 150615_D00565_0087_AC6VG0ANXX
+            run_id: 150615_D00565_0087_AC6VG0ANXX
+            flowcell_id: &R1 C6VG0ANXX
+            unaligned:
+                path: Unaligned
+                projects:
+                proj1:
+                    path: P109-1-21113094
+                    name: &P1 P109-1
+                    lib1:
+                        path: lib6615-25944927
+                        name: &P1_L1 lib6615
+                    lib2:
+                        path: lib6618-25921009
+                        name: &P1_L2 lib6618
+                    lib3:
+                        path: lib6624-25939931
+                        name: &P1_L3 lib6624
+                proj2:
+                    path: P14-12-23221204
+                    name: &P2 P14-12
+                    lib1:
+                        path: lib7293-25920016
+                        name: &P2_L1 lib7293
+                    lib2:
+                        path: lib7315-25934979
+                        name: &P2_L2 lib7315
+                    lib3:
+                        path: lib7331-25932988
+                        name: &P2_L3 lib7331
+                proj3:
+                    path: P43-12-23224208
+                    name: &P3 P43-12
+                    lib1:
+                        path: lib6831-25921999
+                        name: &P3_L1 lib6831
+                    lib2:
+                        path: lib6837-25924003
+                        name: &P3_L2 lib6837
+                    lib3:
+                        path: lib6838-25918014
+                        name: &P3_L3 lib6838
+            batches:
+                path: globus_batch_submission
+                batch1:
+                    path: 160929_P109-1_P14-12_C6VG0ANXX_optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt
+                    workflow: optimized_truseq_unstrand_sr_grch38_v0.1_complete
+                batch2:
+                    path: 160929_P43-12_C6VG0ANXX_optimized_nextera_sr_grch38_v0.1_complete.txt
+                    workflow: optimized_nextera_sr_grch38_v0.1_complete
+            processed1:
+                path: !join [Project_, *P1, Processed_globus_160929]
+                metrics:
+                    path: metrics
+                    file1:
+                        path: !ujoin [*P1_L1, *R1, *picard_align]
+                    file2:
+                        path: !ujoin [*P1_L1, *R1, *picard_markdups]
+                    file3:
+                        path: !ujoin [*P1_L1, *R1, *picard_rnaseq]
+                    file4:
+                        path: !ujoin [*P1_L1, *R1, *picard_rnaseq]
+            processed2:
+                path: !join [Project_, *P2, Processed_globus_160929]
+            processed3:
+                path: !join [Project_, *P3, Processed_globus_160929]
