@@ -1,0 +1,59 @@
+<style type="text/css">
+        tr.d0 td {background-color: oldlace; color: black;}
+        tr.d1 td {background-color: aliceblue; color: black;}
+        </style><?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Galaxy picard_wrapper tool output - see http://getgalaxy.org/" />
+<title></title>
+<link rel="stylesheet" href="/static/style/base.css" type="text/css" />
+</head>
+<body>
+<div class="document">
+Galaxy tool CollectRnaSeqMetrics run at 29/09/2016 17:42:10</b><br/><b>The following output files were created (click the filename to view/download a copy):</b><hr/><table>
+<tr><td><a href="CollectRnaSeqMetrics.metrics.txt">CollectRnaSeqMetrics.metrics.txt</a></td></tr>
+<tr><td><a href="CollectRnaSeqMetrics.log">CollectRnaSeqMetrics.log</a></td></tr>
+</table><p/>
+<b>Picard on line resources</b><ul>
+<li><a href="http://picard.sourceforge.net/index.shtml">Click here for Picard Documentation</a></li>
+<li><a href="http://picard.sourceforge.net/picard-metric-definitions.shtml">Click here for Picard Metrics definitions</a></li></ul><hr/>
+<b>Picard output (transposed to make it easier to see)</b><hr/>
+<table cellpadding="3" >
+<tr class="d0"><td colspan="2">## net.sf.picard.metrics.StringHeader</td></tr><tr class="d1"><td colspan="2"># net.sf.picard.analysis.CollectRnaSeqMetrics REF_FLAT=/scratch/galaxy/files/019/dataset_19104.dat RIBOSOMAL_INTERVALS=/scratch/galaxy/files/019/dataset_19280.dat STRAND_SPECIFICITY=FIRST_READ_TRANSCRIPTION_STRAND MINIMUM_LENGTH=500 CHART_OUTPUT=/scratch/galaxy/job_working_directory/059/59484/dataset_121755_files/rgPicardCollectRnaSeqMetrics.pdf RRNA_FRAGMENT_PERCENTAGE=0.8 METRIC_ACCUMULATION_LEVEL=[ALL_READS] INPUT=/ephemeral/0/condor/dir_25922/optimized-DOWlXR/lib-tophat-out.reorder.bam OUTPUT=/scratch/galaxy/job_working_directory/059/59484/dataset_121755_files/CollectRnaSeqMetrics.metrics.txt REFERENCE_SEQUENCE=/scratch/galaxy/job_working_directory/059/59484/dataset_121755_files/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa_fake.fasta TMP_DIR=[/ephemeral/0/condor/dir_25922/tmprKLFpD] VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000    ASSUME_SORTED=true STOP_AFTER=0 VERBOSITY=INFO QUIET=false COMPRESSION_LEVEL=5 CREATE_INDEX=false CREATE_MD5_FILE=false</td></tr><tr class="d0"><td colspan="2">## net.sf.picard.metrics.StringHeader</td></tr><tr class="d1"><td colspan="2"># Started on: Thu Sep 29 17:41:57 UTC 2016</td></tr><tr class="d0"><td colspan="2">## METRICS CLASS	net.sf.picard.analysis.RnaSeqMetrics</td></tr><tr class="d0"><td>PF_BASES</td><td>41633&nbsp;</td></tr>
+<tr class="d1"><td>PF_ALIGNED_BASES</td><td>41633&nbsp;</td></tr>
+<tr class="d0"><td>RIBOSOMAL_BASES</td><td>56&nbsp;</td></tr>
+<tr class="d1"><td>CODING_BASES</td><td>4199&nbsp;</td></tr>
+<tr class="d0"><td>UTR_BASES</td><td>4796&nbsp;</td></tr>
+<tr class="d1"><td>INTRONIC_BASES</td><td>19356&nbsp;</td></tr>
+<tr class="d0"><td>INTERGENIC_BASES</td><td>13226&nbsp;</td></tr>
+<tr class="d1"><td>IGNORED_READS</td><td>0&nbsp;</td></tr>
+<tr class="d0"><td>CORRECT_STRAND_READS</td><td>61&nbsp;</td></tr>
+<tr class="d1"><td>INCORRECT_STRAND_READS</td><td>63&nbsp;</td></tr>
+<tr class="d0"><td>PCT_RIBOSOMAL_BASES</td><td>0.001345&nbsp;</td></tr>
+<tr class="d1"><td>PCT_CODING_BASES</td><td>0.100857&nbsp;</td></tr>
+<tr class="d0"><td>PCT_UTR_BASES</td><td>0.115197&nbsp;</td></tr>
+<tr class="d1"><td>PCT_INTRONIC_BASES</td><td>0.46492&nbsp;</td></tr>
+<tr class="d0"><td>PCT_INTERGENIC_BASES</td><td>0.317681&nbsp;</td></tr>
+<tr class="d1"><td>PCT_MRNA_BASES</td><td>0.216055&nbsp;</td></tr>
+<tr class="d0"><td>PCT_USABLE_BASES</td><td>0.216055&nbsp;</td></tr>
+<tr class="d1"><td>PCT_CORRECT_STRAND_READS</td><td>0.491935&nbsp;</td></tr>
+<tr class="d0"><td>MEDIAN_CV_COVERAGE</td><td>0&nbsp;</td></tr>
+<tr class="d1"><td>MEDIAN_5PRIME_BIAS</td><td>0&nbsp;</td></tr>
+<tr class="d0"><td>MEDIAN_3PRIME_BIAS</td><td>0&nbsp;</td></tr>
+<tr class="d1"><td>MEDIAN_5PRIME_TO_3PRIME_BIAS</td><td>0&nbsp;</td></tr>
+<tr class="d0"><td>SAMPLE</td><td>&nbsp;</td></tr>
+<tr class="d1"><td>LIBRARY</td><td>&nbsp;</td></tr>
+<tr class="d0"><td>READ_GROUP
+</td><td>
+&nbsp;</td></tr>
+</table>
+<b>Picard Tool Run Log</b><hr/>
+<pre>INFO:root:## executing java -Xmx30000m  -Djava.io.tmpdir='/ephemeral/0/condor/dir_25922/tmprKLFpD'  -jar /mnt/galaxyTools/tools/picard/1.56/CollectRnaSeqMetrics.jar VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 R=/scratch/galaxy/job_working_directory/059/59484/dataset_121755_files/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa_fake.fasta REF_FLAT=/scratch/galaxy/files/019/dataset_19104.dat RIBOSOMAL_INTERVALS=/scratch/galaxy/files/019/dataset_19280.dat STRAND_SPECIFICITY=FIRST_READ_TRANSCRIPTION_STRAND MINIMUM_LENGTH=500 RRNA_FRAGMENT_PERCENTAGE=0.8 METRIC_ACCUMULATION_LEVEL=ALL_READS INPUT=/ephemeral/0/condor/dir_25922/optimized-DOWlXR/lib-tophat-out.reorder.bam OUTPUT=/scratch/galaxy/job_working_directory/059/59484/dataset_121755_files/CollectRnaSeqMetrics.metrics.txt TMP_DIR=/ephemeral/0/condor/dir_25922/tmprKLFpD CHART_OUTPUT=/scratch/galaxy/job_working_directory/059/59484/dataset_121755_files/rgPicardCollectRnaSeqMetrics.pdf returned status 0 and nothing on stderr
+
+### runGC: Unable to find pdf /scratch/galaxy/job_working_directory/059/59484/dataset_121755_files/rgPicardCollectRnaSeqMetrics.pdf - please check the log for the causal problem
+
+</pre><hr/>The freely available <a href="http://picard.sourceforge.net/command-line-overview.shtml">Picard software</a> 
+generated all outputs reported here running as a <a href="http://getgalaxy.org">Galaxy</a> tool</div></body></html>
+
