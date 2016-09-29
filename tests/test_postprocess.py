@@ -5,7 +5,6 @@ import os
 import re
 
 import pytest
-import mongomock
 
 from bripipetools import postprocess
 from bripipetools import io
@@ -17,12 +16,20 @@ class TestOutputStitcher:
                                               'len_outputs': 5,
                                               'lib': 'lib7294_C6VG0ANXX',
                                               'len_data': 5,
-                                              'len_table': 2}),
+                                              'len_table': 2,
+                                              'len_os_df': 0}),
+                            ('qc_path', {'type': 'qc',
+                                         'len_outputs': 1,
+                                         'lib': 'lib7294_C6VG0ANXX',
+                                         'len_data': 1,
+                                         'len_table': 2,
+                                         'len_os_df': 0}),
                             ('counts_path', {'type': 'counts',
                                              'len_outputs': 1,
                                              'lib': 'lib7294_C6VG0ANXX',
                                              'len_data': 1,
-                                             'len_table': 100})
+                                             'len_table': 100,
+                                             'len_os_df': 0})
                             ])
     def outputstitcherdata(self, request, mock_genomics_server):
         logger.info("[setup] OutputStitcher test instance "
@@ -64,6 +71,7 @@ class TestOutputStitcher:
          (('metrics', 'picard_markdups'), getattr(io, 'PicardMetricsFile')),
          (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile')),
          (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile')),
+         (('qc', 'fastqc'), getattr(io, 'FastQCFile')),
          (('counts', 'htseq'), getattr(io, 'HtseqCountsFile'))])
     def test_get_parser(self, outputstitcherdata, output, expected):
         logger.info("test `_get_parser()`")
@@ -99,7 +107,6 @@ class TestOutputStitcher:
         # THEN table should have expected number of rows, and rows should
         # be the same length
         assert(len(table_data) == expected_output['len_table'])
-        # assert(len(set([len(row) for row in table_data])) == 1)
 
     def test_build_combined_filename(self, outputstitcherdata,
                                      mock_genomics_server):
@@ -114,6 +121,13 @@ class TestOutputStitcher:
         assert(combined_filename
                == mock_genomics_server['{}_combined_filename'.format(
                 output_type)])
+
+    def test_build_overrepresented_seq_df(self, outputstitcherdata):
+        (outputstitcher, expected_output) = outputstitcherdata
+
+        overrep_seq_df = outputstitcher._build_overrepresented_seq_df()
+
+        assert(len(overrep_seq_df) == expected_output['len_os_df'])
 
     def test_write_table(self, outputstitcherdata, mock_genomics_server):
         logger.info("test `write_table()`")

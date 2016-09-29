@@ -29,17 +29,22 @@ class OutputStitcher(object):
         """
         Return predicted output type based on specified path.
         """
-        output_types = ['metrics', 'counts']
-        return [t for t in output_types if re.search(t, self.path)][0]
+        output_types = ['metrics', 'QC', 'counts']
+        return [t.lower() for t in output_types if re.search(t, self.path)][0]
 
     def _get_outputs(self, output_type):
         """
         Return list of outputs of specified type.
         """
+        output_filetypes = {'metrics': 'txt|html',
+                            'qc': 'txt',
+                            'counts': 'txt'}
         return [os.path.join(self.path, f)
                 for f in os.listdir(self.path)
                 if re.search(output_type, f)
-                and not re.search('combined', f)]
+                and not re.search('combined', f)
+                and re.search(output_filetypes[output_type],
+                              os.path.splitext(f)[-1])]
 
     def _parse_output_filename(self, output_filename):
         """
@@ -70,6 +75,7 @@ class OutputStitcher(object):
                                'picard_markdups': getattr(io, 'PicardMetricsFile'),
                                'picard_align': getattr(io, 'PicardMetricsFile'),
                                'tophat_stats': getattr(io, 'TophatStatsFile')},
+                   'qc': {'fastqc': getattr(io, 'FastQCFile')},
                    'counts': {'htseq': getattr(io, 'HtseqCountsFile')}}
         logger.debug("matched parser {} for output type {} and source {}"
                      .format(parsers[output_type][output_source],
@@ -135,7 +141,7 @@ class OutputStitcher(object):
 
     def _add_mapped_reads_column(self, data):
         """
-        Add mapped_reads_w_dups column to table data.
+        Add mapped_reads_w_dups column to metrics table data.
         """
         for idx, row in enumerate(data[1:]):
             metrics = dict(zip(data[0], row))
@@ -160,6 +166,27 @@ class OutputStitcher(object):
                                           date)
         return '{}_combined_{}.csv'.format(filename_base.rstrip('_'),
                                            self.type)
+
+    def _build_overrepresented_seq_df(self):
+        """
+        Parse and combine overrepresented sequences tables from
+        FastQC files.
+        """
+        outputs = self._get_outputs(self.type)
+        overrep_seq_df = pd.DataFrame([])
+        if self.type == 'qc':
+            for o in outputs:
+                logger.debug("parsing overrepresented sequences "
+                             "from output file {}".format(o))
+                out_items = self._parse_output_filename(o)
+                out_source, out_type, proclib_id = out_items.values()
+                logger.debug("storing data from {} in {} {}".format(
+                    out_source, proclib_id, out_type))
+                out_parser = io.FastQCFile(path=o)
+                o_df = (pd.DataFrame(out_parser.parse_overrepresented_seqs())
+                        .assign(libId=proclib_id))
+                overrep_seq_df = overrep_seq_df.append(o_df)
+        return overrep_seq_df
 
     def write_table(self):
         """

@@ -25,6 +25,7 @@ def mock_genomics_server(request):
         mock_flowcell_path, 'Project_P14-12Processed_160412')
     mock_metrics_path = os.path.join(mock_processed_project_path, 'metrics')
     mock_counts_path = os.path.join(mock_processed_project_path, 'counts')
+    mock_qc_path = os.path.join(mock_processed_project_path, 'QC')
     mock_picard_markdups_file = os.path.join(
         mock_metrics_path, 'lib7294_C6VG0ANXX_picard_markdups_metrics.html')
     mock_picard_align_file = os.path.join(
@@ -37,8 +38,14 @@ def mock_genomics_server(request):
         mock_metrics_path, 'lib7294_C6VG0ANXX_htseq_metrics.txt')
     mock_htseq_counts_file = os.path.join(
         mock_counts_path, 'lib7294_C6VG0ANXX_htseq_counts.txt')
-    mock_counts_path = os.path.join(mock_processed_project_path, 'counts')
+    mock_fastqc_qc_file = os.path.join(
+        mock_qc_path, 'lib7294_C6VG0ANXX_fastqc_qc.txt')
+    mock_fastqc_qc_file_overrep_seqs = os.path.join(
+        mock_flowcell_path, 'Project_P109-1Processed_160412',
+        'QC', 'lib6605_C6VG0ANXX_fastqc_qc.txt')
     mock_metrics_combined_filename = '{}_combined_metrics.csv'.format(
+        'P14-12_C6VG0ANXX_160412')
+    mock_qc_combined_filename = '{}_combined_qc.csv'.format(
         'P14-12_C6VG0ANXX_160412')
     mock_counts_combined_filename = '{}_combined_counts.csv'.format(
         'P14-12_C6VG0ANXX_160412')
@@ -58,14 +65,17 @@ def mock_genomics_server(request):
             'processed_project_path': mock_processed_project_path,
             'metrics_path': mock_metrics_path,
             'counts_path': mock_counts_path,
+            'qc_path': mock_qc_path,
             'picard_markdups_file': mock_picard_markdups_file,
             'picard_align_file': mock_picard_align_file,
             'picard_rnaseq_file': mock_picard_rnaseq_file,
             'tophat_stats_file': mock_tophat_stats_file,
             'htseq_metrics_file': mock_htseq_metrics_file,
             'htseq_counts_file': mock_htseq_counts_file,
-            'counts_path': mock_counts_path,
+            'fastqc_qc_file': mock_fastqc_qc_file,
+            'fastqc_qc_file_overrep_seqs': mock_fastqc_qc_file_overrep_seqs,
             'metrics_combined_filename': mock_metrics_combined_filename,
+            'qc_combined_filename': mock_qc_combined_filename,
             'counts_combined_filename': mock_counts_combined_filename}
     def fin():
         logger.info(("[teardown] mock 'genomics' server, disconnect "
