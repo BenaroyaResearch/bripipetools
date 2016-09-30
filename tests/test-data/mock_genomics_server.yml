@@ -1,11 +1,34 @@
 out_types:
     metrics:
-        - &picard_align picard_align_metrics.html
-        - &picard_markdups picard_markdups_metrics.html
-        - &picard_rnaseq picard_rnaseq_metrics.html
-        - &tophat_stats tophat_stats_metrics.txt
-        - &htseq_metrics htseq_metrics.txt
-        - &combined_metrics combined_metrics.csv
+        &picard_align picard_align:
+            file: &picard_align_file !ujoin [*picard_align, metrics.html]
+            raw_len: 56
+            format: long
+            parse_len_long: 24
+            parse_len_wide: 0
+            parse_len: 24
+        &picard_markdups picard_markdups:
+            file: &picard_markdups_file !ujoin [*picard_markdups, metrics.html]
+            raw_len: 24
+            format: long
+            parse_len_long: 9
+            parse_len_wide: 0
+            parse_len: 9
+        &picard_rnaseq picard_rnaseq:
+            file: &picard_rnaseq_file !ujoin [*picard_rnaseq, metrics.html]
+            raw_len: 215
+            format: wide
+            parse_len_long: 0
+            parse_len_wide: 22
+            parse_len: 22
+        &tophat_stats tophat_stats:
+            file: &tophat_stats_file !ujoin [*tophat_stats, metrics.txt]
+            raw_len: 5
+            parse_len: 5
+        &htseq_metrics htseq_metrics:
+            file: &htseq_metrics_file !join [*htseq_metrics, .txt]
+        combined:
+            file: &combined_metrics_file combined_metrics.csv
     qc:
         - &fastqc_qc fastqc_qc.txt
         - &combined_qc combined_qc.csv
@@ -115,42 +138,60 @@ root:
                         samples: [*P3_L1, *P3_L2, *P3_L3]
                         flowcell_id: *R1
                 processed:
-                  - path: !join [Project_, *P1, Processed_globus_160929]
-                    metrics:
-                        path: metrics
-                        files:
-                          - path: !ujoin [*P1_L1, *R1, *picard_align]
-                          - path: !ujoin [*P1_L1, *R1, *picard_markdups]
-                          - path: !ujoin [*P1_L1, *R1, *picard_rnaseq]
-                          - path: !ujoin [*P1_L1, *R1, *picard_rnaseq]
-                          - path: !ujoin [*P1_L1, *R1, *tophat_stats]
-                          - path: !ujoin [*P1_L1, *R1, *htseq_metrics]
-                          - path: !ujoin [*P1_L2, *R1, *picard_align]
-                          - path: !ujoin [*P1_L2, *R1, *picard_markdups]
-                          - path: !ujoin [*P1_L2, *R1, *picard_rnaseq]
-                          - path: !ujoin [*P1_L2, *R1, *picard_rnaseq]
-                          - path: !ujoin [*P1_L2, *R1, *tophat_stats]
-                          - path: !ujoin [*P1_L2, *R1, *htseq_metrics]
-                          - path: !ujoin [*P1_L3, *R1, *picard_align]
-                          - path: !ujoin [*P1_L3, *R1, *picard_markdups]
-                          - path: !ujoin [*P1_L3, *R1, *picard_rnaseq]
-                          - path: !ujoin [*P1_L3, *R1, *picard_rnaseq]
-                          - path: !ujoin [*P1_L3, *R1, *tophat_stats]
-                          - path: !ujoin [*P1_L3, *R1, *htseq_metrics]
-                        combined:
-                            path: !ujoin [*P1, *R1, *batch_date, *combined_metrics]
-                    qc:
-                        path: QC
-                        files:
-                          - path: !ujoin [*P1_L1, *R1, *fastqc_qc]
-                          - path: !ujoin [*P1_L2, *R1, *fastqc_qc]
-                          - path: !ujoin [*P1_L3, *R1, *fastqc_qc]
-                        combined: !ujoin [*P1, *R1, *batch_date, *combined_qc]
-                    counts:
-                        path: counts
-                        files:
-                          - path: !ujoin [*P1_L1, *R1, *htseq_counts]
-                          - path: !ujoin [*P1_L2, *R1, *htseq_counts]
-                          - path: !ujoin [*P1_L3, *R1, *htseq_counts]
-                        combined:
-                            path: !ujoin [*P1, *R1, *batch_date, *combined_counts]
+                    projects:
+                      - path: !join [Project_, *P1, Processed_globus_160929]
+                        metrics:
+                            path: metrics
+                            sources:
+                                *picard_align:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *picard_align_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *picard_align_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *picard_align_file]
+                                *picard_markdups:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *picard_markdups_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *picard_markdups_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *picard_markdups_file]
+                                *picard_rnaseq:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *picard_rnaseq_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *picard_rnaseq_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *picard_rnaseq_file]
+                                *tophat_stats:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *tophat_stats_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *tophat_stats_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *tophat_stats_file]
+                                *htseq_metrics:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *htseq_metrics_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *htseq_metrics_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *htseq_metrics_file]
+                            combined:
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_metrics_file]
+                        qc:
+                            path: QC
+                            files:
+                              - path: !ujoin [*P1_L1, *R1, *fastqc_qc]
+                              - path: !ujoin [*P1_L2, *R1, *fastqc_qc]
+                              - path: !ujoin [*P1_L3, *R1, *fastqc_qc]
+                            combined: !ujoin [*P1, *R1, *batch_date, *combined_qc]
+                        counts:
+                            path: counts
+                            files:
+                              - path: !ujoin [*P1_L1, *R1, *htseq_counts]
+                              - path: !ujoin [*P1_L2, *R1, *htseq_counts]
+                              - path: !ujoin [*P1_L3, *R1, *htseq_counts]
+                            combined:
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_counts]

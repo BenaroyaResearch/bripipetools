@@ -35,7 +35,7 @@ class PicardMetricsFile(object):
         raw_html = self.data['raw']
         soup = BeautifulSoup(raw_html, 'html.parser')
         logger.debug("getting metrics table from raw HTML string")
-        return soup.findAll('table', attrs={'cellpadding': '3'})
+        return soup.findAll('table', attrs={'cellpadding': '3'})[0]
 
     def _check_table_format(self):
         """
@@ -44,7 +44,7 @@ class PicardMetricsFile(object):
         """
         table = self._get_table()
         if any([re.search(u'\xa0', td.text)
-                for tr in table[0].findAll('tr')
+                for tr in table.findAll('tr')
                 for td in tr.findAll('td')]):
             logger.debug("non-breaking space found in table; long format")
             return 'long'
@@ -58,7 +58,7 @@ class PicardMetricsFile(object):
         """
         table = self._get_table()
         metrics = {}
-        for tr in table[0].findAll('tr'):
+        for tr in table.findAll('tr'):
             for td in tr.findAll('td'):
                 if re.search('^([A-Z]+(\_)*)+$', td.text):
                     td_key = td.text.replace('\n', '')
@@ -80,7 +80,7 @@ class PicardMetricsFile(object):
         """
         table = self._get_table()
         metrics = {}
-        for tr in table[0].findAll('tr'):
+        for tr in table.findAll('tr'):
             if re.search(u'\xa0', tr.text):
                 return {}
                 break
