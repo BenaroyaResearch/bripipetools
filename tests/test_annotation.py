@@ -1,8 +1,9 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 import os
 import re
+import datetime
 
 import pytest
 import mongomock
@@ -25,29 +26,40 @@ def mock_db(request):
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestFlowcellRunAnnotator:
-    @pytest.fixture(scope='class')
-    def annotator(self, request, mock_genomics_server, mock_db):
+    """
+    Tests methods for the `FlowcellRunAnnotator` class in the
+    `bripipetools.annotation.illuminaseq` module.
+    """
+    @pytest.fixture(scope='class', params=[{'runnum': r} for r in range(1)])
+    def annotatordata(self, request, mock_genomics_server, mock_db):
         # GIVEN a FlowcellRunAnnotator with mock 'genomics' server path,
         # valid run ID, and existing 'Unaligned' folder (i.e., where data
         # and organization is known), as well as a mock db connection
-        logger.info("[setup] FlowcellRunAnnotator test instance")
+        runs = mock_genomics_server['root']['genomics']['illumina']['runs']
+        rundata = runs[request.param['runnum']]
+
+        logger.info("[setup] FlowcellRunAnnotator test instance "
+                    "for run {}".format(rundata['run_id']))
 
         fcrunannotator = annotation.FlowcellRunAnnotator(
-            run_id=mock_genomics_server['run_id'],
+            run_id=rundata['run_id'],
             db=mock_db,
-            genomics_root=mock_genomics_server['genomics_root'])
+            genomics_root=mock_genomics_server['root']['path'])
 
         def fin():
             logger.info("[teardown] FlowcellRunAnnotator mock instance")
         request.addfinalizer(fin)
-        return fcrunannotator
+        return (fcrunannotator, rundata)
 
-    def test_init_flowcellrun_existing_run(self, annotator, mock_db):
+    def test_init_flowcellrun_existing_run(self, annotatordata, mock_db):
+        # (GIVEN)
+        (annotator, rundata) = annotatordata
+
         logger.info("test `_init_flowcellrun()` with existing run")
 
         # WHEN flowcell run already exists in 'runs' collection
         mock_db.runs.insert_one(
-            {'_id': '150615_D00565_0087_AC6VG0ANXX',
+            {'_id': rundata['run_id'],
              'type': 'flowcell',
              'isMock': True})
         flowcellrun = annotator._init_flowcellrun()
@@ -55,14 +67,17 @@ class TestFlowcellRunAnnotator:
         # THEN the flowcell run object should be returned and
         # should be correctly mapped from the database object
         assert(type(flowcellrun) == docs.FlowcellRun)
-        assert(flowcellrun._id == '150615_D00565_0087_AC6VG0ANXX')
+        assert(flowcellrun._id == rundata['run_id'])
         assert(hasattr(flowcellrun, 'is_mock'))
 
         logger.info("[rollback] remove most recently inserted "
                     "from mock database")
         mock_db.runs.drop()
 
-    def test_init_flowcellrun_new_run(self, annotator):
+    def test_init_flowcellrun_new_run(self, annotatordata):
+        # (GIVEN)
+        annotator, rundata = annotatordata
+
         logger.info("test `_init_flowcellrun()` with new run")
 
         # WHEN flowcell run run does not already exist in
@@ -71,105 +86,162 @@ class TestFlowcellRunAnnotator:
 
         # THEN a new flowcell run object should be returned
         assert(type(flowcellrun) == docs.FlowcellRun)
-        assert(flowcellrun._id == '150615_D00565_0087_AC6VG0ANXX')
+        assert(flowcellrun._id == rundata['run_id'])
         assert(not hasattr(flowcellrun, 'is_mock'))
+#
+    def test_get_flowcell_path(self, annotatordata, mock_genomics_server):
+        # (GIVEN)
+        annotator, rundata = annotatordata
 
-    def test_get_flowcell_path(self, annotator, mock_genomics_server):
         logger.info("test `_get_flowcell_path()`")
 
         # WHEN searching for flowcell run ID in 'genomics' path
 
         # THEN correct flowcell folder should be found in 'genomics/Illumina/'
-        assert(annotator._get_flowcell_path()
-               == mock_genomics_server['flowcell_path'])
+        assert(annotator._get_flowcell_path() == rundata['path'])
 
-    def test_get_unaligned_path(self, annotator, mock_genomics_server):
+    def test_get_unaligned_path(self, annotatordata, mock_genomics_server):
+        # (GIVEN)
+        annotator, rundata = annotatordata
+
         logger.info("test `_get_unaligned_path()`")
 
         # WHEN searching for 'Unaligned' folder
 
         # THEN path returned should be 'genomics/Illumina/<run_id>/Unaligned'
-        assert(annotator._get_unaligned_path()
-               == mock_genomics_server['unaligned_path'])
+        assert(annotator._get_unaligned_path() == rundata['unaligned']['path'])
 
-    def test_get_projects(self, annotator, mock_genomics_server):
+    def test_get_projects(self, annotatordata, mock_genomics_server):
+        # (GIVEN)
+        annotator, rundata = annotatordata
+
         logger.info("test `_get_projects()`")
 
         # WHEN listing unaligned projects
         projects = annotator.get_projects()
 
-        # THEN should find 8 total projects, including P14-12 and P109-1
-        assert(len(projects) == 7)
-        assert(all([mock_project in projects
-                    for mock_project in [
-                        mock_genomics_server['project_p14_12'],
-                        mock_genomics_server['project_p109_1']
-                    ]]))
+        # THEN should find expected number of projects
+        assert(len(projects) == len(rundata['unaligned']['projects']))
 
-    def test_get_libraries_P14_12(self, annotator, mock_genomics_server):
-        logger.info("test `_get_libraries()`, single project")
+    @pytest.mark.parametrize("projectnum", [0, 1, 2])
+    def test_get_libraries_single_project(self, annotatordata,
+                                          mock_genomics_server, projectnum):
+        # (GIVEN)
+        annotator, rundata = annotatordata
 
-        # WHEN listing libraries for project P14-12
-        libraries = annotator.get_libraries('P14-12')
+        # AND unaligned samples for a single project
+        projectdata = rundata['unaligned']['projects'][projectnum]
 
-        # THEN should find 5 total libraries, including lib7293
-        assert(len(libraries) == 5)
-        assert(mock_genomics_server['lib7293'] in libraries)
-#
-    def test_get_libraries_all_projects(self, annotator, mock_genomics_server):
+        logger.info("test `_get_libraries()`, single project ({})"
+                    .format(projectdata['name']))
+
+        # WHEN listing libraries for the project
+        libraries = annotator.get_libraries(projectdata['name'])
+
+        # THEN should find the expected number of libaries (samples)
+        assert(len(libraries) == len(projectdata['samples']))
+
+    def test_get_libraries_all_projects(self, annotatordata,
+                                        mock_genomics_server):
+        # (GIVEN)
+        annotator, rundata = annotatordata
+
+        # AND list of unaligned projects
+        projects = rundata['unaligned']['projects']
+
         logger.info("test `_get_libraries()`, all projects")
 
         # WHEN listing libraries for all projects
         libraries = annotator.get_libraries()
 
-        # THEN should find 36 total projects
-        assert(len(libraries) == 31)
+        # THEN should find expected number of libraries
+        assert(len(libraries)
+                == sum(map(lambda x: len(x['samples']), projects)))
 
-    def test_get_sequenced_libraries_P14_12(self, annotator, mock_genomics_server):
-        logger.info("test `get_sequenced_libraries()`, single project")
+    @pytest.mark.parametrize("projectnum", [0, 1, 2])
+    def test_get_sequenced_libraries_single_project(self, annotatordata,
+                                                    mock_genomics_server,
+                                                    projectnum):
+        # (GIVEN)
+        annotator, rundata = annotatordata
 
-        # WHEN collecting sequenced libraries for project P14-12
-        sequencedlibraries = annotator.get_sequenced_libraries('P14-12')
+        # AND unaligned samples for a single project
+        projectdata = rundata['unaligned']['projects'][projectnum]
 
-        # THEN should find 5 total libraries, including lib7293
-        assert(len(sequencedlibraries) == 5)
+        logger.info("test `get_sequenced_libraries()`, single project ({})"
+                    .format(projectdata['name']))
 
-    def test_get_sequenced_libraries_all_projects(self, annotator,
+        # WHEN collecting sequenced libraries for project
+        sequencedlibraries = annotator.get_sequenced_libraries(
+            projectdata['name'])
+
+        # THEN should find excpeted number of sequenced libraries
+        assert(len(sequencedlibraries) == len(projectdata['samples']))
+
+    def test_get_sequenced_libraries_all_projects(self, annotatordata,
                                                   mock_genomics_server):
-        logger.info("test `get_sequenced_libraries()`, single project")
+        # (GIVEN)
+        annotator, rundata = annotatordata
+
+        # AND list of unaligned projects
+        projects = rundata['unaligned']['projects']
+
+        logger.info("test `get_sequenced_libraries()`, all projects")
 
         # WHEN collecting sequenced libraries for all projects
         sequencedlibraries = annotator.get_sequenced_libraries()
 
         # THEN should find 31 total libraries
-        assert(len(sequencedlibraries) == 31)
-        # assert(mock_genomics_server['lib7293'] in libraries)
+        assert(len(sequencedlibraries)
+               == sum(map(lambda x: len(x['samples']), projects)))
 
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestSequencedLibraryAnnotator:
-    @pytest.fixture(scope="class")
-    def annotator(self, request, mock_genomics_server, mock_db):
+    """
+    Tests methods for the `SequencedLibraryAnnotator` class in the
+    `bripipetools.annotation.illuminaseq` module.
+    """
+    @pytest.fixture(
+        scope='class',
+        params=[{'runnum': r, 'projectnum': p, 'samplenum': s}
+                for r in range(1)
+                for p in range(3)
+                for s in range(3)])
+    def annotatordata(self, request, mock_genomics_server, mock_db):
         # GIVEN a SequencedLibraryAnnotator with mock 'genomics' server path,
         # and path to library folder (i.e., where data/organization is known),
-        # with specified library, project, and run ID
-        logger.info("[setup] SequencedLibraryAnnotator mock instance")
+        # with specified library, project, and run ID, as well as a mock
+        # db connection
+        runs = mock_genomics_server['root']['genomics']['illumina']['runs']
+        rundata = runs[request.param['runnum']]
+        projects = rundata['unaligned']['projects']
+        projectdata = projects[request.param['projectnum']]
+        samples = projectdata['samples']
+        sampledata = samples[request.param['samplenum']]
+
+        logger.info("[setup] SequencedLibraryAnnotator mock instance "
+                    " for sample {} in project {} from run {}"
+                    .format(sampledata['name'], projectdata['name'],
+                            rundata['flowcell_id']))
 
         seqlibannotator = annotation.SequencedLibraryAnnotator(
-            path=os.path.join(mock_genomics_server['unaligned_path'],
-                              mock_genomics_server['project_p14_12'],
-                              mock_genomics_server['lib7293']),
-            library=mock_genomics_server['lib7293'],
-            project=mock_genomics_server['project_p14_12'],
-            run_id=mock_genomics_server['run_id'],
+            path=sampledata['path'],
+            library=os.path.basename(sampledata['path']),
+            project=os.path.basename(projectdata['path']),
+            run_id=rundata['run_id'],
             db=mock_db)
 
         def fin():
             logger.info("[teardown] SequencedLibraryAnnotator mock instance")
         request.addfinalizer(fin)
-        return seqlibannotator
+        return (seqlibannotator, rundata, sampledata)
 
-    def test_init_attribute_munging(self, annotator):
+    def test_init_attribute_munging(self, annotatordata):
+        # (GIVEN)
+        annotator, rundata, sampledata = annotatordata
+        seqlib_id = '{}_{}'.format(sampledata['name'], rundata['flowcell_id'])
+
         logger.info("test `__init__()` for proper attribute munging")
 
         # WHEN checking whether input arguments were automatically munged
@@ -177,14 +249,20 @@ class TestSequencedLibraryAnnotator:
 
         # THEN the sequenced library ID should be properly constructed as the
         # library ID and flowcell ID
-        assert(annotator.seqlib_id == 'lib7293_C6VG0ANXX')
-#
-    def test_init_sequencedlibrary_existing_sample(self, annotator, mock_db):
-        logger.info("test `_init_sequencedlibrary()` with existing sample")
+        assert(annotator.seqlib_id == seqlib_id)
+
+    def test_init_sequencedlibrary_existing_sample(self, annotatordata,
+                                                   mock_db):
+        # (GIVEN)
+        annotator, rundata, sampledata = annotatordata
+        seqlib_id = '{}_{}'.format(sampledata['name'], rundata['flowcell_id'])
+
+        logger.info("test `_init_sequencedlibrary()` with existing sample {}"
+                    .format(seqlib_id))
 
         # WHEN sequenced library already exists in 'samples' collection
         mock_db.samples.insert_one(
-            {'_id': 'lib7293_C6VG0ANXX',
+            {'_id': seqlib_id,
              'type': 'sequenced library',
              'isMock': True})
         sequencedlibrary = annotator._init_sequencedlibrary()
@@ -192,15 +270,20 @@ class TestSequencedLibraryAnnotator:
         # THEN the sequenced library object should be returned and
         # should be correctly mapped from the database object
         assert(type(sequencedlibrary) == docs.SequencedLibrary)
-        assert(sequencedlibrary._id == 'lib7293_C6VG0ANXX')
+        assert(sequencedlibrary._id == seqlib_id)
         assert(hasattr(sequencedlibrary, 'is_mock'))
 
         logger.info("[rollback] remove most recently inserted "
                     "from mock database")
         mock_db.samples.drop()
 
-    def test_init_sequencedlibrary_new_sample(self, annotator):
-        logger.info("test `_init_sequencedlibrary()` with new sample")
+    def test_init_sequencedlibrary_new_sample(self, annotatordata):
+        # (GIVEN)
+        annotator, rundata, sampledata = annotatordata
+        seqlib_id = '{}_{}'.format(sampledata['name'], rundata['flowcell_id'])
+
+        logger.info("test `_init_sequencedlibrary()` with new sample {}"
+                    .format(seqlib_id))
 
         # WHEN sequenced library sample does not already exist in
         # 'samples' collection
@@ -208,22 +291,31 @@ class TestSequencedLibraryAnnotator:
 
         # THEN a new sequenced library object should be returned
         assert(type(sequencedlibrary) == docs.SequencedLibrary)
-        assert(sequencedlibrary._id == 'lib7293_C6VG0ANXX')
+        assert(sequencedlibrary._id == seqlib_id)
         assert(not hasattr(sequencedlibrary, 'is_mock'))
 
-    def test_get_raw_data(self, annotator, mock_genomics_server):
-        logger.info("test `_get_raw_data()`")
+    def test_get_raw_data(self, annotatordata, mock_genomics_server):
+        # (GIVEN)
+        annotator, _, sampledata = annotatordata
+
+        logger.info("test `_get_raw_data()` for sample {}"
+                    .format(sampledata['name']))
 
         # WHEN collecting raw data for a sequenced library
         raw_data = annotator._get_raw_data()
 
         # THEN should be a list of dicts, with the correct details for each
         # FASTQ file identified
-        assert(re.search(mock_genomics_server['lib7293_fastq'],
-                         raw_data[0]['path']))
+        assert(set(f['path'] for f in raw_data)
+                == set(f for f in os.listdir(sampledata['path'])
+                       if not re.search('empty', f)))
 
-    def test_update_sequencedlibrary(self, annotator):
-        logger.info("test `_update_sequencedlibrary()`")
+    def test_update_sequencedlibrary(self, annotatordata):
+        # (GIVEN)
+        annotator, _, sampledata = annotatordata
+
+        logger.info("test `_update_sequencedlibrary()` for sample {}"
+                    .format(sampledata['name']))
 
         # WHEN sequenced library object is updated
         annotator._update_sequencedlibrary()
@@ -234,8 +326,12 @@ class TestSequencedLibraryAnnotator:
                     for field in ['run_id', 'project_id', 'subproject_id',
                                   'parent_id', 'raw_data']]))
 
-    def test_get_sequenced_library(self, annotator):
-        logger.info("test `get_sequenced_library()`")
+    def test_get_sequenced_library(self, annotatordata):
+        # (GIVEN)
+        annotator, _, sampledata = annotatordata
+
+        logger.info("test `get_sequenced_library()` for sample {}"
+                    .format(sampledata['name']))
 
         # WHEN sequenced library object is returned
         sequencedlibrary = annotator.get_sequenced_library()
@@ -251,24 +347,45 @@ class TestSequencedLibraryAnnotator:
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestWorkflowBatchAnnotator:
+    """
+    Tests methods for the `WorkflowBatchAnnotator` class in the
+    `bripipetools.annotation.globusgalaxy` module.
+    """
+    @pytest.fixture(
+        scope='class',
+        params=[{'runnum': r, 'batchnum': b}
+                for r in range(1)
+                for b in range(2)])
     @pytest.fixture(scope='class')
-    def annotator(self, request, mock_genomics_server, mock_db):
+    def annotatordata(self, request, mock_genomics_server, mock_db):
         # GIVEN a WorkflowBatchAnnotator with mock 'genomics' server path,
-        # and path to workflow batch file with specified genomics root
-        logger.info("[setup] WorkflowBatchAnnotator mock instance")
+        # and path to workflow batch file with specified genomics root,
+        # as well as a mock db connection
+        runs = mock_genomics_server['root']['genomics']['illumina']['runs']
+        rundata = runs[request.param['runnum']]
+        batches = rundata['submitted']['batches']
+        batchdata = batches[request.param['batchnum']]
+
+        logger.info("[setup] WorkflowBatchAnnotator mock instance "
+                    "for batch {}".format(os.path.basename(batchdata['path'])))
 
         wflowbatchannotator = annotation.WorkflowBatchAnnotator(
-            workflowbatch_file=mock_genomics_server['workflowbatch_file'],
+            workflowbatch_file=batchdata['path'],
             db=mock_db,
-            genomics_root=mock_genomics_server['genomics_root'])
+            genomics_root=mock_genomics_server['root']['path'])
 
         def fin():
             logger.info("[teardown] WorkflowBatchAnnotator mock instance")
         request.addfinalizer(fin)
-        return wflowbatchannotator
+        return (wflowbatchannotator, batchdata)
 
-    def test_init_file_parsing(self, annotator):
-        logger.info("test `__init__()` for proper file parsing")
+    def test_init_file_parsing(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
+        logger.info("test `__init__()` for proper file parsing "
+                    "with batch {}"
+                    .format(os.path.basename(batchdata['path'])))
 
         # WHEN checking whether input arguments were automatically munged
         # when setting annotator attributes
@@ -276,79 +393,97 @@ class TestWorkflowBatchAnnotator:
 
         # THEN the workflow batch data should be a dictionary with fields for
         # workflow name, parameters, and samples
-        assert(workflowbatch_data['workflow_name']
-               == "optimized_truseq_unstrand_sr_grch38_v0.1_complete")
-        assert(len(workflowbatch_data['parameters']) == 35)
-        assert(len(workflowbatch_data['samples']) == 2)
+        assert(workflowbatch_data['workflow_name'] == batchdata['workflow'])
+        assert(len(workflowbatch_data['parameters']) == batchdata['num_params'])
+        assert(len(workflowbatch_data['samples']) == batchdata['num_samples'])
 #
-    def test_parse_batch_name(self, annotator, mock_genomics_server):
-        logger.info("test `_parse_batch_name()`")
+    def test_parse_batch_name(self, annotatordata, mock_genomics_server):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
+        logger.info("test `_parse_batch_name()` with batch name {}"
+                    .format(batchdata['name']))
 
         # WHEN parsing batch name from workflow batch file
-        batch_items = annotator._parse_batch_name(
-            mock_genomics_server['batch_name'])
+        batch_items = annotator._parse_batch_name(batchdata['name'])
 
         # THEN items should be in a dict with fields for date (string),
         # project labels (list of strings), and flowcell ID (string)
-        assert(batch_items['date'] == '2016-04-12')
-        assert(batch_items['projects'] == ['P109-1', 'P14-12'])
-        assert(batch_items['flowcell_id'] == 'C6VG0ANXX')
-
-    def test_init_workflowbatch_existing_batch(self, annotator,
+        assert(batch_items['date'] == batchdata['date'])
+        assert(batch_items['projects'] == batchdata['projects'])
+        assert(batch_items['flowcell_id'] == batchdata['flowcell_id'])
+#
+    def test_init_workflowbatch_existing_batch(self, annotatordata,
                                                mock_genomics_server, mock_db):
-        logger.info("test `_init_workflowbatch()` with existing batch")
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
+        logger.info("test `_init_workflowbatch()` with existing batch {}"
+                    .format(batchdata['id']))
 
         # WHEN workflow batch exists in 'workflowbatches' collection
         mock_db.workflowbatches.insert_one(
-            {'_id': 'globusgalaxy_2016-04-12_1',
-             'workflowbatchFile':
-                re.sub('.*(?=genomics)', '/',
-                       mock_genomics_server['workflowbatch_file']),
-             'date': '2016-04-12',
+            {'_id': batchdata['id'],
+             'workflowbatchFile': re.sub('.*(?=genomics)', '/',
+                                         batchdata['path']),
+             'date': batchdata['date'],
              'type': 'Galaxy workflow batch',
              'isMock': True})
         workflowbatch = annotator._init_workflowbatch()
 
         # THEN existing workflow batch should be returned, and it
         # should be mapped from the database object
-        assert(workflowbatch._id == 'globusgalaxy_2016-04-12_1')
+        assert(workflowbatch._id == batchdata['id'])
         assert(hasattr(workflowbatch, 'is_mock'))
         logger.info("[rollback] remove most recently inserted "
                     "from mock database")
         mock_db.workflowbatches.drop()
 
-    def test_init_workflowbatch_new_batch(self, annotator):
-        logger.info("test `_init_workflowbatch()` with new batch")
+    def test_init_workflowbatch_new_batch(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
+        logger.info("test `_init_workflowbatch()` with new batch {}"
+                    .format(batchdata['id']))
 
         # WHEN workflow batch does not exist in 'workflowbatches' collection
         workflowbatch = annotator._init_workflowbatch()
 
         # THEN a new workflow batch should be returned
-        assert(workflowbatch._id == 'globusgalaxy_2016-04-12_1')
+        assert(workflowbatch._id == batchdata['id'])
         assert(not hasattr(workflowbatch, 'is_mock'))
 
-    def test_init_workflowbatch_existing_date(self, annotator, mock_db):
+    def test_init_workflowbatch_existing_date(self, annotatordata, mock_db):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
         logger.info("test `_init_workflowbatch()` existing prefix/date")
 
         # WHEN workflow batch does not exist in 'workflowbatches' collection,
         # but another batch with the same prefix and date does exist
         mock_db.workflowbatches.insert_one(
-            {'_id': 'globusgalaxy_2016-04-12_1',
+            {'_id': batchdata['id'],
              'workflowbatchFile': 'someotherfile',
-             'date': '2016-04-12',
+             'date': batchdata['date'],
              'type': 'Galaxy workflow batch',
              'isMock': True})
         workflowbatch = annotator._init_workflowbatch()
 
         # THEN a new workflow batch should be returned with an incremented
         # ID number
-        assert(workflowbatch._id == 'globusgalaxy_2016-04-12_2')
+        assert(workflowbatch._id == re.sub('\d$',
+                                           lambda x: str(int(x.group(0)) + 1),
+                                           batchdata['id']))
         assert(not hasattr(workflowbatch, 'is_mock'))
+
         logger.info("[rollback] remove most recently inserted "
-                    "from mock database")
+        "from mock database")
         mock_db.workflowbatches.drop()
 
-    def test_update_workflowbatch(self, annotator):
+    def test_update_workflowbatch(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
         logger.info("test `_update_workflowbatch()`")
 
         # WHEN workflow batch object is updated
@@ -360,7 +495,10 @@ class TestWorkflowBatchAnnotator:
                     for field in ['workflow_id', 'date', 'projects',
                                   'flowcell_id']]))
 
-    def test_get_workflow_batch(self, annotator):
+    def test_get_workflow_batch(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
         logger.info("test `get_workflow_batch()`")
 
         # WHEN workflow batch object is returned
@@ -374,29 +512,37 @@ class TestWorkflowBatchAnnotator:
                     for field in ['workflow_id', 'date', 'projects',
                                   'flowcell_id']]))
 
-    def test_get_sequenced_libraries(self, annotator):
+    def test_get_sequenced_libraries(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
         logger.info("test `get_sequenced_libraries()`")
 
         # WHEN collecting list of sequenced libraries for batch
         seqlibraries = annotator.get_sequenced_libraries()
 
-        # THEN should be a list of two sequenced libraries
-        assert(len(seqlibraries) == 2)
-        assert('lib7294_C6VG0ANXX' in seqlibraries)
+        # THEN should be a list with expected number of sequenced libraries
+        assert(len(seqlibraries) == batchdata['num_samples'])
 
-    def test_get_processed_libraries(self, annotator):
+    def test_get_processed_libraries(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
         logger.info("test `get_processed_libraries()`")
 
         # WHEN collecting processed libraries for current workflow batch
         processedlibraries = annotator.get_processed_libraries()
 
-        # THEN should return 2 total processed libraries, each of which
-        # is a valid ProcessedLibrary object
-        assert(len(processedlibraries) == 2)
+        # THEN should return expected number of processed libraries,
+        # each of which is a valid ProcessedLibrary object
+        assert(len(processedlibraries) == batchdata['num_samples'])
         assert(all([type(pl) == docs.ProcessedLibrary
                     for pl in processedlibraries]))
 
-    def test_get_processed_libraries_w_qc(self, annotator):
+    def test_get_processed_libraries_w_qc(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
         logger.info("test `get_processed_libraries()`, add qc")
 
         # WHEN collecting processed libraries for current workflow batch,
@@ -405,7 +551,7 @@ class TestWorkflowBatchAnnotator:
 
         # THEN should return 2 total processed libraries, each of which
         # is a valid ProcessedLibrary object
-        assert(len(processedlibraries) == 2)
+        assert(len(processedlibraries) == batchdata['num_samples'])
         assert(all([type(pl) == docs.ProcessedLibrary
                     for pl in processedlibraries]))
         assert('validations' in processedlibraries[0].processed_data[0])
@@ -413,45 +559,76 @@ class TestWorkflowBatchAnnotator:
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 class TestProcessedLibraryAnnotator:
+    """
+    Tests methods for the `ProcessedLibraryAnnotator` class in the
+    `bripipetools.annotation.globusgalaxy` module.
+    """
+    @pytest.fixture(
+        scope='class',
+        params=[{'runnum': r, 'batchnum': b, 'samplenum': s}
+                for r in range(1)
+                for b in range(2)
+                for s in range(6)
+                if not (b == 1 and s > 2)])
     @pytest.fixture(scope='class')
-    def annotator(self, request, mock_genomics_server, mock_db):
+    def annotatordata(self, request, mock_genomics_server, mock_db):
         # GIVEN a ProcessedLibraryAnnotator with mock 'genomics' server path,
         # and path to library folder (i.e., where data/organization is known),
-        # with specified library, project, and run ID
-        logger.info("[setup] SequencedLibraryAnnotator mock instance")
+        # with specified library, project, and run ID,
+        # as well as a mock db connection
+        runs = mock_genomics_server['root']['genomics']['illumina']['runs']
+        rundata = runs[request.param['runnum']]
+        batches = rundata['submitted']['batches']
+        batchdata = batches[request.param['batchnum']]
+        samples = batchdata['samples']
+        samplename = samples[request.param['samplenum']]
+        proclib_id = ('{}_{}_processed'
+                      .format(samplename, rundata['flowcell_id']))
 
-        workflowbatch_id = 'globusgalaxy_2016-04-12_1'
+        logger.info("[setup] ProcessedLibraryAnnotator mock instance "
+                    "for sample {}".format(samplename))
+
+        workflowbatch_id = batchdata['id']
         # TODO: try to remove the test dependency on the io module here
         workflowbatch_data = io.WorkflowBatchFile(
-            mock_genomics_server['workflowbatch_file'],
+            path=batchdata['path'],
             state='submit').parse()
 
         proclibannotator = annotation.ProcessedLibraryAnnotator(
             workflowbatch_id=workflowbatch_id,
-            params=workflowbatch_data['samples'][-1],
+            params=workflowbatch_data['samples'][request.param['samplenum']],
             db=mock_db)
 
         def fin():
             logger.info("[teardown] ProcessedLibraryAnnotator mock instance")
         request.addfinalizer(fin)
-        return proclibannotator
+        return (proclibannotator, batchdata, proclib_id)
 
-    def test_init_attribute_munging(self, annotator):
-        logger.info("test `__init__()` for proper attribute munging")
+    def test_init_attribute_munging(self, annotatordata):
+        # (GIVEN)
+        annotator, _, proclib_id = annotatordata
+
+        logger.info("test `__init__()` for proper attribute munging "
+                    " with sample {}".format(proclib_id))
 
         # WHEN checking whether input arguments were automatically munged
         # when setting annotator attributes
 
         # THEN the processed library ID should be properly constructed as the
         # library ID and flowcell ID, tagged as processed
-        assert(annotator.proclib_id == 'lib7294_C6VG0ANXX_processed')
+        assert(annotator.proclib_id == proclib_id)
 
-    def test_init_processedlibrary_existing_sample(self, annotator, mock_db):
-        logger.info("test `_init_processedlibrary()` with existing sample")
+    def test_init_processedlibrary_existing_sample(self, annotatordata,
+                                                   mock_db):
+        # (GIVEN)
+        annotator, _, proclib_id = annotatordata
+
+        logger.info("test `_init_processedlibrary()` with existing sample {}"
+                    .format(proclib_id))
 
         # WHEN processed library already exists in 'samples' collection
         mock_db.samples.insert_one(
-            {'_id': 'lib7294_C6VG0ANXX_processed',
+            {'_id': proclib_id,
              'type': 'processed library',
              'isMock': True})
         processedlibrary = annotator._init_processedlibrary()
@@ -459,14 +636,17 @@ class TestProcessedLibraryAnnotator:
         # THEN the processed library object should be returned and
         # should be correctly mapped from the database object
         assert(type(processedlibrary) == docs.ProcessedLibrary)
-        assert(processedlibrary._id == 'lib7294_C6VG0ANXX_processed')
+        assert(processedlibrary._id == proclib_id)
         assert(hasattr(processedlibrary, 'is_mock'))
 
         logger.info("[rollback] remove most recently inserted "
                     "from mock database")
         mock_db.samples.drop()
 
-    def test_init_processedlibrary_new_sample(self, annotator):
+    def test_init_processedlibrary_new_sample(self, annotatordata):
+        # (GIVEN)
+        annotator, _, proclib_id = annotatordata
+
         logger.info("test `_init_processedlibrary()` with new sample")
 
         # WHEN processed library sample does not already exist in
@@ -475,18 +655,24 @@ class TestProcessedLibraryAnnotator:
 
         # THEN a new processed library object should be returned
         assert(type(processedlibrary) == docs.ProcessedLibrary)
-        assert(processedlibrary._id == 'lib7294_C6VG0ANXX_processed')
+        assert(processedlibrary._id == proclib_id)
         assert(not hasattr(processedlibrary, 'is_mock'))
 
-    def test_get_outputs(self, annotator):
+    def test_get_outputs(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata, proclib_id = annotatordata
+
         logger.info("test `_get_outputs()`")
 
         # WHEN collecting the list of outputs for a processed library
 
-        # THEN the outputs should be stored in a dictionary of length 11
-        assert(len(annotator._get_outputs()) == 11)
+        # THEN the outputs should be stored in a dict with expected length
+        assert(len(annotator._get_outputs()) == batchdata['num_outputs'])
 
-    def test_parse_output_name_onepart_source(self, annotator):
+    def test_parse_output_name_onepart_source(self, annotatordata):
+        # (GIVEN)
+        annotator, _, _ = annotatordata
+
         logger.info("test `_parse_output_name()`, one-part source")
 
         # WHEN parsing output name from workflow batch parameter, and the
@@ -500,7 +686,10 @@ class TestProcessedLibraryAnnotator:
         assert(output_items['type'] == 'alignments')
         assert(output_items['source'] == 'tophat')
 
-    def test_parse_output_name_twopart_source(self, annotator):
+    def test_parse_output_name_twopart_source(self, annotatordata):
+        # (GIVEN)
+        annotator, _, _ = annotatordata
+
         logger.info("test `_parse_output_name()`, two-part source")
 
         # WHEN parsing output name from workflow batch parameter, and the
@@ -514,7 +703,10 @@ class TestProcessedLibraryAnnotator:
         assert(output_items['type'] == 'metrics')
         assert(output_items['source'] == 'picard_rnaseq')
 
-    def test_group_outputs(self, annotator):
+    def test_group_outputs(self, annotatordata, mock_genomics_server):
+        # (GIVEN)
+        annotator, _, _ = annotatordata
+
         logger.info("test `_group_outputs()`")
 
         # WHEN collecting the organized dictionary of outputs
@@ -523,12 +715,15 @@ class TestProcessedLibraryAnnotator:
         # THEN the outputs should be correctly grouped according to type
         # and source (tool)
         assert(set(outputs.keys())
-               == set(['metrics', 'qc', 'counts', 'alignments', 'log']))
+               == set(mock_genomics_server['out_types']))
         assert(set([k['source'] for k in outputs['metrics']])
                == set(['picard_align', 'tophat_stats', 'picard_markdups',
                        'picard_rnaseq', 'htseq']))
 
-    def test_append_processed_data(self, annotator):
+    def test_append_processed_data(self, annotatordata):
+        # (GIVEN)
+        annotator, _, _ = annotatordata
+
         logger.info("test `_append_processed_data()`")
 
         # WHEN batch information and outputs are added to processed data
@@ -542,7 +737,10 @@ class TestProcessedLibraryAnnotator:
                == set(['workflowbatch_id', 'outputs']))
         annotator.processedlibrary.processed_data = []
 
-    def test_update_processedlibrary(self, annotator):
+    def test_update_processedlibrary(self, annotatordata):
+        # (GIVEN)
+        annotator, _, _ = annotatordata
+
         logger.info("test `_update_processedlibrary()`")
 
         # WHEN processed library object is updated

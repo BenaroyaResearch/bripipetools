@@ -43,8 +43,8 @@ class WorkflowBatchAnnotator(object):
         labels, and flowcell ID.
         """
         name_parts = batch_name.split('_')
-        d = datetime.datetime.strptime(name_parts.pop(0), '%y%m%d')
-        date = datetime.date.isoformat(d)
+        date = datetime.datetime.strptime(name_parts.pop(0), '%y%m%d')
+        # date = datetime.date.isoformat(d)
 
         fc_id = name_parts.pop(-1)
 

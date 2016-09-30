@@ -117,7 +117,8 @@ class SequencedLibraryAnnotator(object):
     Identifies, stores, and updates information about a sequenced library.
     """
     def __init__(self, path, library, project, run_id, db):
-        logger.info("creating an instance of SequencedLibraryAnnotator")
+        logger.info("creating an instance of SequencedLibraryAnnotator "
+                    "for library {}".format(library))
         self.path = path
         self.db = db
         self.library_id = parsing.get_library_id(library)
