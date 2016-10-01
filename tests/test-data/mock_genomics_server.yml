@@ -25,16 +25,20 @@ out_types:
             file: &tophat_stats_file !ujoin [*tophat_stats, metrics.txt]
             raw_len: 5
             parse_len: 5
-        &htseq_metrics htseq_metrics:
-            file: &htseq_metrics_file !join [*htseq_metrics, .txt]
+        &htseq htseq:
+            file: &htseq_metrics_file !ujoin [*htseq, metrics.txt]
+            raw_len: 5
+            parse_len: 5
         combined:
             file: &combined_metrics_file combined_metrics.csv
     qc:
         - &fastqc_qc fastqc_qc.txt
         - &combined_qc combined_qc.csv
     counts:
-        - &htseq_counts htseq_counts.txt
-        - &combined_counts combined_counts.csv
+        *htseq:
+            file: &htseq_counts_file !ujoin [*htseq, counts.txt]
+            combined: &combined_counts_file combined_counts.csv
+            raw_len: 64253
     alignments:
         - &tophat_align tophat_alignments.bam
     log:
@@ -171,7 +175,7 @@ root:
                                       path: !ujoin [*P1_L2, *R1, *tophat_stats_file]
                                     - sample: *P1_L3
                                       path: !ujoin [*P1_L3, *R1, *tophat_stats_file]
-                                *htseq_metrics:
+                                *htseq:
                                     - sample: *P1_L1
                                       path: !ujoin [*P1_L1, *R1, *htseq_metrics_file]
                                     - sample: *P1_L2
@@ -189,9 +193,13 @@ root:
                             combined: !ujoin [*P1, *R1, *batch_date, *combined_qc]
                         counts:
                             path: counts
-                            files:
-                              - path: !ujoin [*P1_L1, *R1, *htseq_counts]
-                              - path: !ujoin [*P1_L2, *R1, *htseq_counts]
-                              - path: !ujoin [*P1_L3, *R1, *htseq_counts]
+                            sources:
+                                *htseq:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *htseq_counts_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *htseq_counts_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *htseq_counts_file]
                             combined:
-                                path: !ujoin [*P1, *R1, *batch_date, *combined_counts]
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_counts_file]
