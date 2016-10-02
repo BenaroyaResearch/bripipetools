@@ -1,0 +1,41 @@
+<style type="text/css">
+        tr.d0 td {background-color: oldlace; color: black;}
+        tr.d1 td {background-color: aliceblue; color: black;}
+        </style><?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Galaxy picard_wrapper tool output - see http://getgalaxy.org/" />
+<title></title>
+<link rel="stylesheet" href="/static/style/base.css" type="text/css" />
+</head>
+<body>
+<div class="document">
+Galaxy tool MarkDuplicates run at 29/09/2016 17:51:26</b><br/><b>The following output files were created (click the filename to view/download a copy):</b><hr/><table>
+<tr><td><a href="MarkDuplicates.metrics.txt">MarkDuplicates.metrics.txt</a></td></tr>
+<tr><td><a href="MarkDuplicates.log">MarkDuplicates.log</a></td></tr>
+</table><p/>
+<b>Picard on line resources</b><ul>
+<li><a href="http://picard.sourceforge.net/index.shtml">Click here for Picard Documentation</a></li>
+<li><a href="http://picard.sourceforge.net/picard-metric-definitions.shtml">Click here for Picard Metrics definitions</a></li></ul><hr/>
+<b>Picard output (transposed to make it easier to see)</b><hr/>
+<table cellpadding="3" >
+<tr class="d0"><td colspan="2">## net.sf.picard.metrics.StringHeader</td></tr><tr class="d1"><td colspan="2"># net.sf.picard.sam.MarkDuplicates INPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam OUTPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.rd.bam METRICS_FILE=/scratch/galaxy/job_working_directory/059/59539/dataset_121863_files/MarkDuplicates.metrics.txt REMOVE_DUPLICATES=true ASSUME_SORTED=true READ_NAME_REGEX=[a-zA-Z0-9]+:[0-9]:([0-9]+):([0-9]+):([0-9]+).* OPTICAL_DUPLICATE_PIXEL_DISTANCE=100 VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000    MAX_SEQUENCES_FOR_DISK_READ_ENDS_MAP=50000 MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=8000 SORTING_COLLECTION_SIZE_RATIO=0.25 VERBOSITY=INFO QUIET=false COMPRESSION_LEVEL=5 CREATE_INDEX=false CREATE_MD5_FILE=false</td></tr><tr class="d0"><td colspan="2">## net.sf.picard.metrics.StringHeader</td></tr><tr class="d1"><td colspan="2"># Started on: Thu Sep 29 17:51:17 UTC 2016</td></tr><tr class="d0"><td colspan="2">## METRICS CLASS	net.sf.picard.sam.DuplicationMetrics</td></tr><tr class="d0"><td>LIBRARY</td><td>Unknown Library&nbsp;</td></tr>
+<tr class="d1"><td>UNPAIRED_READS_EXAMINED</td><td>88482&nbsp;</td></tr>
+<tr class="d0"><td>READ_PAIRS_EXAMINED</td><td>0&nbsp;</td></tr>
+<tr class="d1"><td>UNMAPPED_READS</td><td>0&nbsp;</td></tr>
+<tr class="d0"><td>UNPAIRED_READ_DUPLICATES</td><td>2503&nbsp;</td></tr>
+<tr class="d1"><td>READ_PAIR_DUPLICATES</td><td>0&nbsp;</td></tr>
+<tr class="d0"><td>READ_PAIR_OPTICAL_DUPLICATES</td><td>0&nbsp;</td></tr>
+<tr class="d1"><td>PERCENT_DUPLICATION</td><td>0.028288&nbsp;</td></tr>
+<tr class="d0"><td>ESTIMATED_LIBRARY_SIZE
+</td><td>
+&nbsp;</td></tr>
+</table>
+<b>Picard Tool Run Log</b><hr/>
+<pre>INFO:root:## executing java -Xmx30749m  -Djava.io.tmpdir='/ephemeral/0/condor/dir_25187/tmpbeISRZ'  -jar /mnt/galaxyTools/tools/picard/1.56/MarkDuplicates.jar VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 ASSUME_SORTED=true INPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam OUTPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.rd.bam METRICS_FILE=/scratch/galaxy/job_working_directory/059/59539/dataset_121863_files/MarkDuplicates.metrics.txt REMOVE_DUPLICATES=true READ_NAME_REGEX="[a-zA-Z0-9]+:[0-9]:([0-9]+):([0-9]+):([0-9]+).*" OPTICAL_DUPLICATE_PIXEL_DISTANCE=100 returned status 0 and nothing on stderr
+
+</pre><hr/>The freely available <a href="http://picard.sourceforge.net/command-line-overview.shtml">Picard software</a> 
+generated all outputs reported here running as a <a href="http://getgalaxy.org">Galaxy</a> tool</div></body></html>
+

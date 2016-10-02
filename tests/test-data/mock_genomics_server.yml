@@ -1,0 +1,227 @@
+out_types:
+    metrics:
+        &picard_align picard_align:
+            file: &picard_align_file !ujoin [*picard_align, metrics.html]
+            raw_len: 56
+            format: long
+            parse_len_long: 24
+            parse_len_wide: 0
+            parse_len: 24
+        &picard_markdups picard_markdups:
+            file: &picard_markdups_file !ujoin [*picard_markdups, metrics.html]
+            raw_len: 24
+            format: long
+            parse_len_long: 9
+            parse_len_wide: 0
+            parse_len: 9
+        &picard_rnaseq picard_rnaseq:
+            file: &picard_rnaseq_file !ujoin [*picard_rnaseq, metrics.html]
+            raw_len: 215
+            format: wide
+            parse_len_long: 0
+            parse_len_wide: 22
+            parse_len: 22
+        &tophat_stats tophat_stats:
+            file: &tophat_stats_file !ujoin [*tophat_stats, metrics.txt]
+            raw_len: 5
+            parse_len: 5
+        &htseq htseq:
+            file: &htseq_metrics_file !ujoin [*htseq, metrics.txt]
+            raw_len: 5
+            parse_len: 5
+        combined:
+            file: &combined_metrics_file combined_metrics.csv
+    qc:
+        &fastqc fastqc:
+            file: &fastqc_qc_file !ujoin [*fastqc, qc.txt]
+            raw_len: 6028
+        combined: &combined_qc_file combined_qc.csv
+    counts:
+        *htseq:
+            file: &htseq_counts_file !ujoin [*htseq, counts.txt]
+            combined: &combined_counts_file combined_counts.csv
+            raw_len: 64253
+    alignments:
+        - &tophat_align tophat_alignments.bam
+    log:
+        - &workflow_log workflow_log.txt
+root:
+    path: ""
+    genomics:
+        path: genomics
+        illumina:
+            path: Illumina
+            runs:
+              - run_id: 150615_D00565_0087_AC6VG0ANXX
+                path: 150615_D00565_0087_AC6VG0ANXX
+                flowcell_id: &R1 C6VG0ANXX
+                unaligned:
+                    path: Unaligned
+                    projects:
+                      - path: P109-1-21113094
+                        name: &P1 P109-1
+                        samples:
+                          - path: lib6615-25944927
+                            name: &P1_L1 lib6615
+                          - path: lib6618-25921009
+                            name: &P1_L2 lib6618
+                          - path: lib6624-25939931
+                            name: &P1_L3 lib6624
+                      - path: P14-12-23221204
+                        name: &P2 P14-12
+                        samples:
+                          - path: lib7293-25920016
+                            name: &P2_L1 lib7293
+                          - path: lib7315-25934979
+                            name: &P2_L2 lib7315
+                          - path: lib7331-25932988
+                            name: &P2_L3 lib7331
+                      - path: P43-12-23224208
+                        name: &P3 P43-12
+                        samples:
+                          - path: lib6831-25921999
+                            name: &P3_L1 lib6831
+                          - path: lib6837-25924003
+                            name: &P3_L2 lib6837
+                          - path: lib6838-25918014
+                            name: &P3_L3 lib6838
+                      - path: P43-13-23232210
+                        name: &P4 P43-13
+                        samples:
+                          - path: lib6817-25926000
+                            name: &P4_L1 lib6817
+                          - path: lib6819-25935977
+                            name: &P4_L2 lib6819
+                          - path: lib6820-25933973
+                            name: &P4_L3 lib6820
+                      - path: P69-6-23217200
+                        name: &P5 P69-6
+                        samples:
+                          - path: lib7282-25939927
+                            name: &P5_L1 lib7282
+                          - path: lib7284-25925999
+                            name: &P5_L2 lib7284
+                          - path: lib7287-25924001
+                            name: &P5_L3 lib7287
+                      - path: P81-8-23231210
+                        name: &P6 P81-8
+                        samples:
+                          - path: lib6843-25920021
+                            name: &P6_L1 lib6843
+                      - path: P91-10-23227209
+                        name: &P7 P91-10
+                        samples:
+                          - path: lib6780-25926004
+                            name: &P7_L1 lib6780
+                          - path: lib6801-25922996
+                            name: &P7_L2 lib6801
+                          - path: lib6804-25934990
+                            name: &P7_L3 lib6804
+                submitted:
+                    path: globus_batch_submission
+                    date: &batch_date 160929
+                    batches:
+                      - path: 160929_P109-1_P14-12_C6VG0ANXX_optimized_truseq_unstrand_sr_grch38_v0.1_complete.txt
+                        name: 160929_P109-1_P14-12_C6VG0ANXX
+                        id: globusgalaxy_2016-09-29_1
+                        workflow: optimized_truseq_unstrand_sr_grch38_v0.1_complete
+                        date: 2016-09-29 00:00:00
+                        num_params: 35
+                        num_samples: 6
+                        num_outputs: 11
+                        projects: [*P1, *P2]
+                        samples: [*P1_L1, *P1_L2, *P1_L3, *P2_L1, *P2_L2, *P2_L3]
+                        flowcell_id: *R1
+                      - path: 160929_P43-12_C6VG0ANXX_optimized_nextera_sr_grch38_v0.1_complete.txt
+                        name: 160929_P43-12_C6VG0ANXX
+                        id: globusgalaxy_2016-09-29_1
+                        workflow: optimized_nextera_sr_grch38_v0.1_complete
+                        date: 2016-09-29 00:00:00
+                        num_params: 38
+                        num_samples: 3
+                        num_outputs: 12
+                        projects: [*P3]
+                        samples: [*P3_L1, *P3_L2, *P3_L3]
+                        flowcell_id: *R1
+                processed:
+                    projects:
+                      - path: !join [Project_, *P1, Processed_globus_160929]
+                        metrics:
+                            path: metrics
+                            sources:
+                                *picard_align:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *picard_align_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *picard_align_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *picard_align_file]
+                                *picard_markdups:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *picard_markdups_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *picard_markdups_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *picard_markdups_file]
+                                *picard_rnaseq:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *picard_rnaseq_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *picard_rnaseq_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *picard_rnaseq_file]
+                                *tophat_stats:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *tophat_stats_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *tophat_stats_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *tophat_stats_file]
+                                *htseq:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *htseq_metrics_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *htseq_metrics_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *htseq_metrics_file]
+                            combined:
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_metrics_file]
+                                len_table: 4
+                        qc:
+                            path: QC
+                            sources:
+                                *fastqc:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *fastqc_qc_file]
+                                      num_lines: 562
+                                      num_overrep_seqs: 0
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *fastqc_qc_file]
+                                      num_lines: 578
+                                      num_overrep_seqs: 1
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *fastqc_qc_file]
+                                      num_lines: 557
+                                      num_overrep_seqs: 0
+                            combined:
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_qc_file]
+                                len_table: 4
+                        counts:
+                            path: counts
+                            sources:
+                                *htseq:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *htseq_counts_file]
+                                      y_total: 1
+                                      x_total: 332
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *htseq_counts_file]
+                                      y_total: 0
+                                      x_total: 332
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *htseq_counts_file]
+                                      y_total: 1
+                                      x_total: 287
+                            combined:
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_counts_file]
+                                len_table: 64253

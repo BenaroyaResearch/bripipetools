@@ -1,0 +1,96 @@
+100000 fastq reads were processed.
+100000 FASTQ reads were processed.
+136 reads of zero length were excluded from the output.
+TopHat v1.4.0
+tophat -p 8  /mnt/galaxyIndices/genomes/Hsapiens/hg38/bowtie/Homo_sapiens.GRCh38.dna.primary_assembly_sorted /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.qc.fastq
+['java -Xmx30749m', " -Djava.io.tmpdir='/ephemeral/0/condor/dir_25187/tmpUaV9jR' ", '-jar /mnt/galaxyTools/tools/picard/1.56/ReorderSam.jar', 'VALIDATION_STRINGENCY=LENIENT', 'MAX_RECORDS_IN_RAM=4000000', 'INPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam', 'OUTPUT=/ephemeral/0/condor/dir_25187/tmpUaV9jR/tmpvssbeR', 'REFERENCE=/mnt/galaxyIndices/genomes/Hsapiens/hg38/seq/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa'] /ephemeral/0/condor/dir_25187/optimized-exB09a
+Samtools Version: 0.1.18 (r982:295)
+BAM file converted to SAM['java -Xmx30749m', " -Djava.io.tmpdir='/ephemeral/0/condor/dir_25187/tmpbeISRZ' ", '-jar /mnt/galaxyTools/tools/picard/1.56/MarkDuplicates.jar', 'VALIDATION_STRINGENCY=LENIENT', 'MAX_RECORDS_IN_RAM=4000000', 'ASSUME_SORTED=true', 'INPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam', 'OUTPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.rd.bam', 'METRICS_FILE=/scratch/galaxy/job_working_directory/059/59539/dataset_121863_files/MarkDuplicates.metrics.txt', 'REMOVE_DUPLICATES=true', 'READ_NAME_REGEX="[a-zA-Z0-9]+:[0-9]:([0-9]+):([0-9]+):([0-9]+).*"', 'OPTICAL_DUPLICATE_PIXEL_DISTANCE=100'] /scratch/galaxy/job_working_directory/059/59539/dataset_121863_files
+['java -Xmx30000m', " -Djava.io.tmpdir='/ephemeral/0/condor/dir_25187/tmp3v0iJZ' ", '-jar /mnt/galaxyTools/tools/picard/1.56/CollectAlignmentSummaryMetrics.jar', 'VALIDATION_STRINGENCY=LENIENT', 'MAX_RECORDS_IN_RAM=4000000', 'ASSUME_SORTED=true', 'ADAPTER_SEQUENCE=', 'IS_BISULFITE_SEQUENCED=false', 'MAX_INSERT_SIZE=100000', 'OUTPUT=/scratch/galaxy/job_working_directory/059/59539/dataset_121866_files/CollectAlignmentSummaryMetrics.metrics.txt', 'R=/scratch/galaxy/job_working_directory/059/59539/dataset_121866_files/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa_fake.fasta', 'TMP_DIR=/ephemeral/0/condor/dir_25187/tmp3v0iJZ', 'INPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam'] /scratch/galaxy/job_working_directory/059/59539/dataset_121866_files
+['java -Xmx30000m', " -Djava.io.tmpdir='/ephemeral/0/condor/dir_25187/tmpNrNq41' ", '-jar /mnt/galaxyTools/tools/picard/1.56/CollectRnaSeqMetrics.jar', 'VALIDATION_STRINGENCY=LENIENT', 'MAX_RECORDS_IN_RAM=4000000', 'R=/scratch/galaxy/job_working_directory/059/59539/dataset_121864_files/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa_fake.fasta', 'REF_FLAT=/scratch/galaxy/files/019/dataset_19104.dat', 'RIBOSOMAL_INTERVALS=/scratch/galaxy/files/019/dataset_19280.dat', 'STRAND_SPECIFICITY=FIRST_READ_TRANSCRIPTION_STRAND', 'MINIMUM_LENGTH=500', 'RRNA_FRAGMENT_PERCENTAGE=0.8', 'METRIC_ACCUMULATION_LEVEL=ALL_READS', 'INPUT=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam', 'OUTPUT=/scratch/galaxy/job_working_directory/059/59539/dataset_121864_files/CollectRnaSeqMetrics.metrics.txt', 'TMP_DIR=/ephemeral/0/condor/dir_25187/tmpNrNq41', 'CHART_OUTPUT=/scratch/galaxy/job_working_directory/059/59539/dataset_121864_files/rgPicardCollectRnaSeqMetrics.pdf'] /scratch/galaxy/job_working_directory/059/59539/dataset_121864_files
+START STEP 0: 29/09/2016 17:42:25
+
+run step 0:
+python /opt/galaxy/tools/filters/catWrapper.py /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq.gz /scratch/galaxy/files/000/121/dataset_121853.dat /scratch/galaxy/files/000/121/dataset_121854.dat /scratch/galaxy/files/000/121/dataset_121855.dat /scratch/galaxy/files/000/121/dataset_121856.dat /scratch/galaxy/files/000/121/dataset_121857.dat /scratch/galaxy/files/000/121/dataset_121858.dat /scratch/galaxy/files/000/121/dataset_121859.dat /scratch/galaxy/files/000/121/dataset_121860.dat; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq.gz /scratch/galaxy/files/000/121/dataset_121861.dat
+python /opt/galaxy/tools/filters/catWrapper.py /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq.gz /scratch/galaxy/files/000/121/dataset_121853.dat /scratch/galaxy/files/000/121/dataset_121854.dat /scratch/galaxy/files/000/121/dataset_121855.dat /scratch/galaxy/files/000/121/dataset_121856.dat /scratch/galaxy/files/000/121/dataset_121857.dat /scratch/galaxy/files/000/121/dataset_121858.dat /scratch/galaxy/files/000/121/dataset_121859.dat /scratch/galaxy/files/000/121/dataset_121860.dat; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq.gz /scratch/galaxy/files/000/121/dataset_121861.dat
+END STEP 0: 29/09/2016 17:42:39
+
+START STEP 1: 29/09/2016 17:42:39
+
+run step 1:
+zcat /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq.gz > /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq
+zcat /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq.gz > /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq
+END STEP 1: 29/09/2016 17:42:40
+
+START STEP 2: 29/09/2016 17:42:40
+
+run step 2:
+python /opt/galaxy/tools/fastq/fastq_trimmer.py /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq 0 1 offsets_absolute sanger exclude_zero_length
+python /opt/galaxy/tools/fastq/fastq_trimmer.py /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq 0 1 offsets_absolute sanger exclude_zero_length
+run step 2:
+python /opt/galaxy/tools/rgenetics/rgFastQC.py -i /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq -d /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc -o /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.html -t /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.txt -f fastqsanger -j FASTQC_OUT -e /mnt/galaxyTools/tools/FastQC/0.11.3//fastqc; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.html /scratch/galaxy/files/000/121/dataset_121867.dat; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.txt /scratch/galaxy/files/000/121/dataset_121868.dat
+python /opt/galaxy/tools/rgenetics/rgFastQC.py -i /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq -d /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc -o /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.html -t /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.txt -f fastqsanger -j FASTQC_OUT -e /mnt/galaxyTools/tools/FastQC/0.11.3//fastqc; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.html /scratch/galaxy/files/000/121/dataset_121867.dat; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq.fastqc.txt /scratch/galaxy/files/000/121/dataset_121868.dat
+Waiting for 2 processes...
+Waiting for 1 processes...
+Waiting for 0 processes...
+END STEP 2: 29/09/2016 17:42:47
+
+START STEP 3: 29/09/2016 17:42:47
+
+run step 3:
+python /opt/galaxy/tools/fastq/fastq_trimmer_by_quality.py /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.qc.fastq -f sanger -s 1 -t 1 -e 53 -a min -x 0 -c '>=' -q 30.0
+python /opt/galaxy/tools/fastq/fastq_trimmer_by_quality.py /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.fastq /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.qc.fastq -f sanger -s 1 -t 1 -e 53 -a min -x 0 -c '>=' -q 30.0
+END STEP 3: 29/09/2016 17:42:53
+
+START STEP 4: 29/09/2016 17:42:53
+
+run step 4:
+python /opt/galaxy/tools/ngs_rna/tophat_wrapper.py --num-threads=8 --junctions-output=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-junctions.bed --hits-output=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam --indexes-path=/mnt/galaxyIndices/genomes/Hsapiens/hg38/bowtie/Homo_sapiens.GRCh38.dna.primary_assembly_sorted --single-paired=single --input1=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.qc.fastq --settings=preSet; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam /scratch/galaxy/files/000/121/dataset_121862.dat
+python /opt/galaxy/tools/ngs_rna/tophat_wrapper.py --num-threads=8 --junctions-output=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-junctions.bed --hits-output=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam --indexes-path=/mnt/galaxyIndices/genomes/Hsapiens/hg38/bowtie/Homo_sapiens.GRCh38.dna.primary_assembly_sorted --single-paired=single --input1=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.trim.qc.fastq --settings=preSet; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam /scratch/galaxy/files/000/121/dataset_121862.dat
+END STEP 4: 29/09/2016 17:51:16
+
+START STEP 5: 29/09/2016 17:51:16
+
+run step 5:
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py --maxjheap 30749m -i /ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam -n Dupes_Marked --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE -o /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.rd.bam --assumesorted true --readregex "[a-zA-Z0-9]+:[0-9]:([0-9]+):([0-9]+):([0-9]+).*" --remdups true --optdupdist 100 -j "/mnt/galaxyTools/tools/picard/1.56/MarkDuplicates.jar" -d /scratch/galaxy/job_working_directory/059/59539/dataset_121863_files -t /scratch/galaxy/files/000/121/dataset_121863.dat -e bam
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py --maxjheap 30749m -i /ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam -n Dupes_Marked --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE -o /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.rd.bam --assumesorted true --readregex "[a-zA-Z0-9]+:[0-9]:([0-9]+):([0-9]+):([0-9]+).*" --remdups true --optdupdist 100 -j "/mnt/galaxyTools/tools/picard/1.56/MarkDuplicates.jar" -d /scratch/galaxy/job_working_directory/059/59539/dataset_121863_files -t /scratch/galaxy/files/000/121/dataset_121863.dat -e bam
+run step 5:
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py --maxjheap 30749m --input=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam --ref=/mnt/galaxyIndices/genomes/Hsapiens/hg38/seq/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa --allow-inc-dict-concord=false --allow-contig-len-discord=false --output-format=bam --output=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE -j "/mnt/galaxyTools/tools/picard/1.56/ReorderSam.jar"
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py --maxjheap 30749m --input=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam --ref=/mnt/galaxyIndices/genomes/Hsapiens/hg38/seq/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa --allow-inc-dict-concord=false --allow-contig-len-discord=false --output-format=bam --output=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE -j "/mnt/galaxyTools/tools/picard/1.56/ReorderSam.jar"
+run step 5:
+python /opt/galaxy/tools/samtools/bam_to_sam.py --input1=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam --output1=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sam --header
+python /opt/galaxy/tools/samtools/bam_to_sam.py --input1=/ephemeral/0/condor/dir_25187/optimized-exB09a/tophat_out/accepted_hits.bam --output1=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sam --header
+Waiting for 3 processes...
+Waiting for 2 processes...
+Waiting for 1 processes...
+Waiting for 0 processes...
+END STEP 5: 29/09/2016 17:51:26
+
+START STEP 6: 29/09/2016 17:51:26
+
+run step 6:
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py -i /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam -d /scratch/galaxy/job_working_directory/059/59539/dataset_121864_files -t /scratch/galaxy/files/000/121/dataset_121864.dat -n "Dupes Marked" -j "/mnt/galaxyTools/tools/picard/1.56/CollectRnaSeqMetrics.jar" --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE --ref /mnt/galaxyIndices/genomes/Hsapiens/hg38/seq/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa --ref_flat /scratch/galaxy/files/019/dataset_19104.dat --ribosomalintervals /scratch/galaxy/files/019/dataset_19280.dat --strandspecificity "FIRST_READ_TRANSCRIPTION_STRAND" --minimumlength 500 --rrnafragmentpercentage 0.8 --metricaccumulationlevel ALL_READS --assumesorted true
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py -i /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam -d /scratch/galaxy/job_working_directory/059/59539/dataset_121864_files -t /scratch/galaxy/files/000/121/dataset_121864.dat -n "Dupes Marked" -j "/mnt/galaxyTools/tools/picard/1.56/CollectRnaSeqMetrics.jar" --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE --ref /mnt/galaxyIndices/genomes/Hsapiens/hg38/seq/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa --ref_flat /scratch/galaxy/files/019/dataset_19104.dat --ribosomalintervals /scratch/galaxy/files/019/dataset_19280.dat --strandspecificity "FIRST_READ_TRANSCRIPTION_STRAND" --minimumlength 500 --rrnafragmentpercentage 0.8 --metricaccumulationlevel ALL_READS --assumesorted true
+run step 6:
+perl /opt/galaxy/tools/ngs_rna/tophatstatsPE_bri.pl /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sam /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq > /scratch/galaxy/files/000/121/dataset_121865.dat
+perl /opt/galaxy/tools/ngs_rna/tophatstatsPE_bri.pl /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sam /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-R1.fastq > /scratch/galaxy/files/000/121/dataset_121865.dat
+run step 6:
+python /opt/galaxy/tools/filters/sorter.py --input=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sam --out_file1=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sorted.sam --column=1 --style=alpha --order=DESC
+python /opt/galaxy/tools/filters/sorter.py --input=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sam --out_file1=/ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sorted.sam --column=1 --style=alpha --order=DESC
+run step 6:
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py -i /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam -d /scratch/galaxy/job_working_directory/059/59539/dataset_121866_files -t /scratch/galaxy/files/000/121/dataset_121866.dat --assumesorted true -b false --adaptors "" --maxinsert 100000 -n "Picard Alignment Summary Metrics" --datatype bam -j "/mnt/galaxyTools/tools/picard/1.56/CollectAlignmentSummaryMetrics.jar"  --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE --ref /mnt/galaxyIndices/genomes/Hsapiens/hg38/seq/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa
+python /opt/galaxy/tools/picard-pre-1.128/picard_wrapper.py -i /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.reorder.bam -d /scratch/galaxy/job_working_directory/059/59539/dataset_121866_files -t /scratch/galaxy/files/000/121/dataset_121866.dat --assumesorted true -b false --adaptors "" --maxinsert 100000 -n "Picard Alignment Summary Metrics" --datatype bam -j "/mnt/galaxyTools/tools/picard/1.56/CollectAlignmentSummaryMetrics.jar"  --tmpdir /ephemeral/0/condor/dir_25187/optimized-tmp-yxI_bE --ref /mnt/galaxyIndices/genomes/Hsapiens/hg38/seq/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa
+Waiting for 4 processes...
+Waiting for 3 processes...
+Waiting for 2 processes...
+Waiting for 1 processes...
+Waiting for 0 processes...
+END STEP 6: 29/09/2016 17:51:44
+
+START STEP 7: 29/09/2016 17:51:44
+
+run step 7:
+htseq-count -q --mode=union --stranded=no --minaqual=0 --type=exon --idattr=gene_id /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sorted.sam /scratch/galaxy/files/019/dataset_19103.dat | awk '{if ($1 ~ "no_feature|ambiguous|too_low_aQual|not_aligned|alignment_not_unique") print $0 | "cat 1>&2"; else print $0}' > temp.out.txt 2> /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count-log.txt && mv temp.out.txt /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count.txt; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count.txt /scratch/galaxy/files/000/121/dataset_121869.dat; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count-log.txt /scratch/galaxy/files/000/121/dataset_121870.dat
+htseq-count -q --mode=union --stranded=no --minaqual=0 --type=exon --idattr=gene_id /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-tophat-out.sorted.sam /scratch/galaxy/files/019/dataset_19103.dat | awk '{if ($1 ~ "no_feature|ambiguous|too_low_aQual|not_aligned|alignment_not_unique") print $0 | "cat 1>&2"; else print $0}' > temp.out.txt 2> /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count-log.txt && mv temp.out.txt /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count.txt; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count.txt /scratch/galaxy/files/000/121/dataset_121869.dat; cp /ephemeral/0/condor/dir_25187/optimized-exB09a/lib-htseq-count-log.txt /scratch/galaxy/files/000/121/dataset_121870.dat
+END STEP 7: 29/09/2016 17:54:49
+

@@ -1,0 +1,5 @@
+100000	total reads in fastq file
+1258	reads aligned in sam file
+1.3%	aligned
+575	reads with multiple alignments
+45.7%	of aligned segments had multiple alignments

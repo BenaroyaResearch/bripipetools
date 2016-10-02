@@ -1,0 +1,143 @@
+<style type="text/css">
+        tr.d0 td {background-color: oldlace; color: black;}
+        tr.d1 td {background-color: aliceblue; color: black;}
+        </style><?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Galaxy picard_wrapper tool output - see http://getgalaxy.org/" />
+<title></title>
+<link rel="stylesheet" href="/static/style/base.css" type="text/css" />
+</head>
+<body>
+<div class="document">
+Galaxy tool CollectRnaSeqMetrics run at 29/09/2016 17:51:29</b><br/><table cellpadding="10"><tr><td>
+<a href="rgPicardCollectRnaSeqMetrics.pdf"><img src="rgPicardCollectRnaSeqMetrics.jpg" title="Click image preview for a print quality PDF version" hspace="10" align="middle"></a>
+</tr></td></table>
+<b>The following output files were created (click the filename to view/download a copy):</b><hr/><table>
+<tr><td><a href="CollectRnaSeqMetrics.metrics.txt">CollectRnaSeqMetrics.metrics.txt</a></td></tr>
+<tr><td><a href="rgPicardCollectRnaSeqMetrics.pdf">rgPicardCollectRnaSeqMetrics.pdf</a></td></tr>
+<tr><td><a href="rgPicardCollectRnaSeqMetrics.jpg">rgPicardCollectRnaSeqMetrics.jpg</a></td></tr>
+<tr><td><a href="CollectRnaSeqMetrics.log">CollectRnaSeqMetrics.log</a></td></tr>
+</table><p/>
+<b>Picard on line resources</b><ul>
+<li><a href="http://picard.sourceforge.net/index.shtml">Click here for Picard Documentation</a></li>
+<li><a href="http://picard.sourceforge.net/picard-metric-definitions.shtml">Click here for Picard Metrics definitions</a></li></ul><hr/>
+<b>Picard output (transposed to make it easier to see)</b><hr/>
+<table cellpadding="3" >
+<tr class="d0"><td colspan="2">## net.sf.picard.metrics.StringHeader</td></tr><tr class="d1"><td colspan="2"># net.sf.picard.analysis.CollectRnaSeqMetrics REF_FLAT=/scratch/galaxy/files/019/dataset_19104.dat RIBOSOMAL_INTERVALS=/scratch/galaxy/files/019/dataset_19280.dat STRAND_SPECIFICITY=FIRST_READ_TRANSCRIPTION_STRAND MINIMUM_LENGTH=500 CHART_OUTPUT=/scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/rgPicardCollectRnaSeqMetrics.pdf RRNA_FRAGMENT_PERCENTAGE=0.8 METRIC_ACCUMULATION_LEVEL=[ALL_READS] INPUT=/ephemeral/0/condor/dir_25202/optimized-JgV6Ep/lib-tophat-out.reorder.bam OUTPUT=/scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/CollectRnaSeqMetrics.metrics.txt REFERENCE_SEQUENCE=/scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa_fake.fasta TMP_DIR=[/ephemeral/0/condor/dir_25202/tmpHRyGPq] VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000    ASSUME_SORTED=true STOP_AFTER=0 VERBOSITY=INFO QUIET=false COMPRESSION_LEVEL=5 CREATE_INDEX=false CREATE_MD5_FILE=false</td></tr><tr class="d0"><td colspan="2">## net.sf.picard.metrics.StringHeader</td></tr><tr class="d1"><td colspan="2"># Started on: Thu Sep 29 17:51:11 UTC 2016</td></tr><tr class="d0"><td colspan="2">## METRICS CLASS	net.sf.picard.analysis.RnaSeqMetrics</td></tr><tr class="d1"><td colspan="2">## HISTOGRAM	java.lang.Integer</td></tr><tr class="d0"><td colspan="2">PF_BASES	PF_ALIGNED_BASES	RIBOSOMAL_BASES	CODING_BASES	UTR_BASES	INTRONIC_BASES	INTERGENIC_BASES	IGNORED_READS	CORRECT_STRAND_READS	INCORRECT_STRAND_READS	PCT_RIBOSOMAL_BASES	PCT_CODING_BASES	PCT_UTR_BASES	PCT_INTRONIC_BASES	PCT_INTERGENIC_BASES	PCT_MRNA_BASES	PCT_USABLE_BASES	PCT_CORRECT_STRAND_READS	MEDIAN_CV_COVERAGE	MEDIAN_5PRIME_BIAS	MEDIAN_3PRIME_BIAS	MEDIAN_5PRIME_TO_3PRIME_BIAS	SAMPLE	LIBRARY	READ_GROUP</td></tr>
+<tr class="d1"><td colspan="2">4890746	4890725	29054	2089084	1670811	625794	475982	0	480	47357	0.005941	0.427152	0.341628	0.127955	0.097323	0.768781	0.768777	0.010034	1.184904	0.171854	0.626362	0.377244</td></tr>
+<tr class="d0"><td colspan="2">normalized_position	All_Reads.normalized_coverage</td></tr>
+<tr class="d1"><td colspan="2">0	0.188455</td></tr>
+<tr class="d0"><td colspan="2">1	0.204905</td></tr>
+<tr class="d1"><td colspan="2">2	0.28486</td></tr>
+<tr class="d0"><td colspan="2">3	0.338714</td></tr>
+<tr class="d1"><td colspan="2">4	0.448349</td></tr>
+<tr class="d0"><td colspan="2">5	0.512279</td></tr>
+<tr class="d1"><td colspan="2">6	0.545809</td></tr>
+<tr class="d0"><td colspan="2">7	0.474787</td></tr>
+<tr class="d1"><td colspan="2">8	0.491551</td></tr>
+<tr class="d0"><td colspan="2">9	0.553704</td></tr>
+<tr class="d1"><td colspan="2">10	0.605864</td></tr>
+<tr class="d0"><td colspan="2">11	0.665552</td></tr>
+<tr class="d1"><td colspan="2">12	0.701658</td></tr>
+<tr class="d0"><td colspan="2">13	0.777431</td></tr>
+<tr class="d1"><td colspan="2">14	0.911105</td></tr>
+<tr class="d0"><td colspan="2">15	0.947102</td></tr>
+<tr class="d1"><td colspan="2">16	0.963015</td></tr>
+<tr class="d0"><td colspan="2">17	0.997945</td></tr>
+<tr class="d1"><td colspan="2">18	1.03617</td></tr>
+<tr class="d0"><td colspan="2">19	1.078189</td></tr>
+<tr class="d1"><td colspan="2">20	1.078998</td></tr>
+<tr class="d0"><td colspan="2">21	1.134077</td></tr>
+<tr class="d1"><td colspan="2">22	1.11565</td></tr>
+<tr class="d0"><td colspan="2">23	1.078472</td></tr>
+<tr class="d1"><td colspan="2">24	1.05092</td></tr>
+<tr class="d0"><td colspan="2">25	1.03148</td></tr>
+<tr class="d1"><td colspan="2">26	1.046448</td></tr>
+<tr class="d0"><td colspan="2">27	1.030597</td></tr>
+<tr class="d1"><td colspan="2">28	1.013376</td></tr>
+<tr class="d0"><td colspan="2">29	0.998144</td></tr>
+<tr class="d1"><td colspan="2">30	0.9761</td></tr>
+<tr class="d0"><td colspan="2">31	0.974892</td></tr>
+<tr class="d1"><td colspan="2">32	0.951265</td></tr>
+<tr class="d0"><td colspan="2">33	1.014121</td></tr>
+<tr class="d1"><td colspan="2">34	1.093712</td></tr>
+<tr class="d0"><td colspan="2">35	1.104068</td></tr>
+<tr class="d1"><td colspan="2">36	1.064664</td></tr>
+<tr class="d0"><td colspan="2">37	1.060186</td></tr>
+<tr class="d1"><td colspan="2">38	1.016959</td></tr>
+<tr class="d0"><td colspan="2">39	0.985447</td></tr>
+<tr class="d1"><td colspan="2">40	0.934717</td></tr>
+<tr class="d0"><td colspan="2">41	0.958655</td></tr>
+<tr class="d1"><td colspan="2">42	0.92737</td></tr>
+<tr class="d0"><td colspan="2">43	0.925906</td></tr>
+<tr class="d1"><td colspan="2">44	0.930733</td></tr>
+<tr class="d0"><td colspan="2">45	0.940695</td></tr>
+<tr class="d1"><td colspan="2">46	0.973674</td></tr>
+<tr class="d0"><td colspan="2">47	0.947989</td></tr>
+<tr class="d1"><td colspan="2">48	0.944413</td></tr>
+<tr class="d0"><td colspan="2">49	0.952281</td></tr>
+<tr class="d1"><td colspan="2">50	0.969782</td></tr>
+<tr class="d0"><td colspan="2">51	0.990411</td></tr>
+<tr class="d1"><td colspan="2">52	1.017341</td></tr>
+<tr class="d0"><td colspan="2">53	1.085523</td></tr>
+<tr class="d1"><td colspan="2">54	1.069301</td></tr>
+<tr class="d0"><td colspan="2">55	1.080175</td></tr>
+<tr class="d1"><td colspan="2">56	1.108799</td></tr>
+<tr class="d0"><td colspan="2">57	1.160042</td></tr>
+<tr class="d1"><td colspan="2">58	1.158395</td></tr>
+<tr class="d0"><td colspan="2">59	1.16716</td></tr>
+<tr class="d1"><td colspan="2">60	1.157746</td></tr>
+<tr class="d0"><td colspan="2">61	1.13017</td></tr>
+<tr class="d1"><td colspan="2">62	1.133284</td></tr>
+<tr class="d0"><td colspan="2">63	1.130099</td></tr>
+<tr class="d1"><td colspan="2">64	1.124859</td></tr>
+<tr class="d0"><td colspan="2">65	1.121205</td></tr>
+<tr class="d1"><td colspan="2">66	1.065095</td></tr>
+<tr class="d0"><td colspan="2">67	0.980276</td></tr>
+<tr class="d1"><td colspan="2">68	1.03823</td></tr>
+<tr class="d0"><td colspan="2">69	1.043892</td></tr>
+<tr class="d1"><td colspan="2">70	1.090328</td></tr>
+<tr class="d0"><td colspan="2">71	1.191255</td></tr>
+<tr class="d1"><td colspan="2">72	1.247584</td></tr>
+<tr class="d0"><td colspan="2">73	1.284538</td></tr>
+<tr class="d1"><td colspan="2">74	1.319388</td></tr>
+<tr class="d0"><td colspan="2">75	1.354708</td></tr>
+<tr class="d1"><td colspan="2">76	1.291114</td></tr>
+<tr class="d0"><td colspan="2">77	1.306363</td></tr>
+<tr class="d1"><td colspan="2">78	1.375742</td></tr>
+<tr class="d0"><td colspan="2">79	1.385401</td></tr>
+<tr class="d1"><td colspan="2">80	1.37201</td></tr>
+<tr class="d0"><td colspan="2">81	1.383337</td></tr>
+<tr class="d1"><td colspan="2">82	1.413919</td></tr>
+<tr class="d0"><td colspan="2">83	1.317266</td></tr>
+<tr class="d1"><td colspan="2">84	1.358176</td></tr>
+<tr class="d0"><td colspan="2">85	1.402809</td></tr>
+<tr class="d1"><td colspan="2">86	1.41699</td></tr>
+<tr class="d0"><td colspan="2">87	1.356888</td></tr>
+<tr class="d1"><td colspan="2">88	1.236582</td></tr>
+<tr class="d0"><td colspan="2">89	1.201172</td></tr>
+<tr class="d1"><td colspan="2">90	1.156478</td></tr>
+<tr class="d0"><td colspan="2">91	1.142234</td></tr>
+<tr class="d1"><td colspan="2">92	1.082281</td></tr>
+<tr class="d0"><td colspan="2">93	0.984309</td></tr>
+<tr class="d1"><td colspan="2">94	0.943878</td></tr>
+<tr class="d0"><td colspan="2">95	0.862882</td></tr>
+<tr class="d1"><td colspan="2">96	0.804748</td></tr>
+<tr class="d0"><td colspan="2">97	0.674953</td></tr>
+<tr class="d1"><td colspan="2">98	0.629883</td></tr>
+<tr class="d0"><td colspan="2">99	0.588628</td></tr>
+<tr class="d1"><td colspan="2">100	0.511153</td></tr>
+</table>
+<b>Picard Tool Run Log</b><hr/>
+<pre>INFO:root:## executing java -Xmx30000m  -Djava.io.tmpdir='/ephemeral/0/condor/dir_25202/tmpHRyGPq'  -jar /mnt/galaxyTools/tools/picard/1.56/CollectRnaSeqMetrics.jar VALIDATION_STRINGENCY=LENIENT MAX_RECORDS_IN_RAM=4000000 R=/scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/Homo_sapiens.GRCh38.dna.primary_assembly_sorted.fa_fake.fasta REF_FLAT=/scratch/galaxy/files/019/dataset_19104.dat RIBOSOMAL_INTERVALS=/scratch/galaxy/files/019/dataset_19280.dat STRAND_SPECIFICITY=FIRST_READ_TRANSCRIPTION_STRAND MINIMUM_LENGTH=500 RRNA_FRAGMENT_PERCENTAGE=0.8 METRIC_ACCUMULATION_LEVEL=ALL_READS INPUT=/ephemeral/0/condor/dir_25202/optimized-JgV6Ep/lib-tophat-out.reorder.bam OUTPUT=/scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/CollectRnaSeqMetrics.metrics.txt TMP_DIR=/ephemeral/0/condor/dir_25202/tmpHRyGPq CHART_OUTPUT=/scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/rgPicardCollectRnaSeqMetrics.pdf returned status 0 and nothing on stderr
+
+INFO:root:## executing convert -resize x400 /scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/rgPicardCollectRnaSeqMetrics.pdf /scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/rgPicardCollectRnaSeqMetrics.jpg returned status 0 and nothing on stderr
+
+## executing convert -resize x400 /scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/rgPicardCollectRnaSeqMetrics.pdf /scratch/galaxy/job_working_directory/059/59619/dataset_122047_files/rgPicardCollectRnaSeqMetrics.jpg returned status 0 and nothing on stderr
+
+</pre><hr/>The freely available <a href="http://picard.sourceforge.net/command-line-overview.shtml">Picard software</a> 
+generated all outputs reported here running as a <a href="http://getgalaxy.org">Galaxy</a> tool</div></body></html>
+

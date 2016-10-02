@@ -5,6 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 import re
 from functools import wraps
+import datetime
 
 import pymongo
 
@@ -100,7 +101,8 @@ def create_workflowbatch_id(db, prefix, date):
     Check the 'workflowbatches' collection and construct ID with lowest
     available batch number (i.e., ''<prefix>_<date>_<number>').
     """
-    query = {'_id': {'$regex': '{}_{}_.+'.format(prefix, date)}}
+    isodate = datetime.date.isoformat(date)
+    query = {'_id': {'$regex': '{}_{}_.+'.format(prefix, isodate)}}
     logger.debug("searching 'workflowbatches' collection with query {}"
                  .format(query))
     workflowbatches = get_workflowbatches(db, query)
@@ -115,4 +117,4 @@ def create_workflowbatch_id(db, prefix, date):
                 num += 1
                 break
 
-    return '{}_{}_{}'.format(prefix, date, num)
+    return '{}_{}_{}'.format(prefix, isodate, num)

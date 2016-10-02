@@ -60,8 +60,10 @@ class SexChecker(object):
         logger.debug("counts data frame has {} rows".format(len(counts_df)))
         total_y = sum(pd.merge(self._load_y_genes(), counts_df,
                                how='inner')['count'] > 0)
+        logger.debug("detected {} Y genes".format(total_y))
         total_x = sum(pd.merge(self._load_x_genes(), counts_df,
                                how='inner')['count'] > 0)
+        logger.debug("detected {} X genes".format(total_x))
         return float(total_y) / float(total_x)
 
     def _predict_sex(self, x_y_ratio):

@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import datetime
 
 import pytest
 import mongomock
@@ -257,10 +258,10 @@ class TestGenLIMSOperations:
         wb_id = genlims.create_workflowbatch_id(
             db=mock_db,
             prefix='mockprefix',
-            date='mockdate')
+            date=datetime.datetime(2000, 1, 1, 0, 0))
 
         # THEN constructed workflow batch ID should end in number 1
-        assert(wb_id == 'mockprefix_mockdate_1')
+        assert(wb_id == 'mockprefix_2000-01-01_1')
 
     def test_create_workflowbatch_id_existing(self, mock_db):
         # GIVEN a prefix/date combination that already exists in
@@ -268,17 +269,17 @@ class TestGenLIMSOperations:
         logger.info("test `create_workflowbatch_id()`, existing prefix/date")
 
         mock_db.workflowbatches.insert(
-            {'_id': 'mockprefix_mockdate_1',
-             'date': 'mockdate'})
+            {'_id': 'mockprefix_2000-01-01_1',
+             'date': datetime.datetime(2000, 1, 1, 0, 0)})
 
         # WHEN creating new workflow batch ID
         wb_id = genlims.create_workflowbatch_id(
             db=mock_db,
             prefix='mockprefix',
-            date='mockdate')
+            date=datetime.datetime(2000, 1, 1, 0, 0))
 
         # THEN constructed workflow batch ID should end in number 2
-        assert(wb_id == 'mockprefix_mockdate_2')
+        assert(wb_id == 'mockprefix_2000-01-01_2')
 
 
 class TestMapping:
