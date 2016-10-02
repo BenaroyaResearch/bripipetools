@@ -212,10 +212,16 @@ root:
                                 *htseq:
                                     - sample: *P1_L1
                                       path: !ujoin [*P1_L1, *R1, *htseq_counts_file]
+                                      y_total: 1
+                                      x_total: 332
                                     - sample: *P1_L2
                                       path: !ujoin [*P1_L2, *R1, *htseq_counts_file]
+                                      y_total: 0
+                                      x_total: 332
                                     - sample: *P1_L3
                                       path: !ujoin [*P1_L3, *R1, *htseq_counts_file]
+                                      y_total: 1
+                                      x_total: 287
                             combined:
                                 path: !ujoin [*P1, *R1, *batch_date, *combined_counts_file]
                                 len_table: 64253
