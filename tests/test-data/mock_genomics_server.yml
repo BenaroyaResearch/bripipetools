@@ -186,6 +186,7 @@ root:
                                       path: !ujoin [*P1_L3, *R1, *htseq_metrics_file]
                             combined:
                                 path: !ujoin [*P1, *R1, *batch_date, *combined_metrics_file]
+                                len_table: 4
                         qc:
                             path: QC
                             sources:
@@ -204,6 +205,7 @@ root:
                                       num_overrep_seqs: 0
                             combined:
                                 path: !ujoin [*P1, *R1, *batch_date, *combined_qc_file]
+                                len_table: 4
                         counts:
                             path: counts
                             sources:
@@ -216,3 +218,4 @@ root:
                                       path: !ujoin [*P1_L3, *R1, *htseq_counts_file]
                             combined:
                                 path: !ujoin [*P1, *R1, *batch_date, *combined_counts_file]
+                                len_table: 64253

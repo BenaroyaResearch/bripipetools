@@ -1,0 +1,4 @@
+libId,%gc,adapter_content,basic_statistics,encoding,file_type,filename,kmer_content,overrepresented_sequences,per_base_n_content,per_base_sequence_content,per_base_sequence_quality,per_sequence_gc_content,per_sequence_quality_scores,per_tile_sequence_quality,sequence_duplication_levels,sequence_length,sequence_length_distribution,sequences_flagged_as_poor_quality,total_deduplicated_percentage,total_sequences
+lib6624_C6VG0ANXX,47.0,pass,pass,Sanger / Illumina 1.9,Conventional base calls,FASTQC_OUT,warn,pass,pass,fail,pass,pass,pass,pass,pass,35-58,warn,0.0,96.476,100000.0
+lib6618_C6VG0ANXX,49.0,pass,pass,Sanger / Illumina 1.9,Conventional base calls,FASTQC_OUT,warn,warn,pass,fail,pass,pass,pass,pass,pass,35-58,warn,0.0,95.893,100000.0
+lib6615_C6VG0ANXX,49.0,pass,pass,Sanger / Illumina 1.9,Conventional base calls,FASTQC_OUT,warn,pass,pass,fail,pass,pass,pass,pass,pass,35-58,warn,0.0,95.551,100000.0
