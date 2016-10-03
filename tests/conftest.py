@@ -6,7 +6,6 @@ import yaml
 
 import pytest
 import mongomock
-from pprint import pprint
 
 def join(loader, node):
     """

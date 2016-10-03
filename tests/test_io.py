@@ -14,7 +14,7 @@ class TestPicardMetricsFile:
         scope='class',
         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
                 for r in range(1)
-                for p in range(1)
+                for p in range(3)
                 for s in range(3)
                 for source in
                 ['picard_align', 'picard_markdups', 'picard_rnaseq']])
@@ -126,7 +126,7 @@ class TestTophatStatsFile:
         scope='class',
         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
                 for r in range(1)
-                for p in range(1)
+                for p in range(3)
                 for s in range(3)
                 for source in ['tophat_stats']])
 
@@ -202,7 +202,7 @@ class TestHtseqMetricsFile:
         scope='class',
         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
                 for r in range(1)
-                for p in range(1)
+                for p in range(3)
                 for s in range(3)
                 for source in ['htseq']])
     def metricsfiledata(self, request, mock_genomics_server):
@@ -277,7 +277,7 @@ class TestHtseqCountsFile:
         scope='class',
         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
                 for r in range(1)
-                for p in range(1)
+                for p in range(3)
                 for s in range(3)
                 for source in ['htseq']])
     def countsfiledata(self, request, mock_genomics_server):
@@ -325,7 +325,7 @@ class TestFastQCFile:
         scope='class',
         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
                 for r in range(1)
-                for p in range(1)
+                for p in range(3)
                 for s in range(3)
                 for source in ['fastqc']])
     def qcfiledata(self, request, mock_genomics_server):

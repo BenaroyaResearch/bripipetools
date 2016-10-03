@@ -167,13 +167,13 @@ class OutputStitcher(object):
         return '{}_combined_{}.csv'.format(filename_base.rstrip('_'),
                                            self.type)
 
-    def _build_overrepresented_seq_df(self):
+    def _build_overrepresented_seq_table(self):
         """
         Parse and combine overrepresented sequences tables from
         FastQC files.
         """
         outputs = self._get_outputs(self.type)
-        overrep_seq_df = pd.DataFrame([])
+        overrep_seq_table = pd.DataFrame([])
         if self.type == 'qc':
             for o in outputs:
                 logger.debug("parsing overrepresented sequences "
@@ -183,10 +183,25 @@ class OutputStitcher(object):
                 logger.debug("storing data from {} in {} {}".format(
                     out_source, proclib_id, out_type))
                 out_parser = io.FastQCFile(path=o)
-                o_df = (pd.DataFrame(out_parser.parse_overrepresented_seqs())
-                        .assign(libId=proclib_id))
-                overrep_seq_df = overrep_seq_df.append(o_df)
-        return overrep_seq_df
+                o_table = (pd.DataFrame(out_parser
+                                        .parse_overrepresented_seqs())
+                           .assign(libId=proclib_id))
+                logger.debug("found {} overrepresented sequence(s) "
+                             "for sample {}".format(len(o_table), proclib_id))
+                overrep_seq_table = overrep_seq_table.append(o_table)
+        return overrep_seq_table
+
+    def write_overrepresented_seq_table(self):
+        """
+        Write combined overrepresented sequences table to CSV file.
+        """
+        table_path = os.path.join(self.path,
+                                  self._build_combined_filename())
+        table_path = re.sub('_qc', '_overrep_seqs', table_path)
+        table_data = self._build_overrepresented_seq_table()
+        logger.debug("writing overrepresented seqs to file {}"
+                     .format(table_path))
+        table_data.to_csv(table_path, index=False)
 
     def write_table(self):
         """
