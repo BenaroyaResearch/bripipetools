@@ -25,7 +25,8 @@ before_install:
 
 # commands set up environment, install dependencies
 install:
-    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION beautifulsoup4 pymongo pandas
+    - deps='pip beautifulsoup4 pymongo pandas pytest'
+    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION $deps
     - source activate test-environment
     - pip install python-coveralls
     - pip install .
