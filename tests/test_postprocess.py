@@ -3,6 +3,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 import os
 import re
+import shutil
 
 import pytest
 
@@ -177,3 +178,53 @@ class TestOutputStitcher:
 
         # THEN file should exist at expected path
         assert(os.path.exists(expected_path))
+
+
+class TestOutputCleaner:
+    @pytest.fixture(scope='function')
+    def output_folder(self, tmpdir):
+        return tmpdir.mkdir('processed')
+
+    def test_get_output_types(self, output_folder):
+        path = output_folder
+        path.mkdir('metrics')
+        path.mkdir('counts')
+        # assert(str(path) == "foo")
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        assert(set(outputcleaner._get_output_types())
+               == set(['metrics', 'counts']))
+
+    def test_get_output_paths(self, output_folder):
+        path = output_folder
+        path.mkdir('QC').mkdir('sample1').ensure('file1.zip')
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        assert(outputcleaner._get_output_paths('QC')
+               == [str(path.join('QC').join('sample1').join('file1.zip'))])
+
+    def test_unzip_output(self, output_folder):
+        path = output_folder
+        zipdir = path.mkdir('zipfolder')
+        zipdir.ensure('file1')
+        zipoutput = shutil.make_archive(str(zipdir), 'zip',
+                                        str(zipdir))
+        shutil.rmtree(str(zipdir))
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        outputcleaner._unzip_output(zipoutput)
+
+        assert('file1' in str(path.listdir()))
+
+    def test_unnest_output(self, output_folder):
+        path = output_folder
+        subdir = path.mkdir('subfolder')
+        nestedoutput = subdir.ensure('file1')
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        outputcleaner._unnest_output(str(nestedoutput))
+
+        assert('subfolder_file1' in str(path.listdir()))
