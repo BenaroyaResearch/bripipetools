@@ -13,7 +13,7 @@ config = {
     'license': 'MIT',
     'packages': ['bripipetools'],
     'install_requires': [
-        'bs4',
+        'beautifulsoup4',
         'pymongo',
         'pandas'
     ],
