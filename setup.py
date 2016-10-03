@@ -15,6 +15,7 @@ config = {
     'install_requires': [
         'bs4',
         'pymongo',
+        'cython',
         'pandas'
     ],
     'setup_requires': ['pytest-runner'],
