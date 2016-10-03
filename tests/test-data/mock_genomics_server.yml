@@ -36,6 +36,7 @@ out_types:
             file: &fastqc_qc_file !ujoin [*fastqc, qc.txt]
             raw_len: 6028
         combined: &combined_qc_file combined_qc.csv
+        combined_overrep_seqs: &combined_overrep_seqs_file combined_overrep_seqs.csv
     counts:
         *htseq:
             file: &htseq_counts_file !ujoin [*htseq, counts.txt]
@@ -206,6 +207,8 @@ root:
                             combined:
                                 path: !ujoin [*P1, *R1, *batch_date, *combined_qc_file]
                                 len_table: 4
+                            combined_overrep_seqs:
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_overrep_seqs_file]
                         counts:
                             path: counts
                             sources:

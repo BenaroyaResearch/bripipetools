@@ -126,18 +126,38 @@ class TestOutputStitcher:
         assert(combined_filename
                == os.path.basename(outputdata['combined']['path']))
 
-    def test_build_overrepresented_seq_df(self, outputstitcherdata):
+    def test_build_overrepresented_seq_table(self, outputstitcherdata):
         # (GIVEN)
         outputstitcher, outputdata, out_type = outputstitcherdata
 
-        overrep_seq_df = outputstitcher._build_overrepresented_seq_df()
+        # WHEN overrepresented sequences are combined into a table
+        overrep_seq_table = outputstitcher._build_overrepresented_seq_table()
 
         if out_type == 'qc':
-            assert(len(overrep_seq_df)
+            assert(len(overrep_seq_table)
                    == sum(map(lambda x: x['num_overrep_seqs'],
                           outputdata['sources']['fastqc'])))
         else:
-            assert(len(overrep_seq_df) == 0)
+            assert(len(overrep_seq_table) == 0)
+
+    def test_write_overrepresented_seq_table(self, outputstitcherdata):
+        # (GIVEN)
+        outputstitcher, outputdata, out_type = outputstitcherdata
+
+        # AND combined overrepresented seqs file does not already exist
+        if out_type == 'qc':
+            expected_path = outputdata['combined_overrep_seqs']['path']
+            try:
+                os.remove(expected_path)
+            except OSError:
+                pass
+
+            # WHEN data is read and combined overrepresented seqs are written
+            # to file
+            outputstitcher.write_overrepresented_seq_table()
+
+            # THEN file should exist at expected path
+            assert(os.path.exists(expected_path))
 
     def test_write_table(self, outputstitcherdata):
         # (GIVEN)
@@ -146,7 +166,6 @@ class TestOutputStitcher:
         logger.info("test `write_table()`")
 
         # AND combined file does not already exist
-        output_type = outputstitcher.type
         expected_path = outputdata['combined']['path']
         try:
             os.remove(expected_path)

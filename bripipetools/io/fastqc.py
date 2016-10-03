@@ -59,7 +59,8 @@ class FastQCFile(object):
         Return a tuple with the section name and status.
         """
         logger.debug("getting section status for {} from line {}"
-                     .format(section_name, self.data['raw'][section_info[0]]))
+                     .format(section_name,
+                             self.data['raw'][section_info[0]].rstrip()))
         return (section_name,
                 self.data['raw'][section_info[0]][2:].rstrip().split('\t')[1])
 
