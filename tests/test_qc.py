@@ -14,7 +14,7 @@ from bripipetools import util
     scope='class',
     params=[{'runnum': r, 'projectnum': p, 'samplenum': s}
             for r in range(1)
-            for p in range(1)
+            for p in range(3)
             for s in range(3)])
 def mock_proclibdata(request, mock_genomics_server):
     # GIVEN a processed library object

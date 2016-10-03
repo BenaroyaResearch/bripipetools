@@ -15,7 +15,7 @@ class TestOutputStitcher:
         scope='class',
         params=[(out_type, {'runnum': r, 'projectnum': p})
                 for r in range(1)
-                for p in range(1)
+                for p in range(3)
                 for out_type in ['metrics', 'qc', 'counts']])
     def outputstitcherdata(self, request, mock_genomics_server):
         # GIVEN a OutputStitcher with mock 'genomics' server path to outputs
