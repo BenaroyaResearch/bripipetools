@@ -53,6 +53,12 @@ class OutputCleaner(object):
         with zipfile.ZipFile(path) as zf:
             zf.extractall(os.path.dirname(path))
 
+        # plist = []
+        # with zipfile.ZipFile(path) as zf:
+        #     for f in zf.namelist():
+        #         plist.append(zf.extract(f))
+        # return plist
+
     def _unnest_output(self, path):
         """
         Unnest files in a subfolder by concatenating filenames and
