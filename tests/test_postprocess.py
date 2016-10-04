@@ -214,11 +214,12 @@ class TestOutputCleaner:
 
         outputcleaner = postprocess.OutputCleaner(
             path=str(path))
-        outputcleaner._unzip_output(zipoutput)
+        paths = outputcleaner._unzip_output(zipoutput)
 
         assert('file1' in str(path.listdir()))
+        assert(paths[0] == str(path.join('file1')))
 
-    def test_unnest_output(self, output_folder):
+    def test_unnest_output_file(self, output_folder):
         path = output_folder
         subdir = path.mkdir('subfolder')
         nestedoutput = subdir.ensure('file1')
@@ -228,3 +229,52 @@ class TestOutputCleaner:
         outputcleaner._unnest_output(str(nestedoutput))
 
         assert('subfolder_file1' in str(path.listdir()))
+
+    def test_unnest_output_zip(self, output_folder):
+        path = output_folder
+        subdir = path.mkdir('subfolder')
+        zipdir = subdir.mkdir('zipfolder')
+        nestedoutput = zipdir.ensure('file1')
+        zipoutput = shutil.make_archive(str(zipdir), 'zip',
+                                        str(zipdir))
+        shutil.rmtree(str(zipdir))
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        outputcleaner._unnest_output(str(zipoutput))
+
+        assert('subfolder_file1' in str(path.listdir()))
+
+    def test_recode_output(self, output_folder):
+        path = output_folder
+        qcfile = path.ensure('libID_fcID_fastqc_data.txt')
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        newpath = outputcleaner._recode_output(str(qcfile), 'QC')
+
+        assert(os.path.basename(newpath) == 'libID_fcID_fastqc_qc.txt')
+        assert('libID_fcID_fastqc_qc.txt' in str(path.listdir()))
+
+    def test_clean_outputs(self, output_folder):
+        path = output_folder
+        outdir = path.mkdir('QC')
+
+        lib1dir = outdir.mkdir('lib1_fcID')
+        zip1dir = lib1dir.mkdir('qc1')
+        qc1file = zip1dir.ensure('fastqc_data.txt')
+        zip1out = shutil.make_archive(str(zip1dir), 'zip', str(zip1dir))
+        shutil.rmtree(str(zip1dir))
+
+        lib2dir = outdir.mkdir('lib2_fcID')
+        zip2dir = lib2dir.mkdir('qc1')
+        qc2file = zip2dir.ensure('fastqc_data.txt')
+        zip2out = shutil.make_archive(str(zip2dir), 'zip', str(zip2dir))
+        shutil.rmtree(str(zip2dir))
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        outputcleaner.clean_outputs()
+
+        assert(len(outdir.listdir()) == 4)
+        assert('lib1_fcID_fastqc_qc.txt' in str(outdir.listdir()))
