@@ -18,9 +18,12 @@ def parse_input_args(parser=None):
                               "Project_P69Processed"))
     parser.add_argument('-t', '--output_type',
                         default=None,
-                        choices=['c', 'm', 'b'],
+                        choices=['c', 'm', 'q', 'a'],
                         help=("Select type of result file to combine: "
-                              "c [counts], m [metrics], b [both]"))
+                              "c [counts], m [metrics], q [qc], a [all"))
+    parser.add_argument('-c', '--clean_outputs',
+                        action='store_true',
+                        help=("Attempt to clean/organize output files"))
     parser.add_argument('-d', '--debug',
                         action='store_true',
                         help=("Set logging level to debug"))
@@ -40,18 +43,30 @@ def main(argv):
         logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
+    if args.clean_outputs:
+        logging.info("cleaning output files for {}"
+                     .format(args.processed_project_path))
+        path = args.processed_project_path
+        postprocess.OutputCleaner(path).clean_outputs()
+
     logger.info("combining output files for {} with option {}"
                 .format(args.processed_project_path, args.output_type))
 
-    if args.output_type == 'c' or args.output_type == 'b':
+    if args.output_type in ['c', 'a']:
         logger.info("generating combined counts file")
         path = os.path.join(args.processed_project_path, 'counts')
         postprocess.OutputStitcher(path).write_table()
 
-    if args.output_type == 'm' or args.output_type == 'b':
+    if args.output_type in ['m', 'a']:
         logger.info("generating combined metrics file")
         path = os.path.join(args.processed_project_path, 'metrics')
         postprocess.OutputStitcher(path).write_table()
+
+    if args.output_type in ['q', 'a']:
+        logger.info("generating combined QC file(s)")
+        path = os.path.join(args.processed_project_path, 'QC')
+        postprocess.OutputStitcher(path).write_table()
+        postprocess.OutputStitcher(path).write_overrepresented_seq_table()
 
 if __name__ == "__main__":
    main(sys.argv[1:])

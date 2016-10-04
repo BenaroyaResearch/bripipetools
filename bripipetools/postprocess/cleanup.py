@@ -42,7 +42,8 @@ class OutputCleaner(object):
         output_root = os.path.join(self.path, output_type)
         return [os.path.join(self.path, root, f)
                 for root, dirs, files in os.walk(output_root)
-                for f in files]
+                for f in files
+                if not re.search('(DS_Store|_old)', f)]
 
     def _unzip_output(self, path):
         """
@@ -70,6 +71,10 @@ class OutputCleaner(object):
                           .format(path))
             for p in self._unzip_output(path):
                 shutil.move(p, '{}_{}'.format(prefix, os.path.basename(p)))
+            try:
+                shutil.rmtree(os.path.splitext(path)[0])
+            except OSError:
+                pass
         else:
             shutil.move(path, '{}_{}'.format(prefix, os.path.basename(path)))
 
@@ -95,6 +100,6 @@ class OutputCleaner(object):
                     outregex = re.compile(output_type + '$')
                     if not outregex.search(os.path.dirname(o)):
                         self._unnest_output(o)
-            for o in os.listdir(os.path.join(self.path, output_type)):
-                self._recode_output(os.path.join(self.path, output_type, o),
-                                    output_type)
+                for o in os.listdir(os.path.join(self.path, output_type)):
+                    self._recode_output(os.path.join(self.path, output_type, o),
+                                        output_type)
