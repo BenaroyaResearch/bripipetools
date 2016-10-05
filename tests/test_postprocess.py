@@ -3,6 +3,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 import os
 import re
+import shutil
 
 import pytest
 
@@ -177,3 +178,103 @@ class TestOutputStitcher:
 
         # THEN file should exist at expected path
         assert(os.path.exists(expected_path))
+
+
+class TestOutputCleaner:
+    @pytest.fixture(scope='function')
+    def output_folder(self, tmpdir):
+        return tmpdir.mkdir('processed')
+
+    def test_get_output_types(self, output_folder):
+        path = output_folder
+        path.mkdir('metrics')
+        path.mkdir('counts')
+        # assert(str(path) == "foo")
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        assert(set(outputcleaner._get_output_types())
+               == set(['metrics', 'counts']))
+
+    def test_get_output_paths(self, output_folder):
+        path = output_folder
+        path.mkdir('QC').mkdir('sample1').ensure('file1.zip')
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        assert(outputcleaner._get_output_paths('QC')
+               == [str(path.join('QC').join('sample1').join('file1.zip'))])
+
+    def test_unzip_output(self, output_folder):
+        path = output_folder
+        zipdir = path.mkdir('zipfolder')
+        zipdir.ensure('file1')
+        zipoutput = shutil.make_archive(str(zipdir), 'zip',
+                                        str(zipdir))
+        shutil.rmtree(str(zipdir))
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        paths = outputcleaner._unzip_output(zipoutput)
+
+        assert('file1' in str(path.listdir()))
+        assert(paths[0] == str(path.join('file1')))
+
+    def test_unnest_output_file(self, output_folder):
+        path = output_folder
+        subdir = path.mkdir('subfolder')
+        nestedoutput = subdir.ensure('file1')
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        outputcleaner._unnest_output(str(nestedoutput))
+
+        assert('subfolder_file1' in str(path.listdir()))
+
+    def test_unnest_output_zip(self, output_folder):
+        path = output_folder
+        subdir = path.mkdir('subfolder')
+        zipdir = subdir.mkdir('zipfolder')
+        nestedoutput = zipdir.ensure('file1')
+        zipoutput = shutil.make_archive(str(zipdir), 'zip',
+                                        str(zipdir))
+        shutil.rmtree(str(zipdir))
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        outputcleaner._unnest_output(str(zipoutput))
+
+        assert('subfolder_file1' in str(path.listdir()))
+
+    def test_recode_output(self, output_folder):
+        path = output_folder
+        qcfile = path.ensure('libID_fcID_fastqc_data.txt')
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        newpath = outputcleaner._recode_output(str(qcfile), 'QC')
+
+        assert(os.path.basename(newpath) == 'libID_fcID_fastqc_qc.txt')
+        assert('libID_fcID_fastqc_qc.txt' in str(path.listdir()))
+
+    def test_clean_outputs(self, output_folder):
+        path = output_folder
+        outdir = path.mkdir('QC')
+
+        lib1dir = outdir.mkdir('lib1_fcID')
+        zip1dir = lib1dir.mkdir('qc1')
+        qc1file = zip1dir.ensure('fastqc_data.txt')
+        zip1out = shutil.make_archive(str(zip1dir), 'zip', str(zip1dir))
+        shutil.rmtree(str(zip1dir))
+
+        lib2dir = outdir.mkdir('lib2_fcID')
+        zip2dir = lib2dir.mkdir('qc1')
+        qc2file = zip2dir.ensure('fastqc_data.txt')
+        zip2out = shutil.make_archive(str(zip2dir), 'zip', str(zip2dir))
+        shutil.rmtree(str(zip2dir))
+
+        outputcleaner = postprocess.OutputCleaner(
+            path=str(path))
+        outputcleaner.clean_outputs()
+
+        assert(len(outdir.listdir()) == 4)
+        assert('lib1_fcID_fastqc_qc.txt' in str(outdir.listdir()))
