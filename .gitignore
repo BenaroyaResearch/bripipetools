@@ -1,11 +1,19 @@
-.cache
-data/_deprecated/
-tmp
-
+# Byte-compiled / optimized / DLL files
 __pycache__
 *.pyc
+
+# Distribution / packaging
 /*.egg-info
 .eggs
 /dist/
 
+# Unit test / coverage reports
+.cache
 .coverage
+
+# Sphinx documentation
+docs/_build/
+
+# Deprecated scripts / temp directory
+data/_deprecated/
+tmp
