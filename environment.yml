@@ -4,7 +4,7 @@ channels: !!python/tuple
 - !!python/unicode 'defaults'
 dependencies:
 - beautifulsoup4=4.5.1=py27_0
-- bioconda::python-dateutil=2.3=py27_0
+- python-dateutil=2.3=py27_0
 - coverage=4.2=py27_0
 - funcsigs=1.0.2=py27_0
 - mkl=11.3.3=0
@@ -21,7 +21,7 @@ dependencies:
 - python=2.7.12=1
 - pytz=2016.7=py27_0
 - pyyaml=3.12=py27_0
-- r::zlib=1.2.8=1
+- zlib=1.2.8=1
 - readline=6.2=2
 - setuptools=27.2.0=py27_0
 - six=1.10.0=py27_0
