@@ -107,7 +107,7 @@ class WorkflowBatchFile(object):
 
         :rtype: list
         :return: A list of tuples with number (index) and dict with details
-        for each parameter.
+            for each parameter.
         """
         param_line = self.data['raw'][self._locate_param_line()]
         return OrderedDict((idx, self._parse_param(p))
