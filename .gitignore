@@ -3,6 +3,7 @@ __pycache__
 *.pyc
 
 # Distribution / packaging
+build/
 /*.egg-info
 .eggs
 /dist/
