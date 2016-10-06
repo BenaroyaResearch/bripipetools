@@ -111,6 +111,14 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
 
+# List of autodoc directive flags that should be automatically applied to all
+# autodoc directives
+autodoc_default_flags = ['members', 'undoc-members', 'private-members']
+
+# Include the __init__ method's doc string in addition to the class doc string
+# in the documentation.
+autoclass_content = 'both'
+
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
 

@@ -3,15 +3,27 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to bripipetools's documentation!
-========================================
+bripipetools
+============
+
+**bripipetools** (i.e., BRI Pipeline Tools) is a collection of modules for managing the operation of processing workflows — as well as the input and output data for these workflows — within the Genomics and Bioinformatics Cores at the Benaroya Research Institute.
+
+.. warning:: **Scope & environment**
+
+   These tools are designed with **very** strong assumptions about data structure and formats, as well as available resources (e.g., file system, database). While bits and pieces of the code may be useful in other contexts, as a general rule, if you try to install/use this package somewhere other than one of a handful of properly configured BRI servers, *you're going to have a bad time*.
+
+-----
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   bripipetools.rst
+   usingbripipetools.rst
+   galaxy.rst
+   genlims.rst
+   appmodules.rst
+   coremodules.rst
 
 Indices and tables
 ==================
