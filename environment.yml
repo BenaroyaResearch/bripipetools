@@ -20,7 +20,7 @@ dependencies:
 - python=2.7.12=1
 - pytz=2016.7=py27_0
 - pyyaml=3.12=py27_0
-- zlib=1.2.8=1
+- zlib=1.2.8=3
 - readline=6.2=2
 - setuptools=27.2.0=py27_0
 - six=1.10.0=py27_0
