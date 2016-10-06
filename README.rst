@@ -35,7 +35,7 @@ bripipetools can be installed by cloning this repository and running::
 Documentation
 -------------
 
-The documentation for bripipetools is available `here <https://readthedocs.org/projects/bripipetools/badge/?version=latest>`_ (courtesy of `ReadTheDocs <http://readthedocs.org/>`_).
+The documentation for bripipetools is available `here <http://bripipetools.readthedocs.io/en/latest/?badge=latest>`_ (courtesy of `ReadTheDocs <http://readthedocs.org/>`_).
 
 Contribute
 ----------
