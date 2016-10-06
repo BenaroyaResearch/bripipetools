@@ -1,12 +1,16 @@
-===============================
-bripipetools
-===============================
 
 .. image:: https://img.shields.io/travis/jaeddy/bripipetools.svg
         :target: https://travis-ci.org/jaeddy/bripipetools
 
 .. image:: https://img.shields.io/coveralls/jaeddy/bripipetools.svg
         :target: https://coveralls.io/github/jaeddy/bripipetools
+
+.. image:: https://readthedocs.org/projects/bripipetools/badge/?version=latest
+        :target: http://bripipetools.readthedocs.io/en/latest/?badge=latest
+
+
+bripipetools
+============
 
 **bripipetools** (i.e., BRI Pipeline Tools) is a collection of modules for managing the operation of processing workflows — as well as the input and output data for these workflows — within the Genomics and Bioinformatics Cores at the Benaroya Research Institute.
 
@@ -31,7 +35,7 @@ bripipetools can be installed by cloning this repository and running::
 Documentation
 -------------
 
-The documentation for $project is available `here <link>`_.
+The documentation for bripipetools is available `here <https://readthedocs.org/projects/bripipetools/badge/?version=latest>`_ (courtesy of `ReadTheDocs <http://readthedocs.org/>`_).
 
 Contribute
 ----------
