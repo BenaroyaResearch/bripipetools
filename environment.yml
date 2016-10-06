@@ -1,5 +1,4 @@
 channels: !!python/tuple
-- !!python/unicode 'r'
 - !!python/unicode 'bioconda'
 - !!python/unicode 'defaults'
 dependencies:
