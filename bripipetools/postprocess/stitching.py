@@ -14,6 +14,7 @@ from .. import io
 from .. import parsing
 from .. import util
 
+
 class OutputStitcher(object):
     """
     Given a path to an output folder or list of files, combine parsed data

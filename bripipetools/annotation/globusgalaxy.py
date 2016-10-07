@@ -4,18 +4,17 @@ Galaxy workflow processing batch performed by the BRI Bioinformatics
 Core.
 """
 import logging
+logger = logging.getLogger(__name__)
 import os
 import re
 import datetime
 
 from .. import util
-from .. import parsing
 from .. import io
 from .. import genlims
 from .. import qc
 from .. import model as docs
 
-logger = logging.getLogger(__name__)
 
 class WorkflowBatchAnnotator(object):
     """

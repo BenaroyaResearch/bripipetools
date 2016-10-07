@@ -9,6 +9,7 @@ import pandas as pd
 
 from .. import io
 
+
 class SexChecker(object):
     """
     Reads gene counts for a processed library, maps genes to X and Y

@@ -9,6 +9,7 @@ import datetime
 
 import pymongo
 
+
 def find_objects(collection):
     """
     Return a decorator that retrieves objects from the specified

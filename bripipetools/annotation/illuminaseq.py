@@ -7,10 +7,10 @@ logger = logging.getLogger(__name__)
 import os
 import re
 
-from .. import util
 from .. import parsing
 from .. import genlims
 from .. import model as docs
+
 
 class FlowcellRunAnnotator(object):
     """

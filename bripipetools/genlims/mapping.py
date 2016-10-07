@@ -3,12 +3,12 @@ bripipetools mapping submodule: methods to map from Mongo documents to model
 classes.
 """
 import logging
+logger = logging.getLogger(__name__)
 import re
 
 from .. import util
 from .. import model as docs
 
-logger = logging.getLogger(__name__)
 
 def map_keys(obj):
     """

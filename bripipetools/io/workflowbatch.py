@@ -2,11 +2,10 @@
 Classes for reading, parsing, and writing workflow batch submit files for
 Globus Galaxy.
 """
-import os
-import sys
 import re
 
 from collections import OrderedDict
+
 
 class WorkflowBatchFile(object):
     def __init__(self, path, state='template'):
