@@ -5,7 +5,7 @@ except ImportError:
 
 config = {
     'name': 'bripipetools',
-    'version': '0.2.3',
+    'version': '0.3.0',
     'description': 'Software for managing BRI bioinformatics pipelines',
     'author': 'James A. Eddy',
     'author_email': 'james.a.eddy@gmail.com',
