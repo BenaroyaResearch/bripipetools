@@ -90,21 +90,21 @@ class WorkflowBatchAnnotator(object):
         batch_items = self._parse_batch_name(
             self.workflowbatch_data['batch_name'])
 
-        self.workflowbatch.workflow_id = self.workflowbatch_data['workflow_name']
-        self.workflowbatch.date = batch_items['date']
-        self.workflowbatch.projects = batch_items['projects']
-        self.workflowbatch.flowcell_id = batch_items['flowcell_id']
+        update_fields = {
+            'workflow_id': self.workflowbatch_data['workflow_name'],
+            'date': batch_items['date'],
+            'projects': batch_items['projects'],
+            'flowcell_id': batch_items['flowcell_id']}
+        self.workflowbatch.is_mapped = False
+        self.workflowbatch.update_attrs(update_fields, force=True)
 
     def get_workflow_batch(self):
         """
         Return workflow batch object with updated fields.
         """
-
         self._update_workflowbatch()
         logger.debug("returning workflow batch object: {}".format(
-            self.workflowbatch.to_json()
-            )
-        )
+            self.workflowbatch.to_json()))
         return self.workflowbatch
 
     def get_sequenced_libraries(self):
@@ -236,7 +236,10 @@ class ProcessedLibraryAnnotator(object):
         Add or update any missing fields in ProcessedLibrary object.
         """
         self._append_processed_data()
-        self.processedlibrary.parent_id = self.seqlib_id
+
+        update_fields = {'parent_id': self.seqlib_id}
+        self.processedlibrary.is_mapped = False
+        self.processedlibrary.update_attrs(update_fields, force=True)
 
     def get_processed_library(self):
         """

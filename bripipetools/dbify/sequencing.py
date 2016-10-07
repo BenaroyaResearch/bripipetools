@@ -41,7 +41,7 @@ class SequencingImporter(object):
             run_id=path_items['run_id'],
             genomics_root=path_items['genomics_root'],
             db=self.db
-            ).flowcellrun
+            ).get_flowcell_run()
 
     def _collect_sequencedlibraries(self):
         """

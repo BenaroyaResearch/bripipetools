@@ -12,14 +12,50 @@ def test_tg3object_creation():
     tg3object = docs.TG3Object(_id='tg3-0000')
     assert(tg3object._id == 'tg3-0000')
     assert(tg3object.type is None)
-    assert(tg3object.date_created is None)
+    assert(tg3object.date_created is not None)
+    assert(tg3object.last_updated == tg3object.date_created)
+
+def test_tg3object_update_attrs_no_update():
+    tg3object = docs.TG3Object(_id='tg3-0000')
+    # attr_map = {'new_field': 'foo'}
+    attr_map = {'_id': 'tg3-0000'}
+    tg3object.update_attrs(attr_map)
+    assert(tg3object.last_updated == tg3object.date_created)
+
+def test_tg3object_update_attrs_update_none():
+    tg3object = docs.TG3Object(_id='tg3-0000')
+    attr_map = {'_id': 'tg3-0000', 'type': 'new'}
+    tg3object.update_attrs(attr_map)
+    assert(tg3object.type is not None)
+    assert(tg3object.last_updated > tg3object.date_created)
+
+def test_tg3object_update_attrs_update_val_no_force():
+    tg3object = docs.TG3Object(_id='tg3-0000', type='old')
+    # attr_map = {'new_field': 'foo'}
+    attr_map = {'_id': 'tg3-0000', 'type': 'new'}
+    tg3object.update_attrs(attr_map)
+    assert(tg3object.type == 'old')
+    assert(tg3object.last_updated == tg3object.date_created)
+
+def test_tg3object_update_attrs_update_val_force():
+    tg3object = docs.TG3Object(_id='tg3-0000', type='old')
+    # attr_map = {'new_field': 'foo'}
+    attr_map = {'_id': 'tg3-0000', 'type': 'new'}
+    tg3object.update_attrs(attr_map, force=True)
+    assert(tg3object.type == 'new')
+    assert(tg3object.last_updated > tg3object.date_created)
+
+def test_tg3object_update_attrs_update_new_attr():
+    tg3object = docs.TG3Object(_id='tg3-0000', type='old')
+    attr_map = {'new_field': 'foo'}
+    tg3object.update_attrs(attr_map)
+    assert(hasattr(tg3object, 'new_field'))
+    assert(tg3object.last_updated > tg3object.date_created)
 
 def test_tg3object_to_json():
     tg3object = docs.TG3Object(_id='tg3-0000')
-    assert(tg3object.to_json() ==
-        {'_id': 'tg3-0000',
-         'type': None,
-         'dateCreated': None})
+    assert(all([field in tg3object.to_json()
+                for field in ['_id', 'type', 'dateCreated', 'lastUpdated']]))
 
 def test_genericsample_creation():
     sample = docs.GenericSample(_id='S0000')
@@ -28,17 +64,6 @@ def test_genericsample_creation():
     assert(sample.subproject_id is None)
     assert(sample.protocol_id is None)
     assert(sample.parent_id is None)
-
-def test_genericsample_to_json():
-    sample = docs.GenericSample(_id='S0000')
-    assert(sample.to_json() ==
-        {'_id': 'S0000',
-         'type': None,
-         'dateCreated': None,
-         'projectId': None,
-         'subprojectId': None,
-         'protocolId': None,
-         'parentId': None})
 
 def test_library_creation():
     library = docs.Library(_id='lib0000', parent_id='S0000')
@@ -60,12 +85,6 @@ def test_sequencedlibrary_set_raw_data():
                                        parent_id='lib0000')
     seqlibrary.raw_data = [{'path': None}]
     assert(len(seqlibrary.raw_data))
-
-def test_sequencedlibrary_to_json():
-    seqlibrary = docs.SequencedLibrary(_id='lib0000_C000000XX',
-                                       parent_id='lib0000')
-    seqlibrary_json = seqlibrary.to_json()
-    assert('rawData' in seqlibrary_json)
 
 def test_processedlibrary_creation():
     proclibrary = docs.ProcessedLibrary(_id='lib0000_C000000XX_proc')

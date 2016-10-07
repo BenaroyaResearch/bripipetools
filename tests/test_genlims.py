@@ -1,4 +1,6 @@
 import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 import os
 import re
 import datetime
@@ -10,8 +12,6 @@ from mock import Mock
 from bripipetools import model as docs
 from bripipetools import genlims
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 # def test_genlims_connection():
 #     # TODO: come up with a better way to test this
@@ -326,6 +326,8 @@ class TestMapping:
         # if possible (and maybe even in the method itself)
         assert(type(obj) is docs.SequencedLibrary)
         assert(all([hasattr(obj, field)
-                    for field in ['_id', 'parent_id', 'type', 'raw_data']]))
+                    for field in ['_id', 'parent_id', 'type', 'raw_data',
+                                  'date_created', 'last_updated']]))
         assert(all([field in obj.raw_data]
                     for field in ['path', 'lane_id', 'sample_number']))
+        assert(obj.last_updated == obj.date_created)

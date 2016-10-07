@@ -1,7 +1,10 @@
 """
 Classes representing documents in the GenLIMS database.
 """
+import logging
+logger = logging.getLogger(__name__)
 import re
+import datetime
 
 from .. import util
 from .. import parsing
@@ -33,13 +36,46 @@ class TG3Object(object):
     """
     Generic functions for objects in TG3 collections.
     """
-    def __init__(self, _id=None, type=None, date_created=None):
-
+    def __init__(self, _id=None, type=None, date_created=None,
+                 is_mapped=False):
         self._id = _id
         self.type = type
-        self.date_created = date_created
+        if date_created is None:
+            self.date_created = datetime.datetime.now()
+            self.last_updated = self.date_created
+        else:
+            self.date_created = date_created
+        self.is_mapped = is_mapped
+
+    def update_attrs(self, attr_map, force=False):
+        """
+        Given a dictionary of key-value pairs for attribute names with
+        new values, update each attribute. Always update empty ('None')
+        attributes and set any new attributes; update all modified
+        attributes if force option is 'True'.
+        """
+        updated = False
+        for attr, val in attr_map.items():
+            if hasattr(self, attr):
+                if (getattr(self, attr) is None
+                        or (getattr(self, attr) != val and force)):
+                    logger.debug("setting attribute {} as {}".format(attr, val))
+                    setattr(self, attr, val)
+                    updated = True
+            else:
+                setattr(self, attr, val)
+                logger.debug("setting attribute {} as {}".format(attr, val))
+                updated = True
+        if updated and not self.is_mapped:
+            self.last_updated = datetime.datetime.now()
+        else:
+            logger.debug("no attributes updated")
 
     def to_json(self):
+        """
+        Return object attributes as dictionary with keys formatted as
+        camel case.
+        """
         return convert_keys(self.__dict__)
 
 class GenericSample(TG3Object):
