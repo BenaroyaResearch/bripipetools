@@ -15,7 +15,10 @@ from . import model
 # genlims depends on util, model
 from . import genlims
 
-# annotation depends on util, parsing, io, model, genlims
+# qc depends on io
+from . import qc
+
+# annotation depends on util, parsing, io, model, genlims, qc
 from . import annotation
 
 # dbify depends on util, genlims, annotation
