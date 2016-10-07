@@ -70,7 +70,4 @@ def map_to_object(doc):
     logger.debug("document has following fields: {}".format(doc.keys()))
     snake_doc = map_keys(doc)
     obj.update_attrs(snake_doc, force=True)
-    # for k, v in snake_doc.items():
-    #     logger.debug("setting attribute {} as {}".format(k, v))
-    #     setattr(obj, k, v)
     return obj

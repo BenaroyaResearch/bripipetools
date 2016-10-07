@@ -65,6 +65,22 @@ class FlowcellRunAnnotator(object):
             logger.error("'Unaligned' folder doesn't exist")
             raise
 
+    def _update_flowcellrun(self):
+        """
+        Add any missing fields to FlowcellRun object.
+        """
+        logger.debug("updating FlowcellRun object attributes")
+        pass
+
+    def get_flowcell_run(self):
+        """
+        Return flowcell run object with updated fields.
+        """
+        self._update_flowcellrun()
+        logger.debug("returning flowcell run object: {}".format(
+            self.flowcellrun.to_json()))
+        return self.flowcellrun
+
     def get_projects(self):
         """
         Collect list of projects for flowcell run.
@@ -160,11 +176,13 @@ class SequencedLibraryAnnotator(object):
         logger.debug("updating SequencedLibrary object attributes")
 
         project_items = parsing.parse_project_label(self.project_label)
-        self.sequencedlibrary.project_id = project_items['project_id']
-        self.sequencedlibrary.subproject_id = project_items['subproject_id']
-        self.sequencedlibrary.run_id = self.run_id
-        self.sequencedlibrary.parent_id = self.library_id
-        self.sequencedlibrary.raw_data = self._get_raw_data()
+        update_fields = {'project_id': project_items['project_id'],
+                         'subproject_id': project_items['subproject_id'],
+                         'run_id': self.run_id,
+                         'parent_id': self.library_id,
+                         'raw_data': self._get_raw_data()}
+        self.sequencedlibrary.is_mapped = False
+        self.sequencedlibrary.update_attrs(update_fields, force=True)
 
     def get_sequenced_library(self):
         """

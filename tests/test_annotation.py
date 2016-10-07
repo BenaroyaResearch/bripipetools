@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 import os
 import re
@@ -324,7 +324,10 @@ class TestSequencedLibraryAnnotator:
         # 'subproject_id', 'parent_id' and 'raw_data' attributes
         assert(all([hasattr(annotator.sequencedlibrary, field)
                     for field in ['run_id', 'project_id', 'subproject_id',
-                                  'parent_id', 'raw_data']]))
+                                  'parent_id', 'raw_data', 'date_created',
+                                  'last_updated']]))
+        assert(annotator.sequencedlibrary.last_updated
+               > annotator.sequencedlibrary.date_created)
 
     def test_get_sequenced_library(self, annotatordata):
         # (GIVEN)
@@ -493,7 +496,10 @@ class TestWorkflowBatchAnnotator:
         # 'projects', 'flowcell_id' attributes
         assert(all([hasattr(annotator.workflowbatch, field)
                     for field in ['workflow_id', 'date', 'projects',
-                                  'flowcell_id']]))
+                                  'flowcell_id', 'date_created',
+                                  'last_updated']]))
+        assert(annotator.workflowbatch.last_updated
+               > annotator.workflowbatch.date_created)
 
     def test_get_workflow_batch(self, annotatordata):
         # (GIVEN)
@@ -748,6 +754,9 @@ class TestProcessedLibraryAnnotator:
 
         # THEN the object should have at least the 'parent_id' and
         # 'processed_data', and 'processed_data' should be length 1
-        assert(hasattr(annotator.processedlibrary, 'parent_id'))
-        assert(hasattr(annotator.processedlibrary, 'processed_data'))
+        assert(all([hasattr(annotator.processedlibrary, field)
+                    for field in ['parent_id', 'processed_data',
+                                  'date_created', 'last_updated']]))
         assert(len(annotator.processedlibrary.processed_data) == 1)
+        assert(annotator.processedlibrary.last_updated
+               > annotator.processedlibrary.date_created)

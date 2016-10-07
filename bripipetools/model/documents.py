@@ -68,6 +68,8 @@ class TG3Object(object):
                 updated = True
         if updated and not self.is_mapped:
             self.last_updated = datetime.datetime.now()
+        else:
+            logger.debug("no attributes updated")
 
     def to_json(self):
         """
