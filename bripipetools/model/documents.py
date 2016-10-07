@@ -2,6 +2,7 @@
 Classes representing documents in the GenLIMS database.
 """
 import re
+import datetime
 
 from .. import util
 from .. import parsing
@@ -34,12 +35,39 @@ class TG3Object(object):
     Generic functions for objects in TG3 collections.
     """
     def __init__(self, _id=None, type=None, date_created=None):
-
         self._id = _id
         self.type = type
-        self.date_created = date_created
+        if date_created is None:
+            self.date_created = datetime.datetime.now()
+            self.last_updated = self.date_created
+        else:
+            self.date_created = date_created
+
+    def update_attrs(self, attr_map, force=False):
+        """
+        Given a dictionary of key-value pairs for attribute names with
+        new values, update each attribute. Always update empty ('None')
+        attributes and set any new attributes; update all modified
+        attributes if force option is 'True'.
+        """
+        updated = False
+        for attr, val in attr_map.items():
+            if hasattr(self, attr):
+                if (getattr(self, attr) is None
+                        or (getattr(self, attr) != val and force)):
+                    setattr(self, attr, val)
+                    updated = True
+            else:
+                setattr(self, attr, val)
+                updated = True
+        if updated:
+            self.last_updated = datetime.datetime.now()
 
     def to_json(self):
+        """
+        Return object attributes as dictionary with keys formatted as
+        camel case.
+        """
         return convert_keys(self.__dict__)
 
 class GenericSample(TG3Object):
