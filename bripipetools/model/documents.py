@@ -34,7 +34,8 @@ class TG3Object(object):
     """
     Generic functions for objects in TG3 collections.
     """
-    def __init__(self, _id=None, type=None, date_created=None):
+    def __init__(self, _id=None, type=None, date_created=None,
+                 is_mapped=False):
         self._id = _id
         self.type = type
         if date_created is None:
@@ -42,6 +43,7 @@ class TG3Object(object):
             self.last_updated = self.date_created
         else:
             self.date_created = date_created
+        self.is_mapped = is_mapped
 
     def update_attrs(self, attr_map, force=False):
         """
@@ -60,7 +62,7 @@ class TG3Object(object):
             else:
                 setattr(self, attr, val)
                 updated = True
-        if updated:
+        if updated and not self.is_mapped:
             self.last_updated = datetime.datetime.now()
 
     def to_json(self):
