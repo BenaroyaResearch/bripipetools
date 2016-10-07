@@ -1,6 +1,8 @@
 """
 Classes representing documents in the GenLIMS database.
 """
+import logging
+logger = logging.getLogger(__name__)
 import re
 import datetime
 
@@ -57,10 +59,12 @@ class TG3Object(object):
             if hasattr(self, attr):
                 if (getattr(self, attr) is None
                         or (getattr(self, attr) != val and force)):
+                    logger.debug("setting attribute {} as {}".format(attr, val))
                     setattr(self, attr, val)
                     updated = True
             else:
                 setattr(self, attr, val)
+                logger.debug("setting attribute {} as {}".format(attr, val))
                 updated = True
         if updated and not self.is_mapped:
             self.last_updated = datetime.datetime.now()
