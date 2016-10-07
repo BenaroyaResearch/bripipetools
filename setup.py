@@ -15,7 +15,7 @@ config = {
     'install_requires': [
         'beautifulsoup4',
         'pymongo',
-        'pandas<0.19.0'
+        'pandas'
     ],
     'setup_requires': ['pytest-runner'],
     'tests_require': ['pytest', 'pytest-cov', 'mock', 'mongomock'],
