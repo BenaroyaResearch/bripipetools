@@ -1,6 +1,6 @@
 import re
 
-# wrapper function for regex matching
+
 def matchdefault(pattern, string, default=''):
     """
     Search for pattern in string and return default string if no match.

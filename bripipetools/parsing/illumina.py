@@ -4,7 +4,7 @@ import datetime
 
 from .. import util
 
-### file/path/string parsing functions ###
+
 def get_project_label(str):
     return util.matchdefault('P+[0-9]+(-[0-9]+){,1}', str)
 

@@ -7,6 +7,7 @@ import re
 
 from . import SequencingImporter, ProcessingImporter
 
+
 class ImportManager(object):
     """
     Takes an input argument (path) from script or module specifying

@@ -3,6 +3,7 @@ import glob
 import re
 import shutil
 
+
 def locate_root_folder(top_level, max_depth=3):
     """
     Find the root of a file path preceding a specified 'top level' directory.

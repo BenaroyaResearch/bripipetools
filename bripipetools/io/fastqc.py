@@ -3,9 +3,8 @@ Class for reading and parsing FastQC report files.
 """
 import logging
 logger = logging.getLogger(__name__)
-import os
-import sys
 import re
+
 
 class FastQCFile(object):
     """

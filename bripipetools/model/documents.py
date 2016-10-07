@@ -2,7 +2,6 @@
 Classes representing documents in the GenLIMS database.
 """
 import re
-import json
 
 from .. import util
 from .. import parsing

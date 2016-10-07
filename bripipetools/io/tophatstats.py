@@ -3,8 +3,6 @@ Class for reading and parsing Tophat Stats metrics files.
 """
 import logging
 logger = logging.getLogger(__name__)
-import os
-import sys
 import re
 
 
