@@ -180,6 +180,44 @@ class TestOutputStitcher:
         assert(os.path.exists(expected_path))
 
 
+class TestOutputCompiler:
+    @pytest.fixture(
+        scope='class',
+        params=[{'runnum': r, 'projectnum': p}
+                for r in range(1)
+                for p in range(1)])
+    def compilerdata(self, request, mock_genomics_server):
+        # GIVEN a OutputCompiler with list of mock 'genomics' server path to
+        # combined output files
+        runs = mock_genomics_server['root']['genomics']['illumina']['runs']
+        rundata = runs[request.param['runnum']]
+        projects = rundata['processed']['projects']
+        projectdata = projects[request.param['projectnum']]
+        outputs = [projectdata[out_type]['combined']
+                   for out_type in projectdata
+                   if out_type not in ['path', 'counts']]
+
+        logger.info("[setup] OutputCompiler test instance "
+                    "for combined output files '{}'"
+                    .format([f['path'] for f in outputs]))
+
+        outputcompiler = postprocess.OutputCompiler(
+            paths=[f['path'] for f in outputs])
+
+        def fin():
+            logger.info("[teardown] OutputCompiler mock instance")
+        request.addfinalizer(fin)
+        return (outputcompiler, outputs)
+
+    def test_init(self, compilerdata):
+        # (GIVEN)
+        (outputcompiler, outputs) = compilerdata
+
+        # WHEN object is created
+
+        # THEN should have expected paths stored as attribute
+        assert(len(outputcompiler.paths) == 2)
+
 class TestOutputCleaner:
     @pytest.fixture(scope='function')
     def output_folder(self, tmpdir):
