@@ -61,3 +61,4 @@ class OutputCompiler(object):
             writer = csv.writer(f)
             for row in table_data:
                 writer.writerow(row)
+        return table_path
