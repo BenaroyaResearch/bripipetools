@@ -185,7 +185,7 @@ class TestOutputCompiler:
         scope='class',
         params=[{'runnum': r, 'projectnum': p}
                 for r in range(1)
-                for p in range(1)])
+                for p in range(3)])
     def compilerdata(self, request, mock_genomics_server):
         # GIVEN a OutputCompiler with list of mock 'genomics' server path to
         # combined output files
@@ -195,7 +195,8 @@ class TestOutputCompiler:
         projectdata = projects[request.param['projectnum']]
         outputs = [projectdata[out_type]['combined']
                    for out_type in projectdata
-                   if out_type not in ['path', 'counts']]
+                   if out_type not in ['path', 'counts', 'combined_summary']]
+        outputdata = projectdata['combined_summary']
 
         logger.info("[setup] OutputCompiler test instance "
                     "for combined output files '{}'"
@@ -207,16 +208,78 @@ class TestOutputCompiler:
         def fin():
             logger.info("[teardown] OutputCompiler mock instance")
         request.addfinalizer(fin)
-        return (outputcompiler, outputs)
+        return (outputcompiler, outputs, outputdata)
 
     def test_init(self, compilerdata):
         # (GIVEN)
-        (outputcompiler, outputs) = compilerdata
+        outputcompiler, outputs, _ = compilerdata
+
+        logger.info("test `__init__()`")
 
         # WHEN object is created
 
         # THEN should have expected paths stored as attribute
-        assert(len(outputcompiler.paths) == 2)
+        assert(len(outputcompiler.paths) == len(outputs))
+
+    def test_read_data(self, compilerdata):
+        # (GIVEN)
+        outputcompiler, outputs, _ = compilerdata
+
+        logger.info("test `_read_data()`")
+
+        # WHEN data from individual file paths are read into a list
+        outputcompiler._read_data()
+
+        # THEN data should be stored as list of expected length
+        assert(len(outputcompiler.data) == len(outputs))
+
+    def test_build_table(self, compilerdata):
+        # (GIVEN)
+        outputcompiler, outputs, _ = compilerdata
+
+        logger.info("test `_build_table()`")
+
+        # WHEN data are combined into a single table
+        table_data = outputcompiler._build_table()
+
+        # THEN the table should have the same number of rows (list elements)
+        # as the first combined output table in the list; and 'libId' should
+        # only appear once in the header row
+        assert(len(table_data) == outputs[0]['len_table'])
+        assert(table_data[0].count('libId') == 1)
+
+    def test_build_combined_filename(self, compilerdata):
+        # (GIVEN)
+        outputcompiler, outputs, outputdata = compilerdata
+
+        logger.info("test `_build_combined_filename()`")
+
+        # WHEN path to outputs is parsed to build combined CSV file name
+        combined_filename = outputcompiler._build_combined_filename()
+
+        # THEN combined filename should be correctly formatted
+        assert(combined_filename
+               == os.path.basename(outputdata['path']))
+
+    def test_write_table(self, compilerdata):
+        # (GIVEN)
+        outputcompiler, outputs, outputdata = compilerdata
+
+        logger.info("test `write_table()`")
+
+        # AND combined file does not already exist
+        expected_path = outputdata['path']
+        try:
+            os.remove(expected_path)
+        except OSError:
+            pass
+
+        # WHEN data is read, combined, and written to file
+        outputcompiler.write_table()
+
+        # THEN file should exist at expected path
+        assert(os.path.exists(expected_path))
+
 
 class TestOutputCleaner:
     @pytest.fixture(scope='function')
