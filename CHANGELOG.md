@@ -2,7 +2,7 @@
 
 **[v0.3.1](https://github.com/jaeddy/bripipetools/tree/e7aa92d49dae8fa34a463aba68de4ff9610d2af7) - 2016-10-11**
 
-+ New `postprocess` modules to compile and merge all "stitched" files for different summary output types (e.g., metrics, QC, validations).
++ New `postprocess` submodule to compile and merge all "stitched" files for different summary output types (e.g., metrics, QC, validations).
 + Modified data import/retrieval functionality with GenLIMS to ensure that timestamp fields (`dateCreated`, `lastUpdated`) are present and correctly set for all objects.
 
 -----
