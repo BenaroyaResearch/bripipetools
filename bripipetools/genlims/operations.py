@@ -119,3 +119,21 @@ def create_workflowbatch_id(db, prefix, date):
                 break
 
     return '{}_{}_{}'.format(prefix, isodate, num)
+
+def search_ancestors(db, sample_id, field):
+    """
+    Given an object in the 'samples' collection, specified by the input
+    ID, iteratively walk through ancestors based on 'parentId' until
+    a value is found for the requested field.
+    """
+    sample = db.samples.find_one({'_id': sample_id})
+    if field in sample:
+        return sample[field]
+    else:
+        try:
+            return search_ancestors(db, sample['parentId'], field)
+        except KeyError:
+            logger.debug("input sample '{}' has no mapped parent sample"
+                         .format(sample_id),
+                         exc_info=True)
+            return

@@ -281,6 +281,95 @@ class TestGenLIMSOperations:
         # THEN constructed workflow batch ID should end in number 2
         assert(wb_id == 'mockprefix_2000-01-01_2')
 
+    def test_search_ancestors_field_in_sample(self, mock_db):
+        # GIVEN an existing sample with a field that matches the input
+        # argument
+        logger.info("test `search_ancestors()`, sample has field")
+
+        mock_db.samples.insert(
+            {'_id': 'mocksample',
+             'parentId': 'mockparent',
+             'mockfield': 'mockvalue'})
+
+        # WHEN searching for the field among all sample ancestors
+        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
+
+        # THEN should return the value of the field from the first sample
+        # checked
+        assert(value == 'mockvalue')
+
+    def test_search_ancestors_field_in_parent(self, mock_db):
+        # GIVEN an existing sample with a parent sample that includes the
+        # input field
+        logger.info("test `search_ancestors()`, parent has field")
+
+        mock_db.samples.insert(
+            {'_id': 'mocksample',
+             'parentId': 'mockparent'})
+        mock_db.samples.insert(
+            {'_id': 'mockparent',
+             'mockfield': 'mockvalue'})
+
+        # WHEN searching for the field among all sample ancestors
+        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
+
+        # THEN should return the value of the field from the parent sample
+        assert(value == 'mockvalue')
+
+    def test_search_ancestors_field_in_grandparent(self, mock_db):
+        # GIVEN an existing sample with a grandparent sample (parent of a
+        # parent) that includes the input field
+        logger.info("test `search_ancestors()`, grandparent has field")
+
+        mock_db.samples.insert(
+            {'_id': 'mocksample',
+             'parentId': 'mockparent'})
+        mock_db.samples.insert(
+            {'_id': 'mockparent',
+             'parentId': 'mockgrandparent'})
+        mock_db.samples.insert(
+            {'_id': 'mockgrandparent',
+             'mockfield': 'mockvalue'})
+
+        # WHEN searching for the field among all sample ancestors
+        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
+
+        # THEN should return the value of the field from the parent sample
+        assert(value == 'mockvalue')
+
+    def test_search_ancestors_no_parent(self, mock_db):
+        # GIVEN an existing sample with that has no 'parentId' field
+        logger.info("test `search_ancestors()`, no parent indicated")
+
+        mock_db.samples.insert(
+            {'_id': 'mocksample'})
+        mock_db.samples.insert(
+            {'_id': 'mockparent',
+             'mockfield': 'mockvalue'})
+
+        # WHEN searching for the field among all sample ancestors
+        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
+
+        # THEN should return None
+        assert(value is None)
+
+    def test_search_ancestors_no_field(self, mock_db):
+        # GIVEN an existing sample with no ancestors that include the
+        # input field
+        logger.info("test `search_ancestors()`, no parent indicated")
+
+        mock_db.samples.insert(
+            {'_id': 'mocksample',
+             'parentId': 'mockparent'})
+        mock_db.samples.insert(
+            {'_id': 'mockparent'})
+
+        # WHEN searching for the field among all sample ancestors
+        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
+
+        # THEN should return None
+        assert(value is None)
+
 
 class TestMapping:
     # GIVEN any state
