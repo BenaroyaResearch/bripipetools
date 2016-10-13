@@ -74,9 +74,9 @@ class WorkflowBatchAnnotator(object):
                 self.workflowbatch_data['batch_name'])
 
             workflowbatch_id = genlims.create_workflowbatch_id(
-                db = self.db,
-                prefix = 'globusgalaxy',
-                date = batch_items['date'])
+                db=self.db,
+                prefix='globusgalaxy',
+                date=batch_items['date'])
             return docs.GalaxyWorkflowBatch(
                 _id=workflowbatch_id,
                 workflowbatch_file=workflowbatch_file)
@@ -129,6 +129,28 @@ class WorkflowBatchAnnotator(object):
             workflowbatch_id=self.workflowbatch._id,
             genomics_root=self.genomics_root).update()
 
+    def _verify_sex(self, processedlibrary):
+        """
+        Retrieve reported sex for sample and compare to predicted sex
+        of processed library.
+        """
+        self._add_qc_fields(processedlibrary)
+        processed_data = [d for d in processedlibrary.processed_data
+                          if d['workflowbatch_id']
+                          == self.workflowbatch._id][0]
+        if processed_data['validations']['sex_check']['pass'] is None:
+            logger.debug("searching parents of {} for reported sex"
+                         .format(processedlibrary.parent_id))
+            reported_sex = genlims.search_ancestors(
+                self.db, processedlibrary.parent_id, 'reportedSex')
+            logger.debug("reported sex is {}".format(reported_sex))
+            if (processed_data['validations']['sex_check']['predicted_sex']
+                    == reported_sex):
+                processed_data['validations']['sex_check']['pass'] = True
+            else:
+                processed_data['validations']['sex_check']['pass'] = False
+        return processedlibrary
+
     def get_processed_libraries(self, project=None, qc=False):
         """
         Collect processed library objects for workflow batch.
@@ -140,7 +162,7 @@ class WorkflowBatchAnnotator(object):
         return [ProcessedLibraryAnnotator(
             workflowbatch_id, sample_params, self.db
             ).get_processed_library()
-            if not qc else self._add_qc_fields(
+            if not qc else self._verify_sex(
             ProcessedLibraryAnnotator(
                 workflowbatch_id, sample_params, self.db
                 ).get_processed_library())
