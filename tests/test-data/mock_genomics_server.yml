@@ -217,16 +217,22 @@ root:
                                 *htseq:
                                     - sample: *P1_L1
                                       path: !ujoin [*P1_L1, *R1, *htseq_counts_file]
-                                      y_total: 1
                                       x_total: 332
+                                      x_count: 2065
+                                      y_total: 1
+                                      y_count: 1
                                     - sample: *P1_L2
                                       path: !ujoin [*P1_L2, *R1, *htseq_counts_file]
-                                      y_total: 0
                                       x_total: 332
+                                      x_count: 2068
+                                      y_total: 0
+                                      y_count: 0
                                     - sample: *P1_L3
                                       path: !ujoin [*P1_L3, *R1, *htseq_counts_file]
-                                      y_total: 1
                                       x_total: 287
+                                      x_count: 1748
+                                      y_total: 1
+                                      y_count: 2
                             combined:
                                 path: !ujoin [*P1, *R1, *batch_date, *combined_counts_file]
                                 len_table: 64253
@@ -301,16 +307,22 @@ root:
                                 *htseq:
                                     - sample: *P2_L1
                                       path: !ujoin [*P2_L1, *R1, *htseq_counts_file]
-                                      y_total: 3
                                       x_total: 328
+                                      x_count: 1967
+                                      y_total: 3
+                                      y_count: 4
                                     - sample: *P2_L2
                                       path: !ujoin [*P2_L2, *R1, *htseq_counts_file]
-                                      y_total: 2
                                       x_total: 323
+                                      x_count: 1958
+                                      y_total: 2
+                                      y_count: 2
                                     - sample: *P2_L3
                                       path: !ujoin [*P2_L3, *R1, *htseq_counts_file]
-                                      y_total: 8
                                       x_total: 338
+                                      x_count: 1856
+                                      y_total: 8
+                                      y_count: 31
                             combined:
                                 path: !ujoin [*P2, *R1, *batch_date, *combined_counts_file]
                                 len_table: 64253
@@ -385,16 +397,22 @@ root:
                                 *htseq:
                                     - sample: *P3_L1
                                       path: !ujoin [*P3_L1, *R1, *htseq_counts_file]
-                                      y_total: 10
                                       x_total: 289
+                                      x_count: 1089
+                                      y_total: 10
+                                      y_count: 31
                                     - sample: *P3_L2
                                       path: !ujoin [*P3_L2, *R1, *htseq_counts_file]
-                                      y_total: 1
                                       x_total: 310
+                                      x_count: 1531
+                                      y_total: 1
+                                      y_count: 2
                                     - sample: *P3_L3
                                       path: !ujoin [*P3_L3, *R1, *htseq_counts_file]
-                                      y_total: 2
                                       x_total: 307
+                                      x_count: 1532
+                                      y_total: 2
+                                      y_count: 4
                             combined:
                                 path: !ujoin [*P3, *R1, *batch_date, *combined_counts_file]
                                 len_table: 64253

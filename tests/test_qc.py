@@ -108,7 +108,33 @@ class TestSexChecker:
         # server root
         assert(counts_path == sampledata['path'])
 
-    def test_compute_y_x_ratio(self, checkerdata):
+    def test_get_x_y_counts(self, checkerdata):
+        # (GIVEN)
+        checker, sampledata = checkerdata
+
+        logger.info("test `_get_gene_data()`")
+
+        # WHEN counts for X and Y genes are extracted
+        checker._get_x_y_counts()
+
+        # THEN X and Y count dfs should be expected length
+        assert(len(checker.x_counts) == sampledata['x_total'])
+        assert(len(checker.y_counts) == sampledata['y_total'])
+
+    def test_compute_x_y_data(self, checkerdata):
+        # (GIVEN)
+        checker, sampledata = checkerdata
+
+        # WHEN gene and read totals are computed for X and Y genes
+        checker._compute_x_y_data()
+
+        # THEN X and Y data should match expected results
+        assert(checker.data['x_genes'] == sampledata['x_total'])
+        assert(checker.data['x_reads'] == sampledata['x_count'])
+        assert(checker.data['y_genes'] == sampledata['y_total'])
+        assert(checker.data['y_reads'] == sampledata['y_count'])
+
+    def test_compute_y_x_gene_ratio(self, checkerdata):
         # (GIVEN)
         checker, sampledata = checkerdata
         expected_y_x_ratio = (float(sampledata['y_total'])
@@ -117,34 +143,40 @@ class TestSexChecker:
         logger.info("test `_compute_y_x_ratio()`")
 
         # WHEN ratio of Y genes detected to X genes detected is computed
-        y_x_ratio = checker._compute_y_x_ratio()
+        checker._compute_y_x_gene_ratio()
 
         # THEN ratio should be expected value
-        assert(y_x_ratio == expected_y_x_ratio)
+        assert(checker.data['y_x_gene_ratio'] == expected_y_x_ratio)
 
-    def test_predict_sex_male(self, checkerdata):
+    def test_compute_y_x_count_ratio(self, checkerdata):
         # (GIVEN)
-        checker, _ = checkerdata
+        checker, sampledata = checkerdata
+        expected_y_x_ratio = (float(sampledata['y_count'])
+                     / float(sampledata['x_count']))
 
-        logger.info("test `_predict_sex()`, male ratio")
+        logger.info("test `_compute_y_x_ratio()`")
 
-        # WHEN sex is predicted from a ratio that should indicate male (> 0.1)
-        predicted_sex = checker._predict_sex(0.5)
+        # WHEN ratio of Y reads to X reads is computed
+        checker._compute_y_x_count_ratio()
+
+        # THEN ratio should be expected value
+        assert(checker.data['y_x_count_ratio'] == expected_y_x_ratio)
+
+    def test_predict_sex(self, checkerdata):
+        # (GIVEN)
+        checker, sampledata = checkerdata
+        expected_y_x_ratio = (float(sampledata['y_total'])
+                     / float(sampledata['x_total']))
+        expected_prediction = 'male' if expected_y_x_ratio > 0.01 else 'female'
+
+        logger.info("test `_predict_sex()`")
+
+        # WHEN sex is predicted from a ratio that should indicate male
+        # (> 0.01)
+        checker._predict_sex()
 
         # THEN predicted sex should be 'male'
-        assert(predicted_sex == 'male')
-
-    def test_predict_sex_female(self, checkerdata):
-        # (GIVEN)
-        checker, _ = checkerdata
-
-        logger.info("test `_predict_sex()`, female ratio")
-
-        # WHEN sex is predicted from a ratio that indicates female (<= 0.1)
-        predicted_sex = checker._predict_sex(0.05)
-
-        # THEN predicted sex should be 'female'
-        assert(predicted_sex == 'female')
+        assert(checker.data['predicted_sex'] == expected_prediction)
 
     def test_update(self, checkerdata):
         # (GIVEN)
@@ -160,7 +192,8 @@ class TestSexChecker:
 
         # THEN the processed library object should include the expected
         # validation fields
-        assert(processedlibrary.processed_data[0]['validations']['sex_check']
-               == {'y_x_ratio': expected_y_x_ratio,
-                   'predicted_sex': 'female',
-                   'pass': None})
+        assert(all(
+            [field in
+             processedlibrary.processed_data[0]['validations']['sex_check']
+             for field in ['x_genes', 'y_genes', 'x_reads', 'y_reads',
+                           'y_x_gene_ratio', 'y_x_count_ratio', 'pass']]))
