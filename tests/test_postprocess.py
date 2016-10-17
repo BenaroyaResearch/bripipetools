@@ -17,7 +17,7 @@ class TestOutputStitcher:
         params=[(out_type, {'runnum': r, 'projectnum': p})
                 for r in range(1)
                 for p in range(3)
-                for out_type in ['metrics', 'qc', 'counts']])
+                for out_type in ['metrics', 'qc', 'counts', 'validation']])
     def outputstitcherdata(self, request, mock_genomics_server):
         # GIVEN a OutputStitcher with mock 'genomics' server path to outputs
         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
@@ -71,7 +71,8 @@ class TestOutputStitcher:
          (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile')),
          (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile')),
          (('qc', 'fastqc'), getattr(io, 'FastQCFile')),
-         (('counts', 'htseq'), getattr(io, 'HtseqCountsFile'))])
+         (('counts', 'htseq'), getattr(io, 'HtseqCountsFile')),
+         (('validation', 'sexcheck'), getattr(io, 'SexcheckFile'))])
     def test_get_parser(self, outputstitcherdata, output, expected):
         # (GIVEN)
         outputstitcher, _, _ = outputstitcherdata

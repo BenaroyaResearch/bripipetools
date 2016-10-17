@@ -52,6 +52,8 @@ qc_types:
             file: &sexcheck_file !ujoin [*sexcheck, validation.csv]
             raw_len: 2
             parse_len: 8
+        combined:
+            file: &combined_validation_file combined_validation.csv
 root:
     path: ""
     genomics:
@@ -252,6 +254,9 @@ root:
                                       path: !ujoin [*P1_L2, *R1, *sexcheck_file]
                                     - sample: *P1_L3
                                       path: !ujoin [*P1_L3, *R1, *sexcheck_file]
+                            combined:
+                                path: !ujoin [*P1, *R1, *batch_date, *combined_validation_file]
+                                len_table: 4
                       - path: !join [Project_, *P2, Processed_globus_160929]
                         combined_summary:
                             path: !ujoin [*P2, *R1, *batch_date, combined_summary_data.csv]
@@ -352,6 +357,9 @@ root:
                                       path: !ujoin [*P2_L2, *R1, *sexcheck_file]
                                     - sample: *P2_L3
                                       path: !ujoin [*P2_L3, *R1, *sexcheck_file]
+                            combined:
+                                path: !ujoin [*P2, *R1, *batch_date, *combined_validation_file]
+                                len_table: 4
                       - path: !join [Project_, *P3, Processed_globus_160929]
                         combined_summary:
                             path: !ujoin [*P3, *R1, *batch_date, combined_summary_data.csv]
@@ -452,3 +460,6 @@ root:
                                       path: !ujoin [*P3_L2, *R1, *sexcheck_file]
                                     - sample: *P3_L3
                                       path: !ujoin [*P3_L3, *R1, *sexcheck_file]
+                            combined:
+                                path: !ujoin [*P3, *R1, *batch_date, *combined_validation_file]
+                                len_table: 4
