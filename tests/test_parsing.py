@@ -2,10 +2,6 @@ import pytest
 
 from bripipetools import parsing
 
-def test_get_library_id():
-    assert(parsing.get_library_id('lib1234-1234') == 'lib1234')
-    assert(parsing.get_library_id('Sample_lib1234') == 'lib1234')
-    assert(parsing.get_library_id('Sample1234') == '')
 
 def test_get_project_label_no_subproject():
     assert(parsing.get_project_label('P00Processed') == 'P00')
@@ -25,6 +21,15 @@ def test_parse_project_label():
     # and the second number with key 'subproject_id'
     assert(project_items['project_id'] == 1)
     assert(project_items['subproject_id'] == 2)
+
+def test_get_library_id():
+    assert(parsing.get_library_id('lib1234-1234') == 'lib1234')
+    assert(parsing.get_library_id('Sample_lib1234') == 'lib1234')
+    assert(parsing.get_library_id('Sample1234') == '')
+
+def test_get_flowcell_id():
+    assert(parsing.get_flowcell_id('150615_D00565_0087_AC6VG0ANXX')
+           == 'C6VG0ANXX')
 
 # GIVEN any state
 def test_parse_flowcell_run_id_standard():

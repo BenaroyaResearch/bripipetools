@@ -127,13 +127,16 @@ def search_ancestors(db, sample_id, field):
     a value is found for the requested field.
     """
     sample = db.samples.find_one({'_id': sample_id})
-    if field in sample:
-        return sample[field]
+    if sample is not None:
+        if field in sample:
+            return sample[field]
+        else:
+            try:
+                return search_ancestors(db, sample['parentId'], field)
+            except KeyError:
+                logger.debug("input sample '{}' has no mapped parent sample"
+                             .format(sample_id),
+                             exc_info=True)
     else:
-        try:
-            return search_ancestors(db, sample['parentId'], field)
-        except KeyError:
-            logger.debug("input sample '{}' has no mapped parent sample"
-                         .format(sample_id),
-                         exc_info=True)
-            return
+        logger.debug("input sample '{}' not found in db"
+                     .format(sample_id))

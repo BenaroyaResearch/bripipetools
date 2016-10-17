@@ -30,7 +30,7 @@ class OutputStitcher(object):
         """
         Return predicted output type based on specified path.
         """
-        output_types = ['metrics', 'QC', 'counts']
+        output_types = ['metrics', 'QC', 'counts', 'validation']
         return [t.lower() for t in output_types if re.search(t, self.path)][0]
 
     def _get_outputs(self, output_type):
@@ -39,7 +39,8 @@ class OutputStitcher(object):
         """
         output_filetypes = {'metrics': 'txt|html',
                             'qc': 'txt',
-                            'counts': 'txt'}
+                            'counts': 'txt',
+                            'validation': 'csv'}
         return [os.path.join(self.path, f)
                 for f in os.listdir(self.path)
                 if re.search(output_type, f)
@@ -77,7 +78,8 @@ class OutputStitcher(object):
                                'picard_align': getattr(io, 'PicardMetricsFile'),
                                'tophat_stats': getattr(io, 'TophatStatsFile')},
                    'qc': {'fastqc': getattr(io, 'FastQCFile')},
-                   'counts': {'htseq': getattr(io, 'HtseqCountsFile')}}
+                   'counts': {'htseq': getattr(io, 'HtseqCountsFile')},
+                   'validation': {'sexcheck': getattr(io, 'SexcheckFile')}}
         logger.debug("matched parser {} for output type {} and source {}"
                      .format(parsers[output_type][output_source],
                              output_type, output_source))

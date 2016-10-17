@@ -1,0 +1,2 @@
+x_reads,x_genes,predicted_sex,y_genes,y_reads,y_x_gene_ratio,sexcheck_pass,y_x_count_ratio
+2068,332,female,0,0,0.0,,0.0
