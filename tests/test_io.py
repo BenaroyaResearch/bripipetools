@@ -333,7 +333,7 @@ class TestSexcheckFile:
             [field in data
              for field in ['x_genes', 'y_genes', 'x_reads', 'y_reads',
                            'y_x_gene_ratio', 'y_x_count_ratio',
-                           'predicted_sex', 'pass']]))
+                           'predicted_sex', 'sexcheck_pass']]))
 
     def test_parse(self, validationfiledata):
         # (GIVEN)

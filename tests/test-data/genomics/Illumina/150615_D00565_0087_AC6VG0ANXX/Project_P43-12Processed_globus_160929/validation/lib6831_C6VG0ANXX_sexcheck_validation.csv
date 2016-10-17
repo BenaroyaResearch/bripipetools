@@ -1,2 +1,2 @@
-x_reads,x_genes,predicted_sex,y_genes,y_reads,y_x_gene_ratio,pass,y_x_count_ratio
+x_reads,x_genes,predicted_sex,y_genes,y_reads,y_x_gene_ratio,sexcheck_pass,y_x_count_ratio
 1089,289,male,10,31,0.03460207612456748,,0.028466483011937556

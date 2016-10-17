@@ -218,4 +218,4 @@ class TestSexChecker:
              processedlibrary.processed_data[0]['validations']['sex_check']
              for field in ['x_genes', 'y_genes', 'x_reads', 'y_reads',
                            'y_x_gene_ratio', 'y_x_count_ratio',
-                           'predicted_sex', 'pass']]))
+                           'predicted_sex', 'sexcheck_pass']]))

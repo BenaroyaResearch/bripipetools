@@ -118,7 +118,7 @@ class SexChecker(object):
             self.data['predicted_sex'] = 'male'
         else:
             self.data['predicted_sex'] = 'female'
-        self.data['pass'] = None
+        self.data['sexcheck_pass'] = None
 
     def _write_data(self, data):
         """

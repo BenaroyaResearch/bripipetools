@@ -138,17 +138,17 @@ class WorkflowBatchAnnotator(object):
         processed_data = [d for d in processedlibrary.processed_data
                           if d['workflowbatch_id']
                           == self.workflowbatch._id][0]
-        if processed_data['validations']['sex_check']['pass'] is None:
+        sexcheck_data = processed_data['validations']['sex_check']
+        if sexcheck_data['sexcheck_pass'] is None:
             logger.debug("searching parents of {} for reported sex"
                          .format(processedlibrary.parent_id))
             reported_sex = genlims.search_ancestors(
                 self.db, processedlibrary.parent_id, 'reportedSex')
             logger.debug("reported sex is {}".format(reported_sex))
-            if (processed_data['validations']['sex_check']['predicted_sex']
-                    == reported_sex):
-                processed_data['validations']['sex_check']['pass'] = True
+            if sexcheck_data['predicted_sex'] == reported_sex:
+                sexcheck_data['sexcheck_pass'] = True
             else:
-                processed_data['validations']['sex_check']['pass'] = False
+                sexcheck_data['sexcheck_pass'] = False
         return processedlibrary
 
     def get_processed_libraries(self, project=None, qc=False):

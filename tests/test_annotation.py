@@ -561,7 +561,7 @@ class TestWorkflowBatchAnnotator:
         processedlibrary = annotator._verify_sex(processedlibrary)
         validationdata = processedlibrary.processed_data[0]['validations']
 
-        assert(validationdata['sex_check']['pass'] is not None)
+        assert(validationdata['sex_check']['sexcheck_pass'] is not None)
 
     def test_get_processed_libraries_w_qc(self, annotatordata):
         # (GIVEN)
