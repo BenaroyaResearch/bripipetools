@@ -24,6 +24,8 @@ def mock_proclibdata(request, mock_genomics_server):
     projectdata = projects[request.param['projectnum']]
     samples = projectdata['counts']['sources']['htseq']
     sampledata = samples[request.param['samplenum']]
+    outputs = projectdata['validation']['sources']['sexcheck']
+    outputdata = outputs[request.param['samplenum']]
 
     logger.info(("[setup] mock processed library object with counts file "
                  "for sample {}".format(sampledata['sample'])))
@@ -48,14 +50,14 @@ def mock_proclibdata(request, mock_genomics_server):
     def fin():
         logger.info(("[teardown] mock processed library object"))
     request.addfinalizer(fin)
-    return (processedlibrary, sampledata)
+    return (processedlibrary, sampledata, outputdata)
 
 @pytest.mark.usefixtures('mock_proclibdata', 'mock_genomics_server')
 class TestSexChecker:
     @pytest.fixture(scope='class')
     def checkerdata(self, request, mock_proclibdata, mock_genomics_server):
         # (GIVEN)
-        mock_proclib, sampledata = mock_proclibdata
+        mock_proclib, sampledata, outputdata = mock_proclibdata
 
         logger.info("[setup] sexchecker test instance")
 
@@ -69,11 +71,11 @@ class TestSexChecker:
         def fin():
             logger.info("[teardown] FlowcellRunAnnotator mock instance")
         request.addfinalizer(fin)
-        return (sexchecker, sampledata)
+        return (sexchecker, sampledata, outputdata)
 
     def test_load_x_genes(self, checkerdata):
         # (GIVEN)
-        checker, _ = checkerdata
+        checker, _, _ = checkerdata
 
         logger.info("test `_load_x_genes()`")
 
@@ -85,7 +87,7 @@ class TestSexChecker:
 
     def test_load_y_genes(self, checkerdata):
         # (GIVEN)
-        checker, _ = checkerdata
+        checker, _, _ = checkerdata
 
         logger.info("test `_load_y_genes()`")
 
@@ -97,7 +99,7 @@ class TestSexChecker:
 
     def test_get_counts_path(self, checkerdata):
         # (GIVEN)
-        checker, sampledata = checkerdata
+        checker, sampledata, _ = checkerdata
 
         logger.info("test `_get_counts_path()`")
 
@@ -110,7 +112,7 @@ class TestSexChecker:
 
     def test_get_x_y_counts(self, checkerdata):
         # (GIVEN)
-        checker, sampledata = checkerdata
+        checker, sampledata, _ = checkerdata
 
         logger.info("test `_get_gene_data()`")
 
@@ -123,7 +125,7 @@ class TestSexChecker:
 
     def test_compute_x_y_data(self, checkerdata):
         # (GIVEN)
-        checker, sampledata = checkerdata
+        checker, sampledata, _ = checkerdata
 
         # WHEN gene and read totals are computed for X and Y genes
         checker._compute_x_y_data()
@@ -136,9 +138,9 @@ class TestSexChecker:
 
     def test_compute_y_x_gene_ratio(self, checkerdata):
         # (GIVEN)
-        checker, sampledata = checkerdata
+        checker, sampledata, _ = checkerdata
         expected_y_x_ratio = (float(sampledata['y_total'])
-                     / float(sampledata['x_total']))
+                              / float(sampledata['x_total']))
 
         logger.info("test `_compute_y_x_ratio()`")
 
@@ -150,9 +152,9 @@ class TestSexChecker:
 
     def test_compute_y_x_count_ratio(self, checkerdata):
         # (GIVEN)
-        checker, sampledata = checkerdata
+        checker, sampledata, _ = checkerdata
         expected_y_x_ratio = (float(sampledata['y_count'])
-                     / float(sampledata['x_count']))
+                              / float(sampledata['x_count']))
 
         logger.info("test `_compute_y_x_ratio()`")
 
@@ -164,7 +166,7 @@ class TestSexChecker:
 
     def test_predict_sex(self, checkerdata):
         # (GIVEN)
-        checker, sampledata = checkerdata
+        checker, sampledata, _ = checkerdata
         expected_y_x_ratio = (float(sampledata['y_total'])
                      / float(sampledata['x_total']))
         expected_prediction = 'male' if expected_y_x_ratio > 0.01 else 'female'
@@ -178,9 +180,28 @@ class TestSexChecker:
         # THEN predicted sex should be 'male'
         assert(checker.data['predicted_sex'] == expected_prediction)
 
+    def test_write_data(self, checkerdata):
+        # (GIVEN)
+        checker, _, outputdata = checkerdata
+
+        logger.info("test `_predict_sex()`")
+
+        # AND combined file does not already exist
+        expected_path = outputdata['path']
+        try:
+            os.remove(expected_path)
+        except OSError:
+            pass
+
+        # WHEN sex check data (a dict) is written to a new validation file
+        output = checker._write_data({'foo': 0, 'bar': 'a'})
+
+        assert(output == expected_path)
+        assert(os.path.exists(expected_path))
+
     def test_update(self, checkerdata):
         # (GIVEN)
-        checker, sampledata = checkerdata
+        checker, sampledata, _ = checkerdata
         expected_y_x_ratio = (float(sampledata['y_total'])
                      / float(sampledata['x_total']))
 

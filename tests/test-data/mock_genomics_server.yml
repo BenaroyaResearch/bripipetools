@@ -46,6 +46,10 @@ out_types:
         - &tophat_align tophat_alignments.bam
     log:
         - &workflow_log workflow_log.txt
+qc_types:
+    validation:
+        &sexcheck sexcheck:
+            file: &sexcheck_file !ujoin [*sexcheck, validation.csv]
 root:
     path: ""
     genomics:
@@ -236,6 +240,16 @@ root:
                             combined:
                                 path: !ujoin [*P1, *R1, *batch_date, *combined_counts_file]
                                 len_table: 64253
+                        validation:
+                            path: validation
+                            sources:
+                                *sexcheck:
+                                    - sample: *P1_L1
+                                      path: !ujoin [*P1_L1, *R1, *sexcheck_file]
+                                    - sample: *P1_L2
+                                      path: !ujoin [*P1_L2, *R1, *sexcheck_file]
+                                    - sample: *P1_L3
+                                      path: !ujoin [*P1_L3, *R1, *sexcheck_file]
                       - path: !join [Project_, *P2, Processed_globus_160929]
                         combined_summary:
                             path: !ujoin [*P2, *R1, *batch_date, combined_summary_data.csv]
@@ -326,6 +340,16 @@ root:
                             combined:
                                 path: !ujoin [*P2, *R1, *batch_date, *combined_counts_file]
                                 len_table: 64253
+                        validation:
+                            path: validation
+                            sources:
+                                *sexcheck:
+                                    - sample: *P2_L1
+                                      path: !ujoin [*P2_L1, *R1, *sexcheck_file]
+                                    - sample: *P2_L2
+                                      path: !ujoin [*P2_L2, *R1, *sexcheck_file]
+                                    - sample: *P2_L3
+                                      path: !ujoin [*P2_L3, *R1, *sexcheck_file]
                       - path: !join [Project_, *P3, Processed_globus_160929]
                         combined_summary:
                             path: !ujoin [*P3, *R1, *batch_date, combined_summary_data.csv]
@@ -416,3 +440,13 @@ root:
                             combined:
                                 path: !ujoin [*P3, *R1, *batch_date, *combined_counts_file]
                                 len_table: 64253
+                        validation:
+                            path: validation
+                            sources:
+                                *sexcheck:
+                                    - sample: *P3_L1
+                                      path: !ujoin [*P3_L1, *R1, *sexcheck_file]
+                                    - sample: *P3_L2
+                                      path: !ujoin [*P3_L2, *R1, *sexcheck_file]
+                                    - sample: *P3_L3
+                                      path: !ujoin [*P3_L3, *R1, *sexcheck_file]

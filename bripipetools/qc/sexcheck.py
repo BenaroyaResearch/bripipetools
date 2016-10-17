@@ -3,9 +3,11 @@ Class and methods to perform routine sex check on all processed libraries.
 """
 import logging
 import os
+import csv
 
 import pandas as pd
 
+from .. import parsing
 from .. import io
 from .. import genlims
 
@@ -118,11 +120,27 @@ class SexChecker(object):
             self.data['predicted_sex'] = 'female'
         self.data['pass'] = None
 
-    def _write_data(self):
+    def _write_data(self, data):
         """
         Save the sex validation data to a new file.
         """
-        pass
+        counts_path = self._get_counts_path()
+        project_path = os.path.dirname(os.path.dirname(counts_path))
+        output_filename = '{}_{}_sexcheck_validation.csv'.format(
+            parsing.get_library_id(counts_path),
+            parsing.get_flowcell_id(counts_path))
+        output_dir = os.path.join(project_path, 'validation')
+        output_path = os.path.join(output_dir, output_filename)
+        logger.debug("saving sex check file {} to {}"
+                     .format(output_filename, output_dir))
+        if not os.path.isdir(output_dir):
+            logger.debug("creating directory {}".format(output_dir))
+            os.makedirs(output_dir)
+        with open(output_path, 'w') as f:
+            writer = csv.DictWriter(f, fieldnames=data.keys())
+            writer.writeheader()
+            writer.writerow(data)
+        return output_path
 
     def update(self):
         """
@@ -130,6 +148,7 @@ class SexChecker(object):
         return processed library object.
         """
         y_x_ratio = self._predict_sex()
+        output_path = self._write_data(self.data)
         processed_data = [d for d in self.processedlibrary.processed_data
                           if d['workflowbatch_id'] == self.workflowbatch_id][0]
         processed_data.setdefault('validations', {})['sex_check'] = self.data
