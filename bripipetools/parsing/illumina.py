@@ -39,6 +39,12 @@ def get_library_id(str):
     """
     return util.matchdefault('lib[1-9]+[0-9]*', str)
 
+def get_flowcell_id(str):
+    """
+    Return flowcell ID.
+    """
+    return util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*XX', str)
+
 def parse_flowcell_run_id(run_id):
     """
     Parse Illumina flowcell run ID (or folder name) and return individual
