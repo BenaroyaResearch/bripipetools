@@ -50,6 +50,8 @@ qc_types:
     validation:
         &sexcheck sexcheck:
             file: &sexcheck_file !ujoin [*sexcheck, validation.csv]
+            raw_len: 2
+            parse_len: 8
 root:
     path: ""
     genomics:
