@@ -118,8 +118,10 @@ class SexChecker(object):
 
         cutoff = 1
         equation = '(y_counts^2 / total_counts) > cutoff'
-        value = (float(self.data['y_counts']^2)
+        value = (float(self.data['y_counts']**2)
                  / float(self.data['total_counts']))
+        logger.debug("value for {} is {}"
+                     .format(self.processedlibrary._id, value))
         self.data['sexcheck_eqn'] = equation
         self.data['sexcheck_cutoff'] = cutoff
 
