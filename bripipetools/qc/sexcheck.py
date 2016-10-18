@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class SexChecker(object):
     """
     Reads gene counts for a processed library, maps genes to X and Y
-    chromosomes, computes ratio of Y to X reads, gives predicted sex
+    chromosomes, computes ratio of Y to X counts, gives predicted sex
     based on pre-defined rule.
     """
     def __init__(self, processedlibrary, workflowbatch_id, genomics_root):
@@ -58,11 +58,13 @@ class SexChecker(object):
 
     def _get_x_y_counts(self):
         """
-        Extract and store counts for X and Y genes.
+        Extract and store counts for X and Y genes; also store count total.
         """
         counts_df = pd.read_table(self._get_counts_path(),
                                   names=['geneName', 'count'])
         logger.debug("counts data frame has {} rows".format(len(counts_df)))
+        self.total_counts = sum(counts_df[counts_df['count'] > 0]['count'])
+
         y_counts = pd.merge(self._load_y_genes(), counts_df, how='inner')
         self.y_counts = y_counts[y_counts['count'] > 0]
         logger.debug("detected {} Y gene(s)".format(len(self.y_counts)))
@@ -74,14 +76,15 @@ class SexChecker(object):
         """
         Count and store the number of Y and X genes detected, where
         detected = count > 0, as well as the total number of Y and X
-        reads.
+        counts.
         """
         self._get_x_y_counts()
         self.data = {}
         self.data['x_genes'] = len(self.x_counts)
         self.data['y_genes'] = len(self.y_counts)
-        self.data['x_reads'] = sum(self.x_counts['count'])
-        self.data['y_reads'] = sum(self.y_counts['count'])
+        self.data['x_counts'] = sum(self.x_counts['count'])
+        self.data['y_counts'] = sum(self.y_counts['count'])
+        self.data['total_counts'] = self.total_counts
 
     def _compute_y_x_gene_ratio(self):
         """
@@ -94,31 +97,37 @@ class SexChecker(object):
 
     def _compute_y_x_count_ratio(self):
         """
-        Calculate the ratio of Y reads to X reads.
+        Calculate the ratio of Y counts to X counts.
         """
         # if not hasattr(self, 'data'):
         #     self._compute_x_y_data()
-        self.data['y_x_count_ratio'] = (float(self.data['y_reads'])
-                                        / float(self.data['x_reads']))
+        self.data['y_x_count_ratio'] = (float(self.data['y_counts'])
+                                        / float(self.data['x_counts']))
 
     def _predict_sex(self):
         """
-        Returns predicted sex based on ratio of detected Y to X genes
-        or ratio of Y to X reads.
+        Returns predicted sex based on X/Y gene equation and cutoff.
         """
         self._compute_y_x_gene_ratio()
         logger.debug("ratio of detected Y genes to detected X genes: {}"
                      .format(self.data['y_x_gene_ratio']))
 
         self._compute_y_x_count_ratio()
-        logger.debug("ratio of Y reads to X reads: {}"
+        logger.debug("ratio of Y counts to X counts: {}"
                      .format(self.data['y_x_count_ratio']))
 
-        if self.data['y_x_gene_ratio'] > 0.01:
+        cutoff = 1
+        equation = '(y_counts^2 / total_counts) > cutoff'
+        value = (float(self.data['y_counts']^2)
+                 / float(self.data['total_counts']))
+        self.data['sexcheck_eqn'] = equation
+        self.data['sexcheck_cutoff'] = cutoff
+
+        if value > cutoff:
             self.data['predicted_sex'] = 'male'
         else:
             self.data['predicted_sex'] = 'female'
-        self.data['sexcheck_pass'] = None
+        self.data['sex_check'] = None
 
     def _write_data(self, data):
         """
@@ -147,7 +156,7 @@ class SexChecker(object):
         Add predicted sex validation field to processed library outputs and
         return processed library object.
         """
-        if 'sexcheck_pass' not in self.data:
+        if 'sex_check' not in self.data:
             logger.debug("predicting sex based on Y-to-X gene ratio")
             y_x_ratio = self._predict_sex()
         processed_data = [d for d in self.processedlibrary.processed_data

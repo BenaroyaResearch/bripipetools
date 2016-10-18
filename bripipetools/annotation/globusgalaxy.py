@@ -147,7 +147,7 @@ class WorkflowBatchAnnotator(object):
                           if d['workflowbatch_id']
                           == self.workflowbatch._id][0]
         sexcheck_data = processed_data['validation']['sex_check']
-        if sexcheck_data['sexcheck_pass'] is None:
+        if sexcheck_data['sex_check'] is None:
             logger.debug("searching parents of {} for reported sex"
                          .format(processedlibrary.parent_id))
             try:
@@ -161,13 +161,13 @@ class WorkflowBatchAnnotator(object):
                         self.db, processedlibrary.parent_id, 'gender').lower()
                 except AttributeError:
                     logger.debug("reported sex not found")
-                    sexcheck_data['sexcheck_pass'] = "NA"
+                    sexcheck_data['sex_check'] = "NA"
                     return sexchecker.update()
             logger.debug("reported sex is {}".format(reported_sex))
             if sexcheck_data['predicted_sex'] == reported_sex:
-                sexcheck_data['sexcheck_pass'] = True
+                sexcheck_data['sex_check'] = 'pass'
             else:
-                sexcheck_data['sexcheck_pass'] = False
+                sexcheck_data['sex_check'] = 'fail'
         return sexchecker.update()
 
     def get_processed_libraries(self, project=None, qc=False):

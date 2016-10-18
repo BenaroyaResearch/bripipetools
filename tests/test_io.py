@@ -327,13 +327,13 @@ class TestSexcheckFile:
         # WHEN text lines are parsed into key-value pairs based on column
         data = validationfile._parse_lines()
 
-        # THEN output dictionary should be length 5 and have the correct keys
+        # THEN output dictionary should have the correct keys
         assert(len(data) == filedata['parse_len'])
         assert(all(
             [field in data
-             for field in ['x_genes', 'y_genes', 'x_reads', 'y_reads',
-                           'y_x_gene_ratio', 'y_x_count_ratio',
-                           'predicted_sex', 'sexcheck_pass']]))
+             for field in ['x_genes', 'y_genes', 'x_counts', 'y_counts',
+                           'total_counts', 'y_x_gene_ratio', 'y_x_count_ratio',
+                           'predicted_sex', 'sex_check']]))
 
     def test_parse(self, validationfiledata):
         # (GIVEN)
