@@ -65,6 +65,7 @@ class TestSexChecker:
         # workflow batch ID
         sexchecker = qc.SexChecker(
             processedlibrary=mock_proclib,
+            reference='grch38',
             workflowbatch_id=mock_proclib.processed_data[0]['workflowbatch_id'],
             genomics_root=mock_genomics_server['root']['path'])
 
@@ -132,9 +133,9 @@ class TestSexChecker:
 
         # THEN X and Y data should match expected results
         assert(checker.data['x_genes'] == sampledata['x_total'])
-        assert(checker.data['x_reads'] == sampledata['x_count'])
+        assert(checker.data['x_counts'] == sampledata['x_count'])
         assert(checker.data['y_genes'] == sampledata['y_total'])
-        assert(checker.data['y_reads'] == sampledata['y_count'])
+        assert(checker.data['y_counts'] == sampledata['y_count'])
 
     def test_compute_y_x_gene_ratio(self, checkerdata):
         # (GIVEN)
@@ -158,7 +159,7 @@ class TestSexChecker:
 
         logger.info("test `_compute_y_x_ratio()`")
 
-        # WHEN ratio of Y reads to X reads is computed
+        # WHEN ratio of Y counts to X counts is computed
         checker._compute_y_x_count_ratio()
 
         # THEN ratio should be expected value
@@ -166,19 +167,16 @@ class TestSexChecker:
 
     def test_predict_sex(self, checkerdata):
         # (GIVEN)
-        checker, sampledata, _ = checkerdata
-        expected_y_x_ratio = (float(sampledata['y_total'])
-                     / float(sampledata['x_total']))
-        expected_prediction = 'male' if expected_y_x_ratio > 0.01 else 'female'
+        checker, sampledata, outputdata = checkerdata
 
         logger.info("test `_predict_sex()`")
 
-        # WHEN sex is predicted from a ratio that should indicate male
-        # (> 0.01)
+        # WHEN sex is predicted
         checker._predict_sex()
 
-        # THEN predicted sex should be 'male'
-        assert(checker.data['predicted_sex'] == expected_prediction)
+        # THEN predicted sex should match reported sex
+        if outputdata['reported_sex'] != 'NA':
+            assert(checker.data['predicted_sex'] == outputdata['reported_sex'])
 
     def test_write_data(self, checkerdata):
         # (GIVEN)
@@ -205,7 +203,7 @@ class TestSexChecker:
         expected_y_x_ratio = (float(sampledata['y_total'])
                      / float(sampledata['x_total']))
 
-        logger.info("test `append()`")
+        logger.info("test `update()`")
 
         # WHEN sex check validation is appended to processed data for the
         # processed library
@@ -215,7 +213,7 @@ class TestSexChecker:
         # validation fields
         assert(all(
             [field in
-             processedlibrary.processed_data[0]['validations']['sex_check']
-             for field in ['x_genes', 'y_genes', 'x_reads', 'y_reads',
-                           'y_x_gene_ratio', 'y_x_count_ratio',
-                           'predicted_sex', 'sexcheck_pass']]))
+             processedlibrary.processed_data[0]['validation']['sex_check']
+             for field in ['x_genes', 'y_genes', 'x_counts', 'y_counts',
+                           'total_counts', 'y_x_gene_ratio', 'y_x_count_ratio',
+                           'predicted_sex', 'sex_check']]))

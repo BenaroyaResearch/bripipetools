@@ -1,2 +1,2 @@
-x_reads,x_genes,predicted_sex,y_genes,y_reads,y_x_gene_ratio,sexcheck_pass,y_x_count_ratio
-1958,323,female,2,2,0.006191950464396285,,0.0010214504596527069
+x_genes,sexcheck_cutoff,predicted_sex,y_genes,sex_check,y_x_gene_ratio,y_counts,total_counts,y_x_count_ratio,sexcheck_eqn,x_counts
+323,1,female,2,,0.006191950464396285,2,68040,0.0010214504596527069,(y_counts^2 / total_counts) > cutoff,1958
