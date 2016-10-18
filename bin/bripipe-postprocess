@@ -22,6 +22,12 @@ def parse_input_args(parser=None):
                         help=("Select type of result file to combine: "
                               "c [counts], m [metrics], q [qc], "
                               "v [validation], a [all]"))
+    parser.add_argument('-x', '--exclude_types',
+                        default=[],
+                        choices=['c', 'm', 'q', 'v'],
+                        help=("Select type of result file to exclude: "
+                              "c [counts], m [metrics], q [qc], "
+                              "v [validation]"))
     parser.add_argument('-s', '--stitch_only',
                         action='store_true',
                         help=("Do NOT compile and merge all summary "
@@ -59,23 +65,23 @@ def main(argv):
                 .format(args.processed_project_path, args.output_type))
 
     combined_paths = []
-    if args.output_type in ['c', 'a']:
+    if args.output_type in ['c', 'a'] and not 'c' in args.exclude_types:
         logger.info("generating combined counts file")
         path = os.path.join(args.processed_project_path, 'counts')
         postprocess.OutputStitcher(path).write_table()
 
-    if args.output_type in ['m', 'a']:
+    if args.output_type in ['m', 'a'] and not 'm' in args.exclude_types:
         logger.info("generating combined metrics file")
         path = os.path.join(args.processed_project_path, 'metrics')
         combined_paths.append(postprocess.OutputStitcher(path).write_table())
 
-    if args.output_type in ['q', 'a']:
+    if args.output_type in ['q', 'a'] and not 'q' in args.exclude_types:
         logger.info("generating combined QC file(s)")
         path = os.path.join(args.processed_project_path, 'QC')
         postprocess.OutputStitcher(path).write_overrepresented_seq_table()
         combined_paths.append(postprocess.OutputStitcher(path).write_table())
 
-    if args.output_type in ['v', 'a']:
+    if args.output_type in ['v', 'a'] and not 'v' in args.exclude_types:
         logger.info("generating combined validation file(s)")
         path = os.path.join(args.processed_project_path, 'validation')
         combined_paths.append(postprocess.OutputStitcher(path).write_table())
