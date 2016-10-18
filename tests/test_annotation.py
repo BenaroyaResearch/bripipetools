@@ -559,7 +559,7 @@ class TestWorkflowBatchAnnotator:
 
         # WHEN sex of processed library is verified
         processedlibrary = annotator._verify_sex(processedlibrary)
-        validationdata = processedlibrary.processed_data[0]['validations']
+        validationdata = processedlibrary.processed_data[0]['validation']
 
         assert(validationdata['sex_check']['sexcheck_pass'] is not None)
 
@@ -578,7 +578,7 @@ class TestWorkflowBatchAnnotator:
         assert(len(processedlibraries) == batchdata['num_samples'])
         assert(all([type(pl) == docs.ProcessedLibrary
                     for pl in processedlibraries]))
-        assert('validations' in processedlibraries[0].processed_data[0])
+        assert('validation' in processedlibraries[0].processed_data[0])
 
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
@@ -758,6 +758,52 @@ class TestProcessedLibraryAnnotator:
         # a dictionary with workflow batch ID and outputs
         assert(len(annotator.processedlibrary.processed_data) == 1)
         assert(set(annotator.processedlibrary.processed_data[0].keys())
+               == set(['workflowbatch_id', 'outputs']))
+        annotator.processedlibrary.processed_data = []
+
+    def test_append_processed_data_exists(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata, _ = annotatordata
+
+        logger.info("test `_append_processed_data()`")
+
+        # AND outputs for the workflow batch are already present
+        annotator.processedlibrary.processed_data.append(
+            {'workflowbatch_id': batchdata['id'],
+             'outputs': []})
+
+        # WHEN batch information and outputs are added to processed data
+        # field for processed library object
+        annotator._append_processed_data()
+
+        # THEN the length of the processed data field should be 1, containing
+        # a dictionary with workflow batch ID and outputs
+        assert(len(annotator.processedlibrary.processed_data) == 1)
+        assert(set(annotator.processedlibrary.processed_data[0].keys())
+               == set(['workflowbatch_id', 'outputs']))
+        annotator.processedlibrary.processed_data = []
+
+    def test_append_processed_data_new(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata, _ = annotatordata
+
+        logger.info("test `_append_processed_data()`")
+
+        # AND outputs from a different workflow batch are already present
+        annotator.processedlibrary.processed_data.append(
+            {'workflowbatch_id': re.sub('\d$',
+                                        lambda x: str(int(x.group(0)) + 1),
+                                        batchdata['id']),
+             'outputs': []})
+
+        # WHEN batch information and outputs are added to processed data
+        # field for processed library object
+        annotator._append_processed_data()
+
+        # THEN the length of the processed data field should be 2, containing
+        # a dictionary with workflow batch ID and outputs
+        assert(len(annotator.processedlibrary.processed_data) == 2)
+        assert(set(annotator.processedlibrary.processed_data[1].keys())
                == set(['workflowbatch_id', 'outputs']))
         annotator.processedlibrary.processed_data = []
 

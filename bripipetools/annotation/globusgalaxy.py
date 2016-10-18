@@ -138,7 +138,7 @@ class WorkflowBatchAnnotator(object):
         processed_data = [d for d in processedlibrary.processed_data
                           if d['workflowbatch_id']
                           == self.workflowbatch._id][0]
-        sexcheck_data = processed_data['validations']['sex_check']
+        sexcheck_data = processed_data['validation']['sex_check']
         if sexcheck_data['sexcheck_pass'] is None:
             logger.debug("searching parents of {} for reported sex"
                          .format(processedlibrary.parent_id))
@@ -249,9 +249,23 @@ class ProcessedLibraryAnnotator(object):
         Add details and outputs for current workflow batch to processed
         data array field for processed library.
         """
-        self.processedlibrary.processed_data.append(
-            {'workflowbatch_id': self.workflowbatch_id,
-             'outputs': self._group_outputs()})
+        processed_data = self.processedlibrary.processed_data
+        if (not len(processed_data)
+                or not any(d['workflowbatch_id'] == self.workflowbatch_id
+                            for d in processed_data)):
+            logger.debug("inserting outputs from new workflow batch {} "
+                         "for processed library {}"
+                         .format(self.workflowbatch_id, self.proclib_id))
+            self.processedlibrary.processed_data.append(
+                {'workflowbatch_id': self.workflowbatch_id,
+                 'outputs': self._group_outputs()})
+        else:
+            logger.debug("updating outputs from workflow batch {} "
+                         "for processed library {}"
+                         .format(self.workflowbatch_id, self.proclib_id))
+            batch_data = [d for d in processed_data
+                          if d['workflowbatch_id'] == self.workflowbatch_id][0]
+            batch_data['outputs'] = self._group_outputs()
 
     def _update_processedlibrary(self):
         """
