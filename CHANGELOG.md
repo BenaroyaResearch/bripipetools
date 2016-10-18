@@ -1,5 +1,9 @@
 **Note:** during early development (until package is a bit more stable), intermediate patches and bug fixes will only be listed separately in the changelog up to the point of a new major and minor versions &mdash; at that point, they will be lumped together under the major/minor release description
 
+**[v0.3.2](https://github.com/jaeddy/bripipetools/tree/d7da7683cca4467361f5131de901368d59b5f91d) - 2016-10-18**
+
++ Lots of improvements and additions to the sex check validation in the `qc` module; data from this module are now available through both the `dbify` and `postprocess` entry points.
+
 **[v0.3.1](https://github.com/jaeddy/bripipetools/tree/e7aa92d49dae8fa34a463aba68de4ff9610d2af7) - 2016-10-11**
 
 + New `postprocess` submodule to compile and merge all "stitched" files for different summary output types (e.g., metrics, QC, validations).
