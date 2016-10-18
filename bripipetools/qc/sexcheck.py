@@ -147,10 +147,11 @@ class SexChecker(object):
         Add predicted sex validation field to processed library outputs and
         return processed library object.
         """
-        y_x_ratio = self._predict_sex()
+        if 'sexcheck_pass' not in self.data:
+            y_x_ratio = self._predict_sex()
+            processed_data = [d for d in self.processedlibrary.processed_data
+                              if d['workflowbatch_id']
+                              == self.workflowbatch_id][0]
+            processed_data.setdefault('validation', {})['sex_check'] = self.data
         output_path = self._write_data(self.data)
-        processed_data = [d for d in self.processedlibrary.processed_data
-                          if d['workflowbatch_id'] == self.workflowbatch_id][0]
-        processed_data.setdefault('validations', {})['sex_check'] = self.data
-        logger.info("{}".format(processed_data))
         return self.processedlibrary

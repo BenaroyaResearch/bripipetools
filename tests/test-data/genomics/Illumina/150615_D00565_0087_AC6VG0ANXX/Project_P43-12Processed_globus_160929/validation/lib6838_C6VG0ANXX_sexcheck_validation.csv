@@ -1,2 +1,2 @@
 x_reads,x_genes,predicted_sex,y_genes,y_reads,y_x_gene_ratio,sexcheck_pass,y_x_count_ratio
-1532,307,female,2,4,0.006514657980456026,,0.0026109660574412533
+1532,307,female,2,4,0.006514657980456026,False,0.0026109660574412533

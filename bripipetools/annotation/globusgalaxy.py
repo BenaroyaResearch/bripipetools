@@ -117,24 +117,32 @@ class WorkflowBatchAnnotator(object):
                 for p in s
                 if p['name'] == 'SampleName']
 
-    def _add_qc_fields(self, processedlibrary):
-        """
-        Append QC metrics for specified sample validations to processed
-        data for a processed library.
-        """
-        logger.debug("adding sex check QC info for {}"
-                     .format(processedlibrary._id))
-        return qc.SexChecker(
-            processedlibrary=processedlibrary,
-            workflowbatch_id=self.workflowbatch._id,
-            genomics_root=self.genomics_root).update()
+    # def _add_qc_fields(self, processedlibrary):
+    #     """
+    #     Append QC metrics for specified sample validations to processed
+    #     data for a processed library.
+    #     """
+    #     logger.debug("adding sex check QC info for {}"
+    #                  .format(processedlibrary._id))
+    #     return qc.SexChecker(
+    #         processedlibrary=processedlibrary,
+    #         workflowbatch_id=self.workflowbatch._id,
+    #         genomics_root=self.genomics_root).update()
 
     def _verify_sex(self, processedlibrary):
         """
         Retrieve reported sex for sample and compare to predicted sex
         of processed library.
         """
-        self._add_qc_fields(processedlibrary)
+        logger.debug("adding sex check QC info for {}"
+                     .format(processedlibrary._id))
+        sexchecker = qc.SexChecker(
+            processedlibrary=processedlibrary,
+            workflowbatch_id=self.workflowbatch._id,
+            genomics_root=self.genomics_root)
+        processedlibrary = sexchecker.update()
+
+        # self._add_qc_fields(processedlibrary)
         processed_data = [d for d in processedlibrary.processed_data
                           if d['workflowbatch_id']
                           == self.workflowbatch._id][0]
@@ -149,7 +157,7 @@ class WorkflowBatchAnnotator(object):
                 sexcheck_data['sexcheck_pass'] = True
             else:
                 sexcheck_data['sexcheck_pass'] = False
-        return processedlibrary
+        return sexchecker.update()
 
     def get_processed_libraries(self, project=None, qc=False):
         """
