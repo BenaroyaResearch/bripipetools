@@ -150,8 +150,19 @@ class WorkflowBatchAnnotator(object):
         if sexcheck_data['sexcheck_pass'] is None:
             logger.debug("searching parents of {} for reported sex"
                          .format(processedlibrary.parent_id))
-            reported_sex = genlims.search_ancestors(
-                self.db, processedlibrary.parent_id, 'reportedSex')
+            try:
+                logger.debug("searching for 'reportedSex' field...")
+                reported_sex = genlims.search_ancestors(
+                    self.db, processedlibrary.parent_id, 'reportedSex').lower()
+            except AttributeError:
+                try:
+                    logger.debug("searching for 'gender' field...")
+                    reported_sex = genlims.search_ancestors(
+                        self.db, processedlibrary.parent_id, 'gender').lower()
+                except AttributeError:
+                    logger.debug("reported sex not found")
+                    sexcheck_data['sexcheck_pass'] = "NA"
+                    return sexchecker.update()
             logger.debug("reported sex is {}".format(reported_sex))
             if sexcheck_data['predicted_sex'] == reported_sex:
                 sexcheck_data['sexcheck_pass'] = True

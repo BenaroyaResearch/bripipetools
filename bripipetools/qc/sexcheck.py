@@ -148,10 +148,11 @@ class SexChecker(object):
         return processed library object.
         """
         if 'sexcheck_pass' not in self.data:
+            logger.debug("predicting sex based on Y-to-X gene ratio")
             y_x_ratio = self._predict_sex()
-            processed_data = [d for d in self.processedlibrary.processed_data
-                              if d['workflowbatch_id']
-                              == self.workflowbatch_id][0]
-            processed_data.setdefault('validation', {})['sex_check'] = self.data
+        processed_data = [d for d in self.processedlibrary.processed_data
+                          if d['workflowbatch_id']
+                          == self.workflowbatch_id][0]
+        processed_data.setdefault('validation', {})['sex_check'] = self.data
         output_path = self._write_data(self.data)
         return self.processedlibrary

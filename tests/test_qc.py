@@ -205,7 +205,7 @@ class TestSexChecker:
         expected_y_x_ratio = (float(sampledata['y_total'])
                      / float(sampledata['x_total']))
 
-        logger.info("test `append()`")
+        logger.info("test `update()`")
 
         # WHEN sex check validation is appended to processed data for the
         # processed library
@@ -215,7 +215,7 @@ class TestSexChecker:
         # validation fields
         assert(all(
             [field in
-             processedlibrary.processed_data[0]['validations']['sex_check']
+             processedlibrary.processed_data[0]['validation']['sex_check']
              for field in ['x_genes', 'y_genes', 'x_reads', 'y_reads',
                            'y_x_gene_ratio', 'y_x_count_ratio',
                            'predicted_sex', 'sexcheck_pass']]))
