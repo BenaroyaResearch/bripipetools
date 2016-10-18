@@ -2,13 +2,15 @@
 Basic operations for the GenLIMS Mongo database.
 """
 import logging
-logger = logging.getLogger(__name__)
 import re
 from functools import wraps
 import datetime
 
 import pymongo
 
+from .. import util
+
+logger = logging.getLogger(__name__)
 
 def find_objects(collection):
     """
@@ -107,9 +109,12 @@ def create_workflowbatch_id(db, prefix, date):
     logger.debug("searching 'workflowbatches' collection with query {}"
                  .format(query))
     workflowbatches = get_workflowbatches(db, query)
-    num = 1
+    logger.debug("matched workflow batches: {}".format(workflowbatches))
 
+    num = 1
     if len(workflowbatches):
+        num = max([int(util.matchdefault('\d$', wb['_id']))
+                   for wb in workflowbatches])
         while True:
             num_regex = re.compile('_{}$'.format(num))
             logger.debug("searching for workflowbatches {} ending in {}"
