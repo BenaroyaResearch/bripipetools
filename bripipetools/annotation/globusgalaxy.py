@@ -135,7 +135,9 @@ class WorkflowBatchAnnotator(object):
         of processed library.
         """
         ref = util.matchdefault('(grch38|ncbim37)',
-                                self.workflowbatch.workflow_id)
+                                self.workflowbatch_data['workflow_name'])
+        if ref != 'grch38':
+            return processedlibrary
 
         logger.debug("adding sex check QC info for {}"
                      .format(processedlibrary._id))
