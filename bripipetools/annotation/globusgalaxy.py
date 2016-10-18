@@ -134,10 +134,14 @@ class WorkflowBatchAnnotator(object):
         Retrieve reported sex for sample and compare to predicted sex
         of processed library.
         """
+        ref = util.matchdefault('(grch38|ncbim37)',
+                                self.workflowbatch.workflow_id)
+
         logger.debug("adding sex check QC info for {}"
                      .format(processedlibrary._id))
         sexchecker = qc.SexChecker(
             processedlibrary=processedlibrary,
+            reference=ref,
             workflowbatch_id=self.workflowbatch._id,
             genomics_root=self.genomics_root)
         processedlibrary = sexchecker.update()

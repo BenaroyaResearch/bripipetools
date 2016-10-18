@@ -20,7 +20,8 @@ class SexChecker(object):
     chromosomes, computes ratio of Y to X counts, gives predicted sex
     based on pre-defined rule.
     """
-    def __init__(self, processedlibrary, workflowbatch_id, genomics_root):
+    def __init__(self, processedlibrary, reference, workflowbatch_id,
+                 genomics_root):
         logger.info("creating an instance of SexChecker for processed"
                     " library '{}', workflow batch ID '{}', with "
                     "genomics root '{}'"
@@ -28,6 +29,7 @@ class SexChecker(object):
                             workflowbatch_id,
                             genomics_root))
         self.processedlibrary = processedlibrary
+        self.reference = reference
         self.workflowbatch_id = workflowbatch_id
         self.genomics_root = genomics_root
         self._compute_x_y_data()
@@ -65,10 +67,12 @@ class SexChecker(object):
         logger.debug("counts data frame has {} rows".format(len(counts_df)))
         self.total_counts = sum(counts_df[counts_df['count'] > 0]['count'])
 
-        y_counts = pd.merge(self._load_y_genes(), counts_df, how='inner')
+        y_counts = pd.merge(self._load_y_genes(ref=self.reference), counts_df,
+                            how='inner')
         self.y_counts = y_counts[y_counts['count'] > 0]
         logger.debug("detected {} Y gene(s)".format(len(self.y_counts)))
-        x_counts = pd.merge(self._load_x_genes(), counts_df, how='inner')
+        x_counts = pd.merge(self._load_x_genes(ref=self.reference), counts_df,
+                            how='inner')
         self.x_counts = x_counts[x_counts['count'] > 0]
         logger.debug("detected {} X gene(s)".format(len(self.x_counts)))
 

@@ -65,6 +65,7 @@ class TestSexChecker:
         # workflow batch ID
         sexchecker = qc.SexChecker(
             processedlibrary=mock_proclib,
+            reference='grch38',
             workflowbatch_id=mock_proclib.processed_data[0]['workflowbatch_id'],
             genomics_root=mock_genomics_server['root']['path'])
 
