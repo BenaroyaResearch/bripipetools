@@ -8,8 +8,6 @@ import csv
 import pandas as pd
 
 from .. import parsing
-from .. import io
-from .. import genlims
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +92,6 @@ class SexChecker(object):
         """
         Calculate the ratio of Y genes detected to X genes detected.
         """
-        # if not hasattr(self, 'data'):
-        #     self._compute_x_y_data()
         self.data['y_x_gene_ratio'] = (float(self.data['y_genes'])
                                        / float(self.data['x_genes']))
 
@@ -103,8 +99,6 @@ class SexChecker(object):
         """
         Calculate the ratio of Y counts to X counts.
         """
-        # if not hasattr(self, 'data'):
-        #     self._compute_x_y_data()
         self.data['y_x_count_ratio'] = (float(self.data['y_counts'])
                                         / float(self.data['x_counts']))
 
@@ -164,10 +158,9 @@ class SexChecker(object):
         """
         if 'sex_check' not in self.data:
             logger.debug("predicting sex based on Y-to-X gene ratio")
-            y_x_ratio = self._predict_sex()
+            self._predict_sex()
         processed_data = [d for d in self.processedlibrary.processed_data
                           if d['workflowbatch_id']
                           == self.workflowbatch_id][0]
         processed_data.setdefault('validation', {})['sex_check'] = self.data
-        output_path = self._write_data(self.data)
         return self.processedlibrary
