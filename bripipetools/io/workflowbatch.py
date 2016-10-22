@@ -110,7 +110,8 @@ class WorkflowBatchFile(object):
         """
         param_line = self.data['raw'][self._locate_param_line()]
         return OrderedDict((idx, self._parse_param(p))
-                for idx, p in enumerate(param_line.strip().split('\t')))
+                           for idx, p
+                           in enumerate(param_line.strip().split('\t')))
 
     def get_sample_params(self, sample_line):
         """
@@ -153,7 +154,7 @@ class WorkflowBatchFile(object):
         self.parse()
 
         template_lines = self.data['raw'][0:self._locate_param_line() + 1]
-        sample_lines = ['{}\n'.format(('\t').join([p['value'] for p in s]))
+        sample_lines = ['{}\n'.format('\t'.join([p['value'] for p in s]))
                         for s in self.data['samples']]
         workflow_lines = template_lines + sample_lines
 

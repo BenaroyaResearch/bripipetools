@@ -2,9 +2,9 @@
 Class for reading and parsing sex check validation files.
 """
 import logging
-import re
 
 logger = logging.getLogger(__name__)
+
 
 class SexcheckFile(object):
     """

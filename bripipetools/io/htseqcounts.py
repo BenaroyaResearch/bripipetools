@@ -2,9 +2,10 @@
 Class for reading and parsing htseq files.
 """
 import logging
-logger = logging.getLogger(__name__)
 
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class HtseqCountsFile(object):

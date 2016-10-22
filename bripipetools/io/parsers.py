@@ -47,8 +47,8 @@ class WorkflowParser(object):
         batch_lines = self.batch_lines
 
         param_line = [l for l in batch_lines if 'SampleName' in l][0]
-        return {idx: re.sub('##.*', '', p) \
-                for idx,p in enumerate(param_line.strip().split('\t'))}
+        return {idx: re.sub('##.*', '', p)
+                for idx, p in enumerate(param_line.strip().split('\t'))}
 
     def get_sample_lines(self):
         """
@@ -56,7 +56,7 @@ class WorkflowParser(object):
         """
         batch_lines = self.batch_lines
 
-        param_idx = [idx for idx,l in enumerate(batch_lines)
+        param_idx = [idx for idx, l in enumerate(batch_lines)
                      if 'SampleName' in l][0]
         return batch_lines[param_idx + 1:len(batch_lines)]
 
@@ -73,11 +73,9 @@ class WorkflowParser(object):
         :return: A dict, where for the sample name is a key and the value is
             another dict with output ID and output path as key-value pairs.
         """
-        batch_lines = self.batch_lines
-
         param_dict = self.get_params()
         return {param_dict[i]: p
-                for i,p in enumerate(sample_line.strip().split('\t'))}
+                for i, p in enumerate(sample_line.strip().split('\t'))}
 
     def get_batch_outputs(self):
         """

@@ -2,10 +2,11 @@
 Class for reading and parsing Picard metrics files.
 """
 import logging
-logger = logging.getLogger(__name__)
 import re
 
 from bs4 import BeautifulSoup
+
+logger = logging.getLogger(__name__)
 
 
 class PicardMetricsFile(object):

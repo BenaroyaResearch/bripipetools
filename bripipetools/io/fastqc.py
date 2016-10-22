@@ -2,8 +2,9 @@
 Class for reading and parsing FastQC report files.
 """
 import logging
-logger = logging.getLogger(__name__)
 import re
+
+logger = logging.getLogger(__name__)
 
 
 class FastQCFile(object):
@@ -49,7 +50,7 @@ class FastQCFile(object):
                            if re.search('>>(?!END)', l)]
         section_starts = [idx for idx, l in enumerate(self.data['raw'])
                           if re.search('>>(?!END)', l)]
-        section_ends = [idx  for idx, l in enumerate(self.data['raw'])
+        section_ends = [idx for idx, l in enumerate(self.data['raw'])
                         if re.search('>>(?=END)', l)]
         return dict(zip(section_headers, zip(section_starts, section_ends)))
 
