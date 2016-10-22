@@ -4,7 +4,6 @@ Galaxy workflow processing batch performed by the BRI Bioinformatics
 Core.
 """
 import logging
-logger = logging.getLogger(__name__)
 import os
 import re
 import datetime
@@ -14,6 +13,8 @@ from .. import io
 from .. import genlims
 from .. import qc
 from .. import model as docs
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowBatchAnnotator(object):
@@ -63,9 +64,9 @@ class WorkflowBatchAnnotator(object):
                          "searching for record with batch file {}"
                          .format(workflowbatch_file))
             return genlims.map_to_object(
-                genlims.get_workflowbatches(self.db,
-                    {'workflowbatchFile': workflowbatch_file}
-                    )[0])
+                genlims.get_workflowbatches(
+                    self.db,
+                    {'workflowbatchFile': workflowbatch_file})[0])
         except IndexError:
             logger.debug("creating new GalaxyWorkflowBatch object",
                          exc_info=True)
@@ -235,7 +236,7 @@ class ProcessedLibraryAnnotator(object):
         name_parts = name.split('_')
         file_format = name_parts.pop(-1)
         output_type = name_parts.pop(-1)
-        source = ('_').join(name_parts)
+        source = '_'.join(name_parts)
 
         return {'name': name, 'type': output_type, 'source': source}
 
@@ -264,7 +265,7 @@ class ProcessedLibraryAnnotator(object):
         processed_data = self.processedlibrary.processed_data
         if (not len(processed_data)
                 or not any(d['workflowbatch_id'] == self.workflowbatch_id
-                            for d in processed_data)):
+                           for d in processed_data)):
             logger.debug("inserting outputs from new workflow batch {} "
                          "for processed library {}"
                          .format(self.workflowbatch_id, self.proclib_id))

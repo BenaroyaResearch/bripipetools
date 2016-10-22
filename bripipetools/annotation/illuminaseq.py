@@ -3,13 +3,14 @@ Classify / provide details for objects generated from an Illumina
 sequencing run performed by the BRI Genomics Core.
 """
 import logging
-logger = logging.getLogger(__name__)
 import os
 import re
 
 from .. import parsing
 from .. import genlims
 from .. import model as docs
+
+logger = logging.getLogger(__name__)
 
 
 class FlowcellRunAnnotator(object):

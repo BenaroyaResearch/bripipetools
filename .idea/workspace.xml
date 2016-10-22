@@ -2,22 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="16e68123-df04-453c-a8e6-099d67770bfa" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bripipetools/qc/sexcheck.py" afterPath="$PROJECT_DIR$/bripipetools/qc/sexcheck.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/P109-1_C6VG0ANXX_160929_combined_summary_data.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/P109-1_C6VG0ANXX_160929_combined_summary_data.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/P109-1_C6VG0ANXX_160929_combined_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/P109-1_C6VG0ANXX_160929_combined_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/lib6615_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/lib6615_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/lib6618_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/lib6618_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/lib6624_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P109-1Processed_globus_160929/validation/lib6624_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/P14-12_C6VG0ANXX_160929_combined_summary_data.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/P14-12_C6VG0ANXX_160929_combined_summary_data.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/P14-12_C6VG0ANXX_160929_combined_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/P14-12_C6VG0ANXX_160929_combined_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/lib7293_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/lib7293_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/lib7315_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/lib7315_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/lib7331_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P14-12Processed_globus_160929/validation/lib7331_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/P43-12_C6VG0ANXX_160929_combined_summary_data.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/P43-12_C6VG0ANXX_160929_combined_summary_data.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/P43-12_C6VG0ANXX_160929_combined_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/P43-12_C6VG0ANXX_160929_combined_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/lib6831_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/lib6831_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/lib6837_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/lib6837_C6VG0ANXX_sexcheck_validation.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/lib6838_C6VG0ANXX_sexcheck_validation.csv" afterPath="$PROJECT_DIR$/tests/test-data/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Project_P43-12Processed_globus_160929/validation/lib6838_C6VG0ANXX_sexcheck_validation.csv" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bripipetools/annotation/globusgalaxy.py" afterPath="$PROJECT_DIR$/bripipetools/annotation/globusgalaxy.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bripipetools/annotation/illuminaseq.py" afterPath="$PROJECT_DIR$/bripipetools/annotation/illuminaseq.py" />
     </list>
     <ignored path="bripipetools.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -47,13 +33,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sexcheck.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/bripipetools/qc/sexcheck.py">
+      <file leaf-file-name="globusgalaxy.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/bripipetools/annotation/globusgalaxy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="598">
-              <caret line="156" column="40" selection-start-line="156" selection-start-column="40" selection-end-line="156" selection-end-column="40" />
+            <state relative-caret-position="151">
+              <caret line="236" column="8" selection-start-line="236" selection-start-column="8" selection-end-line="236" selection-end-column="8" />
               <folding>
-                <element signature="e#83#97#0" expanded="true" />
+                <element signature="e#146#160#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="illuminaseq.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/bripipetools/annotation/illuminaseq.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+              <folding>
+                <element signature="e#125#139#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -87,6 +85,8 @@
         <option value="$PROJECT_DIR$/bripipetools/io/parsers.py" />
         <option value="$PROJECT_DIR$/bripipetools/io/workflowbatch.py" />
         <option value="$PROJECT_DIR$/bripipetools/qc/sexcheck.py" />
+        <option value="$PROJECT_DIR$/bripipetools/annotation/illuminaseq.py" />
+        <option value="$PROJECT_DIR$/bripipetools/annotation/globusgalaxy.py" />
       </list>
     </option>
   </component>
@@ -180,24 +180,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="bripipetools" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="bripipetools" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="bripipetools" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="bripipetools" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="qc" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -382,12 +364,12 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="140" y="42" width="1400" height="935" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21428572" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.44226328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection Results" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.44226328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290993" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -686,6 +668,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/bripipetools/qc/sexcheck.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="658">
+          <caret line="160" column="31" selection-start-line="160" selection-start-column="31" selection-end-line="160" selection-end-column="31" />
+          <folding>
+            <element signature="e#83#97#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/bripipetools/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
@@ -694,12 +686,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bripipetools/qc/sexcheck.py">
+    <entry file="file://$PROJECT_DIR$/bripipetools/annotation/illuminaseq.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="598">
-          <caret line="156" column="40" selection-start-line="156" selection-start-column="40" selection-end-line="156" selection-end-column="40" />
+        <state relative-caret-position="210">
+          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
           <folding>
-            <element signature="e#83#97#0" expanded="true" />
+            <element signature="e#125#139#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bripipetools/annotation/globusgalaxy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="151">
+          <caret line="236" column="8" selection-start-line="236" selection-start-column="8" selection-end-line="236" selection-end-column="8" />
+          <folding>
+            <element signature="e#146#160#0" expanded="true" />
           </folding>
         </state>
       </provider>
