@@ -2,10 +2,11 @@
 Parse arguments to determine and select appropriate importer class.
 """
 import logging
-logger = logging.getLogger(__name__)
 import re
 
 from . import SequencingImporter, ProcessingImporter
+
+logger = logging.getLogger(__name__)
 
 
 class ImportManager(object):

@@ -2,12 +2,13 @@
 Class for importing data from a processing batch into GenLIMS as new objects.
 """
 import logging
-logger = logging.getLogger(__name__)
 import os
 
 from .. import util
 from .. import genlims
 from .. import annotation
+
+logger = logging.getLogger(__name__)
 
 
 class ProcessingImporter(object):
