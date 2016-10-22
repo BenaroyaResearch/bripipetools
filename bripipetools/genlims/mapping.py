@@ -3,11 +3,12 @@ bripipetools mapping submodule: methods to map from Mongo documents to model
 classes.
 """
 import logging
-logger = logging.getLogger(__name__)
 import re
 
 from .. import util
 from .. import model as docs
+
+logger = logging.getLogger(__name__)
 
 
 def map_keys(obj):
@@ -16,33 +17,34 @@ def map_keys(obj):
     to snake_case; ignore '_id' keys.
 
     :type obj: dict, list
-    :param obj: A dict or list of dicts with string keys to be
-        converted.
+    :param obj: a dict or list of dicts with string keys to be
+        converted
 
     :rtype: dict, list
-    :return: A dict or list of dicts with string keys converted from
-        camelCase to snake_case.
+    :return: a dict or list of dicts with string keys converted from
+        camelCase to snake_case
     """
     if isinstance(obj, list):
         return [map_keys(i) for i in obj]
     elif isinstance(obj, dict):
         return {(util.to_snake_case(k.lstrip('_'))
-                 if not re.search('^_id', k)
-             else k): map_keys(obj[k])
+                if not re.search('^_id', k)
+                else k): map_keys(obj[k])
                 for k in obj}
     else:
         return obj
+
 
 def get_model_class(doc):
     """
     Find the matching class for the document, based on its type.
 
     :type doc: dict
-    :param doc: A dict representing a MongoDB document/object.
+    :param doc: a dict representing a MongoDB document/object
 
     :rtype: str
-    :return: A string representing the name of the matched class
-        from the model module.
+    :return: a string representing the name of the matched class
+        from the model module
     """
     classes = [n for n in dir(docs)
                if re.search('^[A-Z]', n)]
@@ -52,20 +54,21 @@ def get_model_class(doc):
     return [c for c in classes
             if re.search(doc_type, c)][0]
 
+
 def map_to_object(doc):
     """
     Convert document to model class of appropriate type.
 
     :type doc: dict
-    :param doc: A dict representing a MongoDB document/object.
+    :param doc: a dict representing a MongoDB document/object
 
     :rtype: type[docs.TG3Object]
-    :return: An new instance of the matched model class.
+    :return: an new instance of the matched model class
     """
     doc_class = get_model_class(doc)
-    MappedClass = getattr(docs, doc_class)
+    mappedclass = getattr(docs, doc_class)
     logger.debug("mapping {} to instance of type {}".format(doc, doc_class))
-    obj = MappedClass(_id=doc['_id'], is_mapped=True)
+    obj = mappedclass(_id=doc['_id'], is_mapped=True)
 
     logger.debug("document has following fields: {}".format(doc.keys()))
     snake_doc = map_keys(doc)

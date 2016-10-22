@@ -2,10 +2,9 @@
 Connect to the GenLIMS Mongo database.
 """
 import logging
-logger = logging.getLogger(__name__)
-
 import pymongo
 
+logger = logging.getLogger(__name__)
 
 logger.info("connecting to 'tg3' Mongo database")
 client = pymongo.MongoClient('localhost', 27017)
