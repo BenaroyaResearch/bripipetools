@@ -192,7 +192,10 @@ class TestSexChecker:
             pass
 
         # WHEN sex check data (a dict) is written to a new validation file
-        output = checker._write_data({'foo': 0, 'bar': 'a'})
+        data = {'x_genes': None, 'y_genes': None, 'x_counts': None, 'y_counts': None, 'total_counts': None,
+                'y_x_gene_ratio': None, 'y_x_count_ratio': None, 'sexcheck_eqn': None, 'sexcheck_cutoff': None,
+                'predicted_sex': None, 'sex_check': None}
+        output = checker._write_data(data)
 
         assert(output == expected_path)
         assert(os.path.exists(expected_path))

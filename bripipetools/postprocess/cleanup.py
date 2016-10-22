@@ -29,7 +29,7 @@ class OutputCleaner(object):
         logging.debug("subfolders in project folder: {}"
                       .format(os.listdir(self.path)))
         return [f for f in os.listdir(self.path)
-                if f.lower() in OUT_TYPES]
+                if f.lower() in out_types]
 
     def _get_output_paths(self, output_type):
         """
