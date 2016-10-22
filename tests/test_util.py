@@ -25,22 +25,6 @@ def test_locate_root_folder():
 def test_swap_root_default():
     assert (util.swap_root('/foo/bar/baz', 'bar') == '/~/bar/baz')
 
-# test objects & methods in the files submodule
-
-def test_file_repr():
-    assert (type(util.SystemFile('test.txt').__repr__()) is str)
-
-def test_file_get_file_ext_file_only():
-    assert(util.SystemFile('test.txt').get_file_ext() == 'txt')
-
-def test_file_get_file_ext_full_path():
-    assert(util.SystemFile('/path_to_file/folder/test.txt')
-           .get_file_ext() == 'txt')
-
-def test_file_get_file_compression_zip():
-    assert(util.SystemFile('test.txt.zip')
-           .get_file_compression('txt.zip') == 'zip')
-
 # test objects & methods in the ui submodule
 
 def test_input_to_int_0():
