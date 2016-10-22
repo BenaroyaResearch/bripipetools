@@ -2,11 +2,12 @@
 Clean up & organize outputs from processing workflow batch.
 """
 import logging
-logger = logging.getLogger(__name__)
 import os
 import re
 import zipfile
 import shutil
+
+logger = logging.getLogger(__name__)
 
 
 class OutputCleaner(object):
@@ -23,7 +24,7 @@ class OutputCleaner(object):
         """
         Identify the types of outputs included for the project.
         """
-        OUT_TYPES = ['qc', 'metrics', 'counts', 'alignments', 'logs']
+        out_types = ['qc', 'metrics', 'counts', 'alignments', 'logs']
 
         logging.debug("subfolders in project folder: {}"
                       .format(os.listdir(self.path)))

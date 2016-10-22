@@ -3,10 +3,11 @@ Compile combined/stitched 'summary' outputs of different types from
 batch processing and write to a single CSV file.
 """
 import logging
-logger = logging.getLogger(__name__)
 import os
 import re
 import csv
+
+logger = logging.getLogger(__name__)
 
 
 class OutputCompiler(object):

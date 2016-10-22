@@ -3,7 +3,6 @@ Combine parsed data from a set of batch processing output files and write to a
 single CSV file.
 """
 import logging
-logger = logging.getLogger(__name__)
 import os
 import re
 import csv
@@ -13,6 +12,8 @@ import pandas as pd
 from .. import io
 from .. import parsing
 from .. import util
+
+logger = logging.getLogger(__name__)
 
 
 class OutputStitcher(object):
@@ -60,10 +61,10 @@ class OutputStitcher(object):
         output_type = name_parts.pop(-1)
         source = name_parts.pop(-1)
         if len(name_parts) <= 2:
-            proclib_id = ('_').join(name_parts)
+            proclib_id = '_'.join(name_parts)
         else:
-            source = ('_').join([name_parts.pop(-1), source])
-            proclib_id = ('_').join(name_parts)
+            source = '_'.join([name_parts.pop(-1), source])
+            proclib_id = '_'.join(name_parts)
 
         return {'proclib_id': proclib_id, 'type': output_type,
                 'source': source}
