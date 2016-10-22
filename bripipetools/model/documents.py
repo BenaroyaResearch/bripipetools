@@ -2,12 +2,14 @@
 Classes representing documents in the GenLIMS database.
 """
 import logging
-logger = logging.getLogger(__name__)
 import re
 import datetime
 
 from .. import util
 from .. import parsing
+
+logger = logging.getLogger(__name__)
+
 
 def convert_keys(obj):
     """
@@ -35,6 +37,21 @@ def convert_keys(obj):
 class TG3Object(object):
     """
     Generic functions for objects in TG3 collections.
+
+    :type _id: str
+    :param _id: unique object identifier in the GenLIMS/TG3 Mongo
+        database
+
+    :type type: str
+    :param type: field indicating object type in a collection
+
+    :type date_created: datetime.datetime
+    :param date_created: date (UTC) object was created
+
+    :type is_mapped: bool
+    :param is_mapped: flag indicating whether class instance was
+        mapped from a database object (True) or created from
+        scratch (False)
     """
     def __init__(self, _id=None, type=None, date_created=None,
                  is_mapped=False):
@@ -53,6 +70,14 @@ class TG3Object(object):
         new values, update each attribute. Always update empty ('None')
         attributes and set any new attributes; update all modified
         attributes if force option is 'True'.
+
+        :type attr_map: dict
+        :param attr_map: a dict with key-value pairs representing
+            object attributes and values to which they should be set
+
+        :type force: bool
+        :param force: force overwrite of object fields in database, if
+            they already exist
         """
         updated = False
         for attr, val in attr_map.items():
@@ -75,22 +100,42 @@ class TG3Object(object):
         """
         Return object attributes as dictionary with keys formatted as
         camel case.
+
+        :rtype: dict
+        :return: a dict containing class instance attributes, with all
+            field names converted from snake case to camel case
         """
         return convert_keys(self.__dict__)
+
 
 class GenericSample(TG3Object):
     """
     GenLIMS object in the 'samples' collection
+
+    :type project_id: int
+    :param project_id: Genomics Core project number
+
+    :type: subproject_id: int
+    :param subproject_id: Genomics Core sub-project number
+
+    :type protocol_id: str
+    :param protocol_id: unique ID of a protocol object in the GenLIMS
+        database (in the 'protocols' collection)
+
+    :type parent_id: str
+    :param parent_id: unique ID of a sample object in the GenLIMS
+        database from which the current sample was derived (in the
+        'samples' collection)
     """
     def __init__(self, project_id=None, subproject_id=None, protocol_id=None,
                  parent_id=None, **kwargs):
         self.project_id = project_id
-        self.subproject_id = project_id
+        self.subproject_id = subproject_id
         self.protocol_id = protocol_id
         self.parent_id = parent_id
         super(GenericSample, self).__init__(**kwargs)
 
-#
+
 class Library(GenericSample):
     """
     GenLIMS object in 'samples' collection of type 'library'
@@ -103,6 +148,9 @@ class Library(GenericSample):
 class SequencedLibrary(GenericSample):
     """
     GenLIMS object in 'samples' collection of type 'sequenced library'
+
+    :type run_id: str
+    :param run_id: unique ID of a run object in the GenLIMS database
     """
     def __init__(self, run_id=None, **kwargs):
         sample_type = 'sequenced library'
@@ -113,8 +161,8 @@ class SequencedLibrary(GenericSample):
     @property
     def raw_data(self):
         """
-        Return list of dictionaries with information about each raw data
-        file (i.e., FASTQ) for a sequenced library.
+        Return list of dictionaries with information about each raw
+        data file (i.e., FASTQ) for a sequenced library.
         """
         return self._raw_data
 
@@ -130,7 +178,7 @@ class ProcessedLibrary(GenericSample):
     """
     GenLIMS object in 'samples' collection of type 'processed library'
     """
-    def __init__(self, run_id=None, **kwargs):
+    def __init__(self, **kwargs):
         sample_type = 'processed library'
         self._processed_data = []
         super(ProcessedLibrary, self).__init__(type=sample_type, **kwargs)
@@ -154,6 +202,13 @@ class ProcessedLibrary(GenericSample):
 class GenericRun(TG3Object):
     """
     GenLIMS object in the 'runs' collection
+
+    :type protocol_id: str
+    :param protocol_id: unique ID of a protocol object in the GenLIMS
+        database (in the 'protocols' collection)
+
+    :type date: str
+    :param date: string indicating date of the run in ISO 8601 format
     """
     def __init__(self, protocol_id=None, date=None, **kwargs):
         self.protocol_id = protocol_id
@@ -203,7 +258,8 @@ class GenericWorkflow(TG3Object):
 
 class GlobusGalaxyWorkflow(TG3Object):
     """
-    GenLIMS object in 'workflows' collection of type 'Globus Galaxy workflow'
+    GenLIMS object in 'workflows' collection of type 'Globus Galaxy
+    workflow'
     """
     def __init__(self, **kwargs):
         workflow_type = 'Globus Galaxy workflow'
@@ -221,10 +277,15 @@ class GenericWorkflowBatch(TG3Object):
 
 class GalaxyWorkflowBatch(TG3Object):
     """
-    GenLIMS object in 'workflow batches' collection of type 'Galaxy workflow'
+    GenLIMS object in 'workflow batches' collection of type 'Galaxy
+    workflow'
+
+    :type workflowbatch_file: str
+    :param workflowbatch_file: path to file describing samples and
+        parameters of Globus Galaxy workflow batch
     """
     def __init__(self, workflowbatch_file=None, **kwargs):
         workflow_batch_type = 'Galaxy workflow batch'
         self.workflowbatch_file = workflowbatch_file
         super(GalaxyWorkflowBatch, self).__init__(type=workflow_batch_type,
-                                                   **kwargs)
+                                                  **kwargs)
