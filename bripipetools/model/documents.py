@@ -53,15 +53,14 @@ class TG3Object(object):
         mapped from a database object (True) or created from
         scratch (False)
     """
-    def __init__(self, _id=None, type=None, date_created=None,
-                 is_mapped=False):
+    def __init__(self, _id=None, type=None, is_mapped=False):
         self._id = _id
         self.type = type
-        if date_created is None:
-            self.date_created = datetime.datetime.now()
-            self.last_updated = self.date_created
-        else:
-            self.date_created = date_created
+        # if date_created is None:
+        self.date_created = datetime.datetime.now()
+        self.last_updated = self.date_created
+        # else:
+        #     self.date_created = date_created
         self.is_mapped = is_mapped
 
     def update_attrs(self, attr_map, force=False):

@@ -86,10 +86,22 @@ def parse_flowcell_run_id(run_id):
     logger.debug("collecting the following parts from run ID {}: {}"
                  .format(run_id, id_parts))
 
-    d = datetime.datetime.strptime(id_parts[0], '%y%m%d')
-    date = datetime.date.isoformat(d)
+    try:
+        d = datetime.datetime.strptime(id_parts[0], '%y%m%d')
+        date = datetime.date.isoformat(d)
+    except ValueError:
+        logger.warning("input string does not appear to contain a valid date")
+        date = None
+
     instr_id = id_parts[1]
-    run_num = int(id_parts[2])
+
+    try:
+        run_num = int(id_parts[2])
+    except IndexError:
+        logger.warning("input string does not appear to contain a valid "
+                       "run number")
+        run_num = None
+
     fc_id = util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*XX', run_id)
     fc_pos = util.matchdefault('.{1}(?=%s)' % fc_id, run_id)
 
