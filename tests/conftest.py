@@ -7,12 +7,14 @@ import yaml
 import pytest
 import mongomock
 
+
 def join(loader, node):
     """
     Join YAML list items with no separator.
     """
     seq = loader.construct_sequence(node)
     return ''.join([str(i) for i in seq])
+
 
 def ujoin(loader, node):
     """
@@ -23,6 +25,7 @@ def ujoin(loader, node):
 
 yaml.add_constructor('!join', join)
 yaml.add_constructor('!ujoin', ujoin)
+
 
 def join_path(d, root):
     """
@@ -38,7 +41,8 @@ def join_path(d, root):
         d = [join_path(item, root) for item in d]
     return d
 
-@pytest.fixture(scope='class')
+
+@pytest.fixture(scope='session')
 def mock_genomics_server(request):
     logger.info(("[setup] mock 'genomics' server, connect "
                  "to mock 'genomics' server"))
