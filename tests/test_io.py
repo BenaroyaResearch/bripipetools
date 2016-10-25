@@ -16,6 +16,7 @@ from bripipetools import io
             for p in range(3)]
 )
 def testproject(request, mock_genomics_server):
+    # GIVEN processing data for one of 3 example projects from a flowcell run
     runs = mock_genomics_server['root']['genomics']['illumina']['runs']
     rundata = runs[request.param['runnum']]
     projects = rundata['processed']['projects']
@@ -29,7 +30,8 @@ class TestPicardMetricsFile:
         params=[(source, {'samplenum': s})
                 for s in range(3)
                 for source in
-                ['picard_align', 'picard_markdups', 'picard_rnaseq']])
+                ['picard_align', 'picard_markdups', 'picard_rnaseq']]
+    )
     def testfiledata(self, request, mock_genomics_server, testproject):
         # GIVEN a PicardMetricsFile with mock 'genomics' server path to
         # a metrics file
@@ -37,15 +39,14 @@ class TestPicardMetricsFile:
         sourcedata = sources[request.param[0]]
         samplefile = sourcedata[request.param[1]['samplenum']]
 
-        logger.info("[setup] PicardMetricsFile test instance "
+        logger.debug("[setup] PicardMetricsFile test instance "
                     "for file type '{}' for sample {}"
                     .format(request.param[0], samplefile['sample']))
-
         testfile = io.PicardMetricsFile(path=samplefile['path'])
         filedata = (mock_genomics_server['out_types']['metrics']
                     [request.param[0]])
         yield (testfile, filedata)
-        logger.info("[teardown] PicardMetricsFile mock instance")
+        logger.debug("[teardown] PicardMetricsFile mock instance")
 
     def test_read_file(self, testfiledata):
         # (GIVEN)
@@ -111,283 +112,236 @@ class TestPicardMetricsFile:
 
         # THEN should return parsed dict from table with expected length
         assert(len(metrics) == filedata['parse_len'])
-#
-#
-# @pytest.mark.usefixtures('mock_genomics_server')
-# class TestTophatStatsFile:
-#     @pytest.fixture(
-#         scope='class',
-#         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
-#                 for r in range(1)
-#                 for p in range(3)
-#                 for s in range(3)
-#                 for source in ['tophat_stats']])
-#
-#     def metricsfiledata(self, request, mock_genomics_server):
-#         # GIVEN a TophatStatsFile with mock 'genomics' server path to
-#         # a metrics file
-#         filedata = (mock_genomics_server['out_types']['metrics']
-#                     [request.param[0]])
-#         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#         rundata = runs[request.param[1]['runnum']]
-#         projects = rundata['processed']['projects']
-#         projectdata = projects[request.param[1]['projectnum']]
-#         sourcedata = projectdata['metrics']['sources'][request.param[0]]
-#         samplefile = sourcedata[request.param[1]['samplenum']]
-#
-#         logger.info("[setup] TophatStatsFile test instance "
-#                     "for file type '{}' for sample {}"
-#                     .format(request.param[0], samplefile['sample']))
-#
-#         tophatstatsfile = io.TophatStatsFile(path=samplefile['path'])
-#
-#         def fin():
-#             logger.info("[teardown] TophatStatsFile mock instance")
-#         request.addfinalizer(fin)
-#         return (tophatstatsfile, filedata)
-#
-#     def test_read_file(self, metricsfiledata):
-#         # (GIVEN)
-#         metricsfile, filedata = metricsfiledata
-#
-#         logger.info("test `_read_file()`")
-#
-#         # WHEN the file specified by path is read
-#         metricsfile._read_file()
-#         raw_text = metricsfile.data['raw']
-#
-#         # THEN class should have raw text stored in data attribute and raw
-#         # text should be a list of length 5
-#         assert(raw_text)
-#         assert(len(raw_text) == filedata['raw_len'])
-#
-#     def test_parse_lines(self, metricsfiledata):
-#         # (GIVEN)
-#         metricsfile, filedata = metricsfiledata
-#
-#         logger.info("test `_parse_lines()`")
-#
-#         # WHEN text lines are parsed into key-value pairs based on column
-#         metrics = metricsfile._parse_lines()
-#
-#         # THEN output dictionary should be length 5 and have the correct keys
-#         assert(len(metrics) == filedata['parse_len'])
-#         assert(set(metrics.keys()) == set(['fastq_total_reads',
-#                                            'reads_aligned_sam', 'aligned',
-#                                            'reads_with_mult_align',
-#                                            'algn_seg_with_mult_algn']))
-#
-#     def test_parse(self, metricsfiledata):
-#         # (GIVEN)
-#         metricsfile, filedata = metricsfiledata
-#
-#         logger.info("test `_parse()`")
-#
-#         # WHEN file is parsed
-#         metrics = metricsfile.parse()
-#
-#         # THEN output dictionary should be length 5
-#         assert(len(metrics) == filedata['parse_len'])
-#
-# @pytest.mark.usefixtures('mock_genomics_server')
-# class TestHtseqMetricsFile:
-#     @pytest.fixture(
-#         scope='class',
-#         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
-#                 for r in range(1)
-#                 for p in range(3)
-#                 for s in range(3)
-#                 for source in ['htseq']])
-#     def metricsfiledata(self, request, mock_genomics_server):
-#         # GIVEN a HtseqMetricsFile with mock 'genomics' server path to
-#         # a metrics file
-#         filedata = (mock_genomics_server['out_types']['metrics']
-#                     [request.param[0]])
-#         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#         rundata = runs[request.param[1]['runnum']]
-#         projects = rundata['processed']['projects']
-#         projectdata = projects[request.param[1]['projectnum']]
-#         sourcedata = projectdata['metrics']['sources'][request.param[0]]
-#         samplefile = sourcedata[request.param[1]['samplenum']]
-#
-#         logger.info("[setup] HtseqMetricsFile test instance "
-#                     "for file type '{}' for sample {}"
-#                     .format(request.param[0], samplefile['sample']))
-#
-#         htseqmetricsfile = io.HtseqMetricsFile(path=samplefile['path'])
-#
-#         def fin():
-#             logger.info("[teardown] HtseqMetricsFile mock instance")
-#         request.addfinalizer(fin)
-#         return (htseqmetricsfile, filedata)
-#
-#     def test_read_file(self, metricsfiledata):
-#         # (GIVEN)
-#         metricsfile, filedata = metricsfiledata
-#
-#         logger.info("test `_read_file()`")
-#
-#         # WHEN the file specified by path is read
-#         metricsfile._read_file()
-#         raw_text = metricsfile.data['raw']
-#
-#         # THEN class should have raw text stored in data attribute and raw
-#         # text should be a list of length 5
-#         assert(raw_text)
-#         assert(len(raw_text) == filedata['raw_len'])
-#
-#     def test_parse_lines(self, metricsfiledata):
-#         # (GIVEN)
-#         metricsfile, filedata = metricsfiledata
-#
-#         logger.info("test `_parse_lines()`")
-#
-#         # WHEN text lines are parsed into key-value pairs based on column
-#         metrics = metricsfile._parse_lines()
-#
-#         # THEN output dictionary should be length 5 and have the correct keys
-#         assert(len(metrics) == filedata['parse_len'])
-#         assert(set(metrics.keys()) == set(['no_feature', 'ambiguous',
-#                                            'too_low_aQual', 'not_aligned',
-#                                            'alignment_not_unique']))
-#
-#     def test_parse(self, metricsfiledata):
-#         # (GIVEN)
-#         metricsfile, filedata = metricsfiledata
-#
-#         logger.info("test `_parse()`")
-#
-#         # WHEN file is parsed
-#         metrics = metricsfile.parse()
-#
-#         # THEN output dictionary should be length 5
-#         assert(len(metrics) == filedata['parse_len'])
-#
-#
-# @pytest.mark.usefixtures('mock_genomics_server')
-# class TestSexcheckFile:
-#     @pytest.fixture(
-#         scope='class',
-#         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
-#                 for r in range(1)
-#                 for p in range(3)
-#                 for s in range(3)
-#                 for source in ['sexcheck']])
-#     def validationfiledata(self, request, mock_genomics_server):
-#         # GIVEN a HtseqMetricsFile with mock 'genomics' server path to
-#         # a metrics file
-#         filedata = (mock_genomics_server['qc_types']['validation']
-#                     [request.param[0]])
-#         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#         rundata = runs[request.param[1]['runnum']]
-#         projects = rundata['processed']['projects']
-#         projectdata = projects[request.param[1]['projectnum']]
-#         sourcedata = projectdata['validation']['sources'][request.param[0]]
-#         samplefile = sourcedata[request.param[1]['samplenum']]
-#
-#         logger.info("[setup] SexcheckFile test instance "
-#                     "for file type '{}' for sample {}"
-#                     .format(request.param[0], samplefile['sample']))
-#
-#         sexcheckfile = io.SexcheckFile(path=samplefile['path'])
-#
-#         def fin():
-#             logger.info("[teardown] SexcheckFile mock instance")
-#         request.addfinalizer(fin)
-#         return (sexcheckfile, filedata)
-#
-#     def test_read_file(self, validationfiledata):
-#         # (GIVEN)
-#         validationfile, filedata = validationfiledata
-#
-#         logger.info("test `_read_file()`")
-#
-#         # WHEN the file specified by path is read
-#         validationfile._read_file()
-#         raw_text = validationfile.data['raw']
-#
-#         # THEN class should have raw text stored in data attribute and raw
-#         # text should be a list of length 5
-#         assert(raw_text)
-#         assert(len(raw_text) == filedata['raw_len'])
-#
-#     def test_parse_lines(self, validationfiledata):
-#         # (GIVEN)
-#         validationfile, filedata = validationfiledata
-#
-#         logger.info("test `_parse_lines()`")
-#
-#         # WHEN text lines are parsed into key-value pairs based on column
-#         data = validationfile._parse_lines()
-#
-#         # THEN output dictionary should have the correct keys
-#         assert(len(data) == filedata['parse_len'])
-#         assert(all(
-#             [field in data
-#              for field in ['x_genes', 'y_genes', 'x_counts', 'y_counts',
-#                            'total_counts', 'y_x_gene_ratio', 'y_x_count_ratio',
-#                            'predicted_sex', 'sex_check']]))
-#
-#     def test_parse(self, validationfiledata):
-#         # (GIVEN)
-#         validationfile, filedata = validationfiledata
-#
-#         logger.info("test `_parse()`")
-#
-#         # WHEN file is parsed
-#         data = validationfile.parse()
-#
-#         # THEN output dictionary should be length 5
-#         assert(len(data) == filedata['parse_len'])
-#
-#
-# @pytest.mark.usefixtures('mock_genomics_server')
-# class TestHtseqCountsFile:
-#     @pytest.fixture(
-#         scope='class',
-#         params=[(source, {'runnum': r, 'projectnum': p, 'samplenum': s})
-#                 for r in range(1)
-#                 for p in range(3)
-#                 for s in range(3)
-#                 for source in ['htseq']])
-#     def countsfiledata(self, request, mock_genomics_server):
-#         # GIVEN a HtseqCountsFile with mock 'genomics' server path to
-#         # a counts file
-#         filedata = (mock_genomics_server['out_types']['counts']
-#                     [request.param[0]])
-#         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#         rundata = runs[request.param[1]['runnum']]
-#         projects = rundata['processed']['projects']
-#         projectdata = projects[request.param[1]['projectnum']]
-#         sourcedata = projectdata['counts']['sources'][request.param[0]]
-#         samplefile = sourcedata[request.param[1]['samplenum']]
-#
-#         logger.info("[setup] HtseqCountsFile test instance "
-#                     "for file type '{}' for sample {}"
-#                     .format(request.param[0], samplefile['sample']))
-#
-#         htseqcountsfile = io.HtseqCountsFile(path=samplefile['path'])
-#
-#         def fin():
-#             logger.info("[teardown] HtseqCountsFile mock instance")
-#         request.addfinalizer(fin)
-#         return (htseqcountsfile, filedata)
-#
-#     def test_read_file(self, countsfiledata):
-#         # (GIVEN)
-#         countsfile, filedata = countsfiledata
-#
-#         logger.info("test `_read_file()`")
-#
-#         # WHEN the file specified by path is read
-#         countsfile._read_file()
-#         counts_df = countsfile.data['raw']
-#
-#         # THEN class should have counts stored in a data frame with 100 rows
-#         # and two columns
-#         assert(len(counts_df) == filedata['raw_len'])
-#         assert(len(counts_df.columns) == 2)
-#
+
+
+@pytest.mark.usefixtures('mock_genomics_server', 'testproject')
+class TestTophatStatsFile:
+    @pytest.fixture(
+        scope='class',
+        params=[(source, {'samplenum': s})
+                for s in range(3)
+                for source in
+                ['tophat_stats']]
+    )
+    def testfiledata(self, request, mock_genomics_server, testproject):
+        # GIVEN a TophatStatsFile with mock 'genomics' server path to
+        # a metrics file
+        sourcedata = testproject['metrics']['sources'][request.param[0]]
+        samplefile = sourcedata[request.param[1]['samplenum']]
+
+        logger.debug("[setup] TophatStatsFile test instance "
+                    "for file type '{}' for sample {}"
+                    .format(request.param[0], samplefile['sample']))
+
+        testfile = io.TophatStatsFile(path=samplefile['path'])
+        filedata = (mock_genomics_server['out_types']['metrics']
+                    [request.param[0]])
+        yield testfile, filedata
+        logger.debug("[teardown] TophatStatsFile mock instance")
+
+    def test_read_file(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN the file specified by path is read
+        testfile._read_file()
+        raw_text = testfile.data['raw']
+
+        # THEN class should have raw text stored in data attribute and raw
+        # text should be a list of length 5
+        assert(raw_text)
+        assert(len(raw_text) == filedata['raw_len'])
+
+    def test_parse_lines(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN text lines are parsed into key-value pairs based on column
+        metrics = testfile._parse_lines()
+
+        # THEN output dictionary should be length 5 and have the correct keys
+        assert(len(metrics) == filedata['parse_len'])
+        assert(set(metrics.keys()) == set(['fastq_total_reads',
+                                           'reads_aligned_sam', 'aligned',
+                                           'reads_with_mult_align',
+                                           'algn_seg_with_mult_algn']))
+
+    def test_parse(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN file is parsed
+        metrics = testfile.parse()
+
+        # THEN output dictionary should be length 5
+        assert(len(metrics) == filedata['parse_len'])
+
+@pytest.mark.usefixtures('mock_genomics_server', 'testproject')
+class TestHtseqMetricsFile:
+    @pytest.fixture(
+        scope='class',
+        params=[(source, {'samplenum': s})
+                for s in range(3)
+                for source in
+                ['htseq']]
+    )
+    def testfiledata(self, request, mock_genomics_server, testproject):
+        # GIVEN a HtseqMetricsFile with mock 'genomics' server path to
+        # a metrics file
+        sourcedata = testproject['metrics']['sources'][request.param[0]]
+        samplefile = sourcedata[request.param[1]['samplenum']]
+
+        logger.debug("[setup] HtseqMetricsFile test instance "
+                    "for file type '{}' for sample {}"
+                    .format(request.param[0], samplefile['sample']))
+
+        testfile = io.HtseqMetricsFile(path=samplefile['path'])
+        filedata = (mock_genomics_server['out_types']['metrics']
+                    [request.param[0]])
+        yield testfile, filedata
+        logger.debug("[teardown] HtseqMetricsFile mock instance")
+
+    def test_read_file(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN the file specified by path is read
+        testfile._read_file()
+        raw_text = testfile.data['raw']
+
+        # THEN class should have raw text stored in data attribute and raw
+        # text should be a list of length 5
+        assert(raw_text)
+        assert(len(raw_text) == filedata['raw_len'])
+
+    def test_parse_lines(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN text lines are parsed into key-value pairs based on column
+        metrics = testfile._parse_lines()
+
+        # THEN output dictionary should be length 5 and have the correct keys
+        assert(len(metrics) == filedata['parse_len'])
+        assert(set(metrics.keys()) == set(['no_feature', 'ambiguous',
+                                           'too_low_aQual', 'not_aligned',
+                                           'alignment_not_unique']))
+
+    def test_parse(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN file is parsed
+        metrics = testfile.parse()
+
+        # THEN output dictionary should be length 5
+        assert(len(metrics) == filedata['parse_len'])
+
+
+@pytest.mark.usefixtures('mock_genomics_server', 'testproject')
+class TestSexcheckFile:
+    @pytest.fixture(
+        scope='class',
+        params=[(source, {'samplenum': s})
+                for s in range(3)
+                for source in
+                ['sexcheck']]
+    )
+    def testfiledata(self, request, mock_genomics_server, testproject):
+        # GIVEN a HtseqMetricsFile with mock 'genomics' server path to
+        # a metrics file
+        sourcedata = testproject['validation']['sources'][request.param[0]]
+        samplefile = sourcedata[request.param[1]['samplenum']]
+
+        logger.debug("[setup] SexcheckFile test instance "
+                    "for file type '{}' for sample {}"
+                    .format(request.param[0], samplefile['sample']))
+
+        testfile = io.SexcheckFile(path=samplefile['path'])
+        filedata = (mock_genomics_server['qc_types']['validation']
+                    [request.param[0]])
+        yield testfile, filedata
+        logger.debug("[teardown] SexcheckFile mock instance")
+
+    def test_read_file(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN the file specified by path is read
+        testfile._read_file()
+        raw_text = testfile.data['raw']
+
+        # THEN class should have raw text stored in data attribute and raw
+        # text should be a list of length 5
+        assert(raw_text)
+        assert(len(raw_text) == filedata['raw_len'])
+
+    def test_parse_lines(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN text lines are parsed into key-value pairs based on column
+        data = testfile._parse_lines()
+
+        # THEN output dictionary should have the correct keys
+        assert(len(data) == filedata['parse_len'])
+        assert(all(
+            [field in data
+             for field in ['x_genes', 'y_genes', 'x_counts', 'y_counts',
+                           'total_counts', 'y_x_gene_ratio', 'y_x_count_ratio',
+                           'predicted_sex', 'sex_check']]))
+
+    def test_parse(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        # WHEN file is parsed
+        data = testfile.parse()
+
+        # THEN output dictionary should be length 5
+        assert(len(data) == filedata['parse_len'])
+
+
+@pytest.mark.usefixtures('mock_genomics_server', 'testproject')
+class TestHtseqCountsFile:
+    @pytest.fixture(
+        scope='class',
+        params=[(source, {'samplenum': s})
+                for s in range(3)
+                for source in
+                ['htseq']]
+    )
+    def testfiledata(self, request, mock_genomics_server, testproject):
+        # GIVEN a HtseqCountsFile with mock 'genomics' server path to
+        # a counts file
+        sourcedata = testproject['counts']['sources'][request.param[0]]
+        samplefile = sourcedata[request.param[1]['samplenum']]
+
+        logger.info("[setup] HtseqCountsFile test instance "
+                    "for file type '{}' for sample {}"
+                    .format(request.param[0], samplefile['sample']))
+
+        testfile = io.HtseqCountsFile(path=samplefile['path'])
+        filedata = (mock_genomics_server['out_types']['counts']
+                    [request.param[0]])
+        yield testfile, filedata
+        logger.info("[teardown] HtseqCountsFile mock instance")
+
+    def test_read_file(self, testfiledata):
+        # (GIVEN)
+        testfile, filedata = testfiledata
+
+        logger.info("test `_read_file()`")
+
+        # WHEN the file specified by path is read
+        testfile._read_file()
+        counts_df = testfile.data['raw']
+
+        # THEN class should have counts stored in a data frame with 100 rows
+        # and two columns
+        assert(len(counts_df) == filedata['raw_len'])
+        assert(len(counts_df.columns) == 2)
+
 #
 # @pytest.mark.usefixtures('mock_genomics_server')
 # class TestFastQCFile:
