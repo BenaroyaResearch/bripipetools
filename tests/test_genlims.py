@@ -1,8 +1,4 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-import os
-import re
 import datetime
 
 import pytest
@@ -12,382 +8,277 @@ from mock import Mock
 from bripipetools import model as docs
 from bripipetools import genlims
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 
 # def test_genlims_connection():
 #     # TODO: come up with a better way to test this
 #     assert('samples' in genlims.db.collection_names())
 
 @pytest.fixture(scope='function')
-def mock_db(request):
-    logger.info(("[setup] mock database, connect "
+def mock_db():
+    # GIVEN a mocked version of the TG3 Mongo database
+    logger.debug(("[setup] mock database, connect "
                  "to mock Mongo database"))
-    db = mongomock.MongoClient().db
-    db.mockcollection.insert(
-        {'_id': 'mockobject',
-         'type': 'mocked object',
-         'updateField': None,
-         'skipField': 'mockvalue',
-         'arrayField': ['foo', 'bar']}
-    )
-    def fin():
-        logger.info(("[teardown] mock database, disconnect "
-                     "from mock Mongo database"))
-    request.addfinalizer(fin)
-    return db
+
+    yield mongomock.MongoClient().db
+    logger.debug(("[teardown] mock database, disconnect "
+                  "from mock Mongo database"))
+
+
+@pytest.fixture(scope='function')
+def mock_dbobject():
+    # GIVEN the definition of a single database object object
+    logger.debug("[setup] mock database object")
+
+    yield {'_id': 'mockobject',
+           'updateField': 'value',
+           'arrayField': ['foo', 'baz']}
+    logger.debug("[teardown] mock database object")
+
 
 @pytest.mark.usefixtures('mock_db')
 class TestGenLIMSOperations:
+    """
+    Tests methods in the ``genlims.operations`` module for interacting
+    with the GenLIMS database.
+    """
+    @pytest.mark.parametrize(
+        'dbobject_exists', [False, True]
+    )
+    def test_find_objects(self, mock_db, mock_dbobject, dbobject_exists):
+        # AND the mock database is either empty or contains a mocked
+        # collection with a single pre-defined object
+        if dbobject_exists:
+            mock_db['mockcollection'].insert(mock_dbobject)
 
-    # GIVEN a mocked version of the TG3 Mongo database with example documents
-    # for samples, runs, and workflow batches collections
-    @pytest.fixture(
-        scope='function',
-        params=[
-            ('dummycollection', {
-                'obj_exists': {'target': {'_id': 'foo',
-                                          'newField': 'value',
-                                          'updateField': 'newvalue',
-                                          'skipField': None,
-                                          'arrayField': ['foo', 'baz']},
-                               'expect_get_len': 0,
-                               'expect_put_len': 1,
-                               'expect_get_fields': 3,
-                               'expect_put_fields': 4},
-                'obj_new': {'target': {'_id': 'foo', 'type': 'new_object',
-                                       'skipField': None,
-                                       'arrayField': ['foo', 'bar']},
-                            'expect_get_len': 0,
-                            'expect_put_len': 1,
-                            'expect_put_fields': 3},
-                'objs_new': {'target': [{'_id': 'foo', 'type': 'new_object'},
-                                        {'_id': 'bar', 'type': 'new_object'}],
-                             'expect_put_len': 2}
-            }),
-            ('mockcollection', {
-                'obj_exists': {'target': {'_id': 'mockobject',
-                                          'newField': 'value',
-                                          'updateField': 'newvalue',
-                                          'skipField': None,
-                                          'arrayField': ['foo', 'baz']},
-                               'expect_get_len': 1,
-                               'expect_put_len': 1,
-                               'expect_get_fields': 5,
-                               'expect_put_fields': 6},
-                'obj_new': {'target': {'_id': 'foo', 'type': 'new_object',
-                                       'skipField': None,
-                                       'arrayField': ['foo', 'bar']},
-                            'expect_get_len': 0,
-                            'expect_put_len': 1,
-                            'expect_put_fields': 3},
-                'objs_new': {'target': [{'_id': 'foo', 'type': 'new_object'},
-                                        {'_id': 'bar', 'type': 'new_object'}],
-                             'expect_put_len': 2}
-            })
-        ])
-    def testdata(self, request, mock_db):
-        logger.info("[setup] test data for collection '{}'"
-                    .format(request.param[0]))
-
-        # AND the following scenarios on which to test operations
-        logger.info("test object scenarios {}"
-                    .format(request.param[1]))
-        def fin():
-            logger.info("[teardown] test data for collection '{}', "
-                        "drop collection"
-                        .format(request.param[0]))
-            mock_db[request.param[0]].drop()
-        request.addfinalizer(fin)
-        return request.param
-
-    def test_find_objects_that_are_new(self, mock_db, testdata):
-        # AND the target object does not exist in the database
-        logger.info("test `find_objects()` when objects do not exist")
-
-        test_collection, test_object = testdata[0], testdata[1]['obj_new']
-
-        # WHEN querying for the object
+        # WHEN the wrapper function `find_objects()` is used to query for
+        # objects in a collection
         mock_fn = Mock(name='mock_fn',
                        return_value=(mock_db,
-                                     {'_id': test_object['target']['_id']}))
+                                     {'_id': mock_dbobject['_id']}))
         mock_fn.__name__ = 'mock_fn'
-        wrapped_fn = genlims.find_objects(test_collection)(mock_fn)
-        objects = wrapped_fn()
+        wrapped_fn = genlims.find_objects('mockcollection')(mock_fn)
+        dbobjects = wrapped_fn()
 
-        # THEN should return an empty list
-        assert(len(objects) == test_object['expect_get_len'])
+        # THEN should return a list of objects equal in length to the matching
+        # number of objects in the database; if any objects were retrieved,
+        # they should include the expected fields and values
+        test_query = {'_id': mock_dbobject['_id']}
+        assert(type(dbobjects) == list)
+        assert(len(dbobjects)
+               == mock_db['mockcollection'].find(test_query).count())
+        if dbobject_exists:
+            assert(dbobjects[0] == mock_dbobject)
 
-    def test_find_objects_that_exist(self, mock_db, testdata):
-        # AND the target object exists in the database
-        logger.info("test `find_objects()` when objects exist")
+    @pytest.mark.parametrize(
+        'dbobject_exists', [False, True]
+    )
+    def test_insert_objects(self, mock_db, mock_dbobject, dbobject_exists):
+        # AND the mock database is either empty or contains a mocked
+        # collection with a single pre-defined object
+        if dbobject_exists:
+            mock_db['mockcollection'].insert(mock_dbobject)
 
-        test_collection, test_object = testdata[0], testdata[1]['obj_exists']
-
-        # WHEN querying for the object
+        # WHEN an object is inserted into the database (in the mock
+        # collection) using the wrapper function `insert_objects()`
         mock_fn = Mock(name='mock_fn',
-                       return_value=(mock_db,
-                                     {'_id': test_object['target']['_id']}))
+                       return_value=(mock_db, mock_dbobject))
         mock_fn.__name__ = 'mock_fn'
-        wrapped_fn = genlims.find_objects(test_collection)(mock_fn)
-        objects = wrapped_fn()
-
-        # THEN should return a non-empty list of length 1 and object
-        # should have expected number of fields
-        assert(len(objects) == test_object['expect_get_len'])
-        if len(objects):
-            assert(len(objects[0]) == test_object['expect_get_fields'])
-
-    def test_insert_objects_one_new(self, mock_db, testdata):
-        # AND the target object does not exist in the database
-        logger.info("test `insert_objects()` with one new object")
-
-        test_collection, test_object = testdata[0], testdata[1]['obj_new']
-
-        # WHEN inserting the object
-        mock_fn = Mock(name='mock_fn',
-                       return_value=(mock_db, test_object['target']))
-        mock_fn.__name__ = 'mock_fn'
-        wrapped_fn = genlims.insert_objects(test_collection)(mock_fn)
+        wrapped_fn = genlims.insert_objects('mockcollection')(mock_fn)
         wrapped_fn()
-        new_object = (mock_db[test_collection]
-                      .find_one({'_id': test_object['target']['_id']}))
 
-        # THEN new object should be in database, should have the expected
-        # number of fields, should not include the empty (skipped) field from
-        # the input object, and the array field should be a list
-        assert(len(list(mock_db[test_collection].find({'type': 'new_object'})))
-               == test_object['expect_put_len'])
-        assert(len(new_object) == test_object['expect_put_fields'])
-        assert('skipField' not in new_object)
-        assert(isinstance(new_object['arrayField'], list))
+        # THEN only the single object be in the database in the mock collection
+        # and should match the mock object definition
+        test_query = {'_id': mock_dbobject['_id']}
+        assert(mock_db['mockcollection'].find(test_query).count() == 1)
+        assert(mock_db['mockcollection'].find_one(test_query) == mock_dbobject)
 
-    def test_insert_objects_multiple_new(self, mock_db, testdata):
-        # AND the target objects does not exist in the database
-        logger.info("test `insert_objects()` with multiple new objects")
+    @pytest.mark.parametrize(
+        'update_field',
+        [
+            {'newField': 'value'},
+            {'updateField': 'newvalue'},
+            {'skipField': None}
+        ]
+    )
+    def test_insert_objects_with_update(self, mock_db, mock_dbobject,
+                                        update_field):
+        # AND the mock database is contains a mocked collection with
+        # a single pre-defined object
+        mock_db['mockcollection'].insert(mock_dbobject)
 
-        test_collection, test_object = testdata[0], testdata[1]['objs_new']
+        # AND the local copy of the mock object is updated with either
+        # a new field or an updated value of an existing field
+        mock_dbobject.update(update_field)
 
-        # WHEN inserting the object
+        # WHEN an object with the same ID as the existing object, but with
+        # different fields, is inserted into the database (in the mock
+        # collection) using the wrapper function `insert_objects()`
         mock_fn = Mock(name='mock_fn',
-                       return_value=(mock_db, test_object['target']))
+                       return_value=(mock_db, mock_dbobject))
         mock_fn.__name__ = 'mock_fn'
-        wrapped_fn = genlims.insert_objects(test_collection)(mock_fn)
+        wrapped_fn = genlims.insert_objects('mockcollection')(mock_fn)
+        wrapped_fn()
+
+        # THEN only the single object should be in the database, all unchanged
+        # fields should match the original mock object definition, and new or
+        # updated fields should match the expected value; any fields provided
+        # in the input object with a value of 'None' should be skipped
+        test_query = {'_id': mock_dbobject['_id']}
+        test_dbobject = mock_db['mockcollection'].find_one(test_query)
+        assert(mock_db['mockcollection'].find(test_query).count() == 1)
+        assert(all({test_dbobject[field] == mock_dbobject[field]
+                    for field in mock_dbobject.keys()
+                    if field not in update_field.keys()}))
+        for field, value in update_field.items():
+            if value is not None:
+                assert(test_dbobject[field] == value)
+        assert('skipField' not in test_dbobject)
+
+    def test_insert_objects_multiple(self, mock_db, mock_dbobject):
+        # WHEN inserting the object
+        new_dbobject = mock_dbobject.copy()
+        new_dbobject['_id'] = 'newmockobject'
+
+        mock_fn = Mock(name='mock_fn',
+                       return_value=(mock_db, [mock_dbobject, new_dbobject]))
+        mock_fn.__name__ = 'mock_fn'
+        wrapped_fn = genlims.insert_objects('mockcollection')(mock_fn)
         wrapped_fn()
 
         # THEN new objects should be in database
-        assert(len(list(mock_db[test_collection].find({'type': 'new_object'})))
-               == test_object['expect_put_len'])
+        assert(mock_db['mockcollection'].find().count() == 2)
 
-    def test_insert_objects_one_that_exists(self, mock_db, testdata):
-        # AND the target object exists in the database
-        logger.info("test `insert_objects()` with one object that exists")
+    @pytest.mark.parametrize(
+        'test_collection, test_function',
+        [
+            ('samples', genlims.get_samples),
+            ('runs', genlims.get_runs),
+            ('workflowbatches', genlims.get_workflowbatches)
+        ]
+    )
+    def test_wrapped_get_functions(self, mock_db, test_collection, test_function):
+        # WHEN using a wrapped get function to query for objects in
+        # the specified collection
+        logger.debug("test `get_{}()`".format(test_collection))
+        test_query = {'_id': 'mockobject'}
+        dbobjects = test_function(mock_db, test_query)
 
-        test_collection, test_object = testdata[0], testdata[1]['obj_exists']
+        # THEN should return a list of objects equal in length to the matching
+        # number of objects in the database for the specified collection
+        assert(len(dbobjects)
+               == mock_db[test_collection].find(test_query).count())
 
-        # WHEN inserting the object
-        mock_fn = Mock(name='mock_fn',
-                       return_value=(mock_db, test_object['target']))
-        mock_fn.__name__ = 'mock_fn'
-        wrapped_fn = genlims.insert_objects(test_collection)(mock_fn)
-        wrapped_fn()
-        updated_object = (mock_db[test_collection]
-                          .find_one({'_id': test_object['target']['_id']}))
+    @pytest.mark.parametrize(
+        'test_collection, test_function',
+        [
+            ('samples', genlims.put_samples),
+            ('runs', genlims.put_runs),
+            ('workflowbatches', genlims.put_workflowbatches)
+        ]
+    )
+    def test_wrapped_put_functions(self, mock_db, mock_dbobject,
+                                   test_collection, test_function):
+        # WHEN using a wrapped put function to insert object(s) into
+        # the specified collection
+        logger.debug("test `put_{}()`".format(test_collection))
+        test_function(mock_db, mock_dbobject)
 
-        # THEN new object should be in database, should have the expected
-        # number of fields, should have the original value for the skipped
-        # field, should have the updated value for the update field, and
-        # should have updated values in the array field
-        assert(len(list(mock_db[test_collection]
-                        .find({'_id': test_object['target']['_id']})))
-               == test_object['expect_put_len'])
-        assert(len(updated_object) == test_object['expect_put_fields'])
-        if 'skipField' in updated_object:
-            assert(updated_object['skipField'] is not None)
-        assert(updated_object['updateField'] is not None)
-        assert('baz' in updated_object['arrayField'])
+        # THEN only the single object be in the database in the
+        # specified collection
+        test_query = {'_id': mock_dbobject['_id']}
+        assert(mock_db[test_collection].find(test_query).count() == 1)
 
-    # GIVEN wrapped get/put functions for specific collections
-    @pytest.fixture(
-        scope='function',
-        params=[
-            ('samples', {'get_fn': genlims.get_samples,
-                         'put_fn': genlims.put_samples}),
-            ('runs', {'get_fn': genlims.get_runs,
-                      'put_fn': genlims.put_runs}),
-            ('workflowbatches', {'get_fn': genlims.get_workflowbatches,
-                                 'put_fn': genlims.put_workflowbatches}),
-        ])
-    def wrappedfndata(self, request, mock_db):
-        # AND a minimal object present in the collection
-        logger.info("[setup] test data & wrapped functions for collection '{}'"
-                    .format(request.param[0]))
-        mock_db[request.param[0]].insert({'_id': 'mockobject'})
+    @pytest.mark.parametrize(
+        'id_exists', [False, True]
+    )
+    def test_create_workflowbatch_id_new(self, mock_db, id_exists):
+        # AND a prefix/date combination corresponding to the type and date
+        # of the workflow batch is either new or already exists in the
+        # 'workflowbatches' collection in the database
+        if id_exists:
+            mock_db.workflowbatches.insert(
+                {'_id': 'mockprefix_2000-01-01_1',
+                 'date': datetime.datetime(2000, 1, 1, 0, 0)})
 
-        def fin():
-            logger.info("[teardown] test data for collection '{}', "
-                        "drop collection"
-                        .format(request.param[0]))
-            mock_db[request.param[0]].drop()
-        request.addfinalizer(fin)
-        return request.param
-
-    def test_wrapped_get_functions(self, mock_db, wrappedfndata):
-        logger.info("test `get_{}()`".format(wrappedfndata[0]))
-
-        # WHEN inserting new object(s)
-        objects = wrappedfndata[1]['get_fn'](mock_db, {'_id': 'mockobject'})
-
-        # THEN should be list of length 1
-        assert(len(objects) == 1)
-
-    def test_wrapped_put_functions(self, mock_db, wrappedfndata):
-        logger.info("test `get_{}()`".format(wrappedfndata[0]))
-
-        # WHEN inserting new object(s)
-        wrappedfndata[1]['put_fn'](mock_db, {'_id': 'new_object'})
-
-        # THEN should be list of length 1
-        assert(len(list(mock_db[wrappedfndata[0]].find()))
-               == 2)
-
-    def test_create_workflowbatch_id_new(self, mock_db):
-        # GIVEN a prefix/date combination that does not yet exist in
-        # the database
-        logger.info("test `create_workflowbatch_id()`, new prefix/date")
-
-        # WHEN creating new workflow batch ID
+        # WHEN creating new workflow batch ID based on a prefix (which
+        # corresponds to the type of the workflow batch) and the date on
+        # which the workflow batch was run
         wb_id = genlims.create_workflowbatch_id(
             db=mock_db,
             prefix='mockprefix',
             date=datetime.datetime(2000, 1, 1, 0, 0))
 
-        # THEN constructed workflow batch ID should end in number 1
-        assert(wb_id == 'mockprefix_2000-01-01_1')
+        # THEN the constructed workflow batch ID should end in the
+        # expected number: 1 if new, or 2 if the same prefix/date combo
+        # already existed in the 'workflowbatches' collection
+        id_tag = 2 if id_exists else 1
+        assert(wb_id == 'mockprefix_2000-01-01_{}'.format(id_tag))
 
-    def test_create_workflowbatch_id_existing(self, mock_db):
-        # GIVEN a prefix/date combination that already exists in
-        # the database
-        logger.info("test `create_workflowbatch_id()`, existing prefix/date")
-
-        mock_db.workflowbatches.insert(
-            {'_id': 'mockprefix_2000-01-01_1',
-             'date': datetime.datetime(2000, 1, 1, 0, 0)})
-
-        # WHEN creating new workflow batch ID
-        wb_id = genlims.create_workflowbatch_id(
-            db=mock_db,
-            prefix='mockprefix',
-            date=datetime.datetime(2000, 1, 1, 0, 0))
-
-        # THEN constructed workflow batch ID should end in number 2
-        assert(wb_id == 'mockprefix_2000-01-01_2')
-
-    def test_search_ancestors_field_in_sample(self, mock_db):
-        # GIVEN an existing sample with a field that matches the input
-        # argument
-        logger.info("test `search_ancestors()`, sample has field")
-
+    @pytest.mark.parametrize(
+        'field_level', [-1, 0, 1, 2]
+    )
+    def test_search_ancestors_field(self, mock_db, field_level):
+        # AND a hierarchy of objects in the 'samples' collection, with
+        # parent relationship specified by the 'parentId' field
         mock_db.samples.insert(
-            {'_id': 'mocksample',
-             'parentId': 'mockparent',
-             'mockfield': 'mockvalue'})
-
-        # WHEN searching for the field among all sample ancestors
-        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
-
-        # THEN should return the value of the field from the first sample
-        # checked
-        assert(value == 'mockvalue')
-
-    def test_search_ancestors_field_in_parent(self, mock_db):
-        # GIVEN an existing sample with a parent sample that includes the
-        # input field
-        logger.info("test `search_ancestors()`, parent has field")
-
+            {'_id': 'sample0', 'parentId': 'sample1'})
         mock_db.samples.insert(
-            {'_id': 'mocksample',
-             'parentId': 'mockparent'})
-        mock_db.samples.insert(
-            {'_id': 'mockparent',
-             'mockfield': 'mockvalue'})
+            {'_id': 'sample1', 'parentId': 'sample2'})
+        mock_db.samples.update_one(
+            {'_id': 'sample{}'.format(field_level)},
+            {'$set': {'mockfield': 'mockvalue'}},
+            upsert=True)
 
-        # WHEN searching for the field among all sample ancestors
-        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
+        # WHEN searching for the field among all sample ancestors in
+        # the hierarchy
+        value = genlims.search_ancestors(mock_db, 'sample0', 'mockfield')
 
-        # THEN should return the value of the field from the parent sample
-        assert(value == 'mockvalue')
-
-    def test_search_ancestors_field_in_grandparent(self, mock_db):
-        # GIVEN an existing sample with a grandparent sample (parent of a
-        # parent) that includes the input field
-        logger.info("test `search_ancestors()`, grandparent has field")
-
-        mock_db.samples.insert(
-            {'_id': 'mocksample',
-             'parentId': 'mockparent'})
-        mock_db.samples.insert(
-            {'_id': 'mockparent',
-             'parentId': 'mockgrandparent'})
-        mock_db.samples.insert(
-            {'_id': 'mockgrandparent',
-             'mockfield': 'mockvalue'})
-
-        # WHEN searching for the field among all sample ancestors
-        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
-
-        # THEN should return the value of the field from the parent sample
-        assert(value == 'mockvalue')
+        # THEN should return the value of the field from whichever level
+        # above or equal to the input sample that the field was found; if
+        # the field does not exist in any samples in the hierarchy, should
+        # return 'None'
+        expected_result = 'mockvalue' if field_level >= 0 else None
+        assert(value == expected_result)
 
     def test_search_ancestors_no_parent(self, mock_db):
-        # GIVEN an existing sample with that has no 'parentId' field
-        logger.info("test `search_ancestors()`, no parent indicated")
-
+        # AND a hierarchy of objects in the 'samples' collection, but
+        # parent relationship indicator is missing
         mock_db.samples.insert(
-            {'_id': 'mocksample'})
+            {'_id': 'sample0'})
         mock_db.samples.insert(
-            {'_id': 'mockparent',
-             'mockfield': 'mockvalue'})
+            {'_id': 'sample1', 'mockfield': 'mockvalue'})
 
-        # WHEN searching for the field among all sample ancestors
-        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
-
-        # THEN should return None
-        assert(value is None)
-
-    def test_search_ancestors_no_field(self, mock_db):
-        # GIVEN an existing sample with no ancestors that include the
-        # input field
-        logger.info("test `search_ancestors()`, no parent indicated")
-
-        mock_db.samples.insert(
-            {'_id': 'mocksample',
-             'parentId': 'mockparent'})
-        mock_db.samples.insert(
-            {'_id': 'mockparent'})
-
-        # WHEN searching for the field among all sample ancestors
-        value = genlims.search_ancestors(mock_db, 'mocksample', 'mockfield')
+        # WHEN searching for the field among all sample ancestors in
+        # the hierarchy
+        value = genlims.search_ancestors(mock_db, 'sample0', 'mockfield')
 
         # THEN should return None
         assert(value is None)
 
 
 class TestMapping:
-    # GIVEN any state
+    @pytest.mark.parametrize(
+        'test_input, expected_result',
+        [
+            ({'aB': None}, {'a_b': None}),
+            ({'aB': [{'bC': None}]}, {'a_b': [{'b_c': None}]}),
+            ({'_id': None}, {'_id': None}),
+        ]
+    )
+    def test_map_keys(self, test_input, expected_result):
+        # GIVEN any state
 
-    def test_map_keys(self):
-        logger.info("test `map_keys()`")
-
-        # WHEN formatting camel-case keys/fields in an object
+        # WHEN camelCase keys/fields in an object are converted to snake_case
 
         # THEN keys at all nested levels should be converted to snake case
         # (with the exception of '_id', which should be unchangedj)
-        assert(genlims.map_keys({'aB': None}) == {'a_b': None})
-        assert(genlims.map_keys({'aB': [{'bC': None}]}) ==
-            {'a_b': [{'b_c': None}]})
-        assert(genlims.map_keys({'_id': None}) == {'_id': None})
+        assert(genlims.map_keys(test_input) == expected_result)
 
     def test_get_model_class(self):
-        logger.info("test `_get_model_class()`")
+        # GIVEN any state
 
         # WHEN searching for matched model class based on object type
 
@@ -398,9 +289,9 @@ class TestMapping:
                == 'Library')
 
     def test_map_to_object(self):
-        logger.info("test `map_to_object()`")
+        # GIVEN any state
 
-        # WHEN mapping a database object to a class instance
+        # WHEN mapping a database object to a model class instance
         doc = {'_id': 'lib7293_C6VG0ANXX',
                'parentId': 'lib7293',
                'type': 'sequenced library',

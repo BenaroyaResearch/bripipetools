@@ -178,7 +178,6 @@ class TestProcessedLibrary:
     """
     Tests methods and behavior for ``ProcessedLibrary`` objects.
     """
-
     @pytest.fixture(scope='function')
     def proclibobject(self):
         logger.debug("[setup] ProcessedLibrary test instance")
@@ -208,7 +207,6 @@ class TestRun:
     """
     Tests behavior of objects mapping to the 'runs' collection.
     """
-
     @pytest.fixture(
         scope='function',
         params=[
@@ -241,7 +239,6 @@ class TestFlowcellRun:
     """
     Tests methods and behavior for ``FlowcellRun`` objects.
     """
-
     @pytest.fixture(scope='function')
     def fcrunobject(self):
         logger.debug("[setup] FlowcellRun test instance")
@@ -266,11 +263,11 @@ class TestFlowcellRun:
         # THEN the output should be the updated processed data value
         assert(fcrunobject.flowcell_path == '/~/path-to-flowcell')
 
+
 class TestWorkflow:
     """
     Tests behavior of objects mapping to the 'workflows' collection.
     """
-
     @pytest.fixture(
         scope='function',
         params=[
@@ -298,12 +295,12 @@ class TestWorkflow:
         assert (all({hasattr(wkflowobject, field)
                      for field in ['_id']}))
 
+
 class TestWorkflowBatch:
     """
     Tests behavior of objects mapping to the 'workflowbatches'
     collection.
     """
-
     @pytest.fixture(
         scope='function',
         params=[
