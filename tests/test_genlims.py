@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def mock_db():
     # GIVEN a mocked version of the TG3 Mongo database
     logger.debug(("[setup] mock database, connect "
-                 "to mock Mongo database"))
+                  "to mock Mongo database"))
 
     yield mongomock.MongoClient().db
     logger.debug(("[teardown] mock database, disconnect "
