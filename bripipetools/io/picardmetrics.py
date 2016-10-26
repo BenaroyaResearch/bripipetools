@@ -83,7 +83,6 @@ class PicardMetricsFile(object):
         for tr in table.findAll('tr'):
             if re.search(u'\xa0', tr.text):
                 return {}
-                break
             for td in tr.findAll('td'):
                 if re.search('^[A-Z]+', td.text):
                     td_keys = td.text.split('\t')

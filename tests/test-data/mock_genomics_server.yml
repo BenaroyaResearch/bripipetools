@@ -42,6 +42,7 @@ out_types:
             file: &htseq_counts_file !ujoin [*htseq, counts.txt]
             combined: &combined_counts_file combined_counts.csv
             raw_len: 64253
+            parse_len: 64253
     alignments:
         - &tophat_align tophat_alignments.bam
     log:
