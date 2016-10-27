@@ -1,6 +1,4 @@
 """
-bripipetools ``io` module
-
 Contains class representations of various file types produced through
 the generation or processing of genomics data. In particular, most of
 these classes provide methods for reading and parsing raw data from

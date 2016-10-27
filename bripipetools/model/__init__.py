@@ -1,6 +1,4 @@
 """
-bripipetools ``model`` module
-
 Establishes the underlying data model linking data from bioinformatics
 processing pipelines to the GenLIMS/TG3 database. Python class
 representations of database objects (documents) are defined in the

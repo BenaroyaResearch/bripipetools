@@ -1,6 +1,4 @@
 """
-bripipetools ``parsing`` module
-
 Slightly more specialized than methods in the ``util.strings`` module,
 provides functions for parsing and extracting information from strings
 that follow some expected nomenclature. The primary examples of this
