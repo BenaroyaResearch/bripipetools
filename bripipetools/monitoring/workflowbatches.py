@@ -8,6 +8,8 @@ import re
 from .. import util
 from .. import io
 
+logger = logging.getLogger(__name__)
+
 
 class WorkflowBatchMonitor(object):
     def __init__(self, workflowbatch_file, genomics_root):
@@ -25,69 +27,69 @@ class WorkflowBatchMonitor(object):
             state='submit'
         ).parse()
 
-    def _get_outputs(self):
-        """
-
-        :return:
-        """
-        yield {{p['tag']: p['value'] for p in sample_params
-                if p['type'] == 'output' and p['name'] == 'to_path'}
-               for sample_params in self.workflowbatch_data['samples']}
-
-    def _clean_output_paths(self):
-        """
-        Replaces ambigious file path roots with current system root.
-        """
-        sample_output_map = self.sample_output_map
-        current_root = files.locate_root_folder('genomics')
-
-        for (sample, sample_files) in sample_output_map.items():
-            for file_id in sample_files:
-                sample_files[file_id] = util.swap_root(sample_files[file_id],
-                                                        'genomics',
-                                                        current_root)
-
-        self.sample_output_map = sample_output_map
-
-    def check_outputs(self):
-        """
-        Check whether all expected output files are present for each sample in
-        the batch.
-
-        :rtype: dict
-        :return: A dict, where for each ``sample``, output files are flagged as
-            ok, missing, or empty.
-        """
-        sample_output_map = self.sample_output_map
-
-        output_status_dict = {}
-        for sample in sample_output_map:
-            output_list = [{'path': v, 'type': k}
-                           for (k, v) in sample_output_map[sample].items()]
-
-            for f in output_list:
-                f['exists'] = os.path.exists(f['path'])
-                f['size'] = os.stat(f['path']).st_size if f['exists'] else 0
-                if not f['exists']:
-                    f['status'] = 'missing'
-                else:
-                    f['status'] = 'empty' if f['size'] == 0 else 'ok'
-            output_status_dict[sample] = output_list
-
-        return output_status_dict
-
-    def report_problem_outputs(self):
-        """
-        Return non-zero status and display missing/empty files (if any exist).
-        """
-        # TODO: turn this into an actual error message / raise exception
-        output_status_dict = self.check_outputs()
-
-        problem_outputs = [(sample, output['path'])
-                           for sample in output_status_dict
-                           for output in output_status_dict[sample]
-                           if output['status'] != 'ok']
-
-        if len(problem_outputs):
-            return problem_outputs
+    # def _get_outputs(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     yield {{p['tag']: p['value'] for p in sample_params
+    #             if p['type'] == 'output' and p['name'] == 'to_path'}
+    #            for sample_params in self.workflowbatch_data['samples']}
+    #
+    # def _clean_output_paths(self):
+    #     """
+    #     Replaces ambigious file path roots with current system root.
+    #     """
+    #     sample_output_map = self.sample_output_map
+    #     current_root = files.locate_root_folder('genomics')
+    #
+    #     for (sample, sample_files) in sample_output_map.items():
+    #         for file_id in sample_files:
+    #             sample_files[file_id] = util.swap_root(sample_files[file_id],
+    #                                                     'genomics',
+    #                                                     current_root)
+    #
+    #     self.sample_output_map = sample_output_map
+    #
+    # def check_outputs(self):
+    #     """
+    #     Check whether all expected output files are present for each sample in
+    #     the batch.
+    #
+    #     :rtype: dict
+    #     :return: A dict, where for each ``sample``, output files are flagged as
+    #         ok, missing, or empty.
+    #     """
+    #     sample_output_map = self.sample_output_map
+    #
+    #     output_status_dict = {}
+    #     for sample in sample_output_map:
+    #         output_list = [{'path': v, 'type': k}
+    #                        for (k, v) in sample_output_map[sample].items()]
+    #
+    #         for f in output_list:
+    #             f['exists'] = os.path.exists(f['path'])
+    #             f['size'] = os.stat(f['path']).st_size if f['exists'] else 0
+    #             if not f['exists']:
+    #                 f['status'] = 'missing'
+    #             else:
+    #                 f['status'] = 'empty' if f['size'] == 0 else 'ok'
+    #         output_status_dict[sample] = output_list
+    #
+    #     return output_status_dict
+    #
+    # def report_problem_outputs(self):
+    #     """
+    #     Return non-zero status and display missing/empty files (if any exist).
+    #     """
+    #     # TODO: turn this into an actual error message / raise exception
+    #     output_status_dict = self.check_outputs()
+    #
+    #     problem_outputs = [(sample, output['path'])
+    #                        for sample in output_status_dict
+    #                        for output in output_status_dict[sample]
+    #                        if output['status'] != 'ok']
+    #
+    #     if len(problem_outputs):
+    #         return problem_outputs
 

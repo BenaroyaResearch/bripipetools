@@ -4,3 +4,4 @@ methods here are designed to inspect files on the server and report on
 various indicators of state (e.g., file existence, access, completion,
 size, etc.).
 """
+from .workflowbatches import WorkflowBatchMonitor
