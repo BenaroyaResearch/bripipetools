@@ -26,28 +26,25 @@ class WorkflowBatchMonitor(object):
             self.workflowbatch_file,
             state='submit'
         ).parse()
+        self.genomics_root = genomics_root
 
-    # def _get_outputs(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     yield {{p['tag']: p['value'] for p in sample_params
-    #             if p['type'] == 'output' and p['name'] == 'to_path'}
-    #            for sample_params in self.workflowbatch_data['samples']}
-    #
-    # def _clean_output_paths(self):
-    #     """
-    #     Replaces ambigious file path roots with current system root.
-    #     """
-    #     sample_output_map = self.sample_output_map
-    #     current_root = files.locate_root_folder('genomics')
-    #
-    #     for (sample, sample_files) in sample_output_map.items():
-    #         for file_id in sample_files:
-    #             sample_files[file_id] = util.swap_root(sample_files[file_id],
-    #                                                     'genomics',
-    #                                                     current_root)
+    def _get_outputs(self):
+        """
+
+        :return:
+        """
+        return [{p['tag']: p['value'] for p in sample_params
+                 if p['type'] == 'output' and p['name'] == 'to_path'}
+                for sample_params in self.workflowbatch_data['samples']]
+
+    def _clean_output_paths(self):
+        """
+        Replaces ambiguous file path roots with current system root.
+        """
+        return [{out_tag: util.swap_root(out_path,
+                                         'genomics', self.genomics_root)
+                 for out_tag, out_path in sample_outputs.items()}
+                 for sample_outputs in self._get_outputs()]
     #
     #     self.sample_output_map = sample_output_map
     #
