@@ -1,11 +1,11 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 import os
 import yaml
 
 import pytest
-import mongomock
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def join(loader, node):

@@ -1,4 +1,4 @@
-import _mypath
+import scripts._mypath
 import sys, os, argparse, time, json, re
 from bripipetools.globusgalaxy import postprocessing
 
