@@ -8,6 +8,7 @@ from bripipetools import monitoring
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
 @pytest.fixture(
     scope='module',
     params=[{'runnum': r, 'batchnum': b}
@@ -27,10 +28,10 @@ def testprojects(request, mock_genomics_server):
     # GIVEN processing data for one of 3 example projects from a flowcell run
     rundata = mock_genomics_server['root']['genomics']['illumina']['runs'][0]
     projects = rundata['processed']['projects']
-    logger.debug(("[setup] test projects data"))
+    logger.debug("[setup] test projects data")
 
     yield projects
-    logger.debug(("[teardown] test projects data"))
+    logger.debug("[teardown] test projects data")
 
 
 class TestWorkflowBatchMonitor:
@@ -54,33 +55,64 @@ class TestWorkflowBatchMonitor:
         yield testmonitor, testbatch, projectdata
         logger.debug("[teardown] WorkflowBatchMonitor test instance")
 
-    def test_init(self, testmonitordata):
+    def test_get_outputs(self, testmonitordata):
         # (GIVEN)
         testmonitor, batchdata, projectdata = testmonitordata
 
-        # WHEN
-
-        # THEN
-        assert(hasattr(testmonitor, 'workflowbatch_data'))
-
-    def test_get_outputs(selfself, testmonitordata):
-        # (GIVEN)
-        testmonitor, batchdata, projectdata = testmonitordata
-
-        # WHEN
+        # WHEN expected output files are collected for the workflow batch,
+        # based on the parameters for each sample with type 'output'
         testoutputs = testmonitor._get_outputs()
 
-        # THEN
+        # THEN each sample should have the expected number of outputs
         assert(all(len(sampleoutputs) == batchdata['num_outputs']
                    for sampleoutputs in testoutputs))
 
-    def test_clean_output_paths(self, testmonitordata):
+    def test_clean_output_paths(self, testmonitordata, mock_genomics_server):
         # (GIVEN)
         testmonitor, batchdata, projectdata = testmonitordata
 
-        # WHEN
-        testoutputs = testmonitor._clean_output_paths()
+        # AND a mock list of outputs with expected format
+        outputs = [{'output1': '/mockroot/genomics/path-to-output1',
+                    'output2': '/mockroot/genomics/path-to-output2'},
+                   {'output1': '/mockroot/genomics/path-to-output1',
+                    'output2': '/mockroot/genomics/path-to-output2'}]
 
-        # THEN
-        assert (all(len(sampleoutputs) == batchdata['num_outputs']
-                    for sampleoutputs in testoutputs))
+        # WHEN the root of each output file path (i.e., the top level
+        # directory containing 'genomics') is replaced with the current
+        # 'genomics' root for the system
+        testoutputs = testmonitor._clean_output_paths(outputs)
+
+        # THEN each output file path should have the expected 'genomics' root
+        root_regex = re.compile('^{}genomics/'.format(
+            mock_genomics_server['root']['path']
+        ))
+        assert(all(root_regex.search(path)
+                   for sampleoutputs in testoutputs
+                   for path in sampleoutputs.values()))
+
+    def test_check_outputs(self, testmonitordata):
+        # (GIVEN)
+        testmonitor, batchdata, projectdata = testmonitordata
+
+        # WHEN the status of each output file in the workflow batch is
+        # checked based on presence and size
+        outputstatus = testmonitor.check_outputs()
+
+        # THEN the dict describing status for each output file should include
+        # fields for 'exists', 'size', and 'status'; for the test batches on
+        # the mock 'genomics' server, FASTQ files should be missing, BAM files
+        # should be empty, and all other files should be OK
+        assert(all(field in outinfo
+                   for field in ['exists', 'size', 'status']
+                   for outinfo in outputstatus.values()))
+        assert(all(outinfo['status'] == 'missing'
+                   for outpath, outinfo in outputstatus.items()
+                   if re.search('\.fastq', outpath)))
+        assert (all(outinfo['status'] == 'empty'
+                    for outpath, outinfo in outputstatus.items()
+                    if re.search('\.bam', outpath)))
+        assert (all(outinfo['status'] == 'ok'
+                    for outpath, outinfo in outputstatus.items()
+                    if not re.search('\.(fastq|bam)', outpath)))
+
+
