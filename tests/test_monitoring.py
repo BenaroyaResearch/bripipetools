@@ -39,7 +39,7 @@ class TestWorkflowBatchMonitor:
     )
     def testmonitordata(self, mock_genomics_server, testbatch, testprojects):
         # GIVEN a WorkflowBatchMonitor for a processing batch
-        logger.info("[setup] WorkflowBatchMonitor test instance")
+        logger.debug("[setup] WorkflowBatchMonitor test instance")
 
         testmonitor = monitoring.WorkflowBatchMonitor(
             workflowbatch_file=testbatch['path'],
@@ -52,7 +52,7 @@ class TestWorkflowBatchMonitor:
                        if re.search(batch_p, p['path'])]
 
         yield testmonitor, testbatch, projectdata
-        logger.info("[teardown] WorkflowBatchMonitor test instance")
+        logger.debug("[teardown] WorkflowBatchMonitor test instance")
 
     def test_init(self, testmonitordata):
         # (GIVEN)
