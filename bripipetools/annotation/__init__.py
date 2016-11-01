@@ -9,5 +9,7 @@ are retrieved directly from the database; for new objects or objects
 with missing fields, information is compiled, parsed, and formatted
 (as needed) from files on the server.
 """
-from .illuminaseq import FlowcellRunAnnotator, SequencedLibraryAnnotator
-from .globusgalaxy import WorkflowBatchAnnotator, ProcessedLibraryAnnotator
+from .sequencedlibs import SequencedLibraryAnnotator
+from .flowcellruns import FlowcellRunAnnotator
+from .processedlibs import ProcessedLibraryAnnotator
+from .workflowbatches import WorkflowBatchAnnotator
