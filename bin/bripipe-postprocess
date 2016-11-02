@@ -8,6 +8,7 @@ import argparse
 
 from bripipetools import postprocess
 
+
 def parse_input_args(parser=None):
     parser.add_argument('-p', '--processed_project_path',
                         required=True,
@@ -41,11 +42,10 @@ def parse_input_args(parser=None):
                         help=("Set logging level to debug"))
 
     # Parse and collect input arguments
-    args = parser.parse_args()
-
     return parser.parse_args()
 
-def main(argv):
+
+def main():
     parser = argparse.ArgumentParser()
     args = parse_input_args(parser)
 
@@ -91,4 +91,4 @@ def main(argv):
         postprocess.OutputCompiler(combined_paths).write_table()
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])
