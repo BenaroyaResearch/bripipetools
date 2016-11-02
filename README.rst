@@ -1,9 +1,9 @@
 
-.. image:: https://img.shields.io/travis/jaeddy/bripipetools.svg
-        :target: https://travis-ci.org/jaeddy/bripipetools
+.. image:: https://img.shields.io/travis/BenaroyaResearch/bripipetools.svg
+        :target: https://travis-ci.org/BenaroyaResearch/bripipetools
 
-.. image:: https://img.shields.io/coveralls/jaeddy/bripipetools.svg
-        :target: https://coveralls.io/github/jaeddy/bripipetools
+.. image:: https://img.shields.io/coveralls/BenaroyaResearch/bripipetools.svg
+        :target: https://coveralls.io/github/BenaroyaResearch/bripipetools
 
 .. image:: https://readthedocs.org/projects/bripipetools/badge/?version=latest
         :target: http://bripipetools.readthedocs.io/en/latest/?badge=latest
