@@ -22,7 +22,7 @@ class WorkflowBatchAnnotator(object):
     Identifies, stores, and updates information about a workflow batch.
     """
     def __init__(self, workflowbatch_file, genomics_root, db):
-        logger.info("creating an instance of WorkflowBatchAnnotator")
+        logger.debug("creating an instance of WorkflowBatchAnnotator")
         self.workflowbatch_file = workflowbatch_file
         self.db = db
 
@@ -55,7 +55,7 @@ class WorkflowBatchAnnotator(object):
         Try to retrieve data for the workflow batch from GenLIMS; if
         unsuccessful, create new ``GalaxyWorkflowBatch`` object.
         """
-        logger.info("initializing GalaxyWorkflowBatch instance")
+        logger.debug("initializing GalaxyWorkflowBatch instance")
         workflowbatch_file = util.swap_root(self.workflowbatch_file,
                                             'genomics', '/')
 

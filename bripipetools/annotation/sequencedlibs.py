@@ -18,8 +18,8 @@ class SequencedLibraryAnnotator(object):
     Identifies, stores, and updates information about a sequenced library.
     """
     def __init__(self, path, library, project, run_id, db):
-        logger.info("creating an instance of SequencedLibraryAnnotator "
-                    "for library {}".format(library))
+        logger.debug("creating an instance of SequencedLibraryAnnotator "
+                     "for library {}".format(library))
         self.path = path
         self.db = db
         self.library_id = parsing.get_library_id(library)
@@ -35,7 +35,7 @@ class SequencedLibraryAnnotator(object):
         Try to retrieve data for the sequenced library from GenLIMS;
         if unsuccessful, create new ``SequencedLibrary`` object.
         """
-        logger.info("initializing SequencedLibrary instance")
+        logger.debug("initializing SequencedLibrary instance")
         try:
             logger.debug("getting SequencedLibrary from GenLIMS")
             return genlims.map_to_object(

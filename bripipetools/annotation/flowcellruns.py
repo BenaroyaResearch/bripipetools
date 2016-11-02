@@ -19,8 +19,8 @@ class FlowcellRunAnnotator(object):
     Identifies, stores, and updates information about a flowcell run.
     """
     def __init__(self, run_id, genomics_root, db):
-        logger.info("creating instance of FlowcellRunAnnotator for run ID {}"
-                    .format(run_id))
+        logger.debug("creating instance of FlowcellRunAnnotator for run ID {}"
+                     .format(run_id))
         self.run_id = run_id
         self.db = db
         self.flowcellrun = self._init_flowcellrun()
@@ -33,7 +33,7 @@ class FlowcellRunAnnotator(object):
         Try to retrieve data for the flowcell run from GenLIMS; if
         unsuccessful, create new ``FlowcellRun`` object.
         """
-        logger.info("initializing FlowcellRun instance")
+        logger.debug("initializing FlowcellRun instance")
         try:
             logger.debug("getting FlowcellRun from GenLIMS")
             return genlims.map_to_object(
@@ -47,7 +47,7 @@ class FlowcellRunAnnotator(object):
         Find path to flowcell folder on the server.
         """
         illumina_path = os.path.join(self.genomics_path, 'Illumina')
-        logger.debug("searching for flowcell folder")
+        logger.info("searching for flowcell folder")
         try:
             return [os.path.join(illumina_path, p)
                     for p in os.listdir(illumina_path)
@@ -61,6 +61,7 @@ class FlowcellRunAnnotator(object):
         """
         Find path to unaligned data in flowcell folder.
         """
+        logger.info("searching for 'Unaligned' folder")
         try:
             return os.path.join(self._get_flowcell_path(), 'Unaligned')
         except OSError:

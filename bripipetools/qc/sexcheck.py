@@ -20,12 +20,12 @@ class SexChecker(object):
     """
     def __init__(self, processedlibrary, reference, workflowbatch_id,
                  genomics_root):
-        logger.info("creating an instance of SexChecker for processed"
-                    " library '{}', workflow batch ID '{}', with "
-                    "genomics root '{}'"
-                    .format(processedlibrary._id,
-                            workflowbatch_id,
-                            genomics_root))
+        logger.debug("creating an instance of SexChecker for processed"
+                     " library '{}', workflow batch ID '{}', with "
+                     "genomics root '{}'"
+                     .format(processedlibrary._id,
+                             workflowbatch_id,
+                             genomics_root))
         self.processedlibrary = processedlibrary
         self.reference = reference
         self.workflowbatch_id = workflowbatch_id
@@ -159,6 +159,7 @@ class SexChecker(object):
         if 'sex_check' not in self.data:
             logger.debug("predicting sex based on Y-to-X gene ratio")
             self._predict_sex()
+        self._write_data(self.data)
         processed_data = [d for d in self.processedlibrary.processed_data
                           if d['workflowbatch_id']
                           == self.workflowbatch_id][0]
