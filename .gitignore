@@ -21,3 +21,6 @@ tmp
 
 # PyCharm files
 .idea
+
+# BRI-specific config files
+bri*.ini

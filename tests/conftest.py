@@ -8,6 +8,8 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
+os.environ['DB_PARAM_FILE'] = 'default.ini'
+
 def join(loader, node):
     """
     Join YAML list items with no separator.
