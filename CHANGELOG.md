@@ -1,5 +1,11 @@
 **Note:** during early development (until package is a bit more stable), intermediate patches and bug fixes will only be listed separately in the changelog up to the point of a new major and minor versions &mdash; at that point, they will be lumped together under the major/minor release description
 
+**[v0.3.3](https://github.com/jaeddy/bripipetools/tree/e7a9b553c1e2882bc05215b564f7baff827210d4) - 2016-11-02**
+
++ New `monitoring` module for inspecting/reporting status of various pipeline steps &mdash; i.e., file existence, access, completion, status, etc.
++ Removal of deprecated code & files from old `globusgalaxy` module (a holdover from earlier package organization).
++ Cleaned up & better organized test modules, slightly extended documentation at the module level.
+
 **[v0.3.2](https://github.com/jaeddy/bripipetools/tree/d7da7683cca4467361f5131de901368d59b5f91d) - 2016-10-18**
 
 + Lots of improvements and additions to the sex check validation in the `qc` module; data from this module are now available through both the `dbify` and `postprocess` entry points.
