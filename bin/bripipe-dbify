@@ -19,7 +19,7 @@ def parse_input_args(parser=None):
                               "or workflow batch file"))
     parser.add_argument('-d', '--debug',
                         action='store_true',
-                        help=("Set logging level to debug"))
+                        help="Set logging level to debug")
 
     # Parse and collect input arguments
     return parser.parse_args()
