@@ -16,7 +16,7 @@ class ImportManager(object):
     appropriate importer class and makes insert command available.
     """
     def __init__(self, path, db):
-        logger.info("creating an instance of ImportManager")
+        logger.debug("creating an instance of ImportManager")
         logger.debug("...with arguments (path: {}, db: {})"
                      .format(path, db.name))
         self.path = path
@@ -28,7 +28,7 @@ class ImportManager(object):
         Check path for known patterns and return path type for importer.
         """
         path_types = {
-            'flowcell_path': re.compile('Illumina/.*XX$'),
+            'flowcell_path': re.compile('Illumina/.*X(X|Y)$'),
             'workflowbatch_file': re.compile('batch_submission.*\.txt$')
         }
         return [k for k, v in path_types.items()

@@ -16,7 +16,7 @@ class ProcessedLibraryAnnotator(object):
     Identifies, stores, and updates information about a processed library.
     """
     def __init__(self, workflowbatch_id, params, db):
-        logger.info("creating an instance of ProcessedLibraryAnnotator")
+        logger.debug("creating an instance of ProcessedLibraryAnnotator")
         self.workflowbatch_id = workflowbatch_id
         logger.debug("workflowbatch_id set to {}".format(workflowbatch_id))
         self.db = db
@@ -37,7 +37,7 @@ class ProcessedLibraryAnnotator(object):
         Try to retrieve data for the processed library from GenLIMS;
         if unsuccessful, create new ``ProcessedLibrary`` object.
         """
-        logger.info("initializing ProcessedLibrary instance")
+        logger.debug("initializing ProcessedLibrary instance")
 
         try:
             logger.debug("getting ProcessedLibrary from GenLIMS")

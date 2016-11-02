@@ -1,4 +1,4 @@
 libId,predicted_sex,sex_check,sexcheck_cutoff,sexcheck_eqn,total_counts,x_counts,x_genes,y_counts,y_genes,y_x_count_ratio,y_x_gene_ratio
-lib6624_C6VG0ANXX,,,,,,,,,,,
-lib6618_C6VG0ANXX,,,,,,,,,,,
-lib6615_C6VG0ANXX,,,,,,,,,,,
+lib6624_C6VG0ANXX,female,NA,1,(y_counts^2 / total_counts) > cutoff,52073,1748,287,2,1,0.0011441647597254005,0.003484320557491289
+lib6618_C6VG0ANXX,female,NA,1,(y_counts^2 / total_counts) > cutoff,56765,2068,332,0,0,0.0,0.0
+lib6615_C6VG0ANXX,female,NA,1,(y_counts^2 / total_counts) > cutoff,55718,2065,332,1,1,0.00048426150121065375,0.0030120481927710845
