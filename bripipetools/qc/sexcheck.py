@@ -8,6 +8,7 @@ import csv
 import pandas as pd
 
 from .. import parsing
+from . import SexPredictor, SexVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class SexChecker(object):
     based on pre-defined rule.
     """
     def __init__(self, processedlibrary, reference, workflowbatch_id,
-                 genomics_root):
+                 genomics_root, db):
         logger.debug("creating an instance of SexChecker for processed"
                      " library '{}', workflow batch ID '{}', with "
                      "genomics root '{}'"
@@ -30,6 +31,7 @@ class SexChecker(object):
         self.reference = reference
         self.workflowbatch_id = workflowbatch_id
         self.genomics_root = genomics_root
+        self.db = db
         self._compute_x_y_data()
 
     def _load_x_genes(self, ref='grch38'):
@@ -76,58 +78,36 @@ class SexChecker(object):
 
     def _compute_x_y_data(self):
         """
-        Count and store the number of Y and X genes detected, where
-        detected = count > 0, as well as the total number of Y and X
-        counts.
+        Collect and store X and Y gene/count data as well as total counts
+        for the current processed library.
         """
         self._get_x_y_counts()
-        self.data = {}
-        self.data['x_genes'] = len(self.x_counts)
-        self.data['y_genes'] = len(self.y_counts)
-        self.data['x_counts'] = sum(self.x_counts['count'])
-        self.data['y_counts'] = sum(self.y_counts['count'])
-        self.data['total_counts'] = self.total_counts
-
-    def _compute_y_x_gene_ratio(self):
-        """
-        Calculate the ratio of Y genes detected to X genes detected.
-        """
-        self.data['y_x_gene_ratio'] = (float(self.data['y_genes'])
-                                       / float(self.data['x_genes']))
-
-    def _compute_y_x_count_ratio(self):
-        """
-        Calculate the ratio of Y counts to X counts.
-        """
-        self.data['y_x_count_ratio'] = (float(self.data['y_counts'])
-                                        / float(self.data['x_counts']))
+        self.data = {
+            'x_genes': len(self.x_counts),
+            'y_genes': len(self.y_counts),
+            'x_counts': sum(self.x_counts['count']),
+            'y_counts': sum(self.y_counts['count']),
+            'total_counts': self.total_counts,
+        }
 
     def _predict_sex(self):
         """
-        Returns predicted sex based on X/Y gene equation and cutoff.
+        Return predicted sex based on X/Y gene equation and cutoff.
         """
-        self._compute_y_x_gene_ratio()
-        logger.debug("ratio of detected Y genes to detected X genes: {}"
-                     .format(self.data['y_x_gene_ratio']))
+        logger.debug("adding sex check QC info for {}"
+                     .format(self.processedlibrary._id))
+        self.data = SexPredictor(self.data).predict()
 
-        self._compute_y_x_count_ratio()
-        logger.debug("ratio of Y counts to X counts: {}"
-                     .format(self.data['y_x_count_ratio']))
-
-        cutoff = 1
-        equation = '(y_counts^2 / total_counts) > cutoff'
-        value = (float(self.data['y_counts']**2)
-                 / float(self.data['total_counts']))
-        logger.debug("value for {} is {}"
-                     .format(self.processedlibrary._id, value))
-        self.data['sexcheck_eqn'] = equation
-        self.data['sexcheck_cutoff'] = cutoff
-
-        if value > cutoff:
-            self.data['predicted_sex'] = 'male'
-        else:
-            self.data['predicted_sex'] = 'female'
-        self.data['sex_check'] = None
+    def _verify_sex(self):
+        """
+        Compare predicted sex to reported sex.
+        """
+        logger.debug("verifying sex prediction")
+        self.data = SexVerifier(
+            data=self.data,
+            processedlibrary=self.processedlibrary,
+            db=self.db
+            ).verify()
 
     def _write_data(self, data):
         """
@@ -156,12 +136,16 @@ class SexChecker(object):
         Add predicted sex validation field to processed library outputs and
         return processed library object.
         """
-        if 'sex_check' not in self.data:
-            logger.debug("predicting sex based on Y-to-X gene ratio")
-            self._predict_sex()
-        self._write_data(self.data)
+        if self.reference != 'grch38':
+            return self.processedlibrary
+
         processed_data = [d for d in self.processedlibrary.processed_data
                           if d['workflowbatch_id']
                           == self.workflowbatch_id][0]
+        logger.debug("predicting sex based on Y-to-X gene ratio")
+        self._predict_sex()
+        self._verify_sex()
+        self._write_data(self.data)
+
         processed_data.setdefault('validation', {})['sex_check'] = self.data
         return self.processedlibrary
