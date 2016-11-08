@@ -199,44 +199,63 @@ class TestSexChecker:
     #                        'predicted_sex', 'sex_check']]))
 
 
-# def TestSexPredict:
-    # def test_compute_y_x_gene_ratio(self, checkerdata):
-    #     # (GIVEN)
-    #     checker, sampledata, _ = checkerdata
-    #     expected_y_x_ratio = (float(sampledata['y_total'])
-    #                           / float(sampledata['x_total']))
-    #
-    #     logger.info("test `_compute_y_x_ratio()`")
-    #
-    #     # WHEN ratio of Y genes detected to X genes detected is computed
-    #     checker._compute_y_x_gene_ratio()
-    #
-    #     # THEN ratio should be expected value
-    #     assert(checker.data['y_x_gene_ratio'] == expected_y_x_ratio)
-    #
-    # def test_compute_y_x_count_ratio(self, checkerdata):
-    #     # (GIVEN)
-    #     checker, sampledata, _ = checkerdata
-    #     expected_y_x_ratio = (float(sampledata['y_count'])
-    #                           / float(sampledata['x_count']))
-    #
-    #     logger.info("test `_compute_y_x_ratio()`")
-    #
-    #     # WHEN ratio of Y counts to X counts is computed
-    #     checker._compute_y_x_count_ratio()
-    #
-    #     # THEN ratio should be expected value
-    #     assert(checker.data['y_x_count_ratio'] == expected_y_x_ratio)
-    #
-    # def test_predict_sex(self, checkerdata):
-    #     # (GIVEN)
-    #     checker, sampledata, outputdata = checkerdata
-    #
-    #     logger.info("test `_predict_sex()`")
-    #
-    #     # WHEN sex is predicted
-    #     checker._predict_sex()
-    #
-    #     # THEN predicted sex should match reported sex
-    #     if outputdata['reported_sex'] != 'NA':
-    #         assert(checker.data['predicted_sex'] == outputdata['reported_sex'])
+class TestSexPredict:
+    @pytest.fixture(scope='class')
+    def predictordata(self, request, mock_proclibdata, mock_db,
+                    mock_genomics_server):
+        # (GIVEN)
+        _, sampledata, _ = mock_proclibdata
+        mock_countdata = {'x_genes': sampledata['x_total'],
+                          'y_genes': sampledata['y_total'],
+                          'x_counts': sampledata['x_count'],
+                          'y_counts': sampledata['y_count'],
+                          'total_counts': 10000}
+        logger.info("[setup] sexchecker test instance")
+
+        # AND
+        sexpredictor = qc.SexPredictor(
+            data=mock_countdata,
+        )
+
+        yield sexpredictor, sampledata
+        logger.info("[teardown] FlowcellRunAnnotator mock instance")
+
+    def test_compute_y_x_gene_ratio(self, predictordata):
+        # (GIVEN)
+        predictor, sampledata = predictordata
+        expected_y_x_ratio = (float(sampledata['y_total'])
+                              / float(sampledata['x_total']))
+
+        logger.info("test `_compute_y_x_ratio()`")
+
+        # WHEN ratio of Y genes detected to X genes detected is computed
+        predictor._compute_y_x_gene_ratio()
+
+        # THEN ratio should be expected value
+        assert(predictor.data['y_x_gene_ratio'] == expected_y_x_ratio)
+
+    def test_compute_y_x_count_ratio(self, predictordata):
+        # (GIVEN)
+        predictor, sampledata = predictordata
+        expected_y_x_ratio = (float(sampledata['y_count'])
+                              / float(sampledata['x_count']))
+
+        logger.info("test `_compute_y_x_ratio()`")
+
+        # WHEN ratio of Y counts to X counts is computed
+        predictor._compute_y_x_count_ratio()
+
+        # THEN ratio should be expected value
+        assert(predictor.data['y_x_count_ratio'] == expected_y_x_ratio)
+
+    def test_predict_sex(self, predictordata):
+        # (GIVEN)
+        predictor, _ = predictordata
+
+        logger.info("test `_predict_sex()`")
+
+        # WHEN sex is predicted
+        predictor._predict_sex()
+
+        # THEN predicted sex should match reported sex
+        assert(predictor.data['predicted_sex'] in ['male', 'female'])
