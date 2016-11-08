@@ -74,7 +74,7 @@ class TestSexChecker:
         # (GIVEN)
         mock_proclib, sampledata, outputdata = mock_proclibdata
 
-        logger.info("[setup] sexchecker test instance")
+        logger.info("[setup] SexChecker test instance")
 
         # AND a SexChecker with mock processed library and specified
         # workflow batch ID
@@ -86,10 +86,8 @@ class TestSexChecker:
             db=mock_db
         )
 
-        def fin():
-            logger.info("[teardown] FlowcellRunAnnotator mock instance")
-        request.addfinalizer(fin)
-        return sexchecker, sampledata, outputdata
+        yield sexchecker, sampledata, outputdata
+        logger.info("[teardown] SexChecker mock instance")
 
     def test_load_x_genes(self, checkerdata):
         # (GIVEN)
@@ -210,7 +208,7 @@ class TestSexPredict:
                           'x_counts': sampledata['x_count'],
                           'y_counts': sampledata['y_count'],
                           'total_counts': 10000}
-        logger.info("[setup] sexchecker test instance")
+        logger.info("[setup] SexPredictor test instance")
 
         # AND
         sexpredictor = qc.SexPredictor(
@@ -218,7 +216,7 @@ class TestSexPredict:
         )
 
         yield sexpredictor, sampledata
-        logger.info("[teardown] FlowcellRunAnnotator mock instance")
+        logger.info("[teardown] SexPredictor mock instance")
 
     def test_compute_y_x_gene_ratio(self, predictordata):
         # (GIVEN)
@@ -259,3 +257,6 @@ class TestSexPredict:
 
         # THEN predicted sex should match reported sex
         assert(predictor.data['predicted_sex'] in ['male', 'female'])
+
+# class TestSexVerifier:
+
