@@ -30,7 +30,7 @@ def mock_db():
             for r in range(1)
             for p in range(3)
             for s in range(3)])
-def mock_proclibdata(request, mock_genomics_server):
+def testproclib(request, mock_genomics_server):
     # GIVEN a processed library object
     runs = mock_genomics_server['root']['genomics']['illumina']['runs']
     rundata = runs[request.param['runnum']]
@@ -59,20 +59,18 @@ def mock_proclibdata(request, mock_genomics_server):
              }
             }
         ],
+        parent_id='mock_sample',
         type='processed library')
 
-    def fin():
-        logger.info("[teardown] mock processed library object")
-    request.addfinalizer(fin)
-    return processedlibrary, sampledata, outputdata
+    yield processedlibrary, sampledata, outputdata
+    logger.info("[teardown] mock processed library object")
 
 
 class TestSexChecker:
     @pytest.fixture(scope='class')
-    def checkerdata(self, request, mock_proclibdata, mock_db,
-                    mock_genomics_server):
+    def checkerdata(self, testproclib, mock_db, mock_genomics_server):
         # (GIVEN)
-        mock_proclib, sampledata, outputdata = mock_proclibdata
+        mock_proclib, sampledata, outputdata = testproclib
 
         logger.info("[setup] SexChecker test instance")
 
@@ -152,6 +150,17 @@ class TestSexChecker:
         assert(checker.data['y_genes'] == sampledata['y_total'])
         assert(checker.data['y_counts'] == sampledata['y_count'])
 
+    def test_predict_sex(self, checkerdata):
+        # (GIVEN)
+        checker, _, _ = checkerdata
+
+        logger.info("test `_predict_sex()`")
+
+        # WHEN sex is predicted
+        checker._predict_sex()
+
+        # THEN predicted sex should match reported sex
+        assert(checker.data['predicted_sex'] in ['male', 'female'])
     #
     # def test_write_data(self, checkerdata):
     #     # (GIVEN)
@@ -199,10 +208,9 @@ class TestSexChecker:
 
 class TestSexPredict:
     @pytest.fixture(scope='class')
-    def predictordata(self, request, mock_proclibdata, mock_db,
-                    mock_genomics_server):
+    def predictordata(self, testproclib):
         # (GIVEN)
-        _, sampledata, _ = mock_proclibdata
+        _, sampledata, _ = testproclib
         mock_countdata = {'x_genes': sampledata['x_total'],
                           'y_genes': sampledata['y_total'],
                           'x_counts': sampledata['x_count'],
@@ -258,5 +266,60 @@ class TestSexPredict:
         # THEN predicted sex should match reported sex
         assert(predictor.data['predicted_sex'] in ['male', 'female'])
 
-# class TestSexVerifier:
+    def test_predict(self, predictordata):
+        # (GIVEN)
+        predictor, _ = predictordata
 
+        logger.info("test `predict()`")
+
+        # WHEN sex is predicted
+        predictor.predict()
+
+        # THEN predicted sex should match reported sex
+        assert(predictor.data['predicted_sex'] in ['male', 'female'])
+
+
+class TestSexVerifier:
+    @pytest.fixture(scope='class')
+    def verifierdata(self, testproclib, mock_db):
+        # (GIVEN)
+        processedlibrary, sampledata, _ = testproclib
+        testdata = {'predicted_sex': 'male'}
+
+        logger.info("[setup] SexVerifier test instance")
+
+        # AND
+        sexverifier = qc.SexVerifier(
+            data=testdata,
+            processedlibrary=processedlibrary,
+            db=mock_db,
+        )
+
+        yield sexverifier, sampledata
+        logger.info("[teardown] SexVerifier mock instance")
+
+    def test_retrieve_sex(self, verifierdata, testproclib, mock_db):
+        # (GIVEN)
+        verifier, _ = verifierdata
+
+        # AND a hierarchy of objects in the 'samples' collection, with
+        # parent relationship specified by the 'parentId' field
+        mock_db.samples.insert(
+            {'_id': testproclib[0]._id, 'parentId': testproclib[0].parent_id})
+        mock_db.samples.insert(
+            {'_id': 'mock_sample', 'reportedSex': 'male'})
+
+        # WHEN searching for the field among all sample ancestors in
+        # the hierarchy
+        reported_sex = verifier._retrieve_sex('mock_sample')
+
+        # THEN
+        assert(reported_sex == 'male')
+
+        mock_db.samples.drop()
+
+    def test_verify(self, verifierdata):
+        # (GIVEN)
+        verifier, _ = verifierdata
+
+        assert(verifier.verify()['sex_check'] == 'NA')
