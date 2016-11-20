@@ -56,7 +56,7 @@ class ProcessingImporter(object):
             workflowbatch_file=self.path,
             genomics_root=path_items['genomics_root'],
             db=self.db
-            ).get_processed_libraries(qc=False)
+            ).get_processed_libraries(qc=True)
 
     def _insert_workflowbatch(self):
         """

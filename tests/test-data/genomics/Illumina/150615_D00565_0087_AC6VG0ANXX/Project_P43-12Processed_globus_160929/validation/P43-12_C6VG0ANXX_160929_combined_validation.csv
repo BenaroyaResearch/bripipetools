@@ -1,4 +1,4 @@
 libId,predicted_sex,sex_check,sexcheck_cutoff,sexcheck_eqn,total_counts,x_counts,x_genes,y_counts,y_genes,y_x_count_ratio,y_x_gene_ratio
-lib6831_C6VG0ANXX,female,,1,(y_counts^2 / total_counts) > cutoff,33554,1089,289,31,10,0.028466483011937556,0.03460207612456748
-lib6838_C6VG0ANXX,female,,1,(y_counts^2 / total_counts) > cutoff,40467,1532,307,4,2,0.0026109660574412533,0.006514657980456026
-lib6837_C6VG0ANXX,female,,1,(y_counts^2 / total_counts) > cutoff,40582,1531,310,2,1,0.0013063357282821686,0.0032258064516129032
+lib6831_C6VG0ANXX,female,NA,1,(y_counts^2 / total_counts) > cutoff,33554,1089,289,31,10,0.028466483011937556,0.03460207612456748
+lib6838_C6VG0ANXX,female,NA,1,(y_counts^2 / total_counts) > cutoff,40467,1532,307,4,2,0.0026109660574412533,0.006514657980456026
+lib6837_C6VG0ANXX,female,NA,1,(y_counts^2 / total_counts) > cutoff,40582,1531,310,2,1,0.0013063357282821686,0.0032258064516129032
