@@ -154,56 +154,60 @@ class TestSexChecker:
         # (GIVEN)
         checker, _, _ = checkerdata
 
-        logger.info("test `_predict_sex()`")
-
         # WHEN sex is predicted
         checker._predict_sex()
 
         # THEN predicted sex should match reported sex
         assert(checker.data['predicted_sex'] in ['male', 'female'])
-    #
-    # def test_write_data(self, checkerdata):
-    #     # (GIVEN)
-    #     checker, _, outputdata = checkerdata
-    #
-    #     logger.info("test `_predict_sex()`")
-    #
-    #     # AND combined file does not already exist
-    #     expected_path = outputdata['path']
-    #     try:
-    #         os.remove(expected_path)
-    #     except OSError:
-    #         pass
-    #
-    #     # WHEN sex check data (a dict) is written to a new validation file
-    #     data = {'x_genes': None, 'y_genes': None, 'x_counts': None, 'y_counts': None, 'total_counts': None,
-    #             'y_x_gene_ratio': None, 'y_x_count_ratio': None, 'sexcheck_eqn': None, 'sexcheck_cutoff': None,
-    #             'predicted_sex': None, 'sex_check': None}
-    #     output = checker._write_data(data)
-    #
-    #     assert(output == expected_path)
-    #     assert(os.path.exists(expected_path))
-    #
-    # def test_update(self, checkerdata):
-    #     # (GIVEN)
-    #     checker, sampledata, _ = checkerdata
-    #     expected_y_x_ratio = (float(sampledata['y_total'])
-    #                  / float(sampledata['x_total']))
-    #
-    #     logger.info("test `update()`")
-    #
-    #     # WHEN sex check validation is appended to processed data for the
-    #     # processed library
-    #     processedlibrary = checker.update()
-    #
-    #     # THEN the processed library object should include the expected
-    #     # validation fields
-    #     assert(all(
-    #         [field in
-    #          processedlibrary.processed_data[0]['validation']['sex_check']
-    #          for field in ['x_genes', 'y_genes', 'x_counts', 'y_counts',
-    #                        'total_counts', 'y_x_gene_ratio', 'y_x_count_ratio',
-    #                        'predicted_sex', 'sex_check']]))
+
+    def test_verify_sex(self, checkerdata):
+        # (GIVEN)
+        checker, _, _ = checkerdata
+
+        # WHEN sex is verified
+        checker._verify_sex()
+
+        # THEN predicted sex should match reported sex
+        assert (checker.data['sex_check'] == 'NA')
+
+    def test_write_data(self, checkerdata):
+        # (GIVEN)
+        checker, _, outputdata = checkerdata
+
+        # AND combined file does not already exist
+        expected_path = outputdata['path']
+        try:
+            os.remove(expected_path)
+        except OSError:
+            pass
+
+        # WHEN sex check data (a dict) is written to a new validation file
+        data = {'x_genes': None, 'y_genes': None,
+                'x_counts': None, 'y_counts': None, 'total_counts': None,
+                'y_x_gene_ratio': None, 'y_x_count_ratio': None,
+                'sexcheck_eqn': None, 'sexcheck_cutoff': None,
+                'predicted_sex': None, 'sex_check': None}
+        output = checker._write_data(data)
+
+        assert(output == expected_path)
+        assert(os.path.exists(expected_path))
+
+    def test_update(self, checkerdata):
+        # (GIVEN)
+        checker, sampledata, _ = checkerdata
+
+        # WHEN sex check validation is appended to processed data for the
+        # processed library
+        processedlibrary = checker.update()
+
+        # THEN the processed library object should include the expected
+        # validation fields
+        assert(all(
+            [field in
+             processedlibrary.processed_data[0]['validation']['sex_check']
+             for field in ['x_genes', 'y_genes', 'x_counts', 'y_counts',
+                           'total_counts', 'y_x_gene_ratio', 'y_x_count_ratio',
+                           'predicted_sex', 'sex_check']]))
 
 
 class TestSexPredict:
