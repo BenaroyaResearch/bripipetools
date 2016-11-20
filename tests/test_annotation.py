@@ -545,40 +545,38 @@ class TestWorkflowBatchAnnotator:
         assert(all([type(pl) == docs.ProcessedLibrary
                     for pl in processedlibraries]))
 
-    # def test_verify_sex(self, annotatordata, mock_db):
-    #     # (GIVEN)
-    #     annotator, batchdata = annotatordata
-    #
-    #     # AND a processed library object
-    #     # TODO: not independent, fix...
-    #     processedlibrary = annotator.get_processed_libraries()[0]
-    #
-    #     mock_db.samples.insert({
-    #         '_id': processedlibrary.parent_id,
-    #         'reportedSex': 'female'})
-    #
-    #     # WHEN sex of processed library is verified
-    #     processedlibrary = annotator._verify_sex(processedlibrary)
-    #     validationdata = processedlibrary.processed_data[0]['validation']
-    #
-    #     assert(validationdata['sex_check']['sex_check'] is not None)
-    #
-    # def test_get_processed_libraries_w_qc(self, annotatordata):
-    #     # (GIVEN)
-    #     annotator, batchdata = annotatordata
-    #
-    #     logger.info("test `get_processed_libraries()`, add qc")
-    #
-    #     # WHEN collecting processed libraries for current workflow batch,
-    #     # and QC flag is set to True
-    #     processedlibraries = annotator.get_processed_libraries(qc=True)
-    #
-    #     # THEN should return 2 total processed libraries, each of which
-    #     # is a valid ProcessedLibrary object
-    #     assert(len(processedlibraries) == batchdata['num_samples'])
-    #     assert(all([type(pl) == docs.ProcessedLibrary
-    #                 for pl in processedlibraries]))
-    #     assert('validation' in processedlibraries[0].processed_data[0])
+    def test_check_sex(self, annotatordata, mock_db):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
+        # AND a processed library object
+        # TODO: not independent, fix...
+        processedlibrary = annotator.get_processed_libraries()[0]
+
+        mock_db.samples.insert({
+            '_id': processedlibrary.parent_id,
+            'reportedSex': 'female'})
+
+        # WHEN sex of processed library is verified
+        processedlibrary = annotator._check_sex(processedlibrary)
+        validationdata = processedlibrary.processed_data[0]['validation']
+
+        assert(validationdata['sex_check']['sex_check'] is not None)
+
+    def test_get_processed_libraries_w_qc(self, annotatordata):
+        # (GIVEN)
+        annotator, batchdata = annotatordata
+
+        # WHEN collecting processed libraries for current workflow batch,
+        # and QC flag is set to True
+        processedlibraries = annotator.get_processed_libraries(qc=True)
+
+        # THEN should return 2 total processed libraries, each of which
+        # is a valid ProcessedLibrary object
+        assert(len(processedlibraries) == batchdata['num_samples'])
+        assert(all([type(pl) == docs.ProcessedLibrary
+                    for pl in processedlibraries]))
+        assert('validation' in processedlibraries[0].processed_data[0])
 
 
 @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
