@@ -36,11 +36,15 @@ class TophatStatsFile(object):
             'of aligned segments had multiple alignments':
                 'algn_seg_with_mult_algn'
         }
-        return {metric_keys[l.strip().split('\t')[1]]: l.strip().split('\t')[0]
-                for l in self.data['raw']}
+        logger.debug("{}".format(self.data['raw']))
+        self.data['table'] = (
+            {metric_keys[l.strip().split('\t')[1]]: l.strip().split('\t')[0]
+             for l in self.data['raw']}
+            )
 
     def parse(self):
         """
         Parse metrics table and return dictionary.
         """
-        return self._parse_lines()
+        self._parse_lines()
+        return self.data['table']

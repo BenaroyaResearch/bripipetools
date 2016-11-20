@@ -209,65 +209,43 @@ class TestPicardMetricsFile:
 
 
 class TestTophatStatsFile:
-    # @pytest.fixture(
-    #     scope='class',
-    #     params=[(source, {'samplenum': s})
-    #             for s in range(3)
-    #             for source in
-    #             ['tophat_stats']]
-    # )
-    # def testfiledata(self, request, mock_genomics_server, testproject):
-    #     # GIVEN a TophatStatsFile for one of 3 example samples from a
-    #     # project, with known details about file path, length, etc.
-    #     sourcedata = testproject['metrics']['sources'][request.param[0]]
-    #     samplefile = sourcedata[request.param[1]['samplenum']]
-    #     logger.debug("[setup] TophatStatsFile test instance "
-    #                 "for file type '{}' for sample {}"
-    #                  .format(request.param[0], samplefile['sample']))
-    #
-    #     testfile = io.TophatStatsFile(path=samplefile['path'])
-    #     filedata = (mock_genomics_server['out_types']['metrics']
-    #                 [request.param[0]])
-    #     yield testfile, filedata
-    #     logger.debug("[teardown] TophatStatsFile mock instance")
 
-    def test_read_file(self, testfiledata):
-        # (GIVEN)
-        testfile, filedata = testfiledata
+    def test_read_file(self, tmpdir):
+        testcontents = 'testline\n'
+        testpath = mockstringfile(testcontents, tmpdir)
+        testfile = io.TophatStatsFile(path=testpath)
 
-        # WHEN the file specified by path is read
-        testfile._read_file()
-        raw_text = testfile.data['raw']
+        assert(len(testfile.data['raw']))
 
-        # THEN class should have raw text stored in data attribute and raw
-        # text should be a list of expected length
-        assert(raw_text)
-        assert(len(raw_text) == filedata['raw_len'])
-#
-#     def test_parse_lines(self, testfiledata):
-#         # (GIVEN)
-#         testfile, filedata = testfiledata
-#
-#         # WHEN text lines are parsed into key-value pairs based on column
-#         metrics = testfile._parse_lines()
-#
-#         # THEN output dictionary should be expected length and have
-#         # the correct keys
-#         assert(len(metrics) == filedata['parse_len'])
-#         assert(set(metrics.keys()) == set(['fastq_total_reads',
-#                                            'reads_aligned_sam', 'aligned',
-#                                            'reads_with_mult_align',
-#                                            'algn_seg_with_mult_algn']))
-#
-#     def test_parse(self, testfiledata):
-#         # (GIVEN)
-#         testfile, filedata = testfiledata
-#
-#         # WHEN file is parsed
-#         metrics = testfile.parse()
-#
-#         # THEN output dictionary should be expected length
-#         assert(len(metrics) == filedata['parse_len'])
+    def test_parse_lines(self, tmpdir):
+        testcontents = ('value1\ttotal reads in fastq file\n'
+                        'value2\treads aligned in sam file\n')
+
+        testpath = mockstringfile(testcontents, tmpdir)
+        testfile = io.TophatStatsFile(path=testpath)
+
+        # WHEN parsing wide format table
+        testfile._parse_lines()
+        table_data = testfile.data['table']
+
+        # THEN should return parsed dict
+        assert(table_data == {'fastq_total_reads': 'value1',
+                              'reads_aligned_sam': 'value2'})
+
+    def test_parse(self, tmpdir):
+        testcontents = ('value1\ttotal reads in fastq file\n'
+                        'value2\treads aligned in sam file\n')
+
+        testpath = mockstringfile(testcontents, tmpdir)
+        testfile = io.TophatStatsFile(path=testpath)
+
+        # WHEN parsing wide format table
+        table_data = testfile.parse()
+
+        # THEN should return parsed dict
+        assert(table_data == {'fastq_total_reads': 'value1',
+                              'reads_aligned_sam': 'value2'})
+
 #
 # @pytest.mark.usefixtures('mock_genomics_server', 'testproject')
 # class TestHtseqMetricsFile:
