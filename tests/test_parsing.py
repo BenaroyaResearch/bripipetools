@@ -84,6 +84,41 @@ class TestIllumina:
         assert(run_items['flowcell_id'] == 'C6VG0ANXX')
         assert(run_items['flowcell_position'] == 'A')
 
+    def test_parse_flowcell_run_id_invalid_date(self):
+        # GIVEN any state
+
+        # WHEN a flowcell run ID is parsed into its component items,
+        # but the run ID does not contain a valid date
+        run_id = 'NOTDATE_D00565_0087_AC6VG0ANXX'
+        run_items = parsing.parse_flowcell_run_id(run_id)
+
+        # THEN the components should be correctly parsed and assigned to
+        # appropriate field in the output dictionary; in this case,
+        # the value for date should be 'None'
+        assert(run_items['date'] is None)
+        assert(run_items['instrument_id'] == 'D00565')
+        assert(run_items['run_number'] == 87)
+        assert(run_items['flowcell_id'] == 'C6VG0ANXX')
+        assert(run_items['flowcell_position'] == 'A')
+
+    def test_parse_flowcell_run_id_invalid_runnum(self):
+        # GIVEN any state
+
+        # WHEN a flowcell run ID is parsed into its component items,
+        # but the run ID does not contain a valid run number
+        # TODO: use more realistic example
+        run_id = 'NOTDATE_FCIDENTIFIER'
+        run_items = parsing.parse_flowcell_run_id(run_id)
+
+        # THEN the components should be correctly parsed and assigned to
+        # appropriate field in the output dictionary; in this case,
+        # the value for run_number should be 'None'
+        assert(run_items['date'] is None)
+        assert(run_items['instrument_id'] == 'FCIDENTIFIER')
+        assert(run_items['run_number'] is None)
+        assert(run_items['flowcell_id'] == '')
+        assert(run_items['flowcell_position'] == 'N')
+
     def test_parse_fastq_filename(self):
         # GIVEN any state
 

@@ -14,7 +14,6 @@ class TestStrings:
             (('foobar', 'foo'), 'foo'),
             (('foobar', 'foo$'), ''),
             (('foobar', 'foo', 'foo'), 'foo'),
-
         ]
     )
     def test_matchdefault(self, test_input, expected_result):
@@ -70,7 +69,7 @@ class TestStrings:
         assert (util.to_snake_case(test_input) == expected_result)
 
 
-class TestFiles():
+class TestFiles:
     """
     Tests utility operations for handling files and file paths in the
     ``util.files`` module.
