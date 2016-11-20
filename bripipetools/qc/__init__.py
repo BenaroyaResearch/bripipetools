@@ -9,4 +9,6 @@ outputs from these submodules are designated as a special type,
 'validation', to distinguish them from the QC, metrics, counts, and
 other output types generated through processing.
 """
+from .sexpredict import SexPredictor
+from .sexverify import SexVerifier
 from .sexcheck import SexChecker

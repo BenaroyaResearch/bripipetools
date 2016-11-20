@@ -545,7 +545,7 @@ class TestWorkflowBatchAnnotator:
         assert(all([type(pl) == docs.ProcessedLibrary
                     for pl in processedlibraries]))
 
-    def test_verify_sex(self, annotatordata, mock_db):
+    def test_check_sex(self, annotatordata, mock_db):
         # (GIVEN)
         annotator, batchdata = annotatordata
 
@@ -558,7 +558,7 @@ class TestWorkflowBatchAnnotator:
             'reportedSex': 'female'})
 
         # WHEN sex of processed library is verified
-        processedlibrary = annotator._verify_sex(processedlibrary)
+        processedlibrary = annotator._check_sex(processedlibrary)
         validationdata = processedlibrary.processed_data[0]['validation']
 
         assert(validationdata['sex_check']['sex_check'] is not None)
@@ -566,8 +566,6 @@ class TestWorkflowBatchAnnotator:
     def test_get_processed_libraries_w_qc(self, annotatordata):
         # (GIVEN)
         annotator, batchdata = annotatordata
-
-        logger.info("test `get_processed_libraries()`, add qc")
 
         # WHEN collecting processed libraries for current workflow batch,
         # and QC flag is set to True

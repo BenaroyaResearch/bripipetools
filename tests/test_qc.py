@@ -1,14 +1,28 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 import os
 import re
 
 import pytest
 import mock
+import mongomock
 
 from bripipetools import qc
 from bripipetools import util
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
+@pytest.fixture(scope='class')
+def mock_db():
+    # GIVEN a mocked version of the TG3 Mongo database
+    logger.debug(("[setup] mock database, connect "
+                  "to mock Mongo database"))
+
+    yield mongomock.MongoClient().db
+    logger.debug(("[teardown] mock database, disconnect "
+                  "from mock Mongo database"))
+
 
 @pytest.fixture(
     scope='class',
@@ -16,7 +30,7 @@ from bripipetools import util
             for r in range(1)
             for p in range(3)
             for s in range(3)])
-def mock_proclibdata(request, mock_genomics_server):
+def testproclib(request, mock_genomics_server):
     # GIVEN a processed library object
     runs = mock_genomics_server['root']['genomics']['illumina']['runs']
     rundata = runs[request.param['runnum']]
@@ -45,21 +59,20 @@ def mock_proclibdata(request, mock_genomics_server):
              }
             }
         ],
+        parent_id='mock_sample',
         type='processed library')
 
-    def fin():
-        logger.info(("[teardown] mock processed library object"))
-    request.addfinalizer(fin)
-    return (processedlibrary, sampledata, outputdata)
+    yield processedlibrary, sampledata, outputdata
+    logger.info("[teardown] mock processed library object")
 
-@pytest.mark.usefixtures('mock_proclibdata', 'mock_genomics_server')
+
 class TestSexChecker:
     @pytest.fixture(scope='class')
-    def checkerdata(self, request, mock_proclibdata, mock_genomics_server):
+    def checkerdata(self, testproclib, mock_db, mock_genomics_server):
         # (GIVEN)
-        mock_proclib, sampledata, outputdata = mock_proclibdata
+        mock_proclib, sampledata, outputdata = testproclib
 
-        logger.info("[setup] sexchecker test instance")
+        logger.info("[setup] SexChecker test instance")
 
         # AND a SexChecker with mock processed library and specified
         # workflow batch ID
@@ -67,12 +80,12 @@ class TestSexChecker:
             processedlibrary=mock_proclib,
             reference='grch38',
             workflowbatch_id=mock_proclib.processed_data[0]['workflowbatch_id'],
-            genomics_root=mock_genomics_server['root']['path'])
+            genomics_root=mock_genomics_server['root']['path'],
+            db=mock_db
+        )
 
-        def fin():
-            logger.info("[teardown] FlowcellRunAnnotator mock instance")
-        request.addfinalizer(fin)
-        return (sexchecker, sampledata, outputdata)
+        yield sexchecker, sampledata, outputdata
+        logger.info("[teardown] SexChecker mock instance")
 
     def test_load_x_genes(self, checkerdata):
         # (GIVEN)
@@ -137,52 +150,29 @@ class TestSexChecker:
         assert(checker.data['y_genes'] == sampledata['y_total'])
         assert(checker.data['y_counts'] == sampledata['y_count'])
 
-    def test_compute_y_x_gene_ratio(self, checkerdata):
-        # (GIVEN)
-        checker, sampledata, _ = checkerdata
-        expected_y_x_ratio = (float(sampledata['y_total'])
-                              / float(sampledata['x_total']))
-
-        logger.info("test `_compute_y_x_ratio()`")
-
-        # WHEN ratio of Y genes detected to X genes detected is computed
-        checker._compute_y_x_gene_ratio()
-
-        # THEN ratio should be expected value
-        assert(checker.data['y_x_gene_ratio'] == expected_y_x_ratio)
-
-    def test_compute_y_x_count_ratio(self, checkerdata):
-        # (GIVEN)
-        checker, sampledata, _ = checkerdata
-        expected_y_x_ratio = (float(sampledata['y_count'])
-                              / float(sampledata['x_count']))
-
-        logger.info("test `_compute_y_x_ratio()`")
-
-        # WHEN ratio of Y counts to X counts is computed
-        checker._compute_y_x_count_ratio()
-
-        # THEN ratio should be expected value
-        assert(checker.data['y_x_count_ratio'] == expected_y_x_ratio)
-
     def test_predict_sex(self, checkerdata):
         # (GIVEN)
-        checker, sampledata, outputdata = checkerdata
-
-        logger.info("test `_predict_sex()`")
+        checker, _, _ = checkerdata
 
         # WHEN sex is predicted
         checker._predict_sex()
 
         # THEN predicted sex should match reported sex
-        if outputdata['reported_sex'] != 'NA':
-            assert(checker.data['predicted_sex'] == outputdata['reported_sex'])
+        assert(checker.data['predicted_sex'] in ['male', 'female'])
+
+    def test_verify_sex(self, checkerdata):
+        # (GIVEN)
+        checker, _, _ = checkerdata
+
+        # WHEN sex is verified
+        checker._verify_sex()
+
+        # THEN predicted sex should match reported sex
+        assert (checker.data['sex_check'] == 'NA')
 
     def test_write_data(self, checkerdata):
         # (GIVEN)
         checker, _, outputdata = checkerdata
-
-        logger.info("test `_predict_sex()`")
 
         # AND combined file does not already exist
         expected_path = outputdata['path']
@@ -192,8 +182,10 @@ class TestSexChecker:
             pass
 
         # WHEN sex check data (a dict) is written to a new validation file
-        data = {'x_genes': None, 'y_genes': None, 'x_counts': None, 'y_counts': None, 'total_counts': None,
-                'y_x_gene_ratio': None, 'y_x_count_ratio': None, 'sexcheck_eqn': None, 'sexcheck_cutoff': None,
+        data = {'x_genes': None, 'y_genes': None,
+                'x_counts': None, 'y_counts': None, 'total_counts': None,
+                'y_x_gene_ratio': None, 'y_x_count_ratio': None,
+                'sexcheck_eqn': None, 'sexcheck_cutoff': None,
                 'predicted_sex': None, 'sex_check': None}
         output = checker._write_data(data)
 
@@ -203,10 +195,6 @@ class TestSexChecker:
     def test_update(self, checkerdata):
         # (GIVEN)
         checker, sampledata, _ = checkerdata
-        expected_y_x_ratio = (float(sampledata['y_total'])
-                     / float(sampledata['x_total']))
-
-        logger.info("test `update()`")
 
         # WHEN sex check validation is appended to processed data for the
         # processed library
@@ -220,3 +208,122 @@ class TestSexChecker:
              for field in ['x_genes', 'y_genes', 'x_counts', 'y_counts',
                            'total_counts', 'y_x_gene_ratio', 'y_x_count_ratio',
                            'predicted_sex', 'sex_check']]))
+
+
+class TestSexPredict:
+    @pytest.fixture(scope='class')
+    def predictordata(self, testproclib):
+        # (GIVEN)
+        _, sampledata, _ = testproclib
+        mock_countdata = {'x_genes': sampledata['x_total'],
+                          'y_genes': sampledata['y_total'],
+                          'x_counts': sampledata['x_count'],
+                          'y_counts': sampledata['y_count'],
+                          'total_counts': 10000}
+        logger.info("[setup] SexPredictor test instance")
+
+        # AND
+        sexpredictor = qc.SexPredictor(
+            data=mock_countdata,
+        )
+
+        yield sexpredictor, sampledata
+        logger.info("[teardown] SexPredictor mock instance")
+
+    def test_compute_y_x_gene_ratio(self, predictordata):
+        # (GIVEN)
+        predictor, sampledata = predictordata
+        expected_y_x_ratio = (float(sampledata['y_total'])
+                              / float(sampledata['x_total']))
+
+        logger.info("test `_compute_y_x_ratio()`")
+
+        # WHEN ratio of Y genes detected to X genes detected is computed
+        predictor._compute_y_x_gene_ratio()
+
+        # THEN ratio should be expected value
+        assert(predictor.data['y_x_gene_ratio'] == expected_y_x_ratio)
+
+    def test_compute_y_x_count_ratio(self, predictordata):
+        # (GIVEN)
+        predictor, sampledata = predictordata
+        expected_y_x_ratio = (float(sampledata['y_count'])
+                              / float(sampledata['x_count']))
+
+        logger.info("test `_compute_y_x_ratio()`")
+
+        # WHEN ratio of Y counts to X counts is computed
+        predictor._compute_y_x_count_ratio()
+
+        # THEN ratio should be expected value
+        assert(predictor.data['y_x_count_ratio'] == expected_y_x_ratio)
+
+    def test_predict_sex(self, predictordata):
+        # (GIVEN)
+        predictor, _ = predictordata
+
+        logger.info("test `_predict_sex()`")
+
+        # WHEN sex is predicted
+        predictor._predict_sex()
+
+        # THEN predicted sex should match reported sex
+        assert(predictor.data['predicted_sex'] in ['male', 'female'])
+
+    def test_predict(self, predictordata):
+        # (GIVEN)
+        predictor, _ = predictordata
+
+        logger.info("test `predict()`")
+
+        # WHEN sex is predicted
+        predictor.predict()
+
+        # THEN predicted sex should match reported sex
+        assert(predictor.data['predicted_sex'] in ['male', 'female'])
+
+
+class TestSexVerifier:
+    @pytest.fixture(scope='class')
+    def verifierdata(self, testproclib, mock_db):
+        # (GIVEN)
+        processedlibrary, sampledata, _ = testproclib
+        testdata = {'predicted_sex': 'male'}
+
+        logger.info("[setup] SexVerifier test instance")
+
+        # AND
+        sexverifier = qc.SexVerifier(
+            data=testdata,
+            processedlibrary=processedlibrary,
+            db=mock_db,
+        )
+
+        yield sexverifier, sampledata
+        logger.info("[teardown] SexVerifier mock instance")
+
+    def test_retrieve_sex(self, verifierdata, testproclib, mock_db):
+        # (GIVEN)
+        verifier, _ = verifierdata
+
+        # AND a hierarchy of objects in the 'samples' collection, with
+        # parent relationship specified by the 'parentId' field
+        mock_db.samples.insert(
+            {'_id': testproclib[0]._id, 'parentId': testproclib[0].parent_id})
+        mock_db.samples.insert(
+            {'_id': 'mock_sample', 'reportedSex': 'male'})
+
+        # WHEN searching for the field among all sample ancestors in
+        # the hierarchy
+        reported_sex = verifier._retrieve_sex('mock_sample')
+
+        # THEN
+        assert(reported_sex == 'male')
+
+        mock_db.samples.drop()
+
+    def test_verify(self, verifierdata):
+        # (GIVEN)
+        verifier, _ = verifierdata
+
+        assert(verifier.verify()['sex_check'] == 'NA')

@@ -118,7 +118,7 @@ class WorkflowBatchAnnotator(object):
                 for p in s
                 if p['name'] == 'SampleName']
 
-    def _verify_sex(self, processedlibrary):
+    def _check_sex(self, processedlibrary):
         """
         Retrieve reported sex for sample and compare to predicted sex
         of processed library.
@@ -134,34 +134,9 @@ class WorkflowBatchAnnotator(object):
             processedlibrary=processedlibrary,
             reference=ref,
             workflowbatch_id=self.workflowbatch._id,
-            genomics_root=self.genomics_root)
-        processedlibrary = sexchecker.update()
-
-        processed_data = [d for d in processedlibrary.processed_data
-                          if d['workflowbatch_id']
-                          == self.workflowbatch._id][0]
-        sexcheck_data = processed_data['validation']['sex_check']
-        if sexcheck_data['sex_check'] is None:
-            logger.debug("searching parents of {} for reported sex"
-                         .format(processedlibrary.parent_id))
-            try:
-                logger.debug("searching for 'reportedSex' field...")
-                reported_sex = genlims.search_ancestors(
-                    self.db, processedlibrary.parent_id, 'reportedSex').lower()
-            except AttributeError:
-                try:
-                    logger.debug("searching for 'gender' field...")
-                    reported_sex = genlims.search_ancestors(
-                        self.db, processedlibrary.parent_id, 'gender').lower()
-                except AttributeError:
-                    logger.debug("reported sex not found")
-                    sexcheck_data['sex_check'] = "NA"
-                    return sexchecker.update()
-            logger.debug("reported sex is {}".format(reported_sex))
-            if sexcheck_data['predicted_sex'] == reported_sex:
-                sexcheck_data['sex_check'] = 'pass'
-            else:
-                sexcheck_data['sex_check'] = 'fail'
+            genomics_root=self.genomics_root,
+            db=self.db
+            )
         return sexchecker.update()
 
     def get_processed_libraries(self, project=None, qc=False):
@@ -175,7 +150,7 @@ class WorkflowBatchAnnotator(object):
         return [ProcessedLibraryAnnotator(
             workflowbatch_id, sample_params, self.db
             ).get_processed_library()
-            if not qc else self._verify_sex(
+            if not qc else self._check_sex(
             ProcessedLibraryAnnotator(
                 workflowbatch_id, sample_params, self.db
                 ).get_processed_library())
