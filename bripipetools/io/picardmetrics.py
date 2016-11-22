@@ -18,7 +18,6 @@ class PicardMetricsFile(object):
     def __init__(self, path):
         self.path = path
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
@@ -107,6 +106,7 @@ class PicardMetricsFile(object):
         """
         Parse metrics table and return dictionary.
         """
+        self._read_file()
         self._get_table()
         table_format = self._check_table_format()
         if table_format == 'long':

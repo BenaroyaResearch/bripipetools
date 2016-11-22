@@ -14,7 +14,6 @@ class TophatStatsFile(object):
     def __init__(self, path):
         self.path = path
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
@@ -46,5 +45,6 @@ class TophatStatsFile(object):
         """
         Parse metrics table and return dictionary.
         """
+        self._read_file()
         self._parse_lines()
         return self.data['table']

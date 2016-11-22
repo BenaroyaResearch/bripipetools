@@ -14,7 +14,6 @@ class HtseqMetricsFile(object):
     def __init__(self, path):
         self.path = path
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
@@ -28,11 +27,14 @@ class HtseqMetricsFile(object):
         """
         Get key-value pairs from text lines and return dictionary.
         """
-        return {l.strip().split('\t')[0].lstrip('__'): l.strip().split('\t')[1]
-                for l in self.data['raw']}
+        self.data['table'] = {l.strip().split('\t')[0].lstrip('__'):
+                              l.strip().split('\t')[1]
+                              for l in self.data['raw']}
 
     def parse(self):
         """
         Parse metrics table and return dictionary.
         """
-        return self._parse_lines()
+        self._read_file()
+        self._parse_lines()
+        return self.data['table']

@@ -16,19 +16,18 @@ class HtseqCountsFile(object):
     def __init__(self, path):
         self.path = path
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
         Read file into Pandas data frame.
         """
         logger.debug("reading file {} to data frame".format(self.path))
-        # with open(self.path) as f:
-        self.data['raw'] = pd.read_table(self.path,
-                                         names=['geneName', 'count'])
+        self.data['table'] = pd.read_table(self.path,
+                                           names=['geneName', 'count'])
 
     def parse(self):
         """
         Parse counts file and return data frame.
         """
-        return self.data['raw']
+        self._read_file()
+        return self.data['table']
