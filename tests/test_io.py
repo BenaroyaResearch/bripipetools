@@ -9,7 +9,6 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-
 @pytest.fixture(scope='function')
 def mockstringfile(s, tmpdir):
     f = tmpdir.join("mockfile")
@@ -320,6 +319,7 @@ class TestSexcheckFile:
         assert(table_data == {'field1': 'value1',
                               'field2': 'value2'})
 
+
 class TestHtseqCountsFile:
 
     def test_read_file(self, tmpdir):
@@ -333,7 +333,6 @@ class TestHtseqCountsFile:
         assert(len(testfile.data['table']) == 2)
         assert(len(testfile.data['table'].columns) == 2)
 
-
     def test_parse(self, tmpdir):
         testcontents = ['variable1\tvalue1\n',
                         'variable2\tvalue2\n']
@@ -346,115 +345,130 @@ class TestHtseqCountsFile:
         assert(len(table_data.columns) == 2)
 
 
-#
-#
-# @pytest.mark.usefixtures('mock_genomics_server', 'testproject')
-# class TestFastQCFile:
-#     @pytest.fixture(
-#         scope='class',
-#         params=[(source, {'samplenum': s})
-#                 for s in range(3)
-#                 for source in
-#                 ['fastqc']]
-#     )
-#     def testfiledata(self, request, mock_genomics_server, testproject):
-#         # GIVEN a FastQCFile for one of 3 example samples from a
-#         # project, with known details about file path, length, etc.
-#         sourcedata = testproject['qc']['sources'][request.param[0]]
-#         samplefile = sourcedata[request.param[1]['samplenum']]
-#
-#         logger.info("[setup] FastQCFile test instance "
-#                     "for file type '{}' for sample {}"
-#                     .format(request.param[0], samplefile['sample']))
-#
-#         testfile = io.FastQCFile(path=samplefile['path'])
-#         filedata = (mock_genomics_server['out_types']['qc']
-#                     [request.param[0]])
-#         yield testfile, samplefile, filedata
-#         logger.info("[teardown] FastQCFile mock instance")
-#
-#     def test_read_file(self, testfiledata):
-#         # (GIVEN)
-#         testfile, samplefile, filedata = testfiledata
-#
-#         # WHEN the file specified by path is read
-#         testfile._read_file()
-#         raw_text = testfile.data['raw']
-#
-#         # THEN class should have raw text stored in data attribute and raw
-#         # text should be a list of expected length
-#         assert(raw_text)
-#         assert(len(raw_text) == samplefile['num_lines'])
-#
-#     def test_clean_header(self, testfiledata):
-#         # (GIVEN)
-#         testfile, _, _ = testfiledata
-#
-#         # WHEN header is cleaned of extra characters and converted to
-#         # snake case
-#
-#         # THEN cleaned header should match expected result
-#         assert(testfile._clean_header('>>HEADER One') == 'header_one')
-#         assert(testfile._clean_header('#HEADER Two') == 'header_two')
-#
-#     def test_locate_sections(self, testfiledata):
-#         # (GIVEN)
-#         testfile, samplefile, filedata = testfiledata
-#
-#         # WHEN sections are located in the file
-#         sections = testfile._locate_sections()
-#
-#         # THEN should be dictionary of length 12 with correct structure
-#         assert(len(sections) == 12)
-#         assert(sections['basic_statistics'] == (1, 10))
-#
-#     def test_get_section_status(self, testfiledata):
-#         # (GIVEN)
-#         testfile, samplefile, filedata = testfiledata
-#
-#         # WHEN section header line is parsed to retrieve status
-#         (section_name, section_status) = testfile._get_section_status(
-#             'basic_statistics', (1, 10))
-#
-#         # THEN should return a tuple with the expected status
-#         assert((section_name, section_status) == ('basic_statistics', 'pass'))
-#
-#     def test_parse_section_table(self, testfiledata):
-#         # (GIVEN)
-#         testfile, samplefile, filedata = testfiledata
-#
-#         # WHEN a table of key-value pairs within a section is parsed
-#         section_data = testfile._parse_section_table((1, 10))
-#
-#         # THEN should return a list of expected length
-#         assert(len(section_data) == 7)
-#
-#     def test_parse(self, testfiledata):
-#         # (GIVEN)
-#         testfile, samplefile, filedata = testfiledata
-#
-#         # WHEN FastQC file is parsed
-#         fastqcdata = testfile.parse()
-#
-#         # THEN should return a dictionary of expected length
-#         assert(isinstance(fastqcdata, dict))
-#         assert(len(fastqcdata) == 20)
-#
-#     def test_parse_overrepresented_seqs(self, testfiledata):
-#         # (GIVEN)
-#         testfile, samplefile, filedata = testfiledata
-#
-#         # WHEN FastQC file is parsed and overrepresented sequences are present
-#         overrepseqs = testfile.parse_overrepresented_seqs()
-#
-#         # THEN should return a list of dictionaries with overrepresented
-#         # sequence info
-#         assert(isinstance(overrepseqs, list))
-#         assert(len(overrepseqs) == samplefile['num_overrep_seqs'])
-#         if samplefile['num_overrep_seqs']:
-#             assert(isinstance(overrepseqs[0], dict))
-#             assert(len(overrepseqs[0]) == 4)
-#
+class TestFastQCFile:
+
+    def test_read_file(self, tmpdir):
+        testcontents = 'testline\n'
+        testpath = mockstringfile(testcontents, tmpdir)
+        testfile = io.FastQCFile(path=testpath)
+
+        testfile._read_file()
+
+        assert (len(testfile.data['raw']))
+
+    def test_clean_header(self):
+        testfile = io.FastQCFile(path='')
+
+        # WHEN header is cleaned of extra characters and converted to
+        # snake case
+
+        # THEN cleaned header should match expected result
+        assert(testfile._clean_header('>>HEADER One') == 'header_one')
+        assert(testfile._clean_header('#HEADER Two') == 'header_two')
+
+    def test_clean_value(self):
+        testfile = io.FastQCFile(path='')
+
+        # WHEN value is cleaned
+
+        # THEN cleaned value should match expected result
+        assert(testfile._clean_value('1.0') == 1.0)
+        assert(testfile._clean_value('value1') == 'value1')
+        assert(testfile._clean_value('') == '')
+
+    def test_locate_sections(self):
+        testcontents = ['##FastQC\t0.11.3\n',
+                        '>>Module Header 1\tpass\n',
+                        'module line\n',
+                        '>>END_MODULE\n',
+                        '>>Module Header 2\tfail\n',
+                        'module line\n',
+                        '>>END_MODULE\n']
+        testfile = io.FastQCFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN sections are located in the file
+        sections = testfile._locate_sections()
+
+        # THEN should be dictionary of expected format
+        assert(sections == {'module_header_1': (1, 3),
+                            'module_header_2': (4, 6)})
+
+    def test_get_section_status(self):
+        testcontents = ['>>Module Header 1\tpass\n',
+                        '>>END_MODULE\n']
+        testfile = io.FastQCFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN section header line is parsed to retrieve status
+        (section_name, section_status) = testfile._get_section_status(
+            'module_header_1', (0, 1))
+
+        # THEN should return a tuple with the expected status
+        assert((section_name, section_status) == ('module_header_1', 'pass'))
+
+    def test_parse_section_table(self):
+        testcontents = ['>>Module Header 1\tpass\n',
+                        'field1\tvalue1\n',
+                        'field2\t1.0\n',
+                        '>>END_MODULE\n']
+        testfile = io.FastQCFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN a table of key-value pairs within a section is parsed
+        section_data = testfile._parse_section_table((0, 3))
+
+        # THEN should return a list of expected length
+        assert(section_data == [('field1', 'value1'),
+                                ('field2', 1.0)])
+
+    def test_parse(self, tmpdir):
+        testcontents = ['##FastQC\t0.11.3\n',
+                        '>>Basic Statistics\tpass\n',
+                        'field1\tvalue1\n',
+                        'field2\t1.0\n',
+                        '>>END_MODULE\n']
+        testpath = mockstringfile(''.join(testcontents), tmpdir)
+        testfile = io.FastQCFile(path=testpath)
+
+        table_data = testfile.parse()
+
+        assert(table_data == {'basic_statistics': 'pass',
+                              'field1': 'value1',
+                              'field2': 1.0})
+
+    def test_parse_overrepresented_seqs(self, tmpdir):
+        testcontents = [
+            '##FastQC\t0.11.3\n'
+            '>>Overrepresented sequences\twarn\n',
+            '#Sequence\tCount\tPercentage\tPossible Source\n',
+            'ACGT\t10\t0.10\tType, Number 1 (10% over 10 bp)\n',
+            '>>END_MODULE\n'
+            ]
+        testpath = mockstringfile(''.join(testcontents), tmpdir)
+        testfile = io.FastQCFile(path=testpath)
+
+        table_data = testfile.parse_overrepresented_seqs()
+
+        assert(table_data == [{'sequence': 'ACGT',
+                               'count': 10,
+                               'percentage': 0.1,
+                               'possible_source':
+                                   'Type, Number 1 (10% over 10 bp)'}])
+
+    def test_parse_overrepresented_seqs_pass(self, tmpdir):
+        testcontents = [
+            '##FastQC\t0.11.3\n'
+            '>>Overrepresented sequences\tpass\n',
+            '>>END_MODULE\n'
+            ]
+        testpath = mockstringfile(''.join(testcontents), tmpdir)
+        testfile = io.FastQCFile(path=testpath)
+
+        table_data = testfile.parse_overrepresented_seqs()
+
+        assert(table_data == [])
+
 #
 # # TODO: clean up old testing setup for workflow batch file IO!
 #
