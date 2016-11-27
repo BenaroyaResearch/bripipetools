@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 
 import pytest
 from bs4 import BeautifulSoup as bsoup
@@ -18,17 +19,28 @@ def mockstringfile(s, tmpdir):
 
 
 class TestPicardMetricsFile:
-
+    """
+    Tests class for reading and parsing data from Picard metrics
+    files, which are typically in HTML format.
+    """
     def test_read_file(self, tmpdir):
+        # GIVEN some file exists with arbitrary contents
         testcontents = 'testline\n'
         testpath = mockstringfile(testcontents, tmpdir)
+
+        # AND an io class object is created for that file
         testfile = io.PicardMetricsFile(path=testpath)
 
+        # WHEN the contents of the file are read and stored
         testfile._read_file()
 
+        # THEN the unformatted contents should be stored in the raw
+        # field of the file object's data attribute
         assert(len(testfile.data['raw']))
 
-    def test_get_table(self, tmpdir):
+    def test_get_table(self):
+        # GIVEN some HTML file content with at least one table with the
+        # expected formatting tag (i.e., 'cellpadding="3"')
         testcontents = (
             """
             <html>
@@ -39,18 +51,23 @@ class TestPicardMetricsFile:
             """
             )
 
-        testpath = mockstringfile(testcontents, tmpdir)
-        testfile = io.PicardMetricsFile(path=testpath)
+        # AND an io class object with the file contents stored in the
+        # raw field of its data attribute
+        testfile = io.PicardMetricsFile(path='')
         testfile.data['raw'] = testcontents
 
-
-        # WHEN metrics table is found in raw HTML
+        # WHEN metrics table is retrieved from the raw HTML
         testfile._get_table()
 
-        # THEN
+        # THEN the table should be the expected length; in this case
+        # a single row
         assert(len(testfile.data['table']) == 1)
 
-    def test_check_table_format_long(self, tmpdir):
+    def test_check_table_format_long(self):
+        # GIVEN some HTML file content with at least one table with the
+        # expected formatting and cell contents that indicate data is
+        # reported as two columns per row, with each row containing
+        # fields and values in respective columns
         testcontents = (
             """
             <html>
@@ -64,17 +81,22 @@ class TestPicardMetricsFile:
             """
             )
 
-        testpath = mockstringfile(testcontents, tmpdir)
-        testfile = io.PicardMetricsFile(path=testpath)
+        # AND an io class object with the table contents stored in the
+        # table field of its data attribute
+        testfile = io.PicardMetricsFile(path='')
         testfile.data['table'] = bsoup(testcontents, 'html.parser').table
 
-        # WHEN checking whether table in metrics HTML is long or wide
+        # WHEN checking whether the table is 'long' or 'wide' format
         table_format = testfile._check_table_format()
 
-        # THEN should return the expected format
+        # THEN should return 'long'
         assert(table_format == 'long')
 
-    def test_check_table_format_wide(self, tmpdir):
+    def test_check_table_format_wide(self):
+        # GIVEN some HTML file content with at least one table with the
+        # expected formatting and cell contents that indicate data is
+        # reported as two rows, with tab-separated fields in the first row
+        # and tab-separated values in the second row
         testcontents = (
             """
             <html>
@@ -88,17 +110,22 @@ class TestPicardMetricsFile:
             """
             )
 
-        testpath = mockstringfile(testcontents, tmpdir)
-        testfile = io.PicardMetricsFile(path=testpath)
+        # AND an io class object with the table contents stored in the
+        # table field of its data attribute
+        testfile = io.PicardMetricsFile(path='')
         testfile.data['table'] = bsoup(testcontents, 'html.parser').table
 
-        # WHEN checking whether table in metrics HTML is long or wide
+        # WHEN checking whether the table is 'long' or 'wide' format
         table_format = testfile._check_table_format()
 
-        # THEN should return the expected format
+        # THEN should return 'wide'
         assert(table_format == 'wide')
 
-    def test_parse_long(self, tmpdir):
+    def test_parse_long(self):
+        # GIVEN some HTML file content with at least one table with the
+        # expected formatting and cell contents that indicate data is
+        # reported as two columns per row, with each row containing
+        # fields and values in respective columns - i.e., 'long' format
         testcontents = (
             """
             <html>
@@ -112,17 +139,23 @@ class TestPicardMetricsFile:
             """
             )
 
-        testpath = mockstringfile(testcontents, tmpdir)
-        testfile = io.PicardMetricsFile(path=testpath)
+        # AND an io class object with the table contents stored in the
+        # table field of its data attribute
+        testfile = io.PicardMetricsFile(path='')
         testfile.data['table'] = bsoup(testcontents, 'html.parser').table
 
-        # WHEN parsing long format table
+        # WHEN the table is parsed
         table_data = testfile._parse_long()
 
-        # THEN should return parsed dict
+        # THEN should return a dict with fields and values stored as
+        # key-value pairs
         assert(table_data == {'FIELD1': 'value1', 'FIELD2': 'value2'})
 
-    def test_parse_wide(self, tmpdir):
+    def test_parse_wide(self):
+        # GIVEN some HTML file content with at least one table with the
+        # expected formatting and cell contents that indicate data is
+        # reported as two rows, with tab-separated fields in the first row
+        # and tab-separated values in the second row - i.e., 'wide' format
         testcontents = (
             """
             <html>
@@ -136,17 +169,23 @@ class TestPicardMetricsFile:
             """
             )
 
-        testpath = mockstringfile(testcontents, tmpdir)
-        testfile = io.PicardMetricsFile(path=testpath)
+        # AND an io class object with the table contents stored in the
+        # table field of its data attribute
+        testfile = io.PicardMetricsFile(path='')
         testfile.data['table'] = bsoup(testcontents, 'html.parser').table
 
-        # WHEN parsing wide format table
+        # WHEN the table is parsed
         table_data = testfile._parse_wide()
 
-        # THEN should return parsed dict
+        # THEN should return a dict with fields and values stored as
+        # key-value pairs
         assert(table_data == {'FIELD1': 'value1', 'FIELD2': 'value2'})
 
     def test_parse_w_long_table(self, tmpdir):
+        # GIVEN an HTML file with at least one table with the
+        # expected formatting and cell contents that indicate data is
+        # reported as two columns per row, with each row containing
+        # fields and values in respective columns - i.e., 'long' format
         testcontents = (
             """
             <html>
@@ -159,10 +198,10 @@ class TestPicardMetricsFile:
             </html>
             """
             )
-
         testpath = mockstringfile(testcontents, tmpdir)
+
+        # AND an io class object is created for that file
         testfile = io.PicardMetricsFile(path=testpath)
-        testfile.data['table'] = bsoup(testcontents, 'html.parser').table
 
         # WHEN parsing metrics table
         table_data = testfile.parse()
@@ -171,6 +210,10 @@ class TestPicardMetricsFile:
         assert(table_data == {'FIELD1': 'value1', 'FIELD2': 'value2'})
 
     def test_parse_w_wide_table(self, tmpdir):
+        # GIVEN an HTML file with at least one table with the
+        # expected formatting and cell contents that indicate data is
+        # reported as two rows, with tab-separated fields in the first row
+        # and tab-separated values in the second row - i.e., 'wide' format
         testcontents = (
             """
             <html>
@@ -183,10 +226,10 @@ class TestPicardMetricsFile:
             </html>
             """
             )
-
         testpath = mockstringfile(testcontents, tmpdir)
+
+        # AND an io class object is created for that file
         testfile = io.PicardMetricsFile(path=testpath)
-        testfile.data['table'] = bsoup(testcontents, 'html.parser').table
 
         # WHEN parsing metrics table
         table_data = testfile.parse()
@@ -196,43 +239,61 @@ class TestPicardMetricsFile:
 
 
 class TestTophatStatsFile:
-
+    """
+    Tests class for reading and parsing data from Tophat stats
+    metrics files, which are typically in tab-delimited text format.
+    """
     def test_read_file(self, tmpdir):
+        # GIVEN some file exists with arbitrary contents
         testcontents = 'testline\n'
         testpath = mockstringfile(testcontents, tmpdir)
+
+        # AND an io class object is created for that file
         testfile = io.TophatStatsFile(path=testpath)
 
+        # WHEN the contents of the file are read and stored
         testfile._read_file()
 
+        # THEN the unformatted contents should be stored in the raw
+        # field of the file object's data attribute
         assert(len(testfile.data['raw']))
 
-    def test_parse_lines(self, tmpdir):
+    def test_parse_lines(self):
+        # GIVEN some file content, where data is reported in a table
+        # with each row containing value and field (separated by tab)
         testcontents = ['value1\ttotal reads in fastq file\n',
                         'value2\treads aligned in sam file\n']
 
-        testpath = mockstringfile(''.join(testcontents), tmpdir)
-        testfile = io.TophatStatsFile(path=testpath)
+        # AND an io class object with the file contents stored in the
+        # raw field of its data attribute
+        testfile = io.TophatStatsFile(path='')
         testfile.data['raw'] = testcontents
 
-        # WHEN parsing
+        # WHEN contents are parsed line-by-line and stored in the
+        # table field of the object's data attribute
         testfile._parse_lines()
         table_data = testfile.data['table']
 
-        # THEN should return parsed dict
+        # THEN the table should include key-value pairs for each
+        # field, stored in a dict
         assert(table_data == {'fastq_total_reads': 'value1',
                               'reads_aligned_sam': 'value2'})
 
     def test_parse(self, tmpdir):
+        # GIVEN a file, where data is reported in a table
+        # with each row containing value and field (separated by tab)
         testcontents = ('value1\ttotal reads in fastq file\n'
                         'value2\treads aligned in sam file\n')
-
         testpath = mockstringfile(testcontents, tmpdir)
+
+        # AND an io class object is created for that file
         testfile = io.TophatStatsFile(path=testpath)
 
-        # WHEN parsing
+        # WHEN contents are read and parsed
         table_data = testfile.parse()
 
-        # THEN should return parsed dict
+        # THEN the table should include key-value pairs for each
+        # field, stored in a dict
         assert(table_data == {'fastq_total_reads': 'value1',
                               'reads_aligned_sam': 'value2'})
 
@@ -277,6 +338,7 @@ class TestHtseqMetricsFile:
         # THEN should return parsed dict
         assert(table_data == {'field_1': 'value1',
                               'field_2': 'value2'})
+
 
 class TestSexcheckFile:
 
@@ -354,7 +416,7 @@ class TestFastQCFile:
 
         testfile._read_file()
 
-        assert (len(testfile.data['raw']))
+        assert(len(testfile.data['raw']))
 
     def test_clean_header(self):
         testfile = io.FastQCFile(path='')
@@ -472,161 +534,221 @@ class TestFastQCFile:
 #
 # # TODO: clean up old testing setup for workflow batch file IO!
 #
-# @pytest.fixture(
-#     scope='module',
-#     params=[{'runnum': r, 'batchnum': b}
-#             for r in range(1)
-#             for b in range(2)]
-# )
-# def testbatch(request, mock_genomics_server):
-#     # GIVEN processing data for one of 2 example batches from a flowcell run
-#     runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#     rundata = runs[request.param['runnum']]
-#     batches = rundata['submitted']['batches']
-#     yield batches[request.param['batchnum']]
-#
-#
-# class TestWorkflowBatchFile:
-#     @pytest.fixture(
-#         scope='class'
-#     )
-#     def testfiledata(self, testbatch):
-#         # GIVEN a WorkflowBatchFile for a processing batch, with
-#         # known details about file path, length, etc.
-#         logger.info("[setup] WorkflowBatchFile test instance")
-#
-#         testfile = io.WorkflowBatchFile(path=testbatch['path'])
-#         # filedata = (mock_genomics_server['out_types']['qc']
-#         #             [request.param[0]])
-#         yield testfile, testbatch
-#         logger.info("[teardown] WorkflowBatchFile mock instance")
-#
-#     def test_locate_workflow_name_line(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile._locate_workflow_name_line()
-#                == 29)
-#
-#     def test_locate_batch_name_line(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile._locate_batch_name_line()
-#                == 31)
-#
-#     def test_locate_param_line(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile._locate_param_line()
-#                == 37)
-#
-#     def test_locate_sample_start_line(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile._locate_sample_start_line()
-#                == 38)
-#
-#     def test_get_workflow_name(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile.get_workflow_name()
-#                == batchdata['workflow'])
-#
-#     def test_get_batch_name(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile.get_batch_name()
-#                == batchdata['name'])
-#
-#     @pytest.mark.parametrize(
-#         'test_input, expected_result',
-#         [
-#             ('SampleName', {'tag': 'SampleName',
-#                             'type': 'sample',
-#                             'name': 'SampleName'}),
-#             ('annotation_tag##_::_::param_name', {'tag': 'annotation_tag',
-#                                                   'type': 'annotation',
-#                                                   'name': 'param_name'}),
-#             ('in_tag##_::_::_::param_name', {'tag': 'in_tag',
-#                                              'type': 'input',
-#                                              'name': 'param_name'}),
-#             ('out_tag##_::_::_::param_name', {'tag': 'out_tag',
-#                                               'type': 'output',
-#                                               'name': 'param_name'}),
-#         ]
-#     )
-#     def test_parse_param(self, testfiledata, test_input, expected_result):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile._parse_param(test_input) == expected_result)
-#
-#
-#     def test_get_params(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         assert(testfile.get_params()[1]
-#                == {'tag': 'fastq_in',
-#                    'type': 'input',
-#                    'name': 'from_endpoint'})
-#
-#     def test_get_sample_params(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         # wbf = workflow_batch_file()
-#         assert(testfile.get_sample_params(
-#             'lib6839_C6VG0ANXX\tjeddy#srvgridftp01\n')
-#                == [{'tag': 'SampleName',
-#                     'type': 'sample',
-#                     'name': 'SampleName',
-#                     'value': 'lib6839_C6VG0ANXX'},
-#                    {'tag': 'fastq_in',
-#                     'type': 'input',
-#                     'name': 'from_endpoint',
-#                     'value': 'jeddy#srvgridftp01'}])
-#
-#     def test_parse_template(self, testfiledata):
-#         # (GIVEN)
-#         testfile, batchdata = testfiledata
-#
-#         # wbf = workflow_batch_file()
-#         assert(testfile.parse()['workflow_name']
-#                == batchdata['workflow'])
-#         assert(testfile.parse()['parameters'][1]
-#                == {'tag': 'fastq_in',
-#                    'type': 'input',
-#                    'name': 'from_endpoint'})
 
-    # def test_parse_submit(self, testfiledata):
-    #     # (GIVEN)
-    #     testfile, batchdata = testfiledata
-    #
-    #     wbf = workflow_batch_file(state='submit')
-    #     assert(wbf.state == 'submit')
-    #     assert(wbf.parse()['workflow_name']
-    #            == 'optimized_truseq_unstrand_sr_grch38_v0.1_complete')
-    #     assert(wbf.parse()['parameters'][1]
-    #            == {'tag': 'fastq_in',
-    #                'type': 'input',
-    #                'name': 'from_endpoint'})
-    #     assert(wbf.parse()['samples'][0][1]
-    #            == {'tag': 'fastq_in',
-    #                'type': 'input',
-    #                'name': 'from_endpoint',
-    #                'value': 'jeddy#srvgridftp01'})
-    #     assert(len(wbf.parse()['parameters'])
-    #            == len(wbf.parse()['samples'][0]))
-    #
-    # def test_write_submit(self):
-    #     wbf = workflow_batch_file(state='submit')
-    #     path = os.path.join(TEST_FLOWCELL_DIR,
-    #             'globus_batch_submission', 'foo.txt')
-    #     wbf.write(path)
-    #     assert(workflow_batch_file(path).data['raw'] == wbf.data['raw'])
+class TestWorkflowBatchFile:
+
+    def test_read_file(self, tmpdir):
+        testcontents = 'testline\n'
+        testpath = mockstringfile(testcontents, tmpdir)
+        testfile = io.WorkflowBatchFile(path=testpath)
+
+        testfile._read_file()
+
+        assert(len(testfile.data['raw']))
+
+    def test_locate_workflow_name_line(self):
+        testcontents = ['###METADATA\n',
+                        '#############\n',
+                        'Workflow Name\toptimized_workflow_1\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN
+        line = testfile._locate_workflow_name_line()
+
+        # THEN
+        assert(line == 2)
+
+    def test_locate_batch_name_line(self):
+        testcontents = ['###METADATA\n',
+                        '#############\n',
+                        'Project Name\tDATE_P00-00_FLOWCELL\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN
+        line = testfile._locate_batch_name_line()
+
+        # THEN
+        assert(line == 2)
+
+    def test_locate_param_line(self):
+        testcontents = ['###TABLE DATA\n',
+                        '#############\n',
+                        'SampleName\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN
+        line = testfile._locate_param_line()
+
+        # THEN
+        assert(line == 2)
+
+    def test_locate_sample_start_line(self):
+        testcontents = ['###TABLE DATA\n',
+                        '#############\n',
+                        'SampleName\n',
+                        'sample1\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN
+        line = testfile._locate_sample_start_line()
+
+        # THEN
+        assert(line == 3)
+
+    def test_get_workflow_name(self):
+        testcontents = ['###METADATA\n',
+                        '#############\n',
+                        'Workflow Name\toptimized_workflow_1\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN
+        workflow_name = testfile.get_workflow_name()
+
+        # THEN
+        assert(workflow_name == 'optimized_workflow_1')
+
+    def test_get_batch_name(self):
+        testcontents = ['###METADATA\n',
+                        '#############\n',
+                        'Project Name\tDATE_P00-00_FLOWCELL\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        # WHEN
+        batch_name = testfile.get_batch_name()
+
+        # THEN
+        assert(batch_name == 'DATE_P00-00_FLOWCELL')
+
+    @pytest.mark.parametrize(
+        'test_input, expected_result',
+        [
+            ('SampleName', {'tag': 'SampleName',
+                            'type': 'sample',
+                            'name': 'SampleName'}),
+            ('annotation_tag##_::_::param_name', {'tag': 'annotation_tag',
+                                                  'type': 'annotation',
+                                                  'name': 'param_name'}),
+            ('in_tag##_::_::_::param_name', {'tag': 'in_tag',
+                                             'type': 'input',
+                                             'name': 'param_name'}),
+            ('out_tag##_::_::_::param_name', {'tag': 'out_tag',
+                                              'type': 'output',
+                                              'name': 'param_name'}),
+        ]
+    )
+    def test_parse_param(self, test_input, expected_result):
+        testfile = io.WorkflowBatchFile(path='')
+
+        assert(testfile._parse_param(test_input) == expected_result)
+
+    def test_get_params(self):
+        testcontents = ['###TABLE DATA\n',
+                        '#############\n',
+                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'sample1\tin_value1\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        test_params = testfile.get_params()
+
+        assert(test_params[0] == {'tag': 'SampleName',
+                                  'type': 'sample',
+                                  'name': 'SampleName'})
+        assert(test_params[1] == {'tag': 'in_tag',
+                                  'type': 'input',
+                                  'name': 'param_name'})
+
+    def test_get_sample_params(self):
+        testcontents = ['###TABLE DATA\n',
+                        '#############\n',
+                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'sample1\tin_value1\n',
+                        'sample2\tin_value2\n']
+        testfile = io.WorkflowBatchFile(path='')
+        testfile.data['raw'] = testcontents
+
+        test_sample_params = testfile.get_sample_params(testcontents[3])
+
+        assert(test_sample_params == [
+            {'name': 'SampleName',
+             'tag': 'SampleName',
+             'type': 'sample',
+             'value': 'sample1'},
+            {'name': 'param_name',
+             'tag': 'in_tag',
+             'type': 'input',
+             'value': 'in_value1'}
+            ])
+
+    def test_parse_submit(self, tmpdir):
+        testcontents = ['###METADATA\n',
+                        '#############\n',
+                        'Workflow Name\toptimized_workflow_1\n',
+                        'Project Name\tDATE_P00-00_FLOWCELL\n',
+                        '###TABLE DATA\n',
+                        '#############\n',
+                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'sample1\tin_value1\n',
+                        'sample2\tin_value2\n']
+        testpath = mockstringfile(''.join(testcontents), tmpdir)
+        testfile = io.WorkflowBatchFile(path=testpath, state='submit')
+
+        test_data = testfile.parse()
+
+        assert(test_data == {
+            'workflow_name': 'optimized_workflow_1',
+            'batch_name': 'DATE_P00-00_FLOWCELL',
+            'raw': testcontents,
+            'parameters': [
+                {'name': 'SampleName', 'tag': 'SampleName', 'type': 'sample'},
+                {'name': 'param_name', 'tag': 'in_tag', 'type': 'input'}
+            ],
+            'samples': [
+                [
+                    {'tag': 'SampleName',
+                     'type': 'sample',
+                     'name': 'SampleName',
+                     'value': 'sample1'},
+                    {'tag': 'in_tag',
+                     'type': 'input',
+                     'name': 'param_name',
+                     'value': 'in_value1'}
+                ],
+                [
+                    {'tag': 'SampleName',
+                     'type': 'sample',
+                     'name': 'SampleName',
+                     'value': 'sample2'},
+                    {'tag': 'in_tag',
+                     'type': 'input',
+                     'name': 'param_name',
+                     'value': 'in_value2'}
+                ]
+            ]
+        })
+
+    def test_write(self, tmpdir):
+        testcontents = ['###METADATA\n',
+                        '#############\n',
+                        'Workflow Name\toptimized_workflow_1\n',
+                        'Project Name\tDATE_P00-00_FLOWCELL\n',
+                        '###TABLE DATA\n',
+                        '#############\n',
+                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'sample1\tin_value1\n',
+                        'sample2\tin_value2\n']
+        testpath = mockstringfile(''.join(testcontents), tmpdir)
+        testfile = io.WorkflowBatchFile(path=testpath, state='submit')
+
+        outfile = tmpdir.join("newfile")
+
+        testfile.write(str(outfile))
+
+        assert(outfile.readlines() == testcontents)
+
