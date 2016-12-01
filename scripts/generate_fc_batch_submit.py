@@ -89,7 +89,8 @@ def parse_workflow_template(batch_workflow_template):
 
 # Replace root directory with /~/ for compatibility with Globus transfer
 def format_endpoint_dir(local_dir):
-    endpoint_dir = re.sub('.*(?=(/genomics))', '/~', local_dir)
+    # endpoint_dir = re.sub('.*(?=(/genomics))', '/~', local_dir)
+    endpoint_dir = re.sub('.*(?=(/genomics))', '/mnt', local_dir)
 
     return endpoint_dir
 
