@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 def test_genlims_connection():
     # TODO: come up with a better way to test this
     assert('tg3' in genlims.db.name)
+    assert(genlims.db.collection_names())
 
 
 @pytest.fixture(scope='function')
