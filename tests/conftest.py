@@ -7,8 +7,9 @@ import pytest
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+if os.environ.get('DB_PARAM_FILE') is None:
+    os.environ['DB_PARAM_FILE'] = 'default.ini'
 
-os.environ['DB_PARAM_FILE'] = 'default.ini'
 
 def join(loader, node):
     """
