@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def test_genlims_connection():
     # TODO: come up with a better way to test this
-    assert('tg3' in genlims.db.name)
+    assert ('tg3' in genlims.db.name)
 
 
 @pytest.fixture(scope='function')
@@ -67,11 +67,11 @@ class TestGenLIMSOperations:
         # number of objects in the database; if any objects were retrieved,
         # they should include the expected fields and values
         test_query = {'_id': mock_dbobject['_id']}
-        assert(type(dbobjects) == list)
-        assert(len(dbobjects)
-               == mock_db['mockcollection'].find(test_query).count())
+        assert (type(dbobjects) == list)
+        assert (len(dbobjects)
+                == mock_db['mockcollection'].find(test_query).count())
         if dbobject_exists:
-            assert(dbobjects[0] == mock_dbobject)
+            assert (dbobjects[0] == mock_dbobject)
 
     @pytest.mark.parametrize(
         'dbobject_exists', [False, True]
@@ -93,8 +93,9 @@ class TestGenLIMSOperations:
         # THEN only the single object be in the database in the mock collection
         # and should match the mock object definition
         test_query = {'_id': mock_dbobject['_id']}
-        assert(mock_db['mockcollection'].find(test_query).count() == 1)
-        assert(mock_db['mockcollection'].find_one(test_query) == mock_dbobject)
+        assert (mock_db['mockcollection'].find(test_query).count() == 1)
+        assert (mock_db['mockcollection'].find_one(test_query)
+                == mock_dbobject)
 
     @pytest.mark.parametrize(
         'update_field',
@@ -129,14 +130,14 @@ class TestGenLIMSOperations:
         # in the input object with a value of 'None' should be skipped
         test_query = {'_id': mock_dbobject['_id']}
         test_dbobject = mock_db['mockcollection'].find_one(test_query)
-        assert(mock_db['mockcollection'].find(test_query).count() == 1)
-        assert(all({test_dbobject[field] == mock_dbobject[field]
-                    for field in mock_dbobject.keys()
-                    if field not in update_field.keys()}))
+        assert (mock_db['mockcollection'].find(test_query).count() == 1)
+        assert (all({test_dbobject[field] == mock_dbobject[field]
+                     for field in mock_dbobject.keys()
+                     if field not in update_field.keys()}))
         for field, value in update_field.items():
             if value is not None:
                 assert(test_dbobject[field] == value)
-        assert('skipField' not in test_dbobject)
+        assert ('skipField' not in test_dbobject)
 
     def test_insert_objects_multiple(self, mock_db, mock_dbobject):
         # WHEN inserting the object
@@ -150,7 +151,7 @@ class TestGenLIMSOperations:
         wrapped_fn()
 
         # THEN new objects should be in database
-        assert(mock_db['mockcollection'].find().count() == 2)
+        assert (mock_db['mockcollection'].find().count() == 2)
 
     @pytest.mark.parametrize(
         'test_collection, test_function',
@@ -169,8 +170,8 @@ class TestGenLIMSOperations:
 
         # THEN should return a list of objects equal in length to the matching
         # number of objects in the database for the specified collection
-        assert(len(dbobjects)
-               == mock_db[test_collection].find(test_query).count())
+        assert (len(dbobjects)
+                == mock_db[test_collection].find(test_query).count())
 
     @pytest.mark.parametrize(
         'test_collection, test_function',
@@ -190,7 +191,7 @@ class TestGenLIMSOperations:
         # THEN only the single object be in the database in the
         # specified collection
         test_query = {'_id': mock_dbobject['_id']}
-        assert(mock_db[test_collection].find(test_query).count() == 1)
+        assert (mock_db[test_collection].find(test_query).count() == 1)
 
     @pytest.mark.parametrize(
         'id_exists', [False, True]
@@ -216,7 +217,7 @@ class TestGenLIMSOperations:
         # expected number: 1 if new, or 2 if the same prefix/date combo
         # already existed in the 'workflowbatches' collection
         id_tag = 2 if id_exists else 1
-        assert(wb_id == 'mockprefix_2000-01-01_{}'.format(id_tag))
+        assert (wb_id == 'mockprefix_2000-01-01_{}'.format(id_tag))
 
     @pytest.mark.parametrize(
         'field_level', [-1, 0, 1, 2]
@@ -242,7 +243,7 @@ class TestGenLIMSOperations:
         # the field does not exist in any samples in the hierarchy, should
         # return 'None'
         expected_result = 'mockvalue' if field_level >= 0 else None
-        assert(value == expected_result)
+        assert (value == expected_result)
 
     def test_search_ancestors_no_parent(self, mock_db):
         # AND a hierarchy of objects in the 'samples' collection, but
@@ -257,7 +258,7 @@ class TestGenLIMSOperations:
         value = genlims.search_ancestors(mock_db, 'sample0', 'mockfield')
 
         # THEN should return None
-        assert(value is None)
+        assert (value is None)
 
 
 class TestMapping:
@@ -276,7 +277,7 @@ class TestMapping:
 
         # THEN keys at all nested levels should be converted to snake case
         # (with the exception of '_id', which should be unchangedj)
-        assert(genlims.map_keys(test_input) == expected_result)
+        assert (genlims.map_keys(test_input) == expected_result)
 
     def test_get_model_class(self):
         # GIVEN any state
@@ -284,10 +285,10 @@ class TestMapping:
         # WHEN searching for matched model class based on object type
 
         # THEN should return expected class name
-        assert(genlims.get_model_class({'type': 'sequenced library'})
-               == 'SequencedLibrary')
-        assert(genlims.get_model_class({'type': 'library'})
-               == 'Library')
+        assert (genlims.get_model_class({'type': 'sequenced library'})
+                == 'SequencedLibrary')
+        assert (genlims.get_model_class({'type': 'library'})
+                == 'Library')
 
     def test_map_to_object(self):
         # GIVEN any state
@@ -305,10 +306,10 @@ class TestMapping:
         # include the appropriately formatted fields/attributes
         # TODO: try to remove dependency on model/docs module when testing,
         # if possible (and maybe even in the method itself)
-        assert(type(obj) is docs.SequencedLibrary)
-        assert(all([hasattr(obj, field)
-                    for field in ['_id', 'parent_id', 'type', 'raw_data',
-                                  'date_created', 'last_updated']]))
-        assert(all([field in obj.raw_data]
+        assert (type(obj) is docs.SequencedLibrary)
+        assert (all([hasattr(obj, field)
+                     for field in ['_id', 'parent_id', 'type', 'raw_data',
+                                   'date_created', 'last_updated']]))
+        assert (all([field in obj.raw_data]
                     for field in ['path', 'lane_id', 'sample_number']))
-        assert(obj.last_updated == obj.date_created)
+        assert (obj.last_updated == obj.date_created)

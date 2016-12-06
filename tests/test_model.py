@@ -30,7 +30,7 @@ class TestDocumentsMethods:
 
         # THEN keys at all nested levels of the object should be correctly
         # formatted with the exception of '_id', which should be the same
-        assert(docs.convert_keys(test_input) == expected_result)
+        assert (docs.convert_keys(test_input) == expected_result)
 
 
 class TestTG3Object:
@@ -69,10 +69,11 @@ class TestTG3Object:
         # and the expected relationship between last update and date created
         # attributes (equal, if no updates made; greater than,
         # if any updates made)
-        assert(tg3object.type == expected_result['type'])
-        assert(expected_result['time_check'](tg3object.last_updated,
-                                             tg3object.date_created))
-        assert(hasattr(tg3object, 'new_field') == expected_result['has_newfield'])
+        assert (tg3object.type == expected_result['type'])
+        assert (expected_result['time_check'](tg3object.last_updated,
+                                              tg3object.date_created))
+        assert (hasattr(tg3object, 'new_field')
+                == expected_result['has_newfield'])
 
     @pytest.mark.parametrize(
         'test_input, force_opt, expected_result',
@@ -106,8 +107,10 @@ class TestTG3Object:
         # WHEN object attributes are returned as a JSON-like dict
 
         # THEN the output dict should have expected, correctly formatted fields
-        assert(all({field in tg3object.to_json()
-                    for field in ['_id', 'type', 'dateCreated', 'lastUpdated']}))
+        assert (all({field in tg3object.to_json()
+                     for field in [
+                         '_id', 'type', 'dateCreated', 'lastUpdated'
+                     ]}))
 
 
 class TestSample:
@@ -139,10 +142,10 @@ class TestSample:
 
         # THEN object should have the expected type attribute value and
         # expected fields for a sample
-        assert(sampleobject.type == expected_result)
-        assert(all({hasattr(sampleobject, field)
-                    for field in ['_id', 'project_id', 'subproject_id',
-                                  'protocol_id', 'parent_id']}))
+        assert (sampleobject.type == expected_result)
+        assert (all({hasattr(sampleobject, field)
+                     for field in ['_id', 'project_id', 'subproject_id',
+                                   'protocol_id', 'parent_id']}))
 
 
 class TestSequencedLibrary:
@@ -163,7 +166,7 @@ class TestSequencedLibrary:
         # raw data attribute
 
         # THEN output should be an empty list
-        assert(seqlibobject.raw_data == [])
+        assert (seqlibobject.raw_data == [])
 
     def test_raw_data_setter(self, seqlibobject):
         # WHEN the raw data setter is used to update the objects'
@@ -171,7 +174,7 @@ class TestSequencedLibrary:
         seqlibobject.raw_data = [{'path': None}]
 
         # THEN the output should be the updated raw data value
-        assert(seqlibobject.raw_data == [{'path': None}])
+        assert (seqlibobject.raw_data == [{'path': None}])
 
 
 class TestProcessedLibrary:
@@ -192,7 +195,7 @@ class TestProcessedLibrary:
         # processed data attribute
 
         # THEN output should be an empty list
-        assert(proclibobject.processed_data == [])
+        assert (proclibobject.processed_data == [])
 
     def test_processed_data_setter(self, proclibobject):
         # WHEN the processed data setter is used to update the objects'
@@ -200,7 +203,7 @@ class TestProcessedLibrary:
         proclibobject.processed_data = [{'path': None}]
 
         # THEN the output should be the updated processed data value
-        assert(proclibobject.processed_data == [{'path': None}])
+        assert (proclibobject.processed_data == [{'path': None}])
 
 
 class TestRun:
@@ -230,9 +233,9 @@ class TestRun:
 
         # THEN object should have the expected type attribute value and
         # expected fields for a run
-        assert(runobject.type == expected_result)
-        assert(all({hasattr(runobject, field)
-                    for field in ['_id', 'protocol_id', 'date']}))
+        assert (runobject.type == expected_result)
+        assert (all({hasattr(runobject, field)
+                     for field in ['_id', 'protocol_id', 'date']}))
 
 
 class TestFlowcellRun:
@@ -253,7 +256,7 @@ class TestFlowcellRun:
         # flowcell path attribute
 
         # THEN output should be an empty list
-        assert(fcrunobject.flowcell_path is None)
+        assert (fcrunobject.flowcell_path is None)
 
     def test_flowcell_path_setter(self, fcrunobject):
         # WHEN the flowcell path setter is used to update the objects'
@@ -261,7 +264,7 @@ class TestFlowcellRun:
         fcrunobject.flowcell_path = '/~/path-to-flowcell'
 
         # THEN the output should be the updated processed data value
-        assert(fcrunobject.flowcell_path == '/~/path-to-flowcell')
+        assert (fcrunobject.flowcell_path == '/~/path-to-flowcell')
 
 
 class TestWorkflow:

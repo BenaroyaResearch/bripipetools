@@ -31,7 +31,7 @@ class TestStrings:
 
         # THEN the output string should match the expected result (i.e., the
         # matched substring, if found, or the default return string otherwise)
-        assert(substring == expected_result)
+        assert (substring == expected_result)
 
     @pytest.mark.parametrize(
         'test_input, expected_result',
@@ -49,7 +49,7 @@ class TestStrings:
         # THEN the output string match the expected result (i.e., a camelCase
         # formatted strings with no non-alphanumeric characters and capital
         # letters used to separate words)
-        assert(util.to_camel_case(test_input) == expected_result)
+        assert (util.to_camel_case(test_input) == expected_result)
 
     @pytest.mark.parametrize(
         'test_input, expected_result',
@@ -109,6 +109,6 @@ class TestFiles:
 
         # THEN the output string should be the modified path with the
         # original root folder replaced by the alternative string
-        assert(new_path == expected_result)
+        assert (new_path == expected_result)
 
 
