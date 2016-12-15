@@ -34,5 +34,14 @@ def connect():
     logger.info("connecting to database '{}' on host '{}"
                 .format(db_name, db_host))
     client = pymongo.MongoClient(db_host, 27017)
+
+    try:
+        logger.info("authenticating database '{}'".format(db_name))
+        client[db_name].authenticate(config.get('database', 'user'),
+                                     config.get('database', 'password'))
+    except ConfigParser.NoOptionError:
+        logger.warn("no username/password provided; "
+                    "attempting to connect anyway")
+
     return client[db_name]
 db = connect()

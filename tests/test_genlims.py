@@ -1,5 +1,6 @@
 import logging
 import datetime
+import os
 
 import pytest
 import mongomock
@@ -14,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 def test_genlims_connection():
     # TODO: come up with a better way to test this
-    assert ('tg3' in genlims.db.name)
+    assert('tg3' in genlims.db.name)
+    if os.environ.get('DB_PARAM_FILE') != 'default.ini':
+        assert(genlims.db.collection_names())
 
 
 @pytest.fixture(scope='function')
