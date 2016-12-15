@@ -23,7 +23,7 @@ class FlowcellRunAnnotator(object):
                      .format(run_id))
         self.run_id = run_id
         self.db = db
-        self.flowcellrun = self._init_flowcellrun()
+        # self.flowcellrun = self._init_flowcellrun()
 
         logger.debug("setting 'genomics' path")
         self.genomics_path = os.path.join(genomics_root, 'genomics')
@@ -63,7 +63,11 @@ class FlowcellRunAnnotator(object):
         """
         logger.info("searching for 'Unaligned' folder")
         try:
-            return os.path.join(self._get_flowcell_path(), 'Unaligned')
+            unaligned_path = os.path.join(self._get_flowcell_path(),
+                                          'Unaligned')
+            if not os.path.exists(unaligned_path):
+                raise OSError
+            return unaligned_path
         except OSError:
             logger.error("'Unaligned' folder doesn't exist")
             raise
