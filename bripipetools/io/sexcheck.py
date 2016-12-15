@@ -14,7 +14,6 @@ class SexcheckFile(object):
     def __init__(self, path):
         self.path = path
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
@@ -29,10 +28,13 @@ class SexcheckFile(object):
         Get key-value pairs from text lines and return dictionary.
         """
         rows = [l.rstrip().split(',') for l in self.data['raw']]
-        return dict(zip(rows[0], rows[1]))
+        self.data['table'] = dict(zip(rows[0], rows[1]))
 
     def parse(self):
         """
         Parse metrics table and return dictionary.
         """
-        return self._parse_lines()
+        self._read_file()
+        self._parse_lines()
+
+        return self.data['table']

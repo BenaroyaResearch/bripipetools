@@ -2,9 +2,12 @@
 Classes for reading, parsing, and writing workflow batch submit files for
 Globus Galaxy.
 """
+import logging
 import re
 
 from collections import OrderedDict
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowBatchFile(object):
@@ -23,7 +26,6 @@ class WorkflowBatchFile(object):
         self.path = path
         self.state = state
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
@@ -138,6 +140,7 @@ class WorkflowBatchFile(object):
         """
         Parse workflow batch file and return dict.
         """
+        self._read_file()
         self.data['workflow_name'] = self.get_workflow_name()
         self.data['batch_name'] = self.get_batch_name()
         self.data['parameters'] = [v for k, v in self.get_params().items()]

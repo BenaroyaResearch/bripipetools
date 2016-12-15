@@ -24,7 +24,7 @@ class TestIllumina:
         # ID may or may not be included
 
         # THEN the output string should match the expected result
-        assert(parsing.get_project_label(test_input) == expected_result)
+        assert (parsing.get_project_label(test_input) == expected_result)
 
     def test_parse_project_label(self):
         # GIVEN any state
@@ -35,8 +35,8 @@ class TestIllumina:
 
         # THEN the dictionary should have the first number with key 'project_id'
         # and the second number with key 'subproject_id'
-        assert(project_items['project_id'] == 1)
-        assert(project_items['subproject_id'] == 2)
+        assert (project_items['project_id'] == 1)
+        assert (project_items['subproject_id'] == 2)
 
     @pytest.mark.parametrize(
         'test_input, expected_result',
@@ -55,7 +55,7 @@ class TestIllumina:
         # THEN the output string should match the expected result
         # (i.e., the matched library ID or an empty string, if no
         # match found)
-        assert(parsing.get_library_id(test_input) == expected_result)
+        assert (parsing.get_library_id(test_input) == expected_result)
 
     def test_get_flowcell_id(self):
         # GIVEN any state
@@ -66,8 +66,8 @@ class TestIllumina:
         # ending in 'XX' or 'XY')
 
         # THEN the output string should match the expected result
-        assert(parsing.get_flowcell_id('150615_D00565_0087_AC6VG0ANXX')
-               == 'C6VG0ANXX')
+        assert (parsing.get_flowcell_id('150615_D00565_0087_AC6VG0ANXX')
+                == 'C6VG0ANXX')
 
     def test_parse_flowcell_run_id_standard(self):
         # GIVEN any state
@@ -78,11 +78,46 @@ class TestIllumina:
 
         # THEN the components should be correctly parsed and assigned to
         # appropriate field in the output dictionary
-        assert(run_items['date'] == '2015-06-15')
-        assert(run_items['instrument_id'] == 'D00565')
-        assert(run_items['run_number'] == 87)
-        assert(run_items['flowcell_id'] == 'C6VG0ANXX')
-        assert(run_items['flowcell_position'] == 'A')
+        assert (run_items['date'] == '2015-06-15')
+        assert (run_items['instrument_id'] == 'D00565')
+        assert (run_items['run_number'] == 87)
+        assert (run_items['flowcell_id'] == 'C6VG0ANXX')
+        assert (run_items['flowcell_position'] == 'A')
+
+    def test_parse_flowcell_run_id_invalid_date(self):
+        # GIVEN any state
+
+        # WHEN a flowcell run ID is parsed into its component items,
+        # but the run ID does not contain a valid date
+        run_id = 'NOTDATE_D00565_0087_AC6VG0ANXX'
+        run_items = parsing.parse_flowcell_run_id(run_id)
+
+        # THEN the components should be correctly parsed and assigned to
+        # appropriate field in the output dictionary; in this case,
+        # the value for date should be 'None'
+        assert (run_items['date'] is None)
+        assert (run_items['instrument_id'] == 'D00565')
+        assert (run_items['run_number'] == 87)
+        assert (run_items['flowcell_id'] == 'C6VG0ANXX')
+        assert (run_items['flowcell_position'] == 'A')
+
+    def test_parse_flowcell_run_id_invalid_runnum(self):
+        # GIVEN any state
+
+        # WHEN a flowcell run ID is parsed into its component items,
+        # but the run ID does not contain a valid run number
+        # TODO: use more realistic example
+        run_id = 'NOTDATE_FCIDENTIFIER'
+        run_items = parsing.parse_flowcell_run_id(run_id)
+
+        # THEN the components should be correctly parsed and assigned to
+        # appropriate field in the output dictionary; in this case,
+        # the value for run_number should be 'None'
+        assert (run_items['date'] is None)
+        assert (run_items['instrument_id'] == 'FCIDENTIFIER')
+        assert (run_items['run_number'] is None)
+        assert (run_items['flowcell_id'] == '')
+        assert (run_items['flowcell_position'] == 'N')
 
     def test_parse_fastq_filename(self):
         # GIVEN any state
@@ -97,10 +132,11 @@ class TestIllumina:
 
         # THEN the components should be correctly parsed and assigned to
         # appropriate field in the output dictionary
-        assert(fastq_items['path'] == ('/genomics/Illumina/'
-                                       '150615_D00565_0087_AC6VG0ANXX/Unaligned/'
-                                       'P14-12-23221204/lib7293-25920016/'
-                                       'MXU01-CO072_S1_L001_R1_001.fastq.gz'))
-        assert(fastq_items['lane_id'] == 'L001')
-        assert(fastq_items['read_id'] == 'R1')
-        assert(fastq_items['sample_number'] == 1)
+        assert (fastq_items['path']
+                == ('/genomics/Illumina/'
+                    '150615_D00565_0087_AC6VG0ANXX/Unaligned/'
+                    'P14-12-23221204/lib7293-25920016/'
+                    'MXU01-CO072_S1_L001_R1_001.fastq.gz'))
+        assert (fastq_items['lane_id'] == 'L001')
+        assert (fastq_items['read_id'] == 'R1')
+        assert (fastq_items['sample_number'] == 1)

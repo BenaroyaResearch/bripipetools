@@ -15,7 +15,6 @@ class FastQCFile(object):
     def __init__(self, path):
         self.path = path
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
@@ -81,6 +80,7 @@ class FastQCFile(object):
         """
         Parse file and return key-value pairs as dictionary.
         """
+        self._read_file()
         sections = self._locate_sections()
         data = []
         for section_name, section_info in sections.items():
@@ -96,7 +96,9 @@ class FastQCFile(object):
         Parse table of overrepresented sequences, return as list of
         dictionaries.
         """
+        self._read_file()
         sections = self._locate_sections()
+        logger.debug("{}".format(sections))
         section_status = self._get_section_status(
             'overrepresented_sequences',
             sections['overrepresented_sequences'])

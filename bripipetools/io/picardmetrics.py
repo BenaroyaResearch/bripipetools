@@ -18,7 +18,6 @@ class PicardMetricsFile(object):
     def __init__(self, path):
         self.path = path
         self.data = {}
-        self._read_file()
 
     def _read_file(self):
         """
@@ -35,14 +34,16 @@ class PicardMetricsFile(object):
         raw_html = self.data['raw']
         soup = BeautifulSoup(raw_html, 'html.parser')
         logger.debug("getting metrics table from raw HTML string")
-        return soup.findAll('table', attrs={'cellpadding': '3'})[0]
+        self.data['table'] = soup.findAll(
+            'table', attrs={'cellpadding': '3'}
+            )[0]
 
     def _check_table_format(self):
         """
         Check whether table is long (keys in one column, values in the other)
         or wide (keys in one row, values in the other).
         """
-        table = self._get_table()
+        table = self.data['table']
         if any([re.search(u'\xa0', td.text)
                 for tr in table.findAll('tr')
                 for td in tr.findAll('td')]):
@@ -56,11 +57,12 @@ class PicardMetricsFile(object):
         """
         Parse long-formatted table to dictionary.
         """
-        table = self._get_table()
+        table = self.data['table']
+
         metrics = {}
         for tr in table.findAll('tr'):
             for td in tr.findAll('td'):
-                if re.search('^([A-Z]+(\_)*)+$', td.text):
+                if re.search('^(\w+_*)+$', td.text):
                     td_key = td.text.replace('\n', '')
                     logger.debug("found metrics field {}".format(td_key))
 
@@ -68,7 +70,8 @@ class PicardMetricsFile(object):
                     td_val = td_val.replace('\n', '')
                     logger.debug("with corresponding value {}".format(td_val))
 
-                    if len(td_val) and not re.search(r'[^\d.]+', td_val.lower()):
+                    if len(td_val) and not re.search(r'[^\d.]+',
+                                                     td_val.lower()):
                         td_val = float(td_val)
                     metrics[td_key] = td_val
         logger.debug("parsed metrics table: {}".format(metrics))
@@ -78,7 +81,7 @@ class PicardMetricsFile(object):
         """
         Parse wide-formatted table to dictionary.
         """
-        table = self._get_table()
+        table = self.data['table']
         metrics = {}
         for tr in table.findAll('tr'):
             if re.search(u'\xa0', tr.text):
@@ -103,6 +106,8 @@ class PicardMetricsFile(object):
         """
         Parse metrics table and return dictionary.
         """
+        self._read_file()
+        self._get_table()
         table_format = self._check_table_format()
         if table_format == 'long':
             return self._parse_long()
