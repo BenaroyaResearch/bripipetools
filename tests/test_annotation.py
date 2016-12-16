@@ -56,16 +56,16 @@ class TestFlowcellRunAnnotator:
     def test_init_flowcellrun_for_existing_run(self, mock_db):
         # GIVEN a flowcell run ID and a connection to a database in which
         # a document corresponding to the flowcell run exists already
-        testid = '161231_INSTID_0001_AC00000XX'
+        mockid = '161231_INSTID_0001_AC00000XX'
         mock_db.runs.insert_one(
-            {'_id': testid,
+            {'_id': mockid,
              'type': 'flowcell'}
         )
 
         # AND an annotator object is created for the flowcell run with
         # an arbitrary 'genomics' root specified
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root='/mnt'
         )
@@ -76,18 +76,18 @@ class TestFlowcellRunAnnotator:
         # THEN the flowcell run object should be returned and
         # should be correctly mapped from the database object
         assert (type(modelobject) == docs.FlowcellRun)
-        assert (modelobject._id == testid)
+        assert (modelobject._id == mockid)
         assert modelobject.is_mapped
 
     def test_init_flowcellrun_for_new_run(self, mock_db):
         # GIVEN a flowcell run ID and a connection to a database in which
         # a document corresponding to the flowcell run does not exist
-        testid = '161231_INSTID_0001_AC00000XX'
+        mockid = '161231_INSTID_0001_AC00000XX'
 
         # AND an annotator object is created for the flowcell run with
         # an arbitrary 'genomics' root specified
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root='/mnt'
         )
@@ -97,19 +97,19 @@ class TestFlowcellRunAnnotator:
 
         # THEN the new flowcell run object should be returned
         assert (type(modelobject) == docs.FlowcellRun)
-        assert (modelobject._id == testid)
+        assert (modelobject._id == mockid)
         assert not modelobject.is_mapped
 
     def test_get_flowcell_path_for_existing_folder(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
         # under which a folder exists at the path 'genomics/Illumina/<run_id>'
-        testid = '161231_INSTID_0001_AC00000XX'
-        mockpath = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(testid)
+        mockid = '161231_INSTID_0001_AC00000XX'
+        mockpath = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mockid)
 
         # AND an annotator object created for a flowcell run ID with that
         # directory specified as 'genomics' root
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root=str(tmpdir)
         )
@@ -117,7 +117,7 @@ class TestFlowcellRunAnnotator:
         # AND the annotator object has a mapped model object with the
         # corresponding run ID
         mockobject = mock.create_autospec(docs.FlowcellRun)
-        mockobject._id = testid
+        mockobject._id = mockid
         annotator.flowcellrun = mockobject
 
         # WHEN the flowcell folder path is retrieved
@@ -129,12 +129,12 @@ class TestFlowcellRunAnnotator:
     def test_get_flowcell_path_for_invalid_root(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary directory that does not
         # contain 'genomics/Illumina/'
-        testid = '161231_INSTID_0001_AC00000XX'
+        mockid = '161231_INSTID_0001_AC00000XX'
 
         # AND an annotator object created for a flowcell run ID with that
         # directory specified as 'genomics' root
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root=str(tmpdir)
         )
@@ -142,7 +142,7 @@ class TestFlowcellRunAnnotator:
         # AND the annotator object has a mapped model object with the
         # corresponding run ID
         mockobject = mock.create_autospec(docs.FlowcellRun)
-        mockobject._id = testid
+        mockobject._id = mockid
         annotator.flowcellrun = mockobject
 
         # WHEN the flowcell folder path is retrieved
@@ -155,14 +155,14 @@ class TestFlowcellRunAnnotator:
         # GIVEN a flowcell run ID and an arbitrary root directory,
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
-        testid = '161231_INSTID_0001_AC00000XX'
-        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(testid)
+        mockid = '161231_INSTID_0001_AC00000XX'
+        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mockid)
                     .mkdir('Unaligned'))
 
         # AND an annotator object created for a flowcell run ID with that
         # directory specified as 'genomics' root
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root=str(tmpdir)
         )
@@ -170,7 +170,7 @@ class TestFlowcellRunAnnotator:
         # AND the annotator object has a mapped model object with the
         # corresponding run ID
         mockobject = mock.create_autospec(docs.FlowcellRun)
-        mockobject._id = testid
+        mockobject._id = mockid
         annotator.flowcellrun = mockobject
 
         # WHEN the flowcell folder path is retrieved
@@ -183,13 +183,13 @@ class TestFlowcellRunAnnotator:
         # GIVEN a flowcell run ID and an arbitrary root directory,
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and there is no subfolder named 'Unaligned'
-        testid = '161231_INSTID_0001_AC00000XX'
-        mockpath = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(testid)
+        mockid = '161231_INSTID_0001_AC00000XX'
+        mockpath = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mockid)
 
         # AND an annotator object created for a flowcell run ID with that
         # directory specified as 'genomics' root
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root=str(tmpdir)
         )
@@ -197,7 +197,7 @@ class TestFlowcellRunAnnotator:
         # AND the annotator object has a mapped model object with the
         # corresponding run ID
         mockobject = mock.create_autospec(docs.FlowcellRun)
-        mockobject._id = testid
+        mockobject._id = mockid
         annotator.flowcellrun = mockobject
 
         # WHEN the unaligned folder path is retrieved
@@ -208,9 +208,9 @@ class TestFlowcellRunAnnotator:
 
     def test_get_flowcell_run(self, mock_db):
         # GIVEN any state and a flowcell run annotator object
-        testid = '161231_INSTID_0001_AC00000XX'
+        mockid = '161231_INSTID_0001_AC00000XX'
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root='/mnt'
         )
@@ -218,7 +218,7 @@ class TestFlowcellRunAnnotator:
         # AND the annotator object has a mapped model object with the
         # corresponding run ID
         mockobject = mock.create_autospec(docs.FlowcellRun)
-        mockobject._id = testid
+        mockobject._id = mockid
         annotator.flowcellrun = mockobject
 
         # WHEN model object is retrieved
@@ -231,9 +231,11 @@ class TestFlowcellRunAnnotator:
         # GIVEN a flowcell run ID and an arbitrary root directory,
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
-        testid = '161231_INSTID_0001_AC00000XX'
+        mockid = '161231_INSTID_0001_AC00000XX'
+
+        # AND the unaligned folder includes multiple project folders
         mockprojects = ['P1-1-11111111', 'P99-99-99999999']
-        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(testid)
+        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mockid)
                     .mkdir('Unaligned'))
         for p in mockprojects:
             mockpath.mkdir(p)
@@ -241,7 +243,7 @@ class TestFlowcellRunAnnotator:
         # AND an annotator object created for a flowcell run ID with that
         # directory specified as 'genomics' root
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root=str(tmpdir)
         )
@@ -249,24 +251,28 @@ class TestFlowcellRunAnnotator:
         # AND the annotator object has a mapped model object with the
         # corresponding run ID
         mockobject = mock.create_autospec(docs.FlowcellRun)
-        mockobject._id = testid
+        mockobject._id = mockid
         annotator.flowcellrun = mockobject
 
         # WHEN list of projects is retrieved
         testprojects = annotator.get_projects()
 
-        # THEN
+        # THEN the list of projects should include all project folders
+        # in the unaligned folder (and nothing else)
         assert (testprojects == mockprojects)
 
     def test_get_libraries(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
-        testid = '161231_INSTID_0001_AC00000XX'
+        mockid = '161231_INSTID_0001_AC00000XX'
+
+        # AND the unaligned folder includes multiple project folders,
+        # each with multiple folders for sequenced libraries
         mockprojects = ['P1-1-11111111', 'P99-99-99999999']
         mocklibs = {0: ['lib1111-11111111', 'lib2222-22222222'],
                     1: ['lib3333-33333333', 'lib4444-44444444']}
-        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(testid)
+        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mockid)
                     .mkdir('Unaligned'))
         for idx, p in enumerate(mockprojects):
             projpath = mockpath.mkdir(p)
@@ -276,7 +282,7 @@ class TestFlowcellRunAnnotator:
         # AND an annotator object created for a flowcell run ID with that
         # directory specified as 'genomics' root
         annotator = annotation.FlowcellRunAnnotator(
-            run_id=testid,
+            run_id=mockid,
             db=mock_db,
             genomics_root=str(tmpdir)
         )
@@ -284,160 +290,65 @@ class TestFlowcellRunAnnotator:
         # AND the annotator object has a mapped model object with the
         # corresponding run ID
         mockobject = mock.create_autospec(docs.FlowcellRun)
-        mockobject._id = testid
+        mockobject._id = mockid
         annotator.flowcellrun = mockobject
 
-        # WHEN list of projects is retrieved
+        # WHEN the full list of unaligned libraries is retrieved
         testlibs = annotator.get_libraries()
 
-        # THEN
-        assert (testlibs == [l for libs in mocklibs.values() for l in libs])
+        # THEN the list should include all library folders across all projects
+        # in the unaligned folder (and nothing else)
+        assert (set(testlibs) ==
+                set([l for libs in mocklibs.values() for l in libs]))
 
-#     def test_init_flowcellrun_existing_run(self, annotatordata, mock_db):
-#         # (GIVEN)
-#         (annotator, rundata) = annotatordata
-#
-#         logger.info("test `_init_flowcellrun()` with existing run")
-#
-#         # WHEN flowcell run already exists in 'runs' collection
-#         mock_db.runs.insert_one(
-#             {'_id': rundata['run_id'],
-#              'type': 'flowcell',
-#              'isMock': True})
-#         flowcellrun = annotator._init_flowcellrun()
-#
-#         # THEN the flowcell run object should be returned and
-#         # should be correctly mapped from the database object
-#         assert(type(flowcellrun) == docs.FlowcellRun)
-#         assert(flowcellrun._id == rundata['run_id'])
-#         assert(hasattr(flowcellrun, 'is_mock'))
-#
-#         logger.info("[rollback] remove most recently inserted "
-#                     "from mock database")
-#         mock_db.runs.drop()
-#
-#     def test_init_flowcellrun_new_run(self, annotatordata):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         logger.info("test `_init_flowcellrun()` with new run")
-#
-#         # WHEN flowcell run run does not already exist in
-#         # 'runs' collection
-#         flowcellrun = annotator._init_flowcellrun()
-#
-#         # THEN a new flowcell run object should be returned
-#         assert(type(flowcellrun) == docs.FlowcellRun)
-#         assert(flowcellrun._id == rundata['run_id'])
-#         assert(not hasattr(flowcellrun, 'is_mock'))
-# #
-#     def test_get_flowcell_path(self, annotatordata, mock_genomics_server):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         logger.info("test `_get_flowcell_path()`")
-#
-#         # WHEN searching for flowcell run ID in 'genomics' path
-#
-#         # THEN correct flowcell folder should be found in 'genomics/Illumina/'
-#         assert(annotator._get_flowcell_path() == rundata['path'])
-#
-#     def test_get_unaligned_path(self, annotatordata, mock_genomics_server):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         logger.info("test `_get_unaligned_path()`")
-#
-#         # WHEN searching for 'Unaligned' folder
-#
-#         # THEN path returned should be 'genomics/Illumina/<run_id>/Unaligned'
-#         assert(annotator._get_unaligned_path() == rundata['unaligned']['path'])
-#
-#     def test_get_projects(self, annotatordata, mock_genomics_server):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         logger.info("test `_get_projects()`")
-#
-#         # WHEN listing unaligned projects
-#         projects = annotator.get_projects()
-#
-#         # THEN should find expected number of projects
-#         assert(len(projects) == len(rundata['unaligned']['projects']))
-#
-#     @pytest.mark.parametrize("projectnum", [0, 1, 2])
-#     def test_get_libraries_single_project(self, annotatordata,
-#                                           mock_genomics_server, projectnum):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         # AND unaligned samples for a single project
-#         projectdata = rundata['unaligned']['projects'][projectnum]
-#
-#         logger.info("test `_get_libraries()`, single project ({})"
-#                     .format(projectdata['name']))
-#
-#         # WHEN listing libraries for the project
-#         libraries = annotator.get_libraries(projectdata['name'])
-#
-#         # THEN should find the expected number of libaries (samples)
-#         assert(len(libraries) == len(projectdata['samples']))
-#
-#     def test_get_libraries_all_projects(self, annotatordata,
-#                                         mock_genomics_server):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         # AND list of unaligned projects
-#         projects = rundata['unaligned']['projects']
-#
-#         logger.info("test `_get_libraries()`, all projects")
-#
-#         # WHEN listing libraries for all projects
-#         libraries = annotator.get_libraries()
-#
-#         # THEN should find expected number of libraries
-#         assert(len(libraries)
-#                 == sum(map(lambda x: len(x['samples']), projects)))
-#
-#     @pytest.mark.parametrize("projectnum", [0, 1, 2])
-#     def test_get_sequenced_libraries_single_project(self, annotatordata,
-#                                                     mock_genomics_server,
-#                                                     projectnum):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         # AND unaligned samples for a single project
-#         projectdata = rundata['unaligned']['projects'][projectnum]
-#
-#         logger.info("test `get_sequenced_libraries()`, single project ({})"
-#                     .format(projectdata['name']))
-#
-#         # WHEN collecting sequenced libraries for project
-#         sequencedlibraries = annotator.get_sequenced_libraries(
-#             projectdata['name'])
-#
-#         # THEN should find excpeted number of sequenced libraries
-#         assert(len(sequencedlibraries) == len(projectdata['samples']))
-#
-#     def test_get_sequenced_libraries_all_projects(self, annotatordata,
-#                                                   mock_genomics_server):
-#         # (GIVEN)
-#         annotator, rundata = annotatordata
-#
-#         # AND list of unaligned projects
-#         projects = rundata['unaligned']['projects']
-#
-#         logger.info("test `get_sequenced_libraries()`, all projects")
-#
-#         # WHEN collecting sequenced libraries for all projects
-#         sequencedlibraries = annotator.get_sequenced_libraries()
-#
-#         # THEN should find 31 total libraries
-#         assert(len(sequencedlibraries)
-#                == sum(map(lambda x: len(x['samples']), projects)))
-#
-#
+    def test_get_sequenced_libraries(self, mock_db, tmpdir):
+        # GIVEN a flowcell run ID and an arbitrary root directory,
+        # under which a folder exists at 'genomics/Illumina/<run_id>',
+        # and that folder contains a subfolder named 'Unaligned'
+        mockid = '161231_INSTID_0001_AC00000XX'
+
+        # AND the unaligned folder includes multiple project folders,
+        # each with multiple folders for sequenced libraries that contain
+        # one or more FASTQ files for the library
+        mockprojects = ['P1-1-11111111', 'P99-99-99999999']
+        mocklibs = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                    1: ['lib3333-33333333', 'lib4444-44444444']}
+        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mockid)
+                    .mkdir('Unaligned'))
+        for idx, p in enumerate(mockprojects):
+            projpath = mockpath.mkdir(p)
+            for l in mocklibs[idx]:
+                libpath = projpath.mkdir(l)
+                libpath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                libpath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        # AND an annotator object created for a flowcell run ID with that
+        # directory specified as 'genomics' root
+        annotator = annotation.FlowcellRunAnnotator(
+            run_id=mockid,
+            db=mock_db,
+            genomics_root=str(tmpdir)
+        )
+
+        # AND the annotator object has a mapped model object with the
+        # corresponding run ID
+        mockobject = mock.create_autospec(docs.FlowcellRun)
+        mockobject._id = mockid
+        annotator.flowcellrun = mockobject
+
+        # WHEN the full list of sequenced library model objects is retrieved
+        testseqlibs = annotator.get_sequenced_libraries()
+
+        # THEN the list should include a sequenced library model object
+        # corresponding to each library in the unaligned folder;
+        # note: library IDs correspond to library folder names without any
+        # of the numbers following the dash, and library IDs for each
+        # sequenced library is be stored in the 'parent_id' attribute
+        assert (all[type(sl) == docs.SequencedLibrary] for sl in testseqlibs)
+        assert (set([sl.parent_id for sl in testseqlibs]) ==
+                set([l.split('-')[0] for libs in mocklibs.values()
+                     for l in libs]))
+
 # @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 # class TestSequencedLibraryAnnotator:
 #     """

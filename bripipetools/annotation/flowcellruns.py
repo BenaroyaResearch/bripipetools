@@ -23,7 +23,7 @@ class FlowcellRunAnnotator(object):
                      .format(run_id))
         self.run_id = run_id
         self.db = db
-        # self.flowcellrun = self._init_flowcellrun()
+        self.flowcellrun = self._init_flowcellrun()
 
         logger.debug("setting 'genomics' path")
         self.genomics_path = os.path.join(genomics_root, 'genomics')
