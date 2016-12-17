@@ -8,6 +8,7 @@ import os
 import datetime
 
 from .. import util
+from .. import parsing
 from .. import io
 from .. import genlims
 from .. import qc
@@ -36,20 +37,6 @@ class WorkflowBatchAnnotator(object):
         self.genomics_root = genomics_root
         self.genomics_path = os.path.join(genomics_root, 'genomics')
 
-    def _parse_batch_name(self, batch_name):
-        """
-        Parse batch name indicated in workflow batch submit file and
-        return individual components indicating date, list of project
-        labels, and flowcell ID.
-        """
-        name_parts = batch_name.split('_')
-        date = datetime.datetime.strptime(name_parts.pop(0), '%y%m%d')
-        # date = datetime.date.isoformat(d)
-
-        fc_id = name_parts.pop(-1)
-
-        return {'date': date, 'projects': name_parts, 'flowcell_id': fc_id}
-
     def _init_workflowbatch(self):
         """
         Try to retrieve data for the workflow batch from GenLIMS; if
@@ -66,21 +53,26 @@ class WorkflowBatchAnnotator(object):
             return genlims.map_to_object(
                 genlims.get_workflowbatches(
                     self.db,
-                    {'workflowbatchFile': workflowbatch_file})[0])
+                    {'workflowbatchFile': workflowbatch_file}
+                )[0]
+            )
         except IndexError:
             logger.debug("creating new GalaxyWorkflowBatch object",
                          exc_info=True)
 
-            batch_items = self._parse_batch_name(
-                self.workflowbatch_data['batch_name'])
+            batch_items = parsing.parse_batch_name(
+                self.workflowbatch_data['batch_name']
+            )
 
             workflowbatch_id = genlims.create_workflowbatch_id(
                 db=self.db,
                 prefix='globusgalaxy',
-                date=batch_items['date'])
+                date=batch_items['date']
+            )
             return docs.GalaxyWorkflowBatch(
                 _id=workflowbatch_id,
-                workflowbatch_file=workflowbatch_file)
+                workflowbatch_file=workflowbatch_file
+            )
 
     def _update_workflowbatch(self):
         """
@@ -88,16 +80,20 @@ class WorkflowBatchAnnotator(object):
         """
         logger.debug("updating GalaxyWorkflowBatch object attributes")
 
-        batch_items = self._parse_batch_name(
-            self.workflowbatch_data['batch_name'])
+        batch_items = parsing.parse_batch_name(
+            self.workflowbatch_data['batch_name']
+        )
 
         update_fields = {
             'workflow_id': self.workflowbatch_data['workflow_name'],
             'date': batch_items['date'],
             'projects': batch_items['projects'],
-            'flowcell_id': batch_items['flowcell_id']}
+            'flowcell_id': batch_items['flowcell_id']
+        }
         self.workflowbatch.is_mapped = False
+        logger.debug("{}".format(self.workflowbatch.__dict__))
         self.workflowbatch.update_attrs(update_fields, force=True)
+        logger.debug("{}".format(self.workflowbatch.__dict__))
 
     def get_workflow_batch(self):
         """
@@ -136,7 +132,7 @@ class WorkflowBatchAnnotator(object):
             workflowbatch_id=self.workflowbatch._id,
             genomics_root=self.genomics_root,
             db=self.db
-            )
+        )
         return sexchecker.update()
 
     def get_processed_libraries(self, project=None, qc=False):
@@ -147,14 +143,15 @@ class WorkflowBatchAnnotator(object):
         logger.info("getting processed libraries for workflow batch {}"
                     .format(workflowbatch_id))
 
-        return [ProcessedLibraryAnnotator(
-            workflowbatch_id, sample_params, self.db
-            ).get_processed_library()
-            if not qc else self._check_sex(
+        return [
             ProcessedLibraryAnnotator(
                 workflowbatch_id, sample_params, self.db
-                ).get_processed_library())
-            for sample_params in self.workflowbatch_data['samples']
+            ).get_processed_library()
+            if not qc else self._check_sex(
+                ProcessedLibraryAnnotator(
+                    workflowbatch_id, sample_params, self.db
+                ).get_processed_library()
+            ) for sample_params in self.workflowbatch_data['samples']
             ]
 
 
