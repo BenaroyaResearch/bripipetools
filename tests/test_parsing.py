@@ -154,3 +154,38 @@ class TestIllumina:
         assert(batch_items['date'] == datetime.datetime(2016, 9, 29, 0, 0))
         assert(batch_items['projects'] == ['P109-1', 'P14-12'])
         assert(batch_items['flowcell_id'] == 'C6VG0ANXX')
+
+#
+#     def test_parse_output_name_onepart_source(self, annotatordata):
+#         # (GIVEN)
+#         annotator, _, _ = annotatordata
+#
+#         logger.info("test `_parse_output_name()`, one-part source")
+#
+#         # WHEN parsing output name from workflow batch parameter, and the
+#         # source name has one parts (i.e., 'tophat')
+#         output_items = annotator._parse_output_name(
+#             'tophat_alignments_bam_out')
+#
+#         # THEN output items should be a dictionary including fields for
+#         # name, type, and source
+#         assert(output_items['name'] == 'tophat_alignments_bam')
+#         assert(output_items['type'] == 'alignments')
+#         assert(output_items['source'] == 'tophat')
+#
+#     def test_parse_output_name_twopart_source(self, annotatordata):
+#         # (GIVEN)
+#         annotator, _, _ = annotatordata
+#
+#         logger.info("test `_parse_output_name()`, two-part source")
+#
+#         # WHEN parsing output name from workflow batch parameter, and the
+#         # source name has two parts (i.e., 'picard_rnaseq')
+#         output_items = annotator._parse_output_name(
+#             'picard_rnaseq_metrics_html_out')
+#
+#         # THEN output items should be a dictionary including fields for
+#         # name, type, and source
+#         assert(output_items['name'] == 'picard_rnaseq_metrics_html')
+#         assert(output_items['type'] == 'metrics')
+#         assert(output_items['source'] == 'picard_rnaseq')
