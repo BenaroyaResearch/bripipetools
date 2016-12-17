@@ -27,32 +27,183 @@ def mock_db(request):
     return db
 
 
+class TestSequencedLibraryAnnotator:
+    """
+    Tests methods for the `SequencedLibraryAnnotator` class in the
+    `bripipetools.annotation.illuminaseq` module.
+    """
+    def test_init_sequencedlibrary_for_existing_sample(self, mock_db):
+        # GIVEN a sequenced library ID and a connection to a database in which
+        # a document corresponding to the sequenced library exists already
+        mockid = 'lib1111_C00000XX'
+
+        mock_db.samples.insert_one(
+            {'_id': mockid,
+             'type': 'sequenced library'}
+        )
+
+        # AND an annotator object is created for the sequenced library with
+        # project and library folder names, run ID, and an arbitrary path to
+        # the libraries raw data
+        mocklib = 'lib1111-1111'
+        mockproject = 'P1-1-1111'
+        mockrunid = '161231_INSTID_0001_AC00000XX'
+        annotator = annotation.SequencedLibraryAnnotator(
+            path='mock-path-to-raw-data.fastq.gz',
+            library=mocklib,
+            project=mockproject,
+            run_id=mockrunid,
+            db=mock_db
+        )
+
+        # WHEN the model object is initiated for the annotator
+        modelobject = annotator._init_sequencedlibrary()
+
+        # THEN the sequenced library object should be returned and
+        # should be correctly mapped from the database object
+        assert (type(modelobject) == docs.SequencedLibrary)
+        assert (modelobject._id == mockid)
+        assert modelobject.is_mapped
+
+    def test_init_sequencedlibrary_for_existing_sample(self, mock_db):
+        # GIVEN a sequenced library ID and a connection to a database in which
+        # a document corresponding to the sequenced library does not exist
+        mockid = 'lib1111_C00000XX'
+
+        # AND an annotator object is created for the sequenced library with
+        # project and library folder names, run ID, and an arbitrary path to
+        # the libraries raw data
+        mocklib = 'lib1111-1111'
+        mockproject = 'P1-1-1111'
+        mockrunid = '161231_INSTID_0001_AC00000XX'
+        annotator = annotation.SequencedLibraryAnnotator(
+            path='mock-path-to-raw-data.fastq.gz',
+            library=mocklib,
+            project=mockproject,
+            run_id=mockrunid,
+            db=mock_db
+        )
+
+        # WHEN the model object is initiated for the annotator
+        modelobject = annotator._init_sequencedlibrary()
+
+        # THEN the sequenced library object should be returned and
+        # should be correctly mapped from the database object
+        assert (type(modelobject) == docs.SequencedLibrary)
+        assert (modelobject._id == mockid)
+        assert not modelobject.is_mapped
+
+    def test_get_raw_data(self, mock_db, tmpdir):
+        # GIVEN an annotator object created for the sequenced library with
+        # project and library folder names, run ID, and the full path to the
+        # folder containing raw data (i.e., one or more FASTQ files)
+        mocklib = 'lib1111'
+        mockproject = 'P1-1'
+        mockrunid = '161231_INSTID_0001_AC00000XX'
+        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                    .mkdir(mockrunid)
+                    .mkdir('Unaligned')
+                    .mkdir(mockproject)
+                    .mkdir(mocklib))
+        mockdata = 'sample-name_S001_L001_R1_001.fastq.gz'
+        mockpath.ensure(mockdata)
+        annotator = annotation.SequencedLibraryAnnotator(
+            path=str(mockpath),
+            library=mocklib,
+            project=mockproject,
+            run_id=mockrunid,
+            db=mock_db
+        )
+
+        # WHEN raw data details are recovered for the library
+        testdata = annotator._get_raw_data()
+
+        # THEN the path field of the raw data file should match
+        # the expected result
+        assert (testdata[0]['path'] == mockdata)
+
+    def test_update_sequencedlibrary(self, mock_db, tmpdir):
+        # GIVEN an annotator object created for the sequenced library with
+        # project and library folder names, run ID, and the full path to the
+        # folder containing raw data (i.e., one or more FASTQ files)
+        mocklib = 'lib1111'
+        mockproject = 'P1-1'
+        mockrunid = '161231_INSTID_0001_AC00000XX'
+        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                    .mkdir(mockrunid)
+                    .mkdir('Unaligned')
+                    .mkdir(mockproject)
+                    .mkdir(mocklib))
+        mockdata = 'sample-name_S001_L001_R1_001.fastq.gz'
+        mockpath.ensure(mockdata)
+        annotator = annotation.SequencedLibraryAnnotator(
+            path=str(mockpath),
+            library=mocklib,
+            project=mockproject,
+            run_id=mockrunid,
+            db=mock_db
+        )
+
+        # AND the annotator object has a mapped model object with the
+        # corresponding sequenced library ID
+        mockid = 'lib1111_C00000XX'
+        mockobject = mock.create_autospec(docs.SequencedLibrary)
+        mockobject._id = mockid
+        mockobject.is_mapped = True
+        annotator.sequencedlibrary = mockobject
+
+        # WHEN the mapped model object is updated to add any missing fields
+        annotator._update_sequencedlibrary()
+
+        # THEN the model object should now have expected fields including
+        # for raw data, and should no longer be flagged as mapped
+        assert (hasattr(annotator.sequencedlibrary, 'raw_data'))
+        assert not annotator.sequencedlibrary.is_mapped
+
+    def test_get_sequenced_library(self, mock_db, tmpdir):
+        # GIVEN an annotator object created for the sequenced library with
+        # project and library folder names, run ID, and the full path to the
+        # folder containing raw data (i.e., one or more FASTQ files)
+        mocklib = 'lib1111'
+        mockproject = 'P1-1'
+        mockrunid = '161231_INSTID_0001_AC00000XX'
+        mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                    .mkdir(mockrunid)
+                    .mkdir('Unaligned')
+                    .mkdir(mockproject)
+                    .mkdir(mocklib))
+        mockdata = 'sample-name_S001_L001_R1_001.fastq.gz'
+        mockpath.ensure(mockdata)
+        annotator = annotation.SequencedLibraryAnnotator(
+            path=str(mockpath),
+            library=mocklib,
+            project=mockproject,
+            run_id=mockrunid,
+            db=mock_db
+        )
+
+        # AND the annotator object has a mapped model object with the
+        # corresponding sequenced library ID
+        mockid = 'lib1111_C00000XX'
+        mockobject = mock.create_autospec(docs.SequencedLibrary)
+        mockobject._id = mockid
+        mockobject.is_mapped = True
+        annotator.sequencedlibrary = mockobject
+
+        # WHEN the mapped model object is retrieved
+        testobject = annotator.get_sequenced_library()
+
+        # THEN the model object should now have expected fields including
+        # for raw data, and should no longer be flagged as mapped
+        assert (hasattr(testobject, 'raw_data'))
+        assert not testobject.is_mapped
+
+
 class TestFlowcellRunAnnotator:
     """
     Tests methods for the `FlowcellRunAnnotator` class in the
     `bripipetools.annotation.flowcellruns` module.
     """
-    # @pytest.fixture(scope='class', params=[{'runnum': r} for r in range(1)])
-    # def annotatordata(self, request, mock_genomics_server, mock_db):
-    #     # GIVEN a FlowcellRunAnnotator with mock 'genomics' server path,
-    #     # valid run ID, and existing 'Unaligned' folder (i.e., where data
-    #     # and organization is known), as well as a mock db connection
-    #     runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-    #     rundata = runs[request.param['runnum']]
-    #
-    #     logger.info("[setup] FlowcellRunAnnotator test instance "
-    #                 "for run {}".format(rundata['run_id']))
-    #
-    #     fcrunannotator = annotation.FlowcellRunAnnotator(
-    #         run_id=rundata['run_id'],
-    #         db=mock_db,
-    #         genomics_root=mock_genomics_server['root']['path'])
-    #
-    #     def fin():
-    #         logger.info("[teardown] FlowcellRunAnnotator mock instance")
-    #     request.addfinalizer(fin)
-    #     return (fcrunannotator, rundata)
-
     def test_init_flowcellrun_for_existing_run(self, mock_db):
         # GIVEN a flowcell run ID and a connection to a database in which
         # a document corresponding to the flowcell run exists already
@@ -337,170 +488,19 @@ class TestFlowcellRunAnnotator:
         annotator.flowcellrun = mockobject
 
         # WHEN the full list of sequenced library model objects is retrieved
-        testseqlibs = annotator.get_sequenced_libraries()
+        testobjects = annotator.get_sequenced_libraries()
 
         # THEN the list should include a sequenced library model object
         # corresponding to each library in the unaligned folder;
         # note: library IDs correspond to library folder names without any
         # of the numbers following the dash, and library IDs for each
         # sequenced library is be stored in the 'parent_id' attribute
-        assert (all[type(sl) == docs.SequencedLibrary] for sl in testseqlibs)
-        assert (set([sl.parent_id for sl in testseqlibs]) ==
+        assert (all[type(sl) == docs.SequencedLibrary] for sl in testobjects)
+        assert (set([sl.parent_id for sl in testobjects]) ==
                 set([l.split('-')[0] for libs in mocklibs.values()
                      for l in libs]))
 
-# @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
-# class TestSequencedLibraryAnnotator:
-#     """
-#     Tests methods for the `SequencedLibraryAnnotator` class in the
-#     `bripipetools.annotation.illuminaseq` module.
-#     """
-#     @pytest.fixture(
-#         scope='class',
-#         params=[{'runnum': r, 'projectnum': p, 'samplenum': s}
-#                 for r in range(1)
-#                 for p in range(3)
-#                 for s in range(3)])
-#     def annotatordata(self, request, mock_genomics_server, mock_db):
-#         # GIVEN a SequencedLibraryAnnotator with mock 'genomics' server path,
-#         # and path to library folder (i.e., where data/organization is known),
-#         # with specified library, project, and run ID, as well as a mock
-#         # db connection
-#         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#         rundata = runs[request.param['runnum']]
-#         projects = rundata['unaligned']['projects']
-#         projectdata = projects[request.param['projectnum']]
-#         samples = projectdata['samples']
-#         sampledata = samples[request.param['samplenum']]
-#
-#         logger.info("[setup] SequencedLibraryAnnotator mock instance "
-#                     " for sample {} in project {} from run {}"
-#                     .format(sampledata['name'], projectdata['name'],
-#                             rundata['flowcell_id']))
-#
-#         seqlibannotator = annotation.SequencedLibraryAnnotator(
-#             path=sampledata['path'],
-#             library=os.path.basename(sampledata['path']),
-#             project=os.path.basename(projectdata['path']),
-#             run_id=rundata['run_id'],
-#             db=mock_db)
-#
-#         def fin():
-#             logger.info("[teardown] SequencedLibraryAnnotator mock instance")
-#         request.addfinalizer(fin)
-#         return (seqlibannotator, rundata, sampledata)
-#
-#     def test_init_attribute_munging(self, annotatordata):
-#         # (GIVEN)
-#         annotator, rundata, sampledata = annotatordata
-#         seqlib_id = '{}_{}'.format(sampledata['name'], rundata['flowcell_id'])
-#
-#         logger.info("test `__init__()` for proper attribute munging")
-#
-#         # WHEN checking whether input arguments were automatically munged
-#         # when setting annotator attributes
-#
-#         # THEN the sequenced library ID should be properly constructed as the
-#         # library ID and flowcell ID
-#         assert(annotator.seqlib_id == seqlib_id)
-#
-#     def test_init_sequencedlibrary_existing_sample(self, annotatordata,
-#                                                    mock_db):
-#         # (GIVEN)
-#         annotator, rundata, sampledata = annotatordata
-#         seqlib_id = '{}_{}'.format(sampledata['name'], rundata['flowcell_id'])
-#
-#         logger.info("test `_init_sequencedlibrary()` with existing sample {}"
-#                     .format(seqlib_id))
-#
-#         # WHEN sequenced library already exists in 'samples' collection
-#         mock_db.samples.insert_one(
-#             {'_id': seqlib_id,
-#              'type': 'sequenced library',
-#              'isMock': True})
-#         sequencedlibrary = annotator._init_sequencedlibrary()
-#
-#         # THEN the sequenced library object should be returned and
-#         # should be correctly mapped from the database object
-#         assert(type(sequencedlibrary) == docs.SequencedLibrary)
-#         assert(sequencedlibrary._id == seqlib_id)
-#         assert(hasattr(sequencedlibrary, 'is_mock'))
-#
-#         logger.info("[rollback] remove most recently inserted "
-#                     "from mock database")
-#         mock_db.samples.drop()
-#
-#     def test_init_sequencedlibrary_new_sample(self, annotatordata):
-#         # (GIVEN)
-#         annotator, rundata, sampledata = annotatordata
-#         seqlib_id = '{}_{}'.format(sampledata['name'], rundata['flowcell_id'])
-#
-#         logger.info("test `_init_sequencedlibrary()` with new sample {}"
-#                     .format(seqlib_id))
-#
-#         # WHEN sequenced library sample does not already exist in
-#         # 'samples' collection
-#         sequencedlibrary = annotator._init_sequencedlibrary()
-#
-#         # THEN a new sequenced library object should be returned
-#         assert(type(sequencedlibrary) == docs.SequencedLibrary)
-#         assert(sequencedlibrary._id == seqlib_id)
-#         assert(not hasattr(sequencedlibrary, 'is_mock'))
-#
-#     def test_get_raw_data(self, annotatordata, mock_genomics_server):
-#         # (GIVEN)
-#         annotator, _, sampledata = annotatordata
-#
-#         logger.info("test `_get_raw_data()` for sample {}"
-#                     .format(sampledata['name']))
-#
-#         # WHEN collecting raw data for a sequenced library
-#         raw_data = annotator._get_raw_data()
-#
-#         # THEN should be a list of dicts, with the correct details for each
-#         # FASTQ file identified
-#         assert(set(f['path'] for f in raw_data)
-#                 == set(f for f in os.listdir(sampledata['path'])
-#                        if not re.search('empty', f)))
-#
-#     def test_update_sequencedlibrary(self, annotatordata):
-#         # (GIVEN)
-#         annotator, _, sampledata = annotatordata
-#
-#         logger.info("test `_update_sequencedlibrary()` for sample {}"
-#                     .format(sampledata['name']))
-#
-#         # WHEN sequenced library object is updated
-#         annotator._update_sequencedlibrary()
-#
-#         # THEN the object should have at least the 'run_id', 'project_id',
-#         # 'subproject_id', 'parent_id' and 'raw_data' attributes
-#         assert(all([hasattr(annotator.sequencedlibrary, field)
-#                     for field in ['run_id', 'project_id', 'subproject_id',
-#                                   'parent_id', 'raw_data', 'date_created',
-#                                   'last_updated']]))
-#         assert(annotator.sequencedlibrary.last_updated
-#                > annotator.sequencedlibrary.date_created)
-#
-#     def test_get_sequenced_library(self, annotatordata):
-#         # (GIVEN)
-#         annotator, _, sampledata = annotatordata
-#
-#         logger.info("test `get_sequenced_library()` for sample {}"
-#                     .format(sampledata['name']))
-#
-#         # WHEN sequenced library object is returned
-#         sequencedlibrary = annotator.get_sequenced_library()
-#
-#         # THEN the object should be of type SequencedLibrary and have
-#         # at least the 'run_id', 'project_id', 'subproject_id', 'parent_id',
-#         # and 'raw_data' attributes
-#         assert(type(sequencedlibrary) is docs.SequencedLibrary)
-#         assert(all([hasattr(sequencedlibrary, field)
-#                     for field in ['run_id', 'project_id', 'subproject_id',
-#                                   'parent_id', 'raw_data']]))
-#
-#
+
 # @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 # class TestWorkflowBatchAnnotator:
 #     """
