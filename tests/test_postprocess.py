@@ -558,6 +558,9 @@ class TestOutputCleaner:
         'test_input', ['counts', 'metrics', 'QC', 'alignments', 'logs']
     )
     def test_get_output_paths(self, tmpdir, test_input):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type contains one or
+        # more files
         mockpath = tmpdir.mkdir(test_input)
         mockpaths = []
         for i in range(2):
@@ -569,40 +572,67 @@ class TestOutputCleaner:
             path=str(tmpdir)
         )
 
+        # WHEN full paths are collected for all output files
         testpaths = cleaner._get_output_paths(test_input)
 
+        # THEN list of paths should match expected results
         assert (testpaths == mockpaths)
 
     def test_unzip_output(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
         mockpath = tmpdir.mkdir('metrics')
+
+        # AND the folder contains a zipped archive with one or more
+        # output files
         mockzipdir = mockpath.mkdir('zipfolder')
         mockzipdir.ensure('outfile1')
         mockzippath = shutil.make_archive(str(mockzipdir), 'zip',
                                           str(mockzipdir))
         shutil.rmtree(str(mockzipdir))
 
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
             path=str(tmpdir)
         )
+
+        # WHEN the zipped archive is uncompressed
         testpaths = outputcleaner._unzip_output(mockzippath)
 
+        # THEN the individual output files previously stored in the
+        # zipped archive should now exist in the output type subfolder
         assert ('outfile1' in str(mockpath.listdir()))
         assert (testpaths[0] == str(mockpath.join('outfile1')))
 
     def test_unnest_output_file(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
         mockpath = tmpdir.mkdir('metrics')
+
+        # AND the folder contains another subfolder with one or more
+        # output files
         mocksubdir = mockpath.mkdir('subfolder')
         mocknestpath = mocksubdir.ensure('outfile1')
 
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
             path=str(tmpdir)
         )
+
+        # WHEN output files in the subfolder are unnested
         outputcleaner._unnest_output(str(mocknestpath))
 
+        # THEN the files should exist directly under the output type
+        # folder and be labeled in the form '<subfolder>_<filename>'
         assert ('subfolder_outfile1' in str(mockpath.listdir()))
 
     def test_unnest_output_zip(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
         mockpath = tmpdir.mkdir('metrics')
+
+        # AND the folder contains another subfolder with one or more
+        # zipped archives than in turn contain one or more output files
         mocksubdir = mockpath.mkdir('subfolder')
         mockzipdir = mocksubdir.mkdir('zipfolder')
         mockzipdir.ensure('outfile1')
@@ -610,26 +640,45 @@ class TestOutputCleaner:
                                           str(mockzipdir))
         shutil.rmtree(str(mockzipdir))
 
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
-            path=str(tmpdir))
+            path=str(tmpdir)
+        )
+
+        # WHEN zipped output files in the subfolder are unnested
         outputcleaner._unnest_output(str(mockzippath))
 
+        # THEN the zipped archives should first be flattened such that
+        # individual output files exist directly under the subfolder,
+        # and these files should then be unnested and exist directly
+        # under the output type folder (labeled as '<subfolder>_<filename>'
         assert('subfolder_outfile1' in str(mockpath.listdir()))
 
     def test_recode_output(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type, which contains
+        # an output file
         mockpath = tmpdir.mkdir('QC')
-        mockqcpath= mockpath.ensure('libID_fcID_fastqc_data.txt')
+        mockqcpath = mockpath.ensure('libID_fcID_fastqc_data.txt')
 
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
             path=str(tmpdir))
+
+        # WHEN the output file is renamed according to some predefined rule
         testpath = outputcleaner._recode_output(str(mockqcpath), 'QC')
 
+        # THEN the new filename should match the expected result
         assert (os.path.basename(testpath) == 'libID_fcID_fastqc_qc.txt')
         assert ('libID_fcID_fastqc_qc.txt' in str(mockpath.listdir()))
 
     def test_clean_outputs(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
         mockpath = tmpdir.mkdir('QC')
 
+        # AND the output type folder contains output files for one or more
+        # samples with various levels of compression and nesting
         mockoutputdata = {
             1: 'lib1111_C00000XX',
             2: 'lib2222_C00000XX'
@@ -642,11 +691,15 @@ class TestOutputCleaner:
                                 str(mockzipdir))
             shutil.rmtree(str(mockzipdir))
 
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
             path=str(tmpdir))
 
+        # WHEN output files for the folder are "cleaned" to resolve unwanted
+        # compression, nesting, or deprecated filenames
         outputcleaner.clean_outputs()
 
+        # THEN the updated output organization should match expected results
         assert (len(mockpath.listdir()) == 4)
         assert ('lib1111_C00000XX_fastqc_qc.txt'
                 in str(mockpath.listdir()))
