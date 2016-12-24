@@ -35,7 +35,7 @@ class OutputCleaner(object):
         """
         Return full path for individual output files.
         """
-        logging.debug("locating output files of type {}".format(output_type))
+        logging.debug("locating output files of type '{}'".format(output_type))
         output_root = os.path.join(self.path, output_type)
         return [os.path.join(self.path, root, f)
                 for root, dirs, files in os.walk(output_root)
