@@ -13,7 +13,12 @@ from bripipetools import io
 
 
 class TestOutputStitcher:
-
+    """
+    Tests methods for the `OutputSticher` class in the
+    `bripipetools.postprocess.stitching` module, which is used
+    to combine output data across all sources and samples into
+    a single table for a selected output type.
+    """
     @pytest.mark.parametrize(
         'test_input, expected_result',
         [
@@ -24,12 +29,18 @@ class TestOutputStitcher:
         ]
     )
     def test_sniff_output_type(self, tmpdir, test_input, expected_result):
+        # GIVEN a path to a folder with output data
         mockpath = tmpdir.join(test_input)
 
+        # AND a sticher object is created for that path
         stitcher = postprocess.OutputStitcher(
             path=str(mockpath)
         )
 
+        # WHEN the path is checked to determine output type from a predefined
+        # set of options
+
+        # THEN the assigned output type should match the expected result
         assert (stitcher._sniff_output_type() == expected_result)
 
     @pytest.mark.parametrize(
@@ -46,22 +57,30 @@ class TestOutputStitcher:
         ]
     )
     def test_get_parser(self, tmpdir, test_input, expected_result):
+        # GIVEN an arbitrary path
         mockpath = tmpdir.join('')
 
+        # AND a stitcher object is created for that path
         stitcher = postprocess.OutputStitcher(
             path=str(mockpath)
         )
 
+        # WHEN the io parser class is retrieved for a particular output
+        # type and source
         mocktype, mocksource = test_input
-
-        # WHEN the parser is retrieved given output type and source
         testparser = stitcher._get_parser(mocktype, mocksource)
 
-        # THEN the expected number of outputs should be found
+        # THEN the io class should match the expected result
         assert (testparser == expected_result)
 
     def test_read_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics'
+        # (output type should not matter here, assuming that individual
+        # io classes/modules have been tested)
         mockpath = tmpdir.join('metrics')
+
+        # AND the folder contains outputs from multiple sources and
+        # for multiple samples
         mockfiledata = [
             {'mockfilename': 'lib1111_C00000XX_htseq_metrics.txt',
              'mockcontents': ['__field_1\tsource1_value1\n',
@@ -80,12 +99,18 @@ class TestOutputStitcher:
             mockfile = mockpath.ensure(m['mockfilename'])
             mockfile.write(''.join(m['mockcontents']))
 
+        # AND a stitcher object is created for the folder path
         stitcher = postprocess.OutputStitcher(
             path=str(mockpath)
         )
 
+        # WHEN all file contents in the folder are read and stored as a dict
+        # in the object's 'data' attribute (in the field corresponding to
+        # output type)
         stitcher._read_data()
 
+        # THEN the data stored in the dict should be properly parsed into
+        # key-value pairs and grouped by output source for each sample
         assert (stitcher.data['metrics'] ==
                 {
                     'lib1111_C00000XX': [
@@ -107,12 +132,17 @@ class TestOutputStitcher:
                 })
 
     def test_build_table_for_noncount_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics'
         mockpath = tmpdir.join('metrics')
 
+        # AND a stitcher object is created for the folder path
         stitcher = postprocess.OutputStitcher(
             path=str(mockpath)
         )
 
+        # AND parsed data from output files are stored as a nested dict
+        # in the object's 'data' attribute (in the field corresponding to
+        # output type)
         mockdata = {
             'lib1111_C00000XX': [
                 {'htseq': {'field_1': 'source1_value1',
@@ -131,11 +161,15 @@ class TestOutputStitcher:
                                       'source2_value2'}},
             ],
         }
-
         stitcher.data = {'metrics': mockdata}
 
+        # WHEN all key-value pairs for output data are combined into a
+        # single list corresponding to rows of a table for all samples
         testdata = stitcher._build_table()
 
+        # THEN the list of lists (where each sublist is a table row)
+        # should match the expected result, with sample IDs in the first
+        # column and output keys in remaining columns
         assert (testdata
                 == [
                     ['libId', 'fastq_total_reads',
@@ -147,12 +181,20 @@ class TestOutputStitcher:
                 ])
 
     def test_build_table_for_count_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'counts'
+        # (methods for combining count data require Pandas dataframe
+        # operations, and thus need to be treated differently than
+        # other output types)
         mockpath = tmpdir.join('counts')
 
+        # AND a stitcher object is created for the folder path
         stitcher = postprocess.OutputStitcher(
             path=str(mockpath)
         )
 
+        # AND parsed data from output files are stored as a nested dict
+        # in the object's 'data' attribute (in the field corresponding to
+        # output type)
         mockdata = {
             'lib1111_C00000XX': [
                 {'htseq': pd.DataFrame([['field1', 0], ['field2', 1]],
@@ -163,18 +205,24 @@ class TestOutputStitcher:
                                        columns=['geneName', 'count'])}
                 ]
         }
-
         stitcher.data = {'counts': mockdata}
 
+        # WHEN all count data frames merged into a single data frame
+        # for all samples, with gene IDs stored in the first column and
+        # counts for individual samples stored in remaining columns
         testdata = stitcher._build_table()
+
+        # THEN the combined data frame should match the expected result
         mockdf = pd.DataFrame(
             [['field1', 0, 1], ['field2', 1, 0]],
             columns=['geneName', 'lib1111_C00000XX', 'lib2222_C00000XX']
         )
-
         assert all((testdata[k] == mockdf[k]).all() for k in mockdf.keys())
 
     def test_build_combined_filename(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics',
+        # which exists in a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
         mockrun = '161231_INSTID_0001_AC00000XX'
         mockproject = 'Project_P00-00Processed_161231'
         mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
@@ -182,21 +230,32 @@ class TestOutputStitcher:
                     .mkdir(mockproject)
                     .mkdir('metrics'))
 
+        # AND a stitcher object is created for the folder path
         stitcher = postprocess.OutputStitcher(
             path=str(mockpath)
         )
 
+        # WHEN the combined filename is constructed for output data
+        # of the current type
         testfilename = stitcher._build_combined_filename()
 
+        # THEN the filename should be in the form
+        # '<project-id>_<flowcell-id>_<process-date>_combined_<out-type>.csv'
         assert (testfilename == 'P00-00_C00000XX_161231_combined_metrics.csv')
 
     def test_write_table_for_noncount_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics',
+        # which exists in a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
         mockrun = '161231_INSTID_0001_AC00000XX'
         mockproject = 'Project_P00-00Processed_161231'
         mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
                     .mkdir(mockrun)
                     .mkdir(mockproject)
                     .mkdir('metrics'))
+
+        # AND the folder contains outputs from multiple sources and
+        # for multiple samples
         mockfiledata = [
             {'mockfilename': 'lib1111_C00000XX_htseq_metrics.txt',
              'mockcontents': ['__field_1\tsource1_value1\n',
@@ -215,6 +274,17 @@ class TestOutputStitcher:
             mockfile = mockpath.ensure(m['mockfilename'])
             mockfile.write(''.join(m['mockcontents']))
 
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mockpath)
+        )
+
+        # WHEN combined data across all samples is written as a table
+        # in a new file
+        testtablefile = stitcher.write_table()
+
+        # THEN the combined table should exist at the expected path and
+        # contain the expected contents
         mocktablefile = mockpath.join(
             'P00-00_C00000XX_161231_combined_metrics.csv'
         )
@@ -226,23 +296,23 @@ class TestOutputStitcher:
             ','.join(['lib1111_C00000XX', 'source2_value1',
                       'source1_value1', 'source1_value2', 'source2_value2\n']),
         ]
-        stitcher = postprocess.OutputStitcher(
-            path=str(mockpath)
-        )
-
-        testtablefile = stitcher.write_table()
         assert (testtablefile == mocktablefile)
-
         with open(testtablefile) as f:
             assert (f.readlines() == mockcontents)
 
     def test_write_table_for_count_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'counts',
+        # which exists in a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
         mockrun = '161231_INSTID_0001_AC00000XX'
         mockproject = 'Project_P00-00Processed_161231'
         mockpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
                     .mkdir(mockrun)
                     .mkdir(mockproject)
                     .mkdir('counts'))
+
+        # AND the folder contains outputs from multiple sources and
+        # for multiple samples
         mockfiledata = [
             {'mockfilename': 'lib1111_C00000XX_htseq_counts.txt',
              'mockcontents': ['field1\t0\n',
@@ -255,6 +325,17 @@ class TestOutputStitcher:
             mockfile = mockpath.ensure(m['mockfilename'])
             mockfile.write(''.join(m['mockcontents']))
 
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mockpath)
+        )
+
+        # WHEN combined data across all samples is written as a table
+        # in a new file
+        testtablefile = stitcher.write_table()
+
+        # THEN the combined table should exist at the expected path and
+        # contain the expected contents
         mocktablefile = mockpath.join(
             'P00-00_C00000XX_161231_combined_counts.csv'
         )
@@ -263,118 +344,191 @@ class TestOutputStitcher:
             ','.join(['field1', '1', '0\n']),
             ','.join(['field2', '0', '1\n']),
         ]
-        stitcher = postprocess.OutputStitcher(
-            path=str(mockpath)
-        )
-
-        testtablefile = stitcher.write_table()
         assert (testtablefile == mocktablefile)
-
         with open(testtablefile) as f:
             assert (f.readlines() == mockcontents)
 
 
-# class TestOutputCompiler:
-#     @pytest.fixture(
-#         scope='class',
-#         params=[{'runnum': r, 'projectnum': p}
-#                 for r in range(1)
-#                 for p in range(3)])
-#     def compilerdata(self, request, mock_genomics_server):
-#         # GIVEN a OutputCompiler with list of mock 'genomics' server path to
-#         # combined output files
-#         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#         rundata = runs[request.param['runnum']]
-#         projects = rundata['processed']['projects']
-#         projectdata = projects[request.param['projectnum']]
-#         outputs = [projectdata[out_type]['combined']
-#                    for out_type in projectdata
-#                    if out_type not in ['path', 'counts', 'combined_summary']]
-#         outputdata = projectdata['combined_summary']
-#
-#         logger.info("[setup] OutputCompiler test instance "
-#                     "for combined output files '{}'"
-#                     .format([f['path'] for f in outputs]))
-#
-#         outputcompiler = postprocess.OutputCompiler(
-#             paths=[f['path'] for f in outputs])
-#
-#         def fin():
-#             logger.info("[teardown] OutputCompiler mock instance")
-#         request.addfinalizer(fin)
-#         return (outputcompiler, outputs, outputdata)
-#
-#     def test_init(self, compilerdata):
-#         # (GIVEN)
-#         outputcompiler, outputs, _ = compilerdata
-#
-#         logger.info("test `__init__()`")
-#
-#         # WHEN object is created
-#
-#         # THEN should have expected paths stored as attribute
-#         assert(len(outputcompiler.paths) == len(outputs))
-#
-#     def test_read_data(self, compilerdata):
-#         # (GIVEN)
-#         outputcompiler, outputs, _ = compilerdata
-#
-#         logger.info("test `_read_data()`")
-#
-#         # WHEN data from individual file paths are read into a list
-#         outputcompiler._read_data()
-#
-#         # THEN data should be stored as list of expected length
-#         assert(len(outputcompiler.data) == len(outputs))
-#
-#     def test_build_table(self, compilerdata):
-#         # (GIVEN)
-#         outputcompiler, outputs, _ = compilerdata
-#
-#         logger.info("test `_build_table()`")
-#
-#         # WHEN data are combined into a single table
-#         table_data = outputcompiler._build_table()
-#
-#         # THEN the table should have the same number of rows (list elements)
-#         # as the first combined output table in the list; and 'libId' should
-#         # only appear once in the header row
-#         assert(len(table_data) == outputs[0]['len_table'])
-#         assert(table_data[0].count('libId') == 1)
-#
-#     def test_build_combined_filename(self, compilerdata):
-#         # (GIVEN)
-#         outputcompiler, outputs, outputdata = compilerdata
-#
-#         logger.info("test `_build_combined_filename()`")
-#
-#         # WHEN path to outputs is parsed to build combined CSV file name
-#         combined_filename = outputcompiler._build_combined_filename()
-#
-#         # THEN combined filename should be correctly formatted
-#         assert(combined_filename
-#                == os.path.basename(outputdata['path']))
-#
-#     def test_write_table(self, compilerdata):
-#         # (GIVEN)
-#         outputcompiler, outputs, outputdata = compilerdata
-#
-#         logger.info("test `write_table()`")
-#
-#         # AND combined file does not already exist
-#         expected_path = outputdata['path']
-#         try:
-#             os.remove(expected_path)
-#         except OSError:
-#             pass
-#
-#         # WHEN data is read, combined, and written to file
-#         outputcompiler.write_table()
-#
-#         # THEN file should exist at expected path
-#         assert(os.path.exists(expected_path))
-#
-#
+class TestOutputCompiler:
+    """
+    Tests methods for the `OutputCompiler` class in the
+    `bripipetools.postprocess.compiling` module, which is used
+    to merge combined output data from multiple summary output
+    types (i.e., summary indicates one value per sample).
+    """
+    def test_read_data(self, tmpdir):
+        # GIVEN a path to a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
+        mockrun = '161231_INSTID_0001_AC00000XX'
+        mockproject = 'Project_P00-00Processed_161231'
+
+        # AND one or more folders with output data of 'summary' types
+        # (e.g., metrics, QC, validation), each of which includes a
+        # 'combined' table file for its respective type
+        mockpaths = []
+        mockprojectpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                           .mkdir(mockrun)
+                           .mkdir(mockproject))
+        for i in range(2):
+            mockpath = mockprojectpath.mkdir('type{}'.format(i))
+            mocktablefile = mockpath.join(
+                'P00-00_C00000XX_161231_combined_type{}.csv'.format(i)
+            )
+            mockpaths.append(str(mocktablefile))
+            mockcontents = [
+                'libId,type{}_field1,type{}_field2\n',
+                'sample1,type{}_sample1_value1,type{}_sample1_value2\n',
+                'sample2,type{}_sample2_value1,type{}_sample2_value2\n',
+            ]
+
+            mocktablefile.write(
+                ''.join([line.format(i+1, i+1) for line in mockcontents])
+            )
+
+        # AND a compiler object is created for the project folder path
+        compiler = postprocess.OutputCompiler(
+            paths=mockpaths
+        )
+
+        # WHEN data from the combined table for each type is read and
+        # stored in the object's 'data' attribute
+        compiler._read_data()
+
+        # THEN the resulting list stored in the object's 'data' attribute
+        # should include a list for each combined table, with each item
+        # representing a row in a table as a list of column values
+        mockdata = [
+            [
+                ['libId', 'type1_field1', 'type1_field2'],
+                ['sample1','type1_sample1_value1', 'type1_sample1_value2'],
+                ['sample2', 'type1_sample2_value1', 'type1_sample2_value2'],
+            ],
+            [
+                ['libId', 'type2_field1', 'type2_field2'],
+                ['sample1', 'type2_sample1_value1', 'type2_sample1_value2'],
+                ['sample2', 'type2_sample2_value1', 'type2_sample2_value2'],
+            ],
+        ]
+        assert (compiler.data == mockdata)
+
+    def test_build_table(self):
+        # GIVEN a compiler object, created for an arbitrary list of paths
+        compiler = postprocess.OutputCompiler(
+            paths=[]
+        )
+
+        # AND parsed data from combined output table files are stroed in the
+        # object's 'data' attribute
+        mockdata = [
+            [
+                ['libId', 'type1_field1', 'type1_field2'],
+                ['sample1','type1_sample1_value1', 'type1_sample1_value2'],
+                ['sample2', 'type1_sample2_value1', 'type1_sample2_value2'],
+            ],
+            [
+                ['libId', 'type2_field1', 'type2_field2'],
+                ['sample1', 'type2_sample1_value1', 'type2_sample1_value2'],
+                ['sample2', 'type2_sample2_value1', 'type2_sample2_value2'],
+            ],
+        ]
+        compiler.data = mockdata
+
+        # WHEN combined data from each type are merged into a list
+        # representing representing rows for an overall project summary table
+        testdata = compiler._build_table()
+
+        # THEN the merged rows should contain sample (library) IDs in the
+        # first column, and all other columns from different output types
+        mocktabledata = [
+            ['libId', 'type1_field1', 'type1_field2',
+             'type2_field1', 'type2_field2'],
+            ['sample1', 'type1_sample1_value1', 'type1_sample1_value2',
+             'type2_sample1_value1', 'type2_sample1_value2'],
+            ['sample2', 'type1_sample2_value1', 'type1_sample2_value2',
+             'type2_sample2_value1', 'type2_sample2_value2'],
+        ]
+        assert (testdata == mocktabledata)
+
+    def test_build_combined_filename(self):
+        # GIVEN a list one or more paths to 'combined' table files for
+        # arbitrary output types
+        mockpaths = [
+            'P00-00_C00000XX_161231_combined_type{}.csv'.format(i)
+            for i in range(2)
+            ]
+
+        # AND a compiler object is created for the paths
+        compiler = postprocess.OutputCompiler(
+            paths=mockpaths
+        )
+
+        # WHEN the filename is constructed for the merged table with
+        # all summary output types
+        testfilename = compiler._build_combined_filename()
+
+        # THEN the filename should be in the form
+        # '<project-id>_<flowcell-id>_<process-date>_combined_summary_data.csv'
+        assert (testfilename
+                == 'P00-00_C00000XX_161231_combined_summary-data.csv')
+
+    def test_write_table(self, tmpdir):
+        # GIVEN a path to a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
+        mockrun = '161231_INSTID_0001_AC00000XX'
+        mockproject = 'Project_P00-00Processed_161231'
+
+        # AND one or more folders with output data of 'summary' types
+        # (e.g., metrics, QC, validation), each of which includes a
+        # 'combined' table file for its respective type
+        mockpaths = []
+        mockprojectpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                           .mkdir(mockrun)
+                           .mkdir(mockproject))
+        for i in range(2):
+            mockpath = mockprojectpath.mkdir('type{}'.format(i))
+            mocktablefile = mockpath.join(
+                'P00-00_C00000XX_161231_combined_type{}.csv'.format(i)
+            )
+            mockpaths.append(str(mocktablefile))
+            mockcontents = [
+                'libId,type{}_field1,type{}_field2\n',
+                'sample1,type{}_sample1_value1,type{}_sample1_value2\n',
+                'sample2,type{}_sample2_value1,type{}_sample2_value2\n',
+            ]
+
+            mocktablefile.write(
+                ''.join([line.format(i+1, i+1) for line in mockcontents])
+            )
+
+        # AND a compiler object is created for the project folder path
+        compiler = postprocess.OutputCompiler(
+            paths=mockpaths
+        )
+
+        # WHEN compiled data across all summary output types is written
+        # as a table in a new file, stored directly under the project folder
+        testtablefile = compiler.write_table()
+
+        # THEN the combined table should exist at the expected path and
+        # contain the expected contents
+        mocktablefile = mockprojectpath.join(
+            'P00-00_C00000XX_161231_combined_summary-data.csv'
+        )
+        mockcontents = [
+            ','.join(['libId', 'type1_field1', 'type1_field2',
+                      'type2_field1', 'type2_field2\n']),
+            ','.join(['sample1',
+                      'type1_sample1_value1', 'type1_sample1_value2',
+                      'type2_sample1_value1', 'type2_sample1_value2\n']),
+            ','.join(['sample2',
+                      'type1_sample2_value1', 'type1_sample2_value2',
+                      'type2_sample2_value1', 'type2_sample2_value2\n']),
+        ]
+        assert (testtablefile == mocktablefile)
+        with open(testtablefile) as f:
+            assert (f.readlines() == mockcontents)
+
+
 # class TestOutputCleaner:
 #     @pytest.fixture(scope='function')
 #     def output_folder(self, tmpdir):

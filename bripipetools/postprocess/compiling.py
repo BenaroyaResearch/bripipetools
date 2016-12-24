@@ -45,7 +45,7 @@ class OutputCompiler(object):
         """
         Modify input path to create filename for combined CSV file.
         """
-        return re.sub('(?<=combined_)\w*', 'summary_data',
+        return re.sub('(?<=combined_)\w*', 'summary-data',
                       os.path.basename(self.paths[0]))
 
     def write_table(self):
@@ -59,7 +59,7 @@ class OutputCompiler(object):
                                   self._build_combined_filename())
         logger.debug("writing to file {}".format(table_path))
         with open(table_path, 'w') as f:
-            writer = csv.writer(f)
+            writer = csv.writer(f, lineterminator='\n')
             for row in table_data:
                 writer.writerow(row)
         return table_path
