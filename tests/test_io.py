@@ -664,30 +664,26 @@ class TestWorkflowFile:
         # WHEN the contents of the file are read and stored
         testfile._read_file()
 
-        # THEN the contents should be stored as a data frame in the
-        # table field of the file object's data attribute
+        # THEN the contents should be stored as a dictionary in the
+        # raw field of the file object's data attribute
         assert len(testfile.data['raw'])
 
 
     def test_parse(self, tmpdir):
-        # GIVEN a file, where data is reported in a table
-        # with each row containing a variable (e.g., a gene name)
-        # and value (separated by tab)
-        testcontents = ['variable1\tvalue1\n',
-                        'variable2\tvalue2\n']
-        testpath = mockstringfile(''.join(testcontents), tmpdir)
+        # GIVEN a file, where data is reported in a JSON-like
+        # map of key-value pairs
+        testcontents = '{"field": "value"}'
+        testpath = mockstringfile(testcontents, tmpdir)
 
         # AND an io class object is created for that file
-        testfile = io.HtseqCountsFile(path=testpath)
+        testfile = io.WorkflowFile(path=testpath)
 
         # WHEN the contents of the file are read and stored
-        table_data = testfile.parse()
+        testdata = testfile.parse()
 
-        # THEN the contents should be stored as a data frame in the
-        # table field of the file object's data attribute; the data frame
-        # should have 2 columns and the expected number of rows
-        assert (len(table_data) == 2)
-        assert (len(table_data.columns) == 2)
+        # THEN the contents should be stored as a dictionary in the
+        # raw field of the file object's data attribute
+        assert len(testdata)
 
 
 class TestWorkflowBatchFile:
