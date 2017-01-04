@@ -10,6 +10,7 @@ some submodules may handle files from multiple methods within a tool
 adhere to a hierarchy based on the "type" of file, where current types
 include metrics, counts, QC, and validation.
 """
+from .workflowfile import WorkflowFile
 from .workflowbatch import WorkflowBatchFile
 from .picardmetrics import PicardMetricsFile
 from .tophatstats import TophatStatsFile

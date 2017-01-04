@@ -648,6 +648,48 @@ class TestFastQCFile:
         assert (table_data == [])
 
 
+class TestWorkflowFile:
+    """
+    Tests class for reading and parsing data from Galaxy or Globus
+    Galaxy workflow files, typically in JSON format.
+    """
+    def test_read_file(self, tmpdir):
+        # GIVEN some file exists with arbitrary contents
+        testcontents = '{"field": "value"}'
+        testpath = mockstringfile(testcontents, tmpdir)
+
+        # AND an io class object is created for that file
+        testfile = io.WorkflowFile(path=testpath)
+
+        # WHEN the contents of the file are read and stored
+        testfile._read_file()
+
+        # THEN the contents should be stored as a data frame in the
+        # table field of the file object's data attribute
+        assert len(testfile.data['raw'])
+
+
+    def test_parse(self, tmpdir):
+        # GIVEN a file, where data is reported in a table
+        # with each row containing a variable (e.g., a gene name)
+        # and value (separated by tab)
+        testcontents = ['variable1\tvalue1\n',
+                        'variable2\tvalue2\n']
+        testpath = mockstringfile(''.join(testcontents), tmpdir)
+
+        # AND an io class object is created for that file
+        testfile = io.HtseqCountsFile(path=testpath)
+
+        # WHEN the contents of the file are read and stored
+        table_data = testfile.parse()
+
+        # THEN the contents should be stored as a data frame in the
+        # table field of the file object's data attribute; the data frame
+        # should have 2 columns and the expected number of rows
+        assert (len(table_data) == 2)
+        assert (len(table_data.columns) == 2)
+
+
 class TestWorkflowBatchFile:
     """
     Tests class for reading and parsing data from Globus Galaxy
