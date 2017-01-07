@@ -1,8 +1,5 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 import os
-import re
 import shutil
 
 import pytest
@@ -10,6 +7,9 @@ import pandas as pd
 
 from bripipetools import postprocess
 from bripipetools import io
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class TestOutputStitcher:

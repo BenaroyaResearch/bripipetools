@@ -4,7 +4,7 @@ Parse arguments to determine and select appropriate importer class.
 import logging
 import re
 
-from . import SequencingImporter, ProcessingImporter
+from . import FlowcellRunImporter, ProcessingImporter
 
 logger = logging.getLogger(__name__)
 

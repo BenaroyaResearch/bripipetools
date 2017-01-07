@@ -11,7 +11,7 @@ from .. import annotation
 logger = logging.getLogger(__name__)
 
 
-class SequencingImporter(object):
+class FlowcellRunImporter(object):
     """
     Collects FlowcellRun and SequencedLibrary objects from a sequencing run,
     converts to documents, inserts into database.

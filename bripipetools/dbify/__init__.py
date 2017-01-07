@@ -7,6 +7,6 @@ bioinformatics processing of a batch of samples). The ``dbify.control``
 submodule inspects an input path and deplys the appropriate importer
 class.
 """
-from .sequencing import SequencingImporter
+from .flowcellrun import FlowcellRunImporter
 from .processing import ProcessingImporter
 from .control import ImportManager
