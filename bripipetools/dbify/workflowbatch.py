@@ -11,7 +11,7 @@ from .. import annotation
 logger = logging.getLogger(__name__)
 
 
-class ProcessingImporter(object):
+class WorkflowBatchImporter(object):
     """
     Collects WorkflowBatch and ProcessedLibrary objects from a processing
     batch, converts to documents, inserts into database.

@@ -4,7 +4,7 @@ Parse arguments to determine and select appropriate importer class.
 import logging
 import re
 
-from . import FlowcellRunImporter, ProcessingImporter
+from . import FlowcellRunImporter, WorkflowBatchImporter
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,8 @@ class ImportManager(object):
         """
         path_type = self._sniff_path(self.path)
         importer_opts = {
-            'flowcell_path': SequencingImporter,
-            'workflowbatch_file': ProcessingImporter
+            'flowcell_path': FlowcellRunImporter,
+            'workflowbatch_file': WorkflowBatchImporter
         }
         importer = importer_opts[path_type]
         self.importer = importer(path=self.path, db=self.db)

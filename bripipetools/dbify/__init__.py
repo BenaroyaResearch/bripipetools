@@ -8,5 +8,5 @@ submodule inspects an input path and deplys the appropriate importer
 class.
 """
 from .flowcellrun import FlowcellRunImporter
-from .processing import ProcessingImporter
+from .workflowbatch import WorkflowBatchImporter
 from .control import ImportManager
