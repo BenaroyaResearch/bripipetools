@@ -50,6 +50,7 @@ class OutputCleaner(object):
                       .format(path, os.path.dirname(path)))
         paths = []
         with zipfile.ZipFile(path) as zf:
+            logger.debug("zip folder contents: {}".format(zf.namelist()))
             for f in zf.namelist()[1:]:
                 paths.append(zf.extract(f, os.path.dirname(path)))
         logging.debug("unzipped the following files: {}".format(paths))

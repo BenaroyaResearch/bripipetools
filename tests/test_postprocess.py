@@ -587,8 +587,9 @@ class TestOutputCleaner:
         # output files
         mock_zipdir = mock_path.mkdir('zipfolder')
         mock_zipdir.ensure('outfile1')
+        logger.debug("mock zipfolder contents: {}".format(mock_zipdir.listdir()))
         mock_zippath = shutil.make_archive(str(mock_zipdir), 'zip',
-                                          str(mock_zipdir))
+                                           str(mock_zipdir))
         shutil.rmtree(str(mock_zipdir))
 
         # AND a cleaner object is created for the path
