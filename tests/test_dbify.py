@@ -187,171 +187,159 @@ class TestFlowcellRunImporter:
                 == 4)
 
 
-# @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
-# class TestProcessingImporter:
-#     @pytest.fixture(
-#         scope='class',
-#         params=[{'runnum': r, 'batchnum': b}
-#                 for r in range(1)
-#                 for b in range(2)])
-#     def importerdata(self, request, mock_genomics_server, mock_db):
-#         # GIVEN a ProcessingImporter with mock 'genomics' server path to
-#         # workflow batch file and mock database connection
-#         runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#         rundata = runs[request.param['runnum']]
-#         batches = rundata['submitted']['batches']
-#         batchdata = batches[request.param['batchnum']]
-#
-#         logger.info("[setup] ProcessingImporter test instance "
-#                     "for run {} with workflow batch {}"
-#                     .format(rundata['run_id'], batchdata['path']))
-#
-#         processingimporter = dbify.ProcessingImporter(
-#             path=batchdata['path'],
-#             db=mock_db)
-#
-#         def fin():
-#             logger.info("[teardown] ProcessingImporter mock instance")
-#         request.addfinalizer(fin)
-#         return (processingimporter, batchdata)
-#
-#     def test_parse_batch_file_path(self, importerdata, mock_genomics_server):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_get_genomics_root()`")
-#
-#         # WHEN the path argument is parsed to find the 'genomics' root
-#         # and workflow batch file name
-#         path_items = importer._parse_batch_file_path()
-#
-#         # THEN the 'genomics' root and run ID should match the mock server
-#         assert(path_items['genomics_root']
-#                == mock_genomics_server['root']['path'])
-#         assert(path_items['workflowbatch_filename']
-#                == os.path.basename(batchdata['path']))
-#
-#     def test_collect_workflowbatch(self, importerdata):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_collect_workflowbatch()`")
-#
-#         # WHEN collecting WorkflowBatch object for processing batch
-#         workflowbatch = importer._collect_workflowbatch()
-#
-#         # THEN should return object of correct type
-#         assert(type(workflowbatch) == docs.GalaxyWorkflowBatch)
-#
-#     def test_collect_processedlibraries(self, importerdata):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_collect_processedlibraries()`")
-#
-#         # WHEN collecting list of ProcessedLibrary objects for workflow batch
-#         processedlibraries = importer._collect_processedlibraries()
-#
-#         # THEN should return expected number of objects of correct type
-#         assert(len(processedlibraries) == batchdata['num_samples'])
-#         assert(all([type(pl) == docs.ProcessedLibrary
-#                     for pl in processedlibraries]))
-#
-#     def test_insert_workflowbatch(self, importerdata, mock_db):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_insert_workflowbatch()`")
-#
-#         # WHEN workflow batch is inserted into database
-#         importer._insert_workflowbatch()
-#
-#         # THEN documents should be present in the workflowbatches collection
-#         assert(len(list(mock_db.workflowbatches.find(
-#                {'type': 'Galaxy workflow batch'})))
-#                == 1)
-#         logger.info(("[semi-teardown] mock 'tg3' database, "
-#                      "drop workflowbatches collection from mock database"))
-#         mock_db.workflowbatches.drop()
-#
-#     def test_insert_processedlibraries(self, importerdata, mock_db):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_insert_processedlibraries()`")
-#
-#         # WHEN processed libraries are inserted into database
-#         importer._insert_processedlibraries()
-#
-#         # THEN documents should be present in the samples collection
-#         assert(len(list(mock_db.samples.find({'type': 'processed library'})))
-#                == batchdata['num_samples'])
-#         logger.info("[rollback] remove most recently inserted "
-#                     "from mock database")
-#         mock_db.samples.drop()
-#
-#     def test_insert_all(self, importerdata, mock_db):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_insert()` for all collections")
-#
-#         # WHEN inserting with collection argument set to 'all' (default)
-#         importer.insert()
-#
-#         # THEN documents should be present in both workflowbatches and
-#         # samples collections
-#         assert(len(list(mock_db.workflowbatches.find(
-#                {'type': 'Galaxy workflow batch'})))
-#                == 1)
-#         assert(len(list(mock_db.samples.find({'type': 'processed library'})))
-#                == batchdata['num_samples'])
-#         logger.info("[rollback] remove most recently inserted "
-#                     "from mock database")
-#         mock_db.workflowbatches.drop()
-#         mock_db.samples.drop()
-#
-#     def test_insert_workflowbatches(self, importerdata, mock_db):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_insert()` for workflowbatches only")
-#
-#         # WHEN inserting with collection argument set to 'workflowbatches'
-#         importer.insert(collection='workflowbatches')
-#
-#         # THEN documents should be present in only workflowbatches collections
-#         assert(len(list(mock_db.workflowbatches.find(
-#                {'type': 'Galaxy workflow batch'})))
-#                == 1)
-#         assert(len(list(mock_db.samples.find({'type': 'processed library'})))
-#                == 0)
-#         logger.info("[rollback] remove most recently inserted "
-#                     "from mock database")
-#         mock_db.workflowbatches.drop()
-#         mock_db.samples.drop()
-#
-#     def test_insert_samples(self, importerdata, mock_db):
-#         # (GIVEN)
-#         importer, batchdata = importerdata
-#
-#         logger.info("test `_insert()` for samples only")
-#
-#         # WHEN inserting with collection argument set to 'samples'
-#         importer.insert(collection='samples')
-#
-#         # THEN documents should be present in only runs collections
-#         assert(len(list(mock_db.workflowbatches.find(
-#                {'type': 'Galaxy workflow batch'})))
-#                == 0)
-#         assert(len(list(mock_db.samples.find({'type': 'processed library'})))
-#                == batchdata['num_samples'])
-#         logger.info("[rollback] remove most recently inserted "
-#                     "from mock database")
-#         mock_db.workflowbatches.drop()
-#         mock_db.samples.drop()
-#
-#
+@pytest.fixture(scope='function')
+def mock_batchfile(filename, tmpdir):
+    mock_contents = ['###METADATA\n',
+                     '#############\n',
+                     'Workflow Name\toptimized_workflow_1\n',
+                     'Project Name\t161231_P00-00_C00000XX\n',
+                     '###TABLE DATA\n',
+                     '#############\n',
+                     'SampleName\tin_tag##_::_::_::param_name\n',
+                     'sample1\tin_value1\n',
+                     'sample2\tin_value2\n']
+    mock_file = tmpdir.join(filename)
+    mock_file.write(''.join(mock_contents))
+    return str(mock_file)
+
+
+class TestWorkflowBatchImporter:
+    """
+
+    """
+    def test_parse_batch_file_path(self, mock_db, tmpdir):
+        # GIVEN a path to a flowcell run folder and a connection to a
+        # database in which a document corresponding to the flowcell run
+        # may or may not exist
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+
+        mock_filename = '161231_P00-00_C00000XX_workflow-name.txt'
+        mock_path = mock_batchfile(mock_filename, mock_path)
+
+        # AND an importer object is created for the path
+        importer = dbify.WorkflowBatchImporter(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN the path argument is parsed to find the 'genomics' root
+        # and workflow batch file name
+        test_items = importer._parse_batch_file_path()
+
+        # THEN the 'genomics' root and run ID should match the mock server
+        assert (test_items['genomics_root'].rstrip('/') == str(tmpdir))
+        assert (test_items['workflowbatch_filename'] == mock_filename)
+
+    def test_collect_workflowbatch(self, mock_db, tmpdir):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = mock_batchfile(mock_filename, mock_path)
+
+        # AND an importer object is created for the path
+        importer = dbify.WorkflowBatchImporter(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN collecting model object for flowcell run
+        test_object = importer._collect_workflowbatch()
+
+        # THEN should return object of correct type
+        assert (type(test_object) == docs.GalaxyWorkflowBatch)
+
+    def test_collect_processedlibraries(self, mock_db, tmpdir):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = mock_batchfile(mock_filename, mock_path)
+
+        # AND an importer object is created for the path
+        importer = dbify.WorkflowBatchImporter(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN collecting model object for flowcell run
+        test_objects = importer._collect_processedlibraries()
+
+        # THEN should return object of correct type
+        assert (all(type(pl) == docs.ProcessedLibrary for pl in test_objects))
+
+    def test_insert_workflowbatch(self, mock_db, tmpdir):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = mock_batchfile(mock_filename, mock_path)
+
+        # AND an importer object is created for the path
+        importer = dbify.WorkflowBatchImporter(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN workflow batch is inserted into database
+        importer._insert_workflowbatch()
+
+        # THEN document should be present in the workflowbatches collection
+        assert (len(list(mock_db.workflowbatches
+                         .find({'type': 'Galaxy workflow batch'})))
+                == 1)
+
+    def test_insert_processedlibraries(self, mock_db, tmpdir):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = mock_batchfile(mock_filename, mock_path)
+
+        # AND an importer object is created for the path
+        importer = dbify.WorkflowBatchImporter(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN flowcell run is inserted into database
+        importer._insert_processedlibraries()
+
+        # THEN document should be present in the runs collection
+        assert (len(list(mock_db.samples.find({'type': 'processed library'})))
+                == 2)
+
+    def test_insert(self, mock_db, tmpdir):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = mock_batchfile(mock_filename, mock_path)
+
+        # AND an importer object is created for the path
+        importer = dbify.WorkflowBatchImporter(
+            path=str(mock_path),
+            db=mock_db
+        )
+
+        # WHEN all objects are inserted into database
+        importer.insert()
+
+        # THEN documents should be present in the runs collection
+        assert (len(list(mock_db.workflowbatches
+                         .find({'type': 'Galaxy workflow batch'})))
+                == 1)
+        assert (len(list(mock_db.samples.find({'type': 'processed library'})))
+                == 2)
+
+
 # @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 # class TestImportManagerWithFlowcellPath:
 #     @pytest.fixture(
