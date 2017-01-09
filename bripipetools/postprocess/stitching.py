@@ -32,7 +32,10 @@ class OutputStitcher(object):
         Return predicted output type based on specified path.
         """
         output_types = ['metrics', 'QC', 'counts', 'validation']
-        return [t.lower() for t in output_types if re.search(t, self.path)][0]
+        output_match = [t.lower() for t in output_types
+                        if re.search(t, self.path)]
+        if len(output_match):
+            return output_match[0]
 
     def _get_outputs(self, output_type):
         """
@@ -103,7 +106,8 @@ class OutputStitcher(object):
 
             self.data.setdefault(
                 out_type, {}).setdefault(proclib_id, []).append(
-                {out_source: out_parser.parse()})
+                {out_source: out_parser.parse()}
+            )
 
     def _build_table(self):
         """
@@ -137,9 +141,9 @@ class OutputStitcher(object):
                     table_data.append(['libId'] + sorted(header))
                     logger.debug("added header row: {}".format(table_data[-1]))
 
-                table_data.append([sample_id] + [v for h, v
-                                                 in sorted(zip(header,
-                                                               values))])
+                table_data.append(
+                    [sample_id] + [v for h, v in sorted(zip(header, values))]
+                )
                 logger.debug("added values row: {}".format(table_data[-1]))
         return table_data
 
@@ -147,12 +151,16 @@ class OutputStitcher(object):
         """
         Add mapped_reads_w_dups column to metrics table data.
         """
-        for idx, row in enumerate(data[1:]):
-            metrics = dict(zip(data[0], row))
-            mapped_reads = (float(metrics['UNPAIRED_READS_EXAMINED'])
-                            / float(metrics['fastq_total_reads']))
-            data[idx + 1].append(mapped_reads)
-        data[0].append('mapped_reads_w_dups')
+        try:
+            for idx, row in enumerate(data[1:]):
+                metrics = dict(zip(data[0], row))
+                mapped_reads = (float(metrics['UNPAIRED_READS_EXAMINED'])
+                                / float(metrics['fastq_total_reads']))
+                data[idx + 1].append(mapped_reads)
+            data[0].append('mapped_reads_w_dups')
+        except KeyError:
+            logger.warn("required fields missing; skipping calculation "
+                        "of 'mapped_reads_w_dups")
         return data
 
     def _build_combined_filename(self):
@@ -222,7 +230,7 @@ class OutputStitcher(object):
             table_data.to_csv(table_path, index=False)
         else:
             with open(table_path, 'w') as f:
-                writer = csv.writer(f)
+                writer = csv.writer(f, lineterminator='\n')
                 for row in table_data:
                     writer.writerow(row)
         return table_path

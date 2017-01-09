@@ -25,6 +25,7 @@ class ProcessedLibraryAnnotator(object):
         self.proclib_id = '{}_processed'.format(self.seqlib_id)
         self.processedlibrary = self._init_processedlibrary()
 
+    # TODO: move to parsing module
     def _get_seqlib_id(self):
         """
         Return the ID of the parent sequenced library.
@@ -54,17 +55,24 @@ class ProcessedLibraryAnnotator(object):
         return {p['tag']: p['value'] for p in self.params
                 if p['type'] == 'output' and p['name'] == 'to_path'}
 
+    # TODO: move to parsing module
     def _parse_output_name(self, output_name):
         """
         Parse output name indicated by parameter tag in workflow batch
         submit file and return individual components indicating name,
         source, and type.
         """
-        name = re.sub('_out', '', output_name)
+        name = re.sub('_out$', '', output_name)
         name_parts = name.split('_')
-        file_format = name_parts.pop(-1)
-        output_type = name_parts.pop(-1)
-        source = '_'.join(name_parts)
+        logger.debug("{}".format(name_parts))
+        if len(name_parts) == 3:
+            name = '_'.join(name_parts)
+            output_type = name_parts[1]
+            source = name_parts[0]
+        else:
+            # to handle old style tags
+            output_type = name_parts.pop(-1)
+            source = '_'.join(name_parts)
 
         return {'name': name, 'type': output_type, 'source': source}
 

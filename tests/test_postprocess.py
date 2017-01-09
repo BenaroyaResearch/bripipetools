@@ -1,382 +1,713 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 import os
-import re
 import shutil
 
 import pytest
+import pandas as pd
 
 from bripipetools import postprocess
 from bripipetools import io
 
-@pytest.mark.usefixtures('mock_genomics_server')
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
 class TestOutputStitcher:
-    @pytest.fixture(
-        scope='class',
-        params=[(out_type, {'runnum': r, 'projectnum': p})
-                for r in range(1)
-                for p in range(3)
-                for out_type in ['metrics', 'qc', 'counts', 'validation']])
-    def outputstitcherdata(self, request, mock_genomics_server):
-        # GIVEN a OutputStitcher with mock 'genomics' server path to outputs
-        runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-        rundata = runs[request.param[1]['runnum']]
-        projects = rundata['processed']['projects']
-        projectdata = projects[request.param[1]['projectnum']]
-        outputdata = projectdata[request.param[0]]
+    """
+    Tests methods for the `OutputSticher` class in the
+    `bripipetools.postprocess.stitching` module, which is used
+    to combine output data across all sources and samples into
+    a single table for a selected output type.
+    """
+    @pytest.mark.parametrize(
+        'test_input, expected_result',
+        [
+            ('counts', 'counts'),
+            ('metrics', 'metrics'),
+            ('QC', 'qc'),
+            ('validation', 'validation'),
+        ]
+    )
+    def test_sniff_output_type(self, tmpdir, test_input, expected_result):
+        # GIVEN a path to a folder with output data
+        mock_path = tmpdir.join(test_input)
 
-        logger.info("[setup] OutputStitcher test instance "
-                    "for output type '{}'".format(request.param))
+        # AND a sticher object is created for that path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
 
-        outputstitcher = postprocess.OutputStitcher(
-            path=outputdata['path'])
+        # WHEN the path is checked to determine output type from a predefined
+        # set of options
 
-        def fin():
-            logger.info("[teardown] OutputStitcher mock instance")
-        request.addfinalizer(fin)
-        return (outputstitcher, outputdata, request.param[0])
-
-    def test_sniff_output_type(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, _, out_type = outputstitcherdata
-
-        logger.info("test `_sniff_output_type()`")
-
-        # WHEN the file specified by path is read
-        output_type = outputstitcher._sniff_output_type()
-
-        # THEN output type should match expected type
-        assert(output_type == out_type)
-
-    def test_get_outputs(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, outputdata, _ = outputstitcherdata
-
-        logger.info("test `_get_outputs()`")
-
-        # WHEN the list of output files is collected
-        outputs = outputstitcher._get_outputs(outputstitcher.type)
-
-        # THEN the expected number of outputs should be found
-        assert(len(outputs)
-               == sum(map(lambda x: len(x),
-                      outputdata['sources'].values())))
+        # THEN the assigned output type should match the expected result
+        assert (stitcher._sniff_output_type() == expected_result)
 
     @pytest.mark.parametrize(
-        'output,expected',
-        [(('metrics', 'htseq'), getattr(io, 'HtseqMetricsFile')),
-         (('metrics', 'picard_rnaseq'), getattr(io, 'PicardMetricsFile')),
-         (('metrics', 'picard_markdups'), getattr(io, 'PicardMetricsFile')),
-         (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile')),
-         (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile')),
-         (('qc', 'fastqc'), getattr(io, 'FastQCFile')),
-         (('counts', 'htseq'), getattr(io, 'HtseqCountsFile')),
-         (('validation', 'sexcheck'), getattr(io, 'SexcheckFile'))])
-    def test_get_parser(self, outputstitcherdata, output, expected):
-        # (GIVEN)
-        outputstitcher, _, _ = outputstitcherdata
+        'test_input, expected_result',
+        [
+            (('metrics', 'htseq'), getattr(io, 'HtseqMetricsFile')),
+            (('metrics', 'picard_rnaseq'), getattr(io, 'PicardMetricsFile')),
+            (('metrics', 'picard_markdups'), getattr(io, 'PicardMetricsFile')),
+            (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile')),
+            (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile')),
+            (('qc', 'fastqc'), getattr(io, 'FastQCFile')),
+            (('counts', 'htseq'), getattr(io, 'HtseqCountsFile')),
+            (('validation', 'sexcheck'), getattr(io, 'SexcheckFile'))
+        ]
+    )
+    def test_get_parser(self, tmpdir, test_input, expected_result):
+        # GIVEN an arbitrary path
+        mock_path = tmpdir.join('')
 
-        logger.info("test `_get_parser()`")
+        # AND a stitcher object is created for that path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
 
-        # WHEN the parser is retrieved given output type and source
-        parser = outputstitcher._get_parser(output[0], output[1])
+        # WHEN the io parser class is retrieved for a particular output
+        # type and source
+        mock_type, mock_source = test_input
+        testparser = stitcher._get_parser(mock_type, mock_source)
 
-        # THEN the expected number of outputs should be found
-        assert(parser == expected)
+        # THEN the io class should match the expected result
+        assert (testparser == expected_result)
 
-    def test_read_data(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, outputdata, out_type = outputstitcherdata
+    def test_read_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics'
+        # (output type should not matter here, assuming that individual
+        # io classes/modules have been tested)
+        mock_path = tmpdir.join('metrics')
 
-        logger.info("test `_read_data()`")
+        # AND the folder contains outputs from multiple sources and
+        # for multiple samples
+        mock_filedata = [
+            {'mock_filename': 'lib1111_C00000XX_htseq_metrics.txt',
+             'mock_contents': ['__field_1\tsource1_value1\n',
+                              '__field_2\tsource1_value2\n']},
+            {'mock_filename': 'lib1111_C00000XX_tophat_stats_metrics.txt',
+             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
+                              'source2_value2\treads aligned in sam file\n']},
+            {'mock_filename': 'lib2222_C00000XX_htseq_metrics.txt',
+             'mock_contents': ['__field_1\tsource1_value1\n',
+                              '__field_2\tsource1_value2\n']},
+            {'mock_filename': 'lib2222_C00000XX_tophat_stats_metrics.txt',
+             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
+                              'source2_value2\treads aligned in sam file\n']},
+        ]
+        for m in mock_filedata:
+            mock_file = mock_path.ensure(m['mock_filename'])
+            mock_file.write(''.join(m['mock_contents']))
 
-        # WHEN data from each output file is read and parsed
-        outputstitcher._read_data()
-        data = outputstitcher.data[out_type]
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
 
-        # THEN data should be stored in a dictionary named for the current
-        # output type, with a sub-dict for each output source
-        assert(all([len(data[s]) == len(outputdata['sources'])
-                    for s in data]))
+        # WHEN all file contents in the folder are read and stored as a dict
+        # in the object's 'data' attribute (in the field corresponding to
+        # output type)
+        stitcher._read_data()
 
-    def test_build_table(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, outputdata, out_type = outputstitcherdata
+        # THEN the data stored in the dict should be properly parsed into
+        # key-value pairs and grouped by output source for each sample
+        assert (stitcher.data['metrics'] ==
+                {
+                    'lib1111_C00000XX': [
+                        {'htseq': {'field_1': 'source1_value1',
+                                   'field_2': 'source1_value2'}},
+                        {'tophat_stats': {'fastq_total_reads':
+                                              'source2_value1',
+                                          'reads_aligned_sam':
+                                              'source2_value2'}},
+                    ],
+                    'lib2222_C00000XX': [
+                        {'htseq': {'field_1': 'source1_value1',
+                                   'field_2': 'source1_value2'}},
+                        {'tophat_stats': {'fastq_total_reads':
+                                              'source2_value1',
+                                          'reads_aligned_sam':
+                                              'source2_value2'}},
+                    ],
+                })
 
-        logger.info("test `_build_table()`")
+    def test_build_table_for_noncount_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics'
+        mock_path = tmpdir.join('metrics')
 
-        # WHEN data is combined into a table
-        outputstitcher._read_data()
-        table_data = outputstitcher._build_table()
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
 
-        # THEN table should have expected number of rows, and rows should
-        # be the same length
-        assert(len(table_data) == outputdata['combined']['len_table'])
+        # AND parsed data from output files are stored as a nested dict
+        # in the object's 'data' attribute (in the field corresponding to
+        # output type)
+        mock_data = {
+            'lib1111_C00000XX': [
+                {'htseq': {'field_1': 'source1_value1',
+                           'field_2': 'source1_value2'}},
+                {'tophat_stats': {'fastq_total_reads':
+                                      'source2_value1',
+                                  'reads_aligned_sam':
+                                      'source2_value2'}},
+            ],
+            'lib2222_C00000XX': [
+                {'htseq': {'field_1': 'source1_value1',
+                           'field_2': 'source1_value2'}},
+                {'tophat_stats': {'fastq_total_reads':
+                                      'source2_value1',
+                                  'reads_aligned_sam':
+                                      'source2_value2'}},
+            ],
+        }
+        stitcher.data = {'metrics': mock_data}
 
-    def test_build_combined_filename(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, outputdata, out_type = outputstitcherdata
+        # WHEN all key-value pairs for output data are combined into a
+        # single list corresponding to rows of a table for all samples
+        testdata = stitcher._build_table()
 
-        logger.info("test `_build_combined_filename()`")
+        # THEN the list of lists (where each sublist is a table row)
+        # should match the expected result, with sample IDs in the first
+        # column and output keys in remaining columns
+        assert (testdata
+                == [
+                    ['libId', 'fastq_total_reads',
+                     'field_1', 'field_2', 'reads_aligned_sam'],
+                    ['lib2222_C00000XX', 'source2_value1',
+                     'source1_value1', 'source1_value2', 'source2_value2'],
+                    ['lib1111_C00000XX', 'source2_value1',
+                     'source1_value1', 'source1_value2', 'source2_value2'],
+                ])
 
-        # WHEN path to outputs is parsed to build combined CSV file_name
-        combined_filename = outputstitcher._build_combined_filename()
+    def test_build_table_for_count_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'counts'
+        # (methods for combining count data require Pandas dataframe
+        # operations, and thus need to be treated differently than
+        # other output types)
+        mock_path = tmpdir.join('counts')
 
-        # THEN combined filename should be correctly formatted
-        output_type = outputstitcher.type
-        assert(combined_filename
-               == os.path.basename(outputdata['combined']['path']))
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
 
-    def test_build_overrepresented_seq_table(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, outputdata, out_type = outputstitcherdata
+        # AND parsed data from output files are stored as a nested dict
+        # in the object's 'data' attribute (in the field corresponding to
+        # output type)
+        mock_data = {
+            'lib1111_C00000XX': [
+                {'htseq': pd.DataFrame([['field1', 0], ['field2', 1]],
+                                       columns=['geneName', 'count'])}
+                ],
+            'lib2222_C00000XX': [
+                {'htseq': pd.DataFrame([['field1', 1], ['field2', 0]],
+                                       columns=['geneName', 'count'])}
+                ]
+        }
+        stitcher.data = {'counts': mock_data}
 
-        # WHEN overrepresented sequences are combined into a table
-        overrep_seq_table = outputstitcher._build_overrepresented_seq_table()
+        # WHEN all count data frames merged into a single data frame
+        # for all samples, with gene IDs stored in the first column and
+        # counts for individual samples stored in remaining columns
+        testdata = stitcher._build_table()
 
-        if out_type == 'qc':
-            assert(len(overrep_seq_table)
-                   == sum(map(lambda x: x['num_overrep_seqs'],
-                          outputdata['sources']['fastqc'])))
-        else:
-            assert(len(overrep_seq_table) == 0)
+        # THEN the combined data frame should match the expected result
+        mock_df = pd.DataFrame(
+            [['field1', 0, 1], ['field2', 1, 0]],
+            columns=['geneName', 'lib1111_C00000XX', 'lib2222_C00000XX']
+        )
+        assert all((testdata[k] == mock_df[k]).all() for k in mock_df.keys())
 
-    def test_write_overrepresented_seq_table(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, outputdata, out_type = outputstitcherdata
+    def test_build_combined_filename(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics',
+        # which exists in a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
+        mock_run = '161231_INSTID_0001_AC00000XX'
+        mock_project = 'Project_P00-00Processed_161231'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                    .mkdir(mock_run)
+                    .mkdir(mock_project)
+                    .mkdir('metrics'))
 
-        # AND combined overrepresented seqs file does not already exist
-        if out_type == 'qc':
-            expected_path = outputdata['combined_overrep_seqs']['path']
-            try:
-                os.remove(expected_path)
-            except OSError:
-                pass
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
 
-            # WHEN data is read and combined overrepresented seqs are written
-            # to file
-            outputstitcher.write_overrepresented_seq_table()
+        # WHEN the combined filename is constructed for output data
+        # of the current type
+        testfilename = stitcher._build_combined_filename()
 
-            # THEN file should exist at expected path
-            assert(os.path.exists(expected_path))
+        # THEN the filename should be in the form
+        # '<project-id>_<flowcell-id>_<process-date>_combined_<out-type>.csv'
+        assert (testfilename == 'P00-00_C00000XX_161231_combined_metrics.csv')
 
-    def test_write_table(self, outputstitcherdata):
-        # (GIVEN)
-        outputstitcher, outputdata, out_type = outputstitcherdata
+    def test_write_table_for_noncount_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'metrics',
+        # which exists in a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
+        mock_run = '161231_INSTID_0001_AC00000XX'
+        mock_project = 'Project_P00-00Processed_161231'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                    .mkdir(mock_run)
+                    .mkdir(mock_project)
+                    .mkdir('metrics'))
 
-        logger.info("test `write_table()`")
+        # AND the folder contains outputs from multiple sources and
+        # for multiple samples
+        mock_filedata = [
+            {'mock_filename': 'lib1111_C00000XX_htseq_metrics.txt',
+             'mock_contents': ['__field_1\tsource1_value1\n',
+                              '__field_2\tsource1_value2\n']},
+            {'mock_filename': 'lib1111_C00000XX_tophat_stats_metrics.txt',
+             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
+                              'source2_value2\treads aligned in sam file\n']},
+            {'mock_filename': 'lib2222_C00000XX_htseq_metrics.txt',
+             'mock_contents': ['__field_1\tsource1_value1\n',
+                              '__field_2\tsource1_value2\n']},
+            {'mock_filename': 'lib2222_C00000XX_tophat_stats_metrics.txt',
+             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
+                              'source2_value2\treads aligned in sam file\n']},
+        ]
+        for m in mock_filedata:
+            mock_file = mock_path.ensure(m['mock_filename'])
+            mock_file.write(''.join(m['mock_contents']))
 
-        # AND combined file does not already exist
-        expected_path = outputdata['combined']['path']
-        try:
-            os.remove(expected_path)
-        except OSError:
-            pass
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
 
-        # WHEN data is read, combined, and written to file
-        outputstitcher.write_table()
+        # WHEN combined data across all samples is written as a table
+        # in a new file
+        testtablefile = stitcher.write_table()
 
-        # THEN file should exist at expected path
-        assert(os.path.exists(expected_path))
+        # THEN the combined table should exist at the expected path and
+        # contain the expected contents
+        mock_tablefile = mock_path.join(
+            'P00-00_C00000XX_161231_combined_metrics.csv'
+        )
+        mock_contents = [
+            ','.join(['libId', 'fastq_total_reads',
+                      'field_1', 'field_2', 'reads_aligned_sam\n']),
+            ','.join(['lib2222_C00000XX', 'source2_value1',
+                      'source1_value1', 'source1_value2', 'source2_value2\n']),
+            ','.join(['lib1111_C00000XX', 'source2_value1',
+                      'source1_value1', 'source1_value2', 'source2_value2\n']),
+        ]
+        assert (testtablefile == mock_tablefile)
+        with open(testtablefile) as f:
+            assert (f.readlines() == mock_contents)
+
+    def test_write_table_for_count_data(self, tmpdir):
+        # GIVEN a path to a folder with output data of type 'counts',
+        # which exists in a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
+        mock_run = '161231_INSTID_0001_AC00000XX'
+        mock_project = 'Project_P00-00Processed_161231'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                    .mkdir(mock_run)
+                    .mkdir(mock_project)
+                    .mkdir('counts'))
+
+        # AND the folder contains outputs from multiple sources and
+        # for multiple samples
+        mock_filedata = [
+            {'mock_filename': 'lib1111_C00000XX_htseq_counts.txt',
+             'mock_contents': ['field1\t0\n',
+                              'field2\t1\n']},
+            {'mock_filename': 'lib2222_C00000XX_htseq_counts.txt',
+             'mock_contents': ['field1\t1\n',
+                              'field2\t0\n']},
+        ]
+        for m in mock_filedata:
+            mock_file = mock_path.ensure(m['mock_filename'])
+            mock_file.write(''.join(m['mock_contents']))
+
+        # AND a stitcher object is created for the folder path
+        stitcher = postprocess.OutputStitcher(
+            path=str(mock_path)
+        )
+
+        # WHEN combined data across all samples is written as a table
+        # in a new file
+        testtablefile = stitcher.write_table()
+
+        # THEN the combined table should exist at the expected path and
+        # contain the expected contents
+        mock_tablefile = mock_path.join(
+            'P00-00_C00000XX_161231_combined_counts.csv'
+        )
+        mock_contents = [
+            ','.join(['geneName', 'lib2222_C00000XX', 'lib1111_C00000XX\n']),
+            ','.join(['field1', '1', '0\n']),
+            ','.join(['field2', '0', '1\n']),
+        ]
+        assert (testtablefile == mock_tablefile)
+        with open(testtablefile) as f:
+            assert (f.readlines() == mock_contents)
 
 
 class TestOutputCompiler:
-    @pytest.fixture(
-        scope='class',
-        params=[{'runnum': r, 'projectnum': p}
-                for r in range(1)
-                for p in range(3)])
-    def compilerdata(self, request, mock_genomics_server):
-        # GIVEN a OutputCompiler with list of mock 'genomics' server path to
-        # combined output files
-        runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-        rundata = runs[request.param['runnum']]
-        projects = rundata['processed']['projects']
-        projectdata = projects[request.param['projectnum']]
-        outputs = [projectdata[out_type]['combined']
-                   for out_type in projectdata
-                   if out_type not in ['path', 'counts', 'combined_summary']]
-        outputdata = projectdata['combined_summary']
+    """
+    Tests methods for the `OutputCompiler` class in the
+    `bripipetools.postprocess.compiling` module, which is used
+    to merge combined output data from multiple summary output
+    types (i.e., summary indicates one value per sample).
+    """
+    def test_read_data(self, tmpdir):
+        # GIVEN a path to a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
+        mock_run = '161231_INSTID_0001_AC00000XX'
+        mock_project = 'Project_P00-00Processed_161231'
 
-        logger.info("[setup] OutputCompiler test instance "
-                    "for combined output files '{}'"
-                    .format([f['path'] for f in outputs]))
+        # AND one or more folders with output data of 'summary' types
+        # (e.g., metrics, QC, validation), each of which includes a
+        # 'combined' table file for its respective type
+        mock_paths = []
+        mock_projectpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                           .mkdir(mock_run)
+                           .mkdir(mock_project))
+        for i in range(2):
+            mock_path = mock_projectpath.mkdir('type{}'.format(i))
+            mock_tablefile = mock_path.join(
+                'P00-00_C00000XX_161231_combined_type{}.csv'.format(i)
+            )
+            mock_paths.append(str(mock_tablefile))
+            mock_contents = [
+                'libId,type{}_field1,type{}_field2\n',
+                'sample1,type{}_sample1_value1,type{}_sample1_value2\n',
+                'sample2,type{}_sample2_value1,type{}_sample2_value2\n',
+            ]
 
-        outputcompiler = postprocess.OutputCompiler(
-            paths=[f['path'] for f in outputs])
+            mock_tablefile.write(
+                ''.join([line.format(i+1, i+1) for line in mock_contents])
+            )
 
-        def fin():
-            logger.info("[teardown] OutputCompiler mock instance")
-        request.addfinalizer(fin)
-        return (outputcompiler, outputs, outputdata)
+        # AND a compiler object is created for the project folder path
+        compiler = postprocess.OutputCompiler(
+            paths=mock_paths
+        )
 
-    def test_init(self, compilerdata):
-        # (GIVEN)
-        outputcompiler, outputs, _ = compilerdata
+        # WHEN data from the combined table for each type is read and
+        # stored in the object's 'data' attribute
+        compiler._read_data()
 
-        logger.info("test `__init__()`")
+        # THEN the resulting list stored in the object's 'data' attribute
+        # should include a list for each combined table, with each item
+        # representing a row in a table as a list of column values
+        mock_data = [
+            [
+                ['libId', 'type1_field1', 'type1_field2'],
+                ['sample1','type1_sample1_value1', 'type1_sample1_value2'],
+                ['sample2', 'type1_sample2_value1', 'type1_sample2_value2'],
+            ],
+            [
+                ['libId', 'type2_field1', 'type2_field2'],
+                ['sample1', 'type2_sample1_value1', 'type2_sample1_value2'],
+                ['sample2', 'type2_sample2_value1', 'type2_sample2_value2'],
+            ],
+        ]
+        assert (compiler.data == mock_data)
 
-        # WHEN object is created
+    def test_build_table(self):
+        # GIVEN a compiler object, created for an arbitrary list of paths
+        compiler = postprocess.OutputCompiler(
+            paths=[]
+        )
 
-        # THEN should have expected paths stored as attribute
-        assert(len(outputcompiler.paths) == len(outputs))
+        # AND parsed data from combined output table files are stroed in the
+        # object's 'data' attribute
+        mock_data = [
+            [
+                ['libId', 'type1_field1', 'type1_field2'],
+                ['sample1','type1_sample1_value1', 'type1_sample1_value2'],
+                ['sample2', 'type1_sample2_value1', 'type1_sample2_value2'],
+            ],
+            [
+                ['libId', 'type2_field1', 'type2_field2'],
+                ['sample1', 'type2_sample1_value1', 'type2_sample1_value2'],
+                ['sample2', 'type2_sample2_value1', 'type2_sample2_value2'],
+            ],
+        ]
+        compiler.data = mock_data
 
-    def test_read_data(self, compilerdata):
-        # (GIVEN)
-        outputcompiler, outputs, _ = compilerdata
+        # WHEN combined data from each type are merged into a list
+        # representing representing rows for an overall project summary table
+        testdata = compiler._build_table()
 
-        logger.info("test `_read_data()`")
+        # THEN the merged rows should contain sample (library) IDs in the
+        # first column, and all other columns from different output types
+        mock_tabledata = [
+            ['libId', 'type1_field1', 'type1_field2',
+             'type2_field1', 'type2_field2'],
+            ['sample1', 'type1_sample1_value1', 'type1_sample1_value2',
+             'type2_sample1_value1', 'type2_sample1_value2'],
+            ['sample2', 'type1_sample2_value1', 'type1_sample2_value2',
+             'type2_sample2_value1', 'type2_sample2_value2'],
+        ]
+        assert (testdata == mock_tabledata)
 
-        # WHEN data from individual file paths are read into a list
-        outputcompiler._read_data()
+    def test_build_combined_filename(self):
+        # GIVEN a list one or more paths to 'combined' table files for
+        # arbitrary output types
+        mock_paths = [
+            'P00-00_C00000XX_161231_combined_type{}.csv'.format(i)
+            for i in range(2)
+            ]
 
-        # THEN data should be stored as list of expected length
-        assert(len(outputcompiler.data) == len(outputs))
+        # AND a compiler object is created for the paths
+        compiler = postprocess.OutputCompiler(
+            paths=mock_paths
+        )
 
-    def test_build_table(self, compilerdata):
-        # (GIVEN)
-        outputcompiler, outputs, _ = compilerdata
+        # WHEN the filename is constructed for the merged table with
+        # all summary output types
+        testfilename = compiler._build_combined_filename()
 
-        logger.info("test `_build_table()`")
+        # THEN the filename should be in the form
+        # '<project-id>_<flowcell-id>_<process-date>_combined_summary_data.csv'
+        assert (testfilename
+                == 'P00-00_C00000XX_161231_combined_summary-data.csv')
 
-        # WHEN data are combined into a single table
-        table_data = outputcompiler._build_table()
+    def test_write_table(self, tmpdir):
+        # GIVEN a path to a processed project folder at the path
+        # '<root>/genomics/Illumina/<run-id>/<project-folder>'
+        mock_run = '161231_INSTID_0001_AC00000XX'
+        mock_project = 'Project_P00-00Processed_161231'
 
-        # THEN the table should have the same number of rows (list elements)
-        # as the first combined output table in the list; and 'libId' should
-        # only appear once in the header row
-        assert(len(table_data) == outputs[0]['len_table'])
-        assert(table_data[0].count('libId') == 1)
+        # AND one or more folders with output data of 'summary' types
+        # (e.g., metrics, QC, validation), each of which includes a
+        # 'combined' table file for its respective type
+        mock_paths = []
+        mock_projectpath = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                           .mkdir(mock_run)
+                           .mkdir(mock_project))
+        for i in range(2):
+            mock_path = mock_projectpath.mkdir('type{}'.format(i))
+            mock_tablefile = mock_path.join(
+                'P00-00_C00000XX_161231_combined_type{}.csv'.format(i)
+            )
+            mock_paths.append(str(mock_tablefile))
+            mock_contents = [
+                'libId,type{}_field1,type{}_field2\n',
+                'sample1,type{}_sample1_value1,type{}_sample1_value2\n',
+                'sample2,type{}_sample2_value1,type{}_sample2_value2\n',
+            ]
 
-    def test_build_combined_filename(self, compilerdata):
-        # (GIVEN)
-        outputcompiler, outputs, outputdata = compilerdata
+            mock_tablefile.write(
+                ''.join([line.format(i+1, i+1) for line in mock_contents])
+            )
 
-        logger.info("test `_build_combined_filename()`")
+        # AND a compiler object is created for the project folder path
+        compiler = postprocess.OutputCompiler(
+            paths=mock_paths
+        )
 
-        # WHEN path to outputs is parsed to build combined CSV file name
-        combined_filename = outputcompiler._build_combined_filename()
+        # WHEN compiled data across all summary output types is written
+        # as a table in a new file, stored directly under the project folder
+        testtablefile = compiler.write_table()
 
-        # THEN combined filename should be correctly formatted
-        assert(combined_filename
-               == os.path.basename(outputdata['path']))
-
-    def test_write_table(self, compilerdata):
-        # (GIVEN)
-        outputcompiler, outputs, outputdata = compilerdata
-
-        logger.info("test `write_table()`")
-
-        # AND combined file does not already exist
-        expected_path = outputdata['path']
-        try:
-            os.remove(expected_path)
-        except OSError:
-            pass
-
-        # WHEN data is read, combined, and written to file
-        outputcompiler.write_table()
-
-        # THEN file should exist at expected path
-        assert(os.path.exists(expected_path))
+        # THEN the combined table should exist at the expected path and
+        # contain the expected contents
+        mock_tablefile = mock_projectpath.join(
+            'P00-00_C00000XX_161231_combined_summary-data.csv'
+        )
+        mock_contents = [
+            ','.join(['libId', 'type1_field1', 'type1_field2',
+                      'type2_field1', 'type2_field2\n']),
+            ','.join(['sample1',
+                      'type1_sample1_value1', 'type1_sample1_value2',
+                      'type2_sample1_value1', 'type2_sample1_value2\n']),
+            ','.join(['sample2',
+                      'type1_sample2_value1', 'type1_sample2_value2',
+                      'type2_sample2_value1', 'type2_sample2_value2\n']),
+        ]
+        assert (testtablefile == mock_tablefile)
+        with open(testtablefile) as f:
+            assert (f.readlines() == mock_contents)
 
 
 class TestOutputCleaner:
-    @pytest.fixture(scope='function')
-    def output_folder(self, tmpdir):
-        return tmpdir.mkdir('processed')
+    """
+    Tests methods for the `OutputCleaner` class in the
+    `bripipetools.postprocess.cleanup` module, which is used to
+    reorganize and rename output files from deprecated layouts.
+    """
 
-    def test_get_output_types(self, output_folder):
-        path = output_folder
-        path.mkdir('metrics')
-        path.mkdir('counts')
-        # assert(str(path) == "foo")
+    def test_get_output_types(self, tmpdir):
+        # GIVEN a path to a folder with output data
+        mock_folders = ['counts', 'metrics', 'QC', 'alignments', 'logs']
+        for outfolder in mock_folders:
+            tmpdir.mkdir(outfolder)
+
+        # AND a cleaner object is created for that path
+        cleaner = postprocess.OutputCleaner(
+            path=str(tmpdir)
+        )
+
+        # WHEN the path is checked to determine output type from a predefined
+        # set of options
+        test_types = cleaner._get_output_types()
+
+        # THEN the assigned output type should match the expected result
+        assert (set(test_types) == set(mock_folders))
+
+    @pytest.mark.parametrize(
+        'test_input', ['counts', 'metrics', 'QC', 'alignments', 'logs']
+    )
+    def test_get_output_paths(self, tmpdir, test_input):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type contains one or
+        # more files
+        mock_path = tmpdir.mkdir(test_input)
+        mock_paths = []
+        for i in range(2):
+            mock_file = mock_path.ensure('outfile{}'.format(i))
+            mock_paths.append(str(mock_file))
+
+        # AND a cleaner object is created for that path
+        cleaner = postprocess.OutputCleaner(
+            path=str(tmpdir)
+        )
+
+        # WHEN full paths are collected for all output files
+        test_paths = cleaner._get_output_paths(test_input)
+
+        # THEN list of paths should match expected results
+        assert (set(test_paths) == set(mock_paths))
+
+    def test_unzip_output(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
+        mock_path = tmpdir.mkdir('metrics')
+
+        # AND the folder contains a zipped archive with one or more
+        # output files
+        mock_zipdir = mock_path.mkdir('zipfolder')
+        mock_zipdir.ensure('outfile1')
+        mock_zippath = shutil.make_archive(str(mock_zipdir), 'zip',
+                                           str(mock_zipdir))
+        shutil.rmtree(str(mock_zipdir))
+
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
-            path=str(path))
-        assert(set(outputcleaner._get_output_types())
-               == set(['metrics', 'counts']))
+            path=str(tmpdir)
+        )
 
-    def test_get_output_paths(self, output_folder):
-        path = output_folder
-        path.mkdir('QC').mkdir('sample1').ensure('file1.zip')
+        # WHEN the zipped archive is uncompressed
+        test_paths = outputcleaner._unzip_output(mock_zippath)
 
+        # THEN the individual output files previously stored in the
+        # zipped archive should now exist in the output type subfolder
+        assert ('outfile1' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
+        assert (str(mock_path.join('outfile1')) in test_paths)
+
+    def test_unnest_output_file(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
+        mock_path = tmpdir.mkdir('metrics')
+
+        # AND the folder contains another subfolder with one or more
+        # output files
+        mock_subdir = mock_path.mkdir('subfolder')
+        mock_nestpath = mock_subdir.ensure('outfile1')
+
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
-            path=str(path))
-        assert(outputcleaner._get_output_paths('QC')
-               == [str(path.join('QC').join('sample1').join('file1.zip'))])
+            path=str(tmpdir)
+        )
 
-    def test_unzip_output(self, output_folder):
-        path = output_folder
-        zipdir = path.mkdir('zipfolder')
-        zipdir.ensure('file1')
-        zipoutput = shutil.make_archive(str(zipdir), 'zip',
-                                        str(zipdir))
-        shutil.rmtree(str(zipdir))
+        # WHEN output files in the subfolder are unnested
+        outputcleaner._unnest_output(str(mock_nestpath))
 
+        # THEN the files should exist directly under the output type
+        # folder and be labeled in the form '<subfolder>_<filename>'
+        assert ('subfolder_outfile1' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
+
+    def test_unnest_output_zip(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
+        mock_path = tmpdir.mkdir('metrics')
+
+        # AND the folder contains another subfolder with one or more
+        # zipped archives than in turn contain one or more output files
+        mock_subdir = mock_path.mkdir('subfolder')
+        mock_zipdir = mock_subdir.mkdir('zipfolder')
+        mock_zipdir.ensure('outfile1')
+
+        mock_zippath = shutil.make_archive(str(mock_zipdir), 'zip',
+                                           str(mock_zipdir))
+        shutil.rmtree(str(mock_zipdir))
+
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
-            path=str(path))
-        paths = outputcleaner._unzip_output(zipoutput)
+            path=str(tmpdir)
+        )
 
-        assert('file1' in str(path.listdir()))
-        assert(paths[0] == str(path.join('file1')))
+        # WHEN zipped output files in the subfolder are unnested
+        outputcleaner._unnest_output(mock_zippath)
 
-    def test_unnest_output_file(self, output_folder):
-        path = output_folder
-        subdir = path.mkdir('subfolder')
-        nestedoutput = subdir.ensure('file1')
+        # THEN the zipped archives should first be flattened such that
+        # individual output files exist directly under the subfolder,
+        # and these files should then be unnested and exist directly
+        # under the output type folder (labeled as '<subfolder>_<filename>'
+        logger.debug(''.format(mock_path.listdir()))
+        assert ('subfolder_outfile1' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
 
+    def test_recode_output(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type, which contains
+        # an output file
+        mock_path = tmpdir.mkdir('QC')
+        mock_qcpath = mock_path.ensure('libID_fcID_fastqc_data.txt')
+
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
-            path=str(path))
-        outputcleaner._unnest_output(str(nestedoutput))
+            path=str(tmpdir))
 
-        assert('subfolder_file1' in str(path.listdir()))
+        # WHEN the output file is renamed according to some predefined rule
+        test_path = outputcleaner._recode_output(str(mock_qcpath), 'QC')
 
-    def test_unnest_output_zip(self, output_folder):
-        path = output_folder
-        subdir = path.mkdir('subfolder')
-        zipdir = subdir.mkdir('zipfolder')
-        nestedoutput = zipdir.ensure('file1')
-        zipoutput = shutil.make_archive(str(zipdir), 'zip',
-                                        str(zipdir))
-        shutil.rmtree(str(zipdir))
+        # THEN the new filename should match the expected result
+        assert (os.path.basename(test_path) == 'libID_fcID_fastqc_qc.txt')
+        assert ('libID_fcID_fastqc_qc.txt' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
 
+    def test_clean_outputs(self, tmpdir):
+        # GIVEN a path to a folder with output data, and a subfolder
+        # corresponding to a particular output type
+        mock_path = tmpdir.mkdir('QC')
+
+        # AND the output type folder contains output files for one or more
+        # samples with various levels of compression and nesting
+        mock_outputdata = {
+            1: 'lib1111_C00000XX',
+            2: 'lib2222_C00000XX'
+        }
+        for i in range(2):
+            mock_sampledir = mock_path.mkdir(mock_outputdata[i+1])
+            mock_zipdir = mock_sampledir.mkdir('qc{}'.format(i))
+            mock_zipdir.ensure('fastqc_data.txt')
+            shutil.make_archive(str(mock_zipdir), 'zip',
+                                str(mock_zipdir))
+            shutil.rmtree(str(mock_zipdir))
+
+        # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
-            path=str(path))
-        outputcleaner._unnest_output(str(zipoutput))
+            path=str(tmpdir)
+        )
 
-        assert('subfolder_file1' in str(path.listdir()))
-
-    def test_recode_output(self, output_folder):
-        path = output_folder
-        qcfile = path.ensure('libID_fcID_fastqc_data.txt')
-
-        outputcleaner = postprocess.OutputCleaner(
-            path=str(path))
-        newpath = outputcleaner._recode_output(str(qcfile), 'QC')
-
-        assert(os.path.basename(newpath) == 'libID_fcID_fastqc_qc.txt')
-        assert('libID_fcID_fastqc_qc.txt' in str(path.listdir()))
-
-    def test_clean_outputs(self, output_folder):
-        path = output_folder
-        outdir = path.mkdir('QC')
-
-        lib1dir = outdir.mkdir('lib1_fcID')
-        zip1dir = lib1dir.mkdir('qc1')
-        qc1file = zip1dir.ensure('fastqc_data.txt')
-        zip1out = shutil.make_archive(str(zip1dir), 'zip', str(zip1dir))
-        shutil.rmtree(str(zip1dir))
-
-        lib2dir = outdir.mkdir('lib2_fcID')
-        zip2dir = lib2dir.mkdir('qc1')
-        qc2file = zip2dir.ensure('fastqc_data.txt')
-        zip2out = shutil.make_archive(str(zip2dir), 'zip', str(zip2dir))
-        shutil.rmtree(str(zip2dir))
-
-        outputcleaner = postprocess.OutputCleaner(
-            path=str(path))
+        # WHEN output files for the folder are "cleaned" to resolve unwanted
+        # compression, nesting, or deprecated filenames
         outputcleaner.clean_outputs()
 
-        assert(len(outdir.listdir()) == 4)
-        assert('lib1_fcID_fastqc_qc.txt' in str(outdir.listdir()))
+        # THEN the updated output organization should match expected results
+        logger.debug(''.format(mock_path.listdir()))
+        assert (len(mock_path.listdir()) == 4)
+        assert ('lib1111_C00000XX_fastqc_qc.txt' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])

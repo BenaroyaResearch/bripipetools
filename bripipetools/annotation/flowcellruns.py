@@ -63,7 +63,11 @@ class FlowcellRunAnnotator(object):
         """
         logger.info("searching for 'Unaligned' folder")
         try:
-            return os.path.join(self._get_flowcell_path(), 'Unaligned')
+            unaligned_path = os.path.join(self._get_flowcell_path(),
+                                          'Unaligned')
+            if not os.path.exists(unaligned_path):
+                raise OSError
+            return unaligned_path
         except OSError:
             logger.error("'Unaligned' folder doesn't exist")
             raise

@@ -35,7 +35,7 @@ class OutputCleaner(object):
         """
         Return full path for individual output files.
         """
-        logging.debug("locating output files of type {}".format(output_type))
+        logging.debug("locating output files of type '{}'".format(output_type))
         output_root = os.path.join(self.path, output_type)
         return [os.path.join(self.path, root, f)
                 for root, dirs, files in os.walk(output_root)
@@ -50,8 +50,10 @@ class OutputCleaner(object):
                       .format(path, os.path.dirname(path)))
         paths = []
         with zipfile.ZipFile(path) as zf:
-            for f in zf.namelist()[1:]:
-                paths.append(zf.extract(f, os.path.dirname(path)))
+            logger.debug("zip folder contents: {}".format(zf.namelist()))
+            for f in zf.namelist():
+                if f != './':
+                    paths.append(zf.extract(f, os.path.dirname(path)))
         logging.debug("unzipped the following files: {}".format(paths))
         return paths
 

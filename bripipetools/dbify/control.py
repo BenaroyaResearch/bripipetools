@@ -4,7 +4,7 @@ Parse arguments to determine and select appropriate importer class.
 import logging
 import re
 
-from . import SequencingImporter, ProcessingImporter
+from . import FlowcellRunImporter, WorkflowBatchImporter
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +21,8 @@ class ImportManager(object):
                      .format(path, db.name))
         self.path = path
         self.db = db
-        self._init_importer()
 
-    def _sniff_path(self, path):
+    def _sniff_path(self):
         """
         Check path for known patterns and return path type for importer.
         """
@@ -32,16 +31,16 @@ class ImportManager(object):
             'workflowbatch_file': re.compile('batch_submission.*\.txt$')
         }
         return [k for k, v in path_types.items()
-                if v.search(path.rstrip('/'))][0]
+                if v.search(self.path.rstrip('/'))][0]
 
     def _init_importer(self):
         """
         Initialize the appropriate importer for the provided path.
         """
-        path_type = self._sniff_path(self.path)
+        path_type = self._sniff_path()
         importer_opts = {
-            'flowcell_path': SequencingImporter,
-            'workflowbatch_file': ProcessingImporter
+            'flowcell_path': FlowcellRunImporter,
+            'workflowbatch_file': WorkflowBatchImporter
         }
         importer = importer_opts[path_type]
         self.importer = importer(path=self.path, db=self.db)
@@ -50,4 +49,5 @@ class ImportManager(object):
         """
         Execute the insert method of the selected importer.
         """
+        self._init_importer()
         self.importer.insert()
