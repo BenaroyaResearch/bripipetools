@@ -638,7 +638,7 @@ class TestOutputCleaner:
         mock_zipdir = mock_subdir.mkdir('zipfolder')
         mock_zipdir.ensure('outfile1')
         mock_zippath = shutil.make_archive(str(mock_zipdir), 'zip',
-                                          str(mock_zipdir))
+                                           str(mock_zipdir))
         shutil.rmtree(str(mock_zipdir))
 
         # AND a cleaner object is created for the path
@@ -653,7 +653,8 @@ class TestOutputCleaner:
         # individual output files exist directly under the subfolder,
         # and these files should then be unnested and exist directly
         # under the output type folder (labeled as '<subfolder>_<filename>'
-        assert('subfolder_outfile1' in str(mock_path.listdir()))
+        assert ('subfolder_outfile1' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
 
     def test_recode_output(self, tmpdir):
         # GIVEN a path to a folder with output data, and a subfolder
@@ -671,7 +672,8 @@ class TestOutputCleaner:
 
         # THEN the new filename should match the expected result
         assert (os.path.basename(testpath) == 'libID_fcID_fastqc_qc.txt')
-        assert ('libID_fcID_fastqc_qc.txt' in str(mock_path.listdir()))
+        assert ('libID_fcID_fastqc_qc.txt' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
 
     def test_clean_outputs(self, tmpdir):
         # GIVEN a path to a folder with output data, and a subfolder
@@ -702,5 +704,5 @@ class TestOutputCleaner:
 
         # THEN the updated output organization should match expected results
         assert (len(mock_path.listdir()) == 4)
-        assert ('lib1111_C00000XX_fastqc_qc.txt'
-                in str(mock_path.listdir()))
+        assert ('lib1111_C00000XX_fastqc_qc.txt' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
