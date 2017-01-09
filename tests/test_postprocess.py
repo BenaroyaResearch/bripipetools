@@ -638,7 +638,6 @@ class TestOutputCleaner:
         mock_subdir = mock_path.mkdir('subfolder')
         mock_zipdir = mock_subdir.mkdir('zipfolder')
         mock_zipdir.ensure('outfile1')
-        logger.debug("mock zipfolder contents: {}".format(mock_zipdir.listdir()))
 
         mock_zippath = shutil.make_archive(str(mock_zipdir), 'zip',
                                            str(mock_zipdir))
