@@ -601,7 +601,8 @@ class TestOutputCleaner:
 
         # THEN the individual output files previously stored in the
         # zipped archive should now exist in the output type subfolder
-        assert ('outfile1' in str(mock_path.listdir()))
+        assert ('outfile1' in
+                [os.path.basename(str(f)) for f in mock_path.listdir()])
         assert (str(mock_path.join('outfile1')) in test_paths)
 
     def test_unnest_output_file(self, tmpdir):
@@ -647,12 +648,13 @@ class TestOutputCleaner:
         )
 
         # WHEN zipped output files in the subfolder are unnested
-        outputcleaner._unnest_output(str(mock_zippath))
+        outputcleaner._unnest_output(mock_zippath)
 
         # THEN the zipped archives should first be flattened such that
         # individual output files exist directly under the subfolder,
         # and these files should then be unnested and exist directly
         # under the output type folder (labeled as '<subfolder>_<filename>'
+        logger.debug(''.format(mock_path.listdir()))
         assert ('subfolder_outfile1' in
                 [os.path.basename(str(f)) for f in mock_path.listdir()])
 
@@ -668,10 +670,10 @@ class TestOutputCleaner:
             path=str(tmpdir))
 
         # WHEN the output file is renamed according to some predefined rule
-        testpath = outputcleaner._recode_output(str(mock_qcpath), 'QC')
+        test_path = outputcleaner._recode_output(str(mock_qcpath), 'QC')
 
         # THEN the new filename should match the expected result
-        assert (os.path.basename(testpath) == 'libID_fcID_fastqc_qc.txt')
+        assert (os.path.basename(test_path) == 'libID_fcID_fastqc_qc.txt')
         assert ('libID_fcID_fastqc_qc.txt' in
                 [os.path.basename(str(f)) for f in mock_path.listdir()])
 
@@ -696,13 +698,15 @@ class TestOutputCleaner:
 
         # AND a cleaner object is created for the path
         outputcleaner = postprocess.OutputCleaner(
-            path=str(tmpdir))
+            path=str(tmpdir)
+        )
 
         # WHEN output files for the folder are "cleaned" to resolve unwanted
         # compression, nesting, or deprecated filenames
         outputcleaner.clean_outputs()
 
         # THEN the updated output organization should match expected results
+        logger.debug(''.format(mock_path.listdir()))
         assert (len(mock_path.listdir()) == 4)
         assert ('lib1111_C00000XX_fastqc_qc.txt' in
                 [os.path.basename(str(f)) for f in mock_path.listdir()])
