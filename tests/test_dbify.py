@@ -340,6 +340,131 @@ class TestWorkflowBatchImporter:
                 == 2)
 
 
+class TestImportManager:
+    """
+
+    """
+
+    def test_sniff_path_for_flowcell_run(self, mock_db):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
+
+        manager = dbify.ImportManager(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN path is checked to determine type
+        test_type = manager._sniff_path()
+
+        # THEN path type should be 'flowcell_path'
+        assert (test_type == 'flowcell_path')
+
+    def test_sniff_path_for_workflow_batch(self, mock_db):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = ('/mnt/genomics/Illumina/{}/globus_batch_submission/{}'
+                     .format(mock_id, mock_filename))
+
+        manager = dbify.ImportManager(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN path is checked to determine type
+        test_type = manager._sniff_path()
+
+        # THEN path type should be 'flowcell_path'
+        assert (test_type == 'workflowbatch_file')
+
+    def test_init_importer_for_flowcell_run(self, mock_db):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
+
+        manager = dbify.ImportManager(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN path is checked to determine type
+        manager._init_importer()
+
+        # THEN path type should be 'flowcell_path'
+        assert (type(manager.importer) == dbify.FlowcellRunImporter)
+
+    def test_init_importer_for_workflow_batch(self, mock_db):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = ('/mnt/genomics/Illumina/{}/globus_batch_submission/{}'
+                     .format(mock_id, mock_filename))
+
+        manager = dbify.ImportManager(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN path is checked to determine type
+        manager._init_importer()
+
+        # THEN path type should be 'flowcell_path'
+        assert (type(manager.importer) == dbify.WorkflowBatchImporter)
+
+    def test_run_for_flowcell_run(self, mock_db, tmpdir):
+        # GIVEN a path to a flowcell run folder and a connection to a
+        # database in which a document corresponding to the flowcell run
+        # may or may not exist
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+
+        # AND an unaligned folder, which includes multiple project folders,
+        # each with multiple folders for sequenced libraries
+        mock_projects = ['P1-1-11111111', 'P99-99-99999999']
+        mock_libs = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                     1: ['lib3333-33333333', 'lib4444-44444444']}
+        unalignedpath = mock_path.mkdir('Unaligned')
+        for idx, p in enumerate(mock_projects):
+            projpath = unalignedpath.mkdir(p)
+            for l in mock_libs[idx]:
+                projpath.mkdir(l)
+
+        # AND an importer object is created for the path
+        manager = dbify.ImportManager(
+            path=str(mock_path),
+            db=mock_db
+        )
+
+        # WHEN all objects are inserted into database
+        manager.run()
+
+        # THEN documents should be present in the runs collection
+        assert (len(list(mock_db.runs.find({'type': 'flowcell'}))) == 1)
+        assert (len(list(mock_db.samples.find({'type': 'sequenced library'})))
+                == 4)
+
+    def test_run_for_workflow_batch(self, mock_db, tmpdir):
+        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+
+        mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
+        mock_path = mock_batchfile(mock_filename, mock_path)
+
+        # AND an importer object is created for the path
+        manager = dbify.ImportManager(
+            path=mock_path,
+            db=mock_db
+        )
+
+        # WHEN all objects are inserted into database
+        manager.run()
+
+        # THEN documents should be present in the runs collection
+        assert (len(list(mock_db.workflowbatches
+                         .find({'type': 'Galaxy workflow batch'})))
+                == 1)
+        assert (len(list(mock_db.samples.find({'type': 'processed library'})))
+                == 2)
+
 # @pytest.mark.usefixtures('mock_genomics_server', 'mock_db')
 # class TestImportManagerWithFlowcellPath:
 #     @pytest.fixture(
