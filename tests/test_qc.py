@@ -8,7 +8,6 @@ import mongomock
 import pandas as pd
 
 from bripipetools import qc
-from bripipetools import util
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -23,48 +22,6 @@ def mock_db():
     yield mongomock.MongoClient().db
     logger.debug(("[teardown] mock database, disconnect "
                   "from mock Mongo database"))
-
-
-# @pytest.fixture(
-#     scope='class',
-#     params=[{'runnum': r, 'projectnum': p, 'samplenum': s}
-#             for r in range(1)
-#             for p in range(3)
-#             for s in range(3)])
-# def testproclib(request, mock_genomics_server):
-#     # GIVEN a processed library object
-#     runs = mock_genomics_server['root']['genomics']['illumina']['runs']
-#     rundata = runs[request.param['runnum']]
-#     projects = rundata['processed']['projects']
-#     projectdata = projects[request.param['projectnum']]
-#     samples = projectdata['counts']['sources']['htseq']
-#     sampledata = samples[request.param['samplenum']]
-#     outputs = projectdata['validation']['sources']['sexcheck']
-#     outputdata = outputs[request.param['samplenum']]
-#
-#     logger.info(("[setup] mock processed library object with counts file "
-#                  "for sample {}".format(sampledata['sample'])))
-#
-#     processedlibrary = mock.Mock(
-#         _id='{}_{}_processed'.format(sampledata['sample'],
-#                                      rundata['flowcell_id']),
-#         processed_data=[
-#             {'workflowbatch_id': 'globusgalaxy_2016-09-29_1',
-#              'outputs': {
-#                 'counts': [
-#                     {'source': 'htseq',
-#                      'name': 'htseq_counts_txt',
-#                      'file': re.sub('.*(?=genomics)', '/',
-#                                     sampledata['path'])}
-#                 ]
-#              }
-#             }
-#         ],
-#         parent_id='mock_sample',
-#         type='processed library')
-#
-#     yield processedlibrary, sampledata, outputdata
-#     logger.info("[teardown] mock processed library object")
 
 
 @pytest.fixture(scope='function')
@@ -99,6 +56,7 @@ def mock_proclib(count_filename=None):
 
     # logger.info("[teardown] mock processed library object")
     return processedlibrary
+
 
 class TestSexChecker:
     """
@@ -362,7 +320,7 @@ class TestSexChecker:
         )
 
 
-class TestSexPredict:
+class TestSexPredictor:
     """
 
     """
@@ -427,50 +385,64 @@ class TestSexPredict:
         assert (predictor.data['predicted_sex'] in ['male', 'female'])
 
 
+class TestSexVerifier:
+    """
 
-#
-#
-# class TestSexVerifier:
-#     @pytest.fixture(scope='class')
-#     def verifierdata(self, testproclib, mock_db):
-#         # (GIVEN)
-#         processedlibrary, sampledata, _ = testproclib
-#         testdata = {'predicted_sex': 'male'}
-#
-#         logger.info("[setup] SexVerifier test instance")
-#
-#         # AND
-#         sexverifier = qc.SexVerifier(
-#             data=testdata,
-#             processedlibrary=processedlibrary,
-#             db=mock_db,
-#         )
-#
-#         yield sexverifier, sampledata
-#         logger.info("[teardown] SexVerifier mock instance")
-#
-#     def test_retrieve_sex(self, verifierdata, testproclib, mock_db):
-#         # (GIVEN)
-#         verifier, _ = verifierdata
-#
-#         # AND a hierarchy of objects in the 'samples' collection, with
-#         # parent relationship specified by the 'parentId' field
-#         mock_db.samples.insert(
-#             {'_id': testproclib[0]._id, 'parentId': testproclib[0].parent_id})
-#         mock_db.samples.insert(
-#             {'_id': 'mock_sample', 'reportedSex': 'male'})
-#
-#         # WHEN searching for the field among all sample ancestors in
-#         # the hierarchy
-#         reported_sex = verifier._retrieve_sex('mock_sample')
-#
-#         # THEN
-#         assert(reported_sex == 'male')
-#
-#         mock_db.samples.drop()
-#
-#     def test_verify(self, verifierdata):
-#         # (GIVEN)
-#         verifier, _ = verifierdata
-#
-#         assert(verifier.verify()['sex_check'] == 'NA')
+    """
+    def test_retrieve_sex(self, mock_db):
+        # AND a SexChecker with mock processed library and specified
+        # workflow batch ID
+        mock_object = mock_proclib()
+
+        mock_data = {'x_genes': 1,
+                     'y_genes': 2,
+                     'x_counts': 4,
+                     'y_counts': 6,
+                     'total_counts': 10,
+                     'predicted_sex': 'male'}
+
+        checker = qc.SexVerifier(
+            data=mock_data,
+            processedlibrary=mock_object,
+            db=mock_db
+        )
+
+        # AND a hierarchy of objects in the 'samples' collection, with
+        # parent relationship specified by the 'parentId' field
+        mock_db.samples.insert(
+            {'_id': mock_object._id, 'parentId': mock_object.parent_id})
+        mock_db.samples.insert(
+            {'_id': mock_object.parent_id, 'reportedSex': 'male'})
+
+        test_result = checker._retrieve_sex(mock_object.parent_id)
+
+        assert (test_result == 'male')
+
+    def test_verify(self, mock_db):
+        # AND a SexChecker with mock processed library and specified
+        # workflow batch ID
+        mock_object = mock_proclib()
+
+        mock_data = {'x_genes': 1,
+                     'y_genes': 2,
+                     'x_counts': 4,
+                     'y_counts': 6,
+                     'total_counts': 10,
+                     'predicted_sex': 'male'}
+
+        checker = qc.SexVerifier(
+            data=mock_data,
+            processedlibrary=mock_object,
+            db=mock_db
+        )
+
+        # AND a hierarchy of objects in the 'samples' collection, with
+        # parent relationship specified by the 'parentId' field
+        mock_db.samples.insert(
+            {'_id': mock_object._id, 'parentId': mock_object.parent_id})
+        mock_db.samples.insert(
+            {'_id': mock_object.parent_id, 'reportedSex': 'male'})
+
+        test_data = checker.verify()
+
+        assert (test_data['sex_check'] == 'pass')
