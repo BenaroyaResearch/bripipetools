@@ -46,7 +46,7 @@ def swap_root(path, top_level, new_root='/~/'):
     :rtype: str
     :return: modified path with new root
     """
-    top_re = re.compile('.*(?={})'.format(top_level))
-    return top_re.sub(new_root, path)
+    deroot_path = re.sub('.*(?={})'.format(top_level), '', path)
+    return os.path.join(new_root, deroot_path)
 
 
