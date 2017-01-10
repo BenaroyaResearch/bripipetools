@@ -1,5 +1,11 @@
 **Note:** during early development (until package is a bit more stable), intermediate patches and bug fixes will only be listed separately in the changelog up to the point of a new major and minor versions &mdash; at that point, they will be lumped together under the major/minor release description
 
+**[v0.3.4](https://github.com/BenaroyaResearch/bripipetools/tree/f5307cdd8c9669706fc3bf012e93ed5a070cde48) - 2017-01-10**
+
++ Mostly superficial changes (streamlining test modules, cleaning up syntax and documentation, minor reorganization)
++ Fixed handling of non-code files (config, data) for package distribution
++ New `io` module for reading/parsing workflow JSON files exported from Galaxy
+
 **[v0.3.3](https://github.com/jaeddy/bripipetools/tree/e7a9b553c1e2882bc05215b564f7baff827210d4) - 2016-11-02**
 
 + New `monitoring` module for inspecting/reporting status of various pipeline steps &mdash; i.e., file existence, access, completion, status, etc.
