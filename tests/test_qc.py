@@ -372,57 +372,84 @@ class TestSexPredictor:
     `bripipetools.qc.sexpredict` module.
     """
     def test_compute_y_x_gene_ratio(self):
+        # GIVEN a dictionary with X/Y chromosome gene count summary data
+        # from a processed library
         mock_data = {'x_genes': 1,
                      'y_genes': 2,
                      'x_counts': 4,
                      'y_counts': 6,
-                     'total_counts': 10,
-                     'predicted_sex': 'male'}
+                     'total_counts': 10}
+
+        # AND a predictor object created for the data
         predictor = qc.SexPredictor(data=mock_data)
 
+        # WHEN the ratio of detected Y genes to detected X genes is
+        # computed and stored in the 'y_x_gene_ratio' field of the
+        # predictor object's 'data' attribute
         predictor._compute_y_x_gene_ratio()
 
+        # THEN the value of the ratio should match the expected result,
+        # which is equal to 'y_genes' / 'x_genes'
         test_data = predictor.data
-
         assert (test_data['y_x_gene_ratio'] == 2)
 
     def test_compute_y_x_count_ratio(self):
+        # GIVEN a dictionary with X/Y chromosome gene count summary data
+        # from a processed library
         mock_data = {'x_genes': 1,
                      'y_genes': 2,
                      'x_counts': 4,
                      'y_counts': 6,
-                     'total_counts': 10,
-                     'predicted_sex': 'male'}
+                     'total_counts': 10}
+
+        # AND a predictor object created for the data
         predictor = qc.SexPredictor(data=mock_data)
 
+        # WHEN the ratio of total Y counts to total X counts is
+        # computed and stored in the 'y_x_count_ratio' field of the
+        # predictor object's 'data' attribute
         predictor._compute_y_x_count_ratio()
 
+        # THEN the value of the ratio should match the expected result,
+        # which is equal to 'y_counts' / 'x_counts'
         test_data = predictor.data
-
         assert (test_data['y_x_count_ratio'] == 1.5)
 
     def test_predict_sex(self):
+        # GIVEN a dictionary with X/Y chromosome gene count summary data
+        # from a processed library
         mock_data = {'x_genes': 1,
                      'y_genes': 2,
                      'x_counts': 4,
                      'y_counts': 6,
-                     'total_counts': 10,
-                     'predicted_sex': 'male'}
+                     'total_counts': 10}
+
+        # AND a predictor object created for the data
         predictor = qc.SexPredictor(data=mock_data)
 
-        # WHEN sex is predicted
+        # WHEN sex is predicted based on a pre-determined function of
+        # X and Y gene counts and stored in the 'predicted_sex' field
+        # of the predictor object's 'data' attribute
+        # (note: the default function is currently
+        # male IF (y_counts^2 / total_counts) > 1 ELSE female;
+        # rather than changing this within the SexPredictor class, it may
+        # be preferable to encapsulate the sex predict strategy within
+        # a separate class or set of classes)
         predictor._predict_sex()
 
-        # THEN predicted sex should match reported sex
-        assert (predictor.data['predicted_sex'] in ['male', 'female'])
+        # THEN predicted sex should match the expected result
+        assert (predictor.data['predicted_sex'] == 'male')
 
     def test_predict(self):
+        # GIVEN a dictionary with X/Y chromosome gene count summary data
+        # from a processed library
         mock_data = {'x_genes': 1,
                      'y_genes': 2,
                      'x_counts': 4,
                      'y_counts': 6,
-                     'total_counts': 10,
-                     'predicted_sex': 'male'}
+                     'total_counts': 10}
+
+        # AND a predictor object created for the data
         predictor = qc.SexPredictor(data=mock_data)
 
         # WHEN sex is predicted
@@ -438,10 +465,9 @@ class TestSexVerifier:
     `bripipetools.qc.sexverify` module.
     """
     def test_retrieve_sex(self, mock_db):
-        # AND a SexChecker with mock processed library and specified
-        # workflow batch ID
+        # GIVEN a processed library object and corresponding dictionary
+        # with X/Y chromosome gene count summary data
         mock_object = mock_proclib()
-
         mock_data = {'x_genes': 1,
                      'y_genes': 2,
                      'x_counts': 4,
@@ -449,14 +475,16 @@ class TestSexVerifier:
                      'total_counts': 10,
                      'predicted_sex': 'male'}
 
-        checker = qc.SexVerifier(
+        # AND a SexVerifier object is created for the processed library
+        # and associated X/Y count data
+        verifier = qc.SexVerifier(
             data=mock_data,
             processedlibrary=mock_object,
             db=mock_db
         )
 
-        # AND a hierarchy of objects in the 'samples' collection, with
-        # parent relationship specified by the 'parentId' field
+        # AND a hierarchy of documents exists in the 'samples' collection,
+        # with parent relationship specified by the 'parentId' field
         mock_db.samples.insert(
             {'_id': mock_object._id, 'parentId': mock_object.parent_id}
         )
@@ -464,15 +492,17 @@ class TestSexVerifier:
             {'_id': mock_object.parent_id, 'reportedSex': 'male'}
         )
 
-        test_result = checker._retrieve_sex(mock_object.parent_id)
+        # WHEN the 'reportedSex' for the processed library is retrieved
+        # from an upstream parent sample
+        test_result = verifier._retrieve_sex(mock_object.parent_id)
 
+        # THEN the reported sex should match the expected result
         assert (test_result == 'male')
 
     def test_verify(self, mock_db):
-        # AND a SexChecker with mock processed library and specified
-        # workflow batch ID
+        # GIVEN a processed library object and corresponding dictionary
+        # with X/Y chromosome gene count summary data
         mock_object = mock_proclib()
-
         mock_data = {'x_genes': 1,
                      'y_genes': 2,
                      'x_counts': 4,
@@ -480,14 +510,16 @@ class TestSexVerifier:
                      'total_counts': 10,
                      'predicted_sex': 'male'}
 
-        checker = qc.SexVerifier(
+        # AND a SexVerifier object is created for the processed library
+        # and associated X/Y count data
+        verifier = qc.SexVerifier(
             data=mock_data,
             processedlibrary=mock_object,
             db=mock_db
         )
 
-        # AND a hierarchy of objects in the 'samples' collection, with
-        # parent relationship specified by the 'parentId' field
+        # AND a hierarchy of documents exists in the 'samples' collection,
+        # with parent relationship specified by the 'parentId' field
         mock_db.samples.insert(
             {'_id': mock_object._id, 'parentId': mock_object.parent_id}
         )
@@ -495,6 +527,10 @@ class TestSexVerifier:
             {'_id': mock_object.parent_id, 'reportedSex': 'male'}
         )
 
-        test_data = checker.verify()
+        # WHEN predicted sex for the processed library is verified, and
+        # the result is stored in the 'sex_check' field of the returned
+        # data dictionary
+        test_data = verifier.verify()
 
+        # THEN verification result should match expected result
         assert (test_data['sex_check'] == 'pass')
