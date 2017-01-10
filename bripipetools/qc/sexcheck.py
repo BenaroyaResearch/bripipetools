@@ -32,20 +32,29 @@ class SexChecker(object):
         self.workflowbatch_id = workflowbatch_id
         self.genomics_root = genomics_root
         self.db = db
-        # self._compute_x_y_data()
 
     def _load_x_genes(self, ref='grch38'):
         """
         Read X chromosome gene IDs from file and return data frame.
         """
-        x_genes_file = './data/{}_gene_ids_x.csv'.format(ref)
+        data_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            'data'
+        )
+        x_genes_file = os.path.join(data_path, '{}_gene_ids_x.csv'.format(ref))
+
         return pd.read_table(x_genes_file, names=['geneName'], skiprows=1)
 
     def _load_y_genes(self, ref='grch38'):
         """
         Read Y chromosome gene IDs from file and return data frame.
         """
-        y_genes_file = './data/{}_gene_ids_y.csv'.format(ref)
+        data_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            'data'
+        )
+        y_genes_file = os.path.join(data_path, '{}_gene_ids_y.csv'.format(ref))
+
         return pd.read_table(y_genes_file, names=['geneName'], skiprows=1)
 
     def _get_counts_path(self):

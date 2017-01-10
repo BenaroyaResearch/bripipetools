@@ -1,1 +1,2 @@
-include default.ini
+include bripipetools/config/default.ini
+include bripipetools/data/*

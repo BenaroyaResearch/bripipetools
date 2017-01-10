@@ -18,6 +18,11 @@ def connect():
 
     :return: A database connection object.
     """
+    config_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+        'config'
+    )
+
     property_file = os.environ.get('DB_PARAM_FILE')
     if property_file is None:
         logger.info("no environmental variable set; using 'default.ini'")
@@ -26,7 +31,9 @@ def connect():
         logger.info("property file set: '{}'".format(property_file))
 
     config = ConfigParser.ConfigParser()
-    with open(property_file) as f:
+
+    property_path = os.path.join(config_path, property_file)
+    with open(property_path) as f:
         config.readfp(f)
     db_host = config.get('database', 'db_host')
     db_name = config.get('database', 'db_name')

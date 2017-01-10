@@ -12,6 +12,9 @@ config = {
     'url': 'https://github.com/jaeddy/bripipetools',
     'license': 'MIT',
     'packages': ['bripipetools'],
+    'package_data': {
+        'bripipetools': ['config/default.ini', 'data/*']
+    },
     'install_requires': [
         'beautifulsoup4',
         'pymongo',
