@@ -97,11 +97,11 @@ class TestSequencedLibraryAnnotator:
         mock_project = 'P1-1'
         mock_runid = '161231_INSTID_0001_AC00000XX'
         mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                    .mkdir(mock_runid)
-                    .mkdir('Unaligned')
-                    .mkdir(mock_project)
-                    .mkdir(mock_lib))
-        mock_data = 'sample-name_S001_L001_R1_001.fastq.gz'
+                     .mkdir(mock_runid)
+                     .mkdir('Unaligned')
+                     .mkdir(mock_project)
+                     .mkdir(mock_lib))
+        mock_data = '/sample-name_S001_L001_R1_001.fastq.gz'
         mock_path.ensure(mock_data)
         annotator = annotation.SequencedLibraryAnnotator(
             path=str(mock_path),
@@ -771,15 +771,15 @@ class TestProcessedLibraryAnnotator:
                     'out-type1': [
                         {'source': 'out-source1',
                          'name': 'out-source1_out-type1_out-ext',
-                         'file': 'outfilepath1'},
+                         'file': '/outfilepath1'},
                         {'source': 'out-source2',
                          'name': 'out-source2_out-type1_out-ext',
-                         'file': 'outfilepath2'},
+                         'file': '/outfilepath2'},
                     ],
                     'out-type2': [
                         {'source': 'out-source3',
                          'name': 'out-source3_out-type2_out-ext',
-                         'file': 'outfilepath3'},
+                         'file': '/outfilepath3'},
                     ]
                 })
 

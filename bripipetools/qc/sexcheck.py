@@ -21,8 +21,8 @@ class SexChecker(object):
     """
     def __init__(self, processedlibrary, reference, workflowbatch_id,
                  genomics_root, db):
-        logger.debug("creating an instance of SexChecker for processed"
-                     " library '{}', workflow batch ID '{}', with "
+        logger.debug("creating an instance of SexChecker for processed "
+                     "library '{}', workflow batch ID '{}', with "
                      "genomics root '{}'"
                      .format(processedlibrary._id,
                              workflowbatch_id,
@@ -32,7 +32,7 @@ class SexChecker(object):
         self.workflowbatch_id = workflowbatch_id
         self.genomics_root = genomics_root
         self.db = db
-        self._compute_x_y_data()
+        # self._compute_x_y_data()
 
     def _load_x_genes(self, ref='grch38'):
         """
@@ -107,9 +107,9 @@ class SexChecker(object):
             data=self.data,
             processedlibrary=self.processedlibrary,
             db=self.db
-            ).verify()
+        ).verify()
 
-    def _write_data(self, data):
+    def _write_data(self):
         """
         Save the sex validation data to a new file.
         """
@@ -117,7 +117,8 @@ class SexChecker(object):
         project_path = os.path.dirname(os.path.dirname(counts_path))
         output_filename = '{}_{}_sexcheck_validation.csv'.format(
             parsing.get_library_id(counts_path),
-            parsing.get_flowcell_id(counts_path))
+            parsing.get_flowcell_id(counts_path)
+        )
         output_dir = os.path.join(project_path, 'validation')
         output_path = os.path.join(output_dir, output_filename)
         logger.debug("saving sex check file {} to {}"
@@ -126,9 +127,9 @@ class SexChecker(object):
             logger.debug("creating directory {}".format(output_dir))
             os.makedirs(output_dir)
         with open(output_path, 'w') as f:
-            writer = csv.DictWriter(f, fieldnames=data.keys())
+            writer = csv.DictWriter(f, fieldnames=self.data.keys())
             writer.writeheader()
-            writer.writerow(data)
+            writer.writerow(self.data)
         return output_path
 
     def update(self):
@@ -143,9 +144,10 @@ class SexChecker(object):
                           if d['workflowbatch_id']
                           == self.workflowbatch_id][0]
         logger.debug("predicting sex based on Y-to-X gene ratio")
+        self._compute_x_y_data()
         self._predict_sex()
         self._verify_sex()
-        self._write_data(self.data)
+        self._write_data()
 
         processed_data.setdefault('validation', {})['sex_check'] = self.data
         return self.processedlibrary

@@ -91,6 +91,8 @@ class TestFiles:
         [
             (('/foo/bar/baz', 'bar'), '/~/bar/baz'),
             (('/foo/bar/baz', 'bar', '/newroot/'), '/newroot/bar/baz'),
+            (('bar/baz', 'bar', '/newroot/'), '/newroot/bar/baz'),
+            (('/bar/baz', 'bar', '/newroot'), '/newroot/bar/baz'),
         ]
     )
     def test_swap_root(self, test_input, expected_result):
