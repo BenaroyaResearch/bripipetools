@@ -1,5 +1,5 @@
 import logging
-import datetime
+import os
 
 from .. import util
 
@@ -51,3 +51,22 @@ def get_library_id(string):
         empty string ('') if no match found
     """
     return util.matchdefault('lib[1-9]+[0-9]*', string)
+
+
+def parse_flowcell_path(flowcell_path):
+    """
+    Return 'genomics' root and run ID based on directory path.
+    """
+    # TODO: raise some sort of exception, if path doesn't end in valid run id
+    return {'genomics_root': util.matchdefault('.*(?=genomics)', flowcell_path),
+            'run_id': os.path.basename(flowcell_path.rstrip('/'))}
+
+
+def parse_batch_file_path(batchfile_path):
+    """
+    Return 'genomics' root and batch file name based on directory path.
+    """
+    return {'genomics_root': util.matchdefault('.*(?=genomics)',
+                                               batchfile_path),
+            'workflowbatch_filename': os.path.basename(batchfile_path)}
+

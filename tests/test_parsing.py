@@ -12,14 +12,14 @@ class TestGencore:
     Genomics Core samples and data from strings and paths.
     """
     @pytest.mark.parametrize(
-        'test_input, expected_result',
+        'mock_label, expected_result',
         [
             ('P00Processed', 'P00'),
             ('P00-00Processed', 'P00-00'),
             ('P00-00-0000', 'P00-00'),
         ]
     )
-    def test_get_project_label(self, test_input, expected_result):
+    def test_get_project_label(self, mock_label, expected_result):
         # GIVEN any state
 
         # WHEN some string is searched for a Genomics Core project label
@@ -27,29 +27,29 @@ class TestGencore:
         # ID may or may not be included
 
         # THEN the output string should match the expected result
-        assert (parsing.get_project_label(test_input) == expected_result)
+        assert (parsing.get_project_label(mock_label) == expected_result)
 
     def test_parse_project_label(self):
         # GIVEN any state
 
         # WHEN a project label of format 'P<number>-<number>' is parsed
         # into component items
-        project_items = parsing.parse_project_label('P1-2')
+        test_items = parsing.parse_project_label('P1-2')
 
         # THEN the dictionary should have the first number with key 'project_id'
         # and the second number with key 'subproject_id'
-        assert (project_items['project_id'] == 1)
-        assert (project_items['subproject_id'] == 2)
+        assert (test_items['project_id'] == 1)
+        assert (test_items['subproject_id'] == 2)
 
     @pytest.mark.parametrize(
-        'test_input, expected_result',
+        'mock_string, expected_result',
         [
             ('lib1234-1234', 'lib1234'),
             ('Sample_lib1234', 'lib1234'),
             ('Sample1234', ''),
         ]
     )
-    def test_get_library_id(self, test_input, expected_result):
+    def test_get_library_id(self, mock_string, expected_result):
         # GIVEN any state
 
         # WHEN some string is searched for a Genomics Core library ID
@@ -58,10 +58,70 @@ class TestGencore:
         # THEN the output string should match the expected result
         # (i.e., the matched library ID or an empty string, if no
         # match found)
-        assert (parsing.get_library_id(test_input) == expected_result)
+        assert (parsing.get_library_id(mock_string) == expected_result)
 
-    # TODO: _parse_flowcell_path() from `dbify.flowcellrun`
-    # TODO: _parse_batch_file_path() from `dbifiy.workflowbatch`
+    @pytest.mark.parametrize(
+        'mock_path, expected_result',
+        [
+            (
+                    '/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX',
+                    {'genomics_root': '/mnt/',
+                     'run_id': '161231_INSTID_0001_AC00000XX'}
+            ),
+            (
+                    'genomics/Illumina/161231_INSTID_0001_AC00000XX',
+                    {'genomics_root': '',
+                     'run_id': '161231_INSTID_0001_AC00000XX'}
+            ),
+            (
+                    '/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX/',
+                    {'genomics_root': '/mnt/',
+                     'run_id': '161231_INSTID_0001_AC00000XX'}
+            ),
+        ]
+    )
+    def test_parse_flowcell_path(self, mock_path, expected_result):
+        # GIVEN any state
+
+        # WHEN a flowcell path of format...
+        # '<genomics_root>/genomics/Illumina/<run_id>' is parsed
+        # into component items (note: function assumes, but does not
+        # test that path ends in a folder with valid run ID)
+        test_items = parsing.parse_flowcell_path(mock_path)
+
+        # THEN the dictionary include the expected 'genomics_root' and
+        # flowcell 'run_id'
+        assert (test_items == expected_result)
+
+    @pytest.mark.parametrize(
+        'mock_path, expected_result',
+        [
+            (
+                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                     'globus_batch_submission/workflow-batch-filename.txt'),
+                    {'genomics_root': '/mnt/',
+                     'workflowbatch_filename': 'workflow-batch-filename.txt'}
+            ),
+            (
+                    ('genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                     'globus_batch_submission/workflow-batch-filename.txt'),
+                    {'genomics_root': '',
+                     'workflowbatch_filename': 'workflow-batch-filename.txt'}
+            ),
+        ]
+    )
+    def test_parse_batch_file_path(self, mock_path, expected_result):
+        # GIVEN any state
+
+        # WHEN a workflow batch file path of format...
+        # '<genomics_root>/genomics/Illumina/<run_id>/...
+        #  globus_batch_submission/<workflowbatch_filename>' is parsed
+        # into component items
+        test_items = parsing.parse_batch_file_path(mock_path)
+
+        # THEN the dictionary include the expected 'genomics_root' and
+        # 'workflowbatch_filename'
+        assert (test_items == expected_result)
 
 
 class TestIllumina:
@@ -86,33 +146,33 @@ class TestIllumina:
         # GIVEN any state
 
         # WHEN a flowcell run ID is parsed into its component items
-        run_id = '150615_D00565_0087_AC6VG0ANXX'
-        run_items = parsing.parse_flowcell_run_id(run_id)
+        mock_runid = '150615_D00565_0087_AC6VG0ANXX'
+        test_items = parsing.parse_flowcell_run_id(mock_runid)
 
         # THEN the components should be correctly parsed and assigned to
         # appropriate field in the output dictionary
-        assert (run_items['date'] == '2015-06-15')
-        assert (run_items['instrument_id'] == 'D00565')
-        assert (run_items['run_number'] == 87)
-        assert (run_items['flowcell_id'] == 'C6VG0ANXX')
-        assert (run_items['flowcell_position'] == 'A')
+        assert (test_items['date'] == '2015-06-15')
+        assert (test_items['instrument_id'] == 'D00565')
+        assert (test_items['run_number'] == 87)
+        assert (test_items['flowcell_id'] == 'C6VG0ANXX')
+        assert (test_items['flowcell_position'] == 'A')
 
     def test_parse_flowcell_run_id_invalid_date(self):
         # GIVEN any state
 
         # WHEN a flowcell run ID is parsed into its component items,
         # but the run ID does not contain a valid date
-        run_id = 'NOTDATE_D00565_0087_AC6VG0ANXX'
-        run_items = parsing.parse_flowcell_run_id(run_id)
+        mock_runid = 'NOTDATE_D00565_0087_AC6VG0ANXX'
+        test_items = parsing.parse_flowcell_run_id(mock_runid)
 
         # THEN the components should be correctly parsed and assigned to
         # appropriate field in the output dictionary; in this case,
         # the value for date should be 'None'
-        assert (run_items['date'] is None)
-        assert (run_items['instrument_id'] == 'D00565')
-        assert (run_items['run_number'] == 87)
-        assert (run_items['flowcell_id'] == 'C6VG0ANXX')
-        assert (run_items['flowcell_position'] == 'A')
+        assert (test_items['date'] is None)
+        assert (test_items['instrument_id'] == 'D00565')
+        assert (test_items['run_number'] == 87)
+        assert (test_items['flowcell_id'] == 'C6VG0ANXX')
+        assert (test_items['flowcell_position'] == 'A')
 
     def test_parse_flowcell_run_id_invalid_runnum(self):
         # GIVEN any state
@@ -120,39 +180,39 @@ class TestIllumina:
         # WHEN a flowcell run ID is parsed into its component items,
         # but the run ID does not contain a valid run number
         # TODO: use more realistic example
-        run_id = 'NOTDATE_FCIDENTIFIER'
-        run_items = parsing.parse_flowcell_run_id(run_id)
+        mock_runid = 'NOTDATE_FCIDENTIFIER'
+        test_items = parsing.parse_flowcell_run_id(mock_runid)
 
         # THEN the components should be correctly parsed and assigned to
         # appropriate field in the output dictionary; in this case,
         # the value for run_number should be 'None'
-        assert (run_items['date'] is None)
-        assert (run_items['instrument_id'] == 'FCIDENTIFIER')
-        assert (run_items['run_number'] is None)
-        assert (run_items['flowcell_id'] == '')
-        assert (run_items['flowcell_position'] == 'N')
+        assert (test_items['date'] is None)
+        assert (test_items['instrument_id'] == 'FCIDENTIFIER')
+        assert (test_items['run_number'] is None)
+        assert (test_items['flowcell_id'] == '')
+        assert (test_items['flowcell_position'] == 'N')
 
     def test_parse_fastq_filename(self):
         # GIVEN any state
 
         # WHEN a standard Illumina FASTQ filename is parsed into its
         # component items
-        path = ('tests/test-data/genomics/Illumina/'
-                '150615_D00565_0087_AC6VG0ANXX/Unaligned/'
-                'P14-12-23221204/lib7293-25920016/'
-                'MXU01-CO072_S1_L001_R1_001.fastq.gz')
-        fastq_items = parsing.parse_fastq_filename(path)
+        mock_path = ('tests/test-data/genomics/Illumina/'
+                     '150615_D00565_0087_AC6VG0ANXX/Unaligned/'
+                     'P14-12-23221204/lib7293-25920016/'
+                     'MXU01-CO072_S1_L001_R1_001.fastq.gz')
+        test_items = parsing.parse_fastq_filename(mock_path)
 
         # THEN the components should be correctly parsed and assigned to
         # appropriate field in the output dictionary
-        assert (fastq_items['path']
+        assert (test_items['path']
                 == ('/genomics/Illumina/'
                     '150615_D00565_0087_AC6VG0ANXX/Unaligned/'
                     'P14-12-23221204/lib7293-25920016/'
                     'MXU01-CO072_S1_L001_R1_001.fastq.gz'))
-        assert (fastq_items['lane_id'] == 'L001')
-        assert (fastq_items['read_id'] == 'R1')
-        assert (fastq_items['sample_number'] == 1)
+        assert (test_items['lane_id'] == 'L001')
+        assert (test_items['read_id'] == 'R1')
+        assert (test_items['sample_number'] == 1)
 
 
 class TestProcessing:
@@ -165,13 +225,13 @@ class TestProcessing:
         # GIVEN any state
 
         # WHEN parsing batch name from workflow batch file
-        batch_items = parsing.parse_batch_name('160929_P109-1_P14-12_C6VG0ANXX')
+        test_items = parsing.parse_batch_name('160929_P109-1_P14-12_C6VG0ANXX')
 
         # THEN items should be in a dict with fields for date (string),
         # project labels (list of strings), and flowcell ID (string)
-        assert (batch_items['date'] == datetime.datetime(2016, 9, 29, 0, 0))
-        assert (batch_items['projects'] == ['P109-1', 'P14-12'])
-        assert (batch_items['flowcell_id'] == 'C6VG0ANXX')
+        assert (test_items['date'] == datetime.datetime(2016, 9, 29, 0, 0))
+        assert (test_items['projects'] == ['P109-1', 'P14-12'])
+        assert (test_items['flowcell_id'] == 'C6VG0ANXX')
 
     # TODO: _parse_output_filename() from `postprocess.stitching`
 

@@ -2,9 +2,8 @@
 Class for importing data from a processing batch into GenLIMS as new objects.
 """
 import logging
-import os
 
-from .. import util
+from .. import parsing
 from .. import genlims
 from .. import annotation
 
@@ -23,18 +22,11 @@ class WorkflowBatchImporter(object):
         self.path = path
         self.db = db
 
-    def _parse_batch_file_path(self):
-        """
-        Return 'genomics' root and batch file name based on directory path.
-        """
-        return {'genomics_root': util.matchdefault('.*(?=genomics)', self.path),
-                'workflowbatch_filename': os.path.basename(self.path)}
-
     def _collect_workflowbatch(self):
         """
         Collect WorkflowBatch object for flowcell run.
         """
-        path_items = self._parse_batch_file_path()
+        path_items = parsing.parse_batch_file_path(self.path)
         logger.info("collecting info for workflow batch file {}"
                     .format(path_items['workflowbatch_filename']))
 
@@ -48,7 +40,7 @@ class WorkflowBatchImporter(object):
         """
         Collect list of ProcessedLibrary objects for flowcell run.
         """
-        path_items = self._parse_batch_file_path()
+        path_items = parsing.parse_batch_file_path(self.path)
         logger.info("collecting sequenced libraries for workflow batch file {}"
                     .format(path_items['workflowbatch_filename']))
 
