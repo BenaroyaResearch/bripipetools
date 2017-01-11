@@ -60,6 +60,9 @@ class TestGencore:
         # match found)
         assert (parsing.get_library_id(test_input) == expected_result)
 
+    # TODO: _parse_flowcell_path() from `dbify.flowcellrun`
+    # TODO: _parse_batch_file_path() from `dbifiy.workflowbatch`
+
 
 class TestIllumina:
     """
@@ -170,7 +173,8 @@ class TestProcessing:
         assert (batch_items['projects'] == ['P109-1', 'P14-12'])
         assert (batch_items['flowcell_id'] == 'C6VG0ANXX')
 
-#
+    # TODO: _parse_output_filename() from `postprocess.stitching`
+
 #     def test_parse_output_name_onepart_source(self, annotatordata):
 #         # (GIVEN)
 #         annotator, _, _ = annotatordata
