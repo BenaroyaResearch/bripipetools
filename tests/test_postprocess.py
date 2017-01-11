@@ -47,10 +47,10 @@ class TestOutputStitcher:
         'test_input, expected_result',
         [
             (('metrics', 'htseq'), getattr(io, 'HtseqMetricsFile')),
-            (('metrics', 'picard_rnaseq'), getattr(io, 'PicardMetricsFile')),
-            (('metrics', 'picard_markdups'), getattr(io, 'PicardMetricsFile')),
-            (('metrics', 'picard_align'), getattr(io, 'PicardMetricsFile')),
-            (('metrics', 'tophat_stats'), getattr(io, 'TophatStatsFile')),
+            (('metrics', 'picard-rnaseq'), getattr(io, 'PicardMetricsFile')),
+            (('metrics', 'picard-markdups'), getattr(io, 'PicardMetricsFile')),
+            (('metrics', 'picard-align'), getattr(io, 'PicardMetricsFile')),
+            (('metrics', 'tophat-stats'), getattr(io, 'TophatStatsFile')),
             (('qc', 'fastqc'), getattr(io, 'FastQCFile')),
             (('counts', 'htseq'), getattr(io, 'HtseqCountsFile')),
             (('validation', 'sexcheck'), getattr(io, 'SexcheckFile'))
@@ -84,16 +84,16 @@ class TestOutputStitcher:
         mock_filedata = [
             {'mock_filename': 'lib1111_C00000XX_htseq_metrics.txt',
              'mock_contents': ['__field_1\tsource1_value1\n',
-                              '__field_2\tsource1_value2\n']},
+                               '__field_2\tsource1_value2\n']},
             {'mock_filename': 'lib1111_C00000XX_tophat_stats_metrics.txt',
              'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
-                              'source2_value2\treads aligned in sam file\n']},
+                               'source2_value2\treads aligned in sam file\n']},
             {'mock_filename': 'lib2222_C00000XX_htseq_metrics.txt',
              'mock_contents': ['__field_1\tsource1_value1\n',
-                              '__field_2\tsource1_value2\n']},
+                               '__field_2\tsource1_value2\n']},
             {'mock_filename': 'lib2222_C00000XX_tophat_stats_metrics.txt',
              'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
-                              'source2_value2\treads aligned in sam file\n']},
+                               'source2_value2\treads aligned in sam file\n']},
         ]
         for m in mock_filedata:
             mock_file = mock_path.ensure(m['mock_filename'])
@@ -116,7 +116,7 @@ class TestOutputStitcher:
                     'lib1111_C00000XX': [
                         {'htseq': {'field_1': 'source1_value1',
                                    'field_2': 'source1_value2'}},
-                        {'tophat_stats': {'fastq_total_reads':
+                        {'tophat-stats': {'fastq_total_reads':
                                               'source2_value1',
                                           'reads_aligned_sam':
                                               'source2_value2'}},
@@ -124,7 +124,7 @@ class TestOutputStitcher:
                     'lib2222_C00000XX': [
                         {'htseq': {'field_1': 'source1_value1',
                                    'field_2': 'source1_value2'}},
-                        {'tophat_stats': {'fastq_total_reads':
+                        {'tophat-stats': {'fastq_total_reads':
                                               'source2_value1',
                                           'reads_aligned_sam':
                                               'source2_value2'}},
