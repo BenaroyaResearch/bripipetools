@@ -3,7 +3,6 @@ Classes for reading, parsing, and writing workflow batch submit files for
 Globus Galaxy.
 """
 import logging
-import re
 
 from collections import OrderedDict
 

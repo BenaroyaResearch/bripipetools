@@ -3,8 +3,6 @@ import datetime
 import os
 import re
 
-from .. import util
-
 logger = logging.getLogger(__name__)
 
 
