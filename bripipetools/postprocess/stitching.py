@@ -52,38 +52,20 @@ class OutputStitcher(object):
                 and re.search(output_filetypes[output_type],
                               os.path.splitext(f)[-1])]
 
-    def _parse_output_filename(self, output_filename):
-        """
-        Parse output name indicated by parameter tag in output file
-        return individual components indicating processed library ID,
-        output source, and type.
-        """
-        output_filename = os.path.basename(output_filename)
-        output_name = os.path.splitext(output_filename)[0]
-        name_parts = output_name.split('_')
-        output_type = name_parts.pop(-1)
-        source = name_parts.pop(-1)
-        if len(name_parts) <= 2:
-            proclib_id = '_'.join(name_parts)
-        else:
-            source = '_'.join([name_parts.pop(-1), source])
-            proclib_id = '_'.join(name_parts)
-
-        return {'proclib_id': proclib_id, 'type': output_type,
-                'source': source}
-
     def _get_parser(self, output_type, output_source):
         """
         Return the appropriate parser for the current output file.
         """
-        parsers = {'metrics': {'htseq': getattr(io, 'HtseqMetricsFile'),
-                               'picard_rnaseq': getattr(io, 'PicardMetricsFile'),
-                               'picard_markdups': getattr(io, 'PicardMetricsFile'),
-                               'picard_align': getattr(io, 'PicardMetricsFile'),
-                               'tophat_stats': getattr(io, 'TophatStatsFile')},
-                   'qc': {'fastqc': getattr(io, 'FastQCFile')},
-                   'counts': {'htseq': getattr(io, 'HtseqCountsFile')},
-                   'validation': {'sexcheck': getattr(io, 'SexcheckFile')}}
+        parsers = {
+            'metrics': {'htseq': getattr(io, 'HtseqMetricsFile'),
+                        'picard-rnaseq': getattr(io, 'PicardMetricsFile'),
+                        'picard-markdups': getattr(io, 'PicardMetricsFile'),
+                        'picard-align': getattr(io, 'PicardMetricsFile'),
+                        'tophat-stats': getattr(io, 'TophatStatsFile')},
+            'qc': {'fastqc': getattr(io, 'FastQCFile')},
+            'counts': {'htseq': getattr(io, 'HtseqCountsFile')},
+            'validation': {'sexcheck': getattr(io, 'SexcheckFile')}
+        }
         logger.debug("matched parser {} for output type {} and source {}"
                      .format(parsers[output_type][output_source],
                              output_type, output_source))
@@ -98,8 +80,11 @@ class OutputStitcher(object):
 
         for o in outputs:
             logger.debug("parsing output file {}".format(o))
-            out_items = self._parse_output_filename(o)
-            out_source, out_type, proclib_id = out_items.values()
+            out_items = parsing.parse_output_filename(o)
+            proclib_id = out_items['sample_id']
+            out_type = out_items['type']
+            out_source = out_items['source']
+
             logger.debug("storing data from {} in {} {}".format(
                 out_source, proclib_id, out_type))
             out_parser = self._get_parser(out_type, out_source)(path=o)

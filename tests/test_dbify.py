@@ -26,28 +26,6 @@ class TestFlowcellRunImporter:
     Tests methods for the `FlowcellRunImporter` class in the
     `bripipetools.dbify.flowcellrun` module.
     """
-    def test_parse_flowcell_path(self, mock_db):
-        # GIVEN a path to a flowcell run folder and a connection to a
-        # database in which a document corresponding to the flowcell run
-        # may or may not exist
-        mock_root = '/mnt/'
-        mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = '{}genomics/Illumina/{}'.format(mock_root, mock_id)
-
-        # AND an importer object is created for the path
-        importer = dbify.FlowcellRunImporter(
-            path=mock_path,
-            db=mock_db
-        )
-
-        # WHEN the path argument is parsed to find the 'genomics' root
-        # and flowcell run ID
-        test_items = importer._parse_flowcell_path()
-
-        # THEN the 'genomics' root and run ID should match the mock server
-        assert (test_items['genomics_root'] == mock_root)
-        assert (test_items['run_id'] == mock_id)
-
     def test_collect_flowcellrun(self, mock_db):
         # GIVEN a path to a flowcell run folder and a connection to a
         # database in which a document corresponding to the flowcell run
@@ -209,30 +187,6 @@ class TestWorkflowBatchImporter:
     Tests methods for the `WorkflowBatchImporter` class in the
     `bripipetools.dbify.workflowbatch` module.
     """
-    def test_parse_batch_file_path(self, mock_db, tmpdir):
-        # GIVEN a path to a workflow batch file and a connection to a
-        # database in which a document corresponding to the workflow batch
-        # may or may not exist
-        mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                     .mkdir(mock_id).mkdir('globus_batch_submission'))
-        mock_filename = '161231_P00-00_C00000XX_workflow-name.txt'
-        mock_path = mock_batchfile(mock_filename, mock_path)
-
-        # AND an importer object is created for the path
-        importer = dbify.WorkflowBatchImporter(
-            path=mock_path,
-            db=mock_db
-        )
-
-        # WHEN the path argument is parsed to find the 'genomics' root
-        # and workflow batch file name
-        test_items = importer._parse_batch_file_path()
-
-        # THEN the 'genomics' root and run ID should match the mock server
-        assert (test_items['genomics_root'].rstrip('/') == str(tmpdir))
-        assert (test_items['workflowbatch_filename'] == mock_filename)
-
     def test_collect_workflowbatch(self, mock_db, tmpdir):
         # GIVEN a path to a workflow batch file and a connection to a
         # database in which a document corresponding to the workflow batch

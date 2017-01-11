@@ -2,9 +2,8 @@
 Class for importing data from a sequencing run into GenLIMS as new objects.
 """
 import logging
-import os
 
-from .. import util
+from .. import parsing
 from .. import genlims
 from .. import annotation
 
@@ -23,18 +22,11 @@ class FlowcellRunImporter(object):
         self.path = path
         self.db = db
 
-    def _parse_flowcell_path(self):
-        """
-        Return 'genomics' root and run ID based on directory path.
-        """
-        return {'genomics_root': util.matchdefault('.*(?=genomics)', self.path),
-                'run_id': os.path.basename(self.path.rstrip('/'))}
-
     def _collect_flowcellrun(self):
         """
         Collect FlowcellRun object for flowcell run.
         """
-        path_items = self._parse_flowcell_path()
+        path_items = parsing.parse_flowcell_path(self.path)
         logger.info("collecting info for flowcell run {}"
                     .format(path_items['run_id']))
 
@@ -48,7 +40,7 @@ class FlowcellRunImporter(object):
         """
         Collect list of SequencedLibrary objects for flowcell run.
         """
-        path_items = self._parse_flowcell_path()
+        path_items = parsing.parse_flowcell_path(self.path)
         logger.info("collecting sequenced libraries for flowcell run {}"
                     .format(path_items['run_id']))
 
