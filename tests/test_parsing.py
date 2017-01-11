@@ -5,10 +5,11 @@ import pytest
 from bripipetools import parsing
 
 
-class TestIllumina:
+class TestGencore:
     """
-    Tests methods for extracting identifiers and other information
-    related to Illumina sequencing technology from strings and paths.
+    Tests methods in the `bripipetools.parsing.gencore` module for
+    extracting identifiers and other information related to BRI
+    Genomics Core samples and data from strings and paths.
     """
     @pytest.mark.parametrize(
         'test_input, expected_result',
@@ -59,6 +60,13 @@ class TestIllumina:
         # match found)
         assert (parsing.get_library_id(test_input) == expected_result)
 
+
+class TestIllumina:
+    """
+    Tests methods in the `bripipetools.parsing.illumina` module for
+    extracting identifiers and other information related to Illumina
+    sequencing technology from strings and paths.
+    """
     def test_get_flowcell_id(self):
         # GIVEN any state
 
@@ -143,6 +151,13 @@ class TestIllumina:
         assert (fastq_items['read_id'] == 'R1')
         assert (fastq_items['sample_number'] == 1)
 
+
+class TestProcessing:
+    """
+    Tests methods in the `bripipetools.parsing.processing` module for
+    extracting identifiers and other information related to processing
+    workflows, batches, steps, and parameters from strings and paths.
+    """
     def test_parse_batch_name(self):
         # GIVEN any state
 
@@ -151,9 +166,9 @@ class TestIllumina:
 
         # THEN items should be in a dict with fields for date (string),
         # project labels (list of strings), and flowcell ID (string)
-        assert(batch_items['date'] == datetime.datetime(2016, 9, 29, 0, 0))
-        assert(batch_items['projects'] == ['P109-1', 'P14-12'])
-        assert(batch_items['flowcell_id'] == 'C6VG0ANXX')
+        assert (batch_items['date'] == datetime.datetime(2016, 9, 29, 0, 0))
+        assert (batch_items['projects'] == ['P109-1', 'P14-12'])
+        assert (batch_items['flowcell_id'] == 'C6VG0ANXX')
 
 #
 #     def test_parse_output_name_onepart_source(self, annotatordata):
