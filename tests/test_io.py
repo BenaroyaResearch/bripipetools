@@ -830,34 +830,6 @@ class TestWorkflowBatchFile:
         # THEN should be expected result
         assert (batch_name == 'DATE_P00-00_FLOWCELL')
 
-    @pytest.mark.parametrize(
-        'test_input, expected_result',
-        [
-            ('SampleName', {'tag': 'SampleName',
-                            'type': 'sample',
-                            'name': 'SampleName'}),
-            ('annotation_tag##_::_::param_name', {'tag': 'annotation_tag',
-                                                  'type': 'annotation',
-                                                  'name': 'param_name'}),
-            ('in_tag##_::_::_::param_name', {'tag': 'in_tag',
-                                             'type': 'input',
-                                             'name': 'param_name'}),
-            ('out_tag##_::_::_::param_name', {'tag': 'out_tag',
-                                              'type': 'output',
-                                              'name': 'param_name'}),
-        ]
-    )
-    def test_parse_param(self, test_input, expected_result):
-        # GIVEN an io class object for an arbitrary file
-        testfile = io.WorkflowBatchFile(path='')
-
-        # WHEN a workflow parameter formatted 'tag##unused::details::param_name'
-        # is parsed to collect its component parts and classified as 'sample',
-        # 'input', 'output', or 'annotation'
-
-        # THEN parsed dict should match expected result
-        assert (testfile._parse_param(test_input) == expected_result)
-
     def test_get_params(self):
         # GIVEN some file content representing the typical format of a
         # a sample parameter table, parameters names are listed in the

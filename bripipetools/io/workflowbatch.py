@@ -7,6 +7,8 @@ import re
 
 from collections import OrderedDict
 
+from .. import parsing
+
 logger = logging.getLogger(__name__)
 
 
@@ -84,24 +86,6 @@ class WorkflowBatchFile(object):
                            [self._locate_batch_name_line()])
         return batch_name_line.strip().split('\t')[-1]
 
-    def _parse_param(self, param):
-        """
-        Break parameter into components.
-        """
-        param_tag = param.split('##')[0]
-        if re.search('annotation', param_tag):
-            param_type = 'annotation'
-        elif re.search('in', param_tag):
-            param_type = 'input'
-        elif re.search('out', param_tag):
-            param_type = 'output'
-        else:
-            param_type = 'sample'
-
-        return {'tag': param_tag,
-                'type': param_type,
-                'name': param.split('::')[-1]}
-
     def get_params(self):
         """
         Return the parameters defined for the current workflow.
@@ -111,7 +95,7 @@ class WorkflowBatchFile(object):
             for each parameter.
         """
         param_line = self.data['raw'][self._locate_param_line()]
-        return OrderedDict((idx, self._parse_param(p))
+        return OrderedDict((idx, parsing.parse_workflow_param(p))
                            for idx, p
                            in enumerate(param_line.strip().split('\t')))
 

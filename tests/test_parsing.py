@@ -235,6 +235,34 @@ class TestProcessing:
         assert (test_items['flowcell_id'] == 'C6VG0ANXX')
 
     @pytest.mark.parametrize(
+        'mock_param, expected_result',
+        [
+            ('SampleName', {'tag': 'SampleName',
+                            'type': 'sample',
+                            'name': 'SampleName'}),
+            ('annotation_tag##_::_::param_name', {'tag': 'annotation_tag',
+                                                  'type': 'annotation',
+                                                  'name': 'param_name'}),
+            ('in_tag##_::_::_::param_name', {'tag': 'in_tag',
+                                             'type': 'input',
+                                             'name': 'param_name'}),
+            ('out_tag##_::_::_::param_name', {'tag': 'out_tag',
+                                              'type': 'output',
+                                              'name': 'param_name'}),
+        ]
+    )
+    def test_parse_workflow_param(self, mock_param, expected_result):
+        # GIVEN any state
+
+        # WHEN a workflow parameter formatted 'tag##unused::details::param_name'
+        # is parsed to collect its component parts and classified as 'sample',
+        # 'input', 'output', or 'annotation'
+        test_items = parsing.parse_workflow_param(mock_param)
+
+        # THEN parsed dict should match expected result
+        assert (test_items == expected_result)
+
+    @pytest.mark.parametrize(
         'mock_path, expected_result',
         [
             (
@@ -296,20 +324,3 @@ class TestProcessing:
         # THEN output items should be a dictionary including fields for
         # name, type, and source
         assert (test_items == expected_result)
-#
-#     def test_parse_output_name_twopart_source(self, annotatordata):
-#         # (GIVEN)
-#         annotator, _, _ = annotatordata
-#
-#         logger.info("test `_parse_output_name()`, two-part source")
-#
-#         # WHEN parsing output name from workflow batch parameter, and the
-#         # source name has two parts (i.e., 'picard_rnaseq')
-#         output_items = annotator._parse_output_name(
-#             'picard_rnaseq_metrics_html_out')
-#
-#         # THEN output items should be a dictionary including fields for
-#         # name, type, and source
-#         assert(output_items['name'] == 'picard_rnaseq_metrics_html')
-#         assert(output_items['type'] == 'metrics')
-#         assert(output_items['source'] == 'picard_rnaseq')

@@ -21,23 +21,26 @@ def parse_batch_name(batch_name):
 
     return {'date': date, 'projects': name_parts, 'flowcell_id': fc_id}
 
-# def _parse_param(self, param):
-#     """
-#     Break parameter into components.
-#     """
-#     param_tag = param.split('##')[0]
-#     if re.search('annotation', param_tag):
-#         param_type = 'annotation'
-#     elif re.search('in', param_tag):
-#         param_type = 'input'
-#     elif re.search('out', param_tag):
-#         param_type = 'output'
-#     else:
-#         param_type = 'sample'
-#
-#     return {'tag': param_tag,
-#             'type': param_type,
-#             'name': param.split('::')[-1]}
+
+def parse_workflow_param(param):
+    """
+    Parse workflow parameter into components indicating tag,
+    type, and name.
+    """
+    param_tag = param.split('##')[0]
+    if re.search('annotation', param_tag):
+        param_type = 'annotation'
+    elif re.search('in', param_tag):
+        param_type = 'input'
+    elif re.search('out', param_tag):
+        param_type = 'output'
+    else:
+        param_type = 'sample'
+
+    return {'tag': param_tag,
+            'type': param_type,
+            'name': param.split('::')[-1]}
+
 
 def parse_output_filename(output_path):
     """
