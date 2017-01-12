@@ -61,6 +61,28 @@ class TestGencore:
         assert (parsing.get_library_id(mock_string) == expected_result)
 
     @pytest.mark.parametrize(
+        'mock_string, expected_result',
+        [
+            ('lib1234-1234', 'lib1234'),
+            ('Sample_lib1234', 'lib1234'),
+            ('Sample1234', ''),
+            ('Sample_1234', 'Sample_1234')
+        ]
+    )
+    def test_get_sample_id(self, mock_string, expected_result):
+        # GIVEN any state
+
+        # WHEN some string is searched for a sample identifier
+        # for a sequenced library (nominally 'lib0000', but could
+        # alternatively be 'Sample_lib0000', or 'Sample_name1' in
+        # the case of custom jobs for external data)
+
+        # THEN the output string should match the expected result
+        # (i.e., the matched sample ID or an empty string, if no
+        # match found)
+        assert (parsing.get_sample_id(mock_string) == expected_result)
+
+    @pytest.mark.parametrize(
         'mock_path, expected_result',
         [
             (
