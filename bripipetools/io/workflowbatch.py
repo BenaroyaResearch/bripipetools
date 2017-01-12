@@ -133,15 +133,16 @@ class WorkflowBatchFile(object):
                                     for l in sample_lines]
         return self.data
 
-    def write(self, path):
+    def write(self, path, sample_lines=None):
         """
         Write workflow batch data to file.
         """
         self.parse()
 
         template_lines = self.data['raw'][0:self._locate_param_line() + 1]
-        sample_lines = ['{}\n'.format('\t'.join([p['value'] for p in s]))
-                        for s in self.data['samples']]
+        if sample_lines is None:
+            sample_lines = ['{}\n'.format('\t'.join([p['value'] for p in s]))
+                            for s in self.data['samples']]
         workflow_lines = template_lines + sample_lines
 
         with open(path, 'w+') as f:
