@@ -23,7 +23,114 @@ def mock_db():
                   "from mock Mongo database"))
 
 
-class TestSubmissionBuilder:
+@pytest.fixture(scope='function')
+def mock_template(filename, tmpdir):
+    # GIVEN a simplified workflow batch content with protypical contents
+    mock_params = ['SampleName',
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_endpoint'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path4'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path5'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path6'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path7'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path1'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path2'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path3'),
+                   ('fastq_in##Param::2942::'
+                    'globus_get_data_flowcell_text::from_path8'),
+                   'annotation_gtf##SourceType::SourceName::gtfFile'
+                   'annotation_adapters##SourceType::SourceName::adapterFile',
+                   ('annotation_ribosomal_intervals##SourceType::'
+                    'SourceName::ribointsFile'),
+                   'annotation_refflat##SourceType::SourceName::refflatFile'
+                   'fastq_out##Param::2944::globus_send_data::to_endpoint',
+                   'fastq_out##Param::2944::globus_send_data::to_path', ]
+
+    mock_contents = ['###METADATA\n',
+                     '#############\n',
+                     'Workflow Name\toptimized_workflow_1\n',
+                     'Workflow id\tba1f5a6a3d5eec2c\n',
+                     'Project Name\t<Your_project_name>\n',
+                     '###TABLE DATA\n',
+                     '#############\n',
+                     '{}\n'.format('\t'.join(mock_params))]
+    mock_file = tmpdir.join(filename)
+    mock_file.write(''.join(mock_contents))
+    return str(mock_file)
+
+
+class TestBatchComposer:
+    """
+
+    """
+    def test_get_lane_order(self, tmpdir):
+        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+        mock_paths = ['lib1111-11111111', 'lib2222-22222222']
+        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_targetdir = tmpdir
+
+        composer = submission.BatchComposer(
+            sample_paths=mock_paths,
+            workflow_template=str(mock_file),
+            endpoint=mock_endpoint,
+            target_dir=mock_targetdir
+        )
+
+        assert (composer._get_lane_order()
+                == ['4', '5', '6', '7', '1', '2', '3', '8'])
+
+    def test_get_lane_fastq_when_lane_exists(self, tmpdir):
+        mock_path = tmpdir.mkdir('lib1111-11111111')
+        mock_lane = '2'
+        mock_fastqpath = mock_path.ensure(
+            'sample-name_S001_L00{}_R1_001.fastq.gz'.format(mock_lane)
+        )
+
+        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        composer = submission.BatchComposer(
+            sample_paths=[],
+            workflow_template=str(mock_file),
+            endpoint='',
+            target_dir=''
+        )
+
+        test_fastqpath = composer._get_lane_fastq(str(mock_path), mock_lane)
+
+        assert (test_fastqpath == mock_fastqpath)
+
+    def test_get_lane_fastq_when_lane_missing(self, tmpdir):
+        mock_path = tmpdir.mkdir('lib1111-11111111')
+        mock_lane = '2'
+        mock_path.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+        mock_fastqpath = mock_path.join('empty_L00{}.fastq.gz'
+                                        .format(mock_lane))
+
+        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        composer = submission.BatchComposer(
+            sample_paths=[],
+            workflow_template=str(mock_file),
+            endpoint='',
+            target_dir=''
+        )
+
+        test_fastqpath = composer._get_lane_fastq(str(mock_path), mock_lane)
+
+        assert (test_fastqpath == mock_fastqpath)
+
+
+class TestFlowcellSubmissionBuilder:
     """
 
     """
@@ -32,7 +139,7 @@ class TestSubmissionBuilder:
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_runid)
         mock_endpoint = 'jeddy#srvgridftp01'
 
-        builder = submission.SubmissionBuilder(
+        builder = submission.FlowcellSubmissionBuilder(
             path=mock_path,
             endpoint=mock_endpoint,
             db=mock_db
@@ -53,7 +160,7 @@ class TestSubmissionBuilder:
                              for w in mock_workflows]
         mock_workflowopts.sort()
 
-        builder = submission.SubmissionBuilder(
+        builder = submission.FlowcellSubmissionBuilder(
             path=mock_path,
             endpoint=mock_endpoint,
             db=mock_db,
@@ -77,7 +184,7 @@ class TestSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
-        builder = submission.SubmissionBuilder(
+        builder = submission.FlowcellSubmissionBuilder(
             path=mock_path,
             endpoint=mock_endpoint,
             db=mock_db,
@@ -101,7 +208,7 @@ class TestSubmissionBuilder:
         mock_unaligndir = mock_path.mkdir('Unaligned')
         mock_paths = [mock_unaligndir.mkdir(p) for p in mock_projects]
 
-        builder = submission.SubmissionBuilder(
+        builder = submission.FlowcellSubmissionBuilder(
             path=str(mock_path),
             endpoint=mock_endpoint,
             db=mock_db
