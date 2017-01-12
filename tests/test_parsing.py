@@ -288,6 +288,39 @@ class TestProcessing:
         'mock_path, expected_result',
         [
             (
+                    'tophat_alignments_bam_out',
+                    {'type': 'alignments',
+                     'source': 'tophat',
+                     'extension': 'bam'}
+            ),
+            (
+                    'picard_markdups_metrics_html_out',
+                    {'type': 'metrics',
+                     'source': 'picard-markdups',
+                     'extension': 'html'}
+            ),
+            (
+                    'picard-markdups_metrics_html_out',
+                    {'type': 'metrics',
+                     'source': 'picard-markdups',
+                     'extension': 'html'}
+            ),
+        ]
+    )
+    def test_parse_output_name(self, mock_path, expected_result):
+
+        # WHEN parsing output name from workflow batch parameter, and the
+        # source name has one parts (i.e., 'tophat')
+        test_items = parsing.parse_output_name(mock_path)
+
+        # THEN output items should be a dictionary including fields for
+        # name, type, and source
+        assert (test_items == expected_result)
+
+    @pytest.mark.parametrize(
+        'mock_path, expected_result',
+        [
+            (
                     ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/alignments/'
                      'lib1111_C00000XX_tophat_alignments.bam'),
