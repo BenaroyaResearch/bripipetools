@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 
 import mock
@@ -49,9 +50,11 @@ def mock_template(filename, tmpdir):
                    'annotation_adapters##SourceType::SourceName::adapterFile',
                    ('annotation_ribosomal_intervals##SourceType::'
                     'SourceName::ribointsFile'),
-                   'annotation_refflat##SourceType::SourceName::refflatFile'
-                   'fastq_out##Param::2944::globus_send_data::to_endpoint',
-                   'fastq_out##Param::2944::globus_send_data::to_path', ]
+                   'annotation_refflat##SourceType::SourceName::refflatFile',
+                   ('tophat_alignments_bam_out##Param::2946::'
+                    'globus_send_data::to_endpoint'),
+                   ('tophat_alignments_bam_out##Param::2946::'
+                    'globus_send_data::to_path')]
 
     mock_contents = ['###METADATA\n',
                      '#############\n',
@@ -129,6 +132,80 @@ class TestBatchComposer:
 
         assert (test_fastqpath == mock_fastqpath)
 
+    def test_build_output_path(self, tmpdir):
+        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        composer = submission.BatchComposer(
+            sample_paths=[],
+            workflow_template=str(mock_file),
+            endpoint='',
+            target_dir='/Volumes/genomics/'
+        )
+
+        mock_sample = 'lib1111_C00000XX'
+        mock_param = {'tag': 'tophat_alignments_bam_out',
+                      'type': 'output',
+                      'name': 'to_path'}
+
+        test_path = composer._build_output_path(mock_sample, mock_param)
+
+        mock_path = os.path.join('/mnt/genomics/alignments',
+                                 'lib1111_C00000XX_tophat_alignments.bam')
+        assert (test_path == mock_path)
+
+    def test_build_sample_parameters(self, tmpdir):
+        mock_runid = '161231_INSTID_0001_AC00000XX'
+        mock_path = (tmpdir.mkdir('genomics').mkdir(mock_runid)
+                     .mkdir('lib1111-11111111'))
+        mock_fastqpath = mock_path.ensure(
+            'sample-name_S001_L001_R1_001.fastq.gz'
+        )
+        mock_fastqpath = re.sub(str(tmpdir), '/mnt', str(mock_fastqpath))
+        mock_emptypaths = {
+            lane: re.sub(
+                str(tmpdir), '/mnt', str(mock_path.join(
+                    'empty_L00{}.fastq.gz'.format(lane))
+                )
+            )
+            for lane in range(2, 9)
+            }
+
+
+        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_projectdir = 'Project_MockProcessed'
+        mock_targetdir = (tmpdir.join('genomics').join(mock_runid)
+                          .mkdir(mock_projectdir))
+        logger.debug("TARGETDIR: {}".format(str(mock_path)))
+
+        composer = submission.BatchComposer(
+            sample_paths=[str(mock_path)],
+            workflow_template=str(mock_file),
+            endpoint=mock_endpoint,
+            target_dir=str(mock_targetdir)
+        )
+
+        logger.debug("WORKFLOW PARAMS: {}".format(composer.workflow_data['parameters']))
+        test_params = composer._build_sample_parameters(str(mock_path))
+
+        logger.debug("SAMPLE PARAMS: {}".format(test_params))
+        mock_samplename = 'lib1111_C00000XX'
+        mock_outpath = os.path.join(
+            '/mnt/genomics/', mock_runid, mock_projectdir,
+            'alignments', 'lib1111_C00000XX_tophat_alignments.bam'
+        )
+        mock_params = [mock_samplename,
+                       mock_endpoint, mock_emptypaths[4], mock_emptypaths[5],
+                       mock_emptypaths[6], mock_emptypaths[7],
+                       mock_fastqpath, mock_emptypaths[2], mock_emptypaths[3],
+                       mock_emptypaths[8],
+                       mock_endpoint, mock_outpath]
+        assert (test_params == mock_params)
+
+
 
 class TestFlowcellSubmissionBuilder:
     """
@@ -199,12 +276,12 @@ class TestFlowcellSubmissionBuilder:
         # GIVEN a flowcell run ID and an arbitrary root directory,
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
-        mock_id = '161231_INSTID_0001_AC00000XX'
+        mock_runid = '161231_INSTID_0001_AC00000XX'
         mock_endpoint = 'jeddy#srvgridftp01'
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
-        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_runid)
         mock_unaligndir = mock_path.mkdir('Unaligned')
         mock_paths = [mock_unaligndir.mkdir(p) for p in mock_projects]
 
