@@ -42,7 +42,7 @@ class FlowcellRunAnnotator(object):
             logger.debug("creating new FlowcellRun object", exc_info=True)
             return docs.FlowcellRun(_id=self.run_id)
 
-    def _get_flowcell_path(self):
+    def get_flowcell_path(self):
         """
         Find path to flowcell folder on the server.
         """
@@ -57,13 +57,13 @@ class FlowcellRunAnnotator(object):
                 self.genomics_path))
             raise
 
-    def _get_unaligned_path(self):
+    def get_unaligned_path(self):
         """
         Find path to unaligned data in flowcell folder.
         """
         logger.info("searching for 'Unaligned' folder")
         try:
-            unaligned_path = os.path.join(self._get_flowcell_path(),
+            unaligned_path = os.path.join(self.get_flowcell_path(),
                                           'Unaligned')
             if not os.path.exists(unaligned_path):
                 raise OSError
@@ -92,7 +92,7 @@ class FlowcellRunAnnotator(object):
         """
         Collect list of projects for flowcell run.
         """
-        unaligned_path = self._get_unaligned_path()
+        unaligned_path = self.get_unaligned_path()
         logger.info("collecting list of projects")
         return [p for p in os.listdir(unaligned_path)
                 if len(parsing.get_project_label(p))]
@@ -101,7 +101,7 @@ class FlowcellRunAnnotator(object):
         """
         Collect list of libraries for flowcell run from one or all projects.
         """
-        unaligned_path = self._get_unaligned_path()
+        unaligned_path = self.get_unaligned_path()
         projects = self.get_projects()
         if project is not None:
             logger.debug("subsetting projects")
@@ -117,7 +117,7 @@ class FlowcellRunAnnotator(object):
         """
         Collect sequenced library objects for flowcell run.
         """
-        unaligned_path = self._get_unaligned_path()
+        unaligned_path = self.get_unaligned_path()
         projects = self.get_projects()
         if project is not None:
             logger.debug("subsetting projects")
