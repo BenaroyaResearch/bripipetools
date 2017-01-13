@@ -46,7 +46,7 @@ def mock_template(filename, tmpdir):
                     'globus_get_data_flowcell_text::from_path3'),
                    ('fastq_in##Param::2942::'
                     'globus_get_data_flowcell_text::from_path8'),
-                   'annotation_gtf##SourceType::SourceName::gtfFile'
+                   'annotation_gtf##SourceType::SourceName::gtfFile',
                    'annotation_adapters##SourceType::SourceName::adapterFile',
                    ('annotation_ribosomal_intervals##SourceType::'
                     'SourceName::ribointsFile'),
@@ -132,7 +132,7 @@ class TestBatchComposer:
 
         assert (test_fastqpath == mock_fastqpath)
 
-    def test_build_output_path(self, tmpdir):
+    def test_build_reference_path(self, tmpdir):
         mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
         mock_file = mock_template(mock_filename, tmpdir)
 
@@ -141,6 +141,49 @@ class TestBatchComposer:
             workflow_template=str(mock_file),
             endpoint='',
             target_dir='/Volumes/genomics/'
+        )
+
+        mock_param = {'tag': 'annotation_gtf',
+                      'type': 'annotation',
+                      'name': 'gtfFile'}
+
+        logger.debug("WORKFLOW PARAMS: {}".format(composer.workflow_data['parameters']))
+        test_path = composer._build_reference_path(mock_param)
+
+        mock_path = 'library::annotation::GRCh38/Homo_sapiens.GRCh38.77.gtf'
+        assert (test_path == mock_path)
+
+    def test_prep_output_dir(self, tmpdir):
+        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        composer = submission.BatchComposer(
+            sample_paths=[],
+            workflow_template=str(mock_file),
+            endpoint='',
+            target_dir=str(tmpdir)
+        )
+
+        mock_outtype = 'counts'
+        mock_path = tmpdir.join(mock_outtype)
+
+        test_path = composer._prep_output_dir(mock_outtype)
+
+        assert (test_path == mock_path)
+        assert (os.path.exists(test_path))
+        assert (os.path.isdir(test_path))
+
+    def test_build_output_path(self, tmpdir):
+        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_targetdir = tmpdir.mkdir('genomics')
+
+        composer = submission.BatchComposer(
+            sample_paths=[],
+            workflow_template=str(mock_file),
+            endpoint='',
+            target_dir=str(mock_targetdir)
         )
 
         mock_sample = 'lib1111_C00000XX'
@@ -171,15 +214,11 @@ class TestBatchComposer:
             for lane in range(2, 9)
             }
 
-
         mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
         mock_file = mock_template(mock_filename, tmpdir)
 
         mock_endpoint = 'jeddy#srvgridftp01'
-        mock_projectdir = 'Project_MockProcessed'
-        mock_targetdir = (tmpdir.join('genomics').join(mock_runid)
-                          .mkdir(mock_projectdir))
-        logger.debug("TARGETDIR: {}".format(str(mock_path)))
+        mock_targetdir = (tmpdir.join('genomics').join(mock_runid))
 
         composer = submission.BatchComposer(
             sample_paths=[str(mock_path)],
@@ -188,23 +227,54 @@ class TestBatchComposer:
             target_dir=str(mock_targetdir)
         )
 
-        logger.debug("WORKFLOW PARAMS: {}".format(composer.workflow_data['parameters']))
-        test_params = composer._build_sample_parameters(str(mock_path))
+        test_values = composer._build_sample_parameters(str(mock_path))
 
-        logger.debug("SAMPLE PARAMS: {}".format(test_params))
+        mock_refpaths = [
+            'library::annotation::GRCh38/Homo_sapiens.GRCh38.77.gtf',
+            'library::annotation::adapters/smarter_adapter_seqs_3p_5p.fasta',
+            ('library::annotation::GRCh38/Homo_sapiens.GRCh38.77'
+             '.ribosomalIntervalsWheader_reorder.txt'),
+            'library::annotation::GRCh38/Homo_sapiens.GRCh38.77.refflat.txt',
+        ]
+
         mock_samplename = 'lib1111_C00000XX'
         mock_outpath = os.path.join(
-            '/mnt/genomics/', mock_runid, mock_projectdir,
+            '/mnt/genomics/', mock_runid,
             'alignments', 'lib1111_C00000XX_tophat_alignments.bam'
         )
-        mock_params = [mock_samplename,
-                       mock_endpoint, mock_emptypaths[4], mock_emptypaths[5],
-                       mock_emptypaths[6], mock_emptypaths[7],
-                       mock_fastqpath, mock_emptypaths[2], mock_emptypaths[3],
-                       mock_emptypaths[8],
-                       mock_endpoint, mock_outpath]
-        assert (test_params == mock_params)
+        mock_values = ([mock_samplename,
+                        mock_endpoint, mock_emptypaths[4], mock_emptypaths[5],
+                        mock_emptypaths[6], mock_emptypaths[7],
+                        mock_fastqpath, mock_emptypaths[2], mock_emptypaths[3],
+                        mock_emptypaths[8]]
+                       + mock_refpaths
+                       + [mock_endpoint, mock_outpath])
+        assert (test_values == mock_values)
 
+    def test_parameterize(self, tmpdir):
+        tmpdir = tmpdir.mkdir('genomics')
+        mock_paths = [str(tmpdir.mkdir('lib1111-11111111')),
+                      str(tmpdir.mkdir('lib2222-22222222'))]
+
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        composer = submission.BatchComposer(
+            sample_paths=mock_paths,
+            workflow_template=str(mock_file),
+            endpoint='',
+            target_dir=str(tmpdir)
+        )
+
+        composer.parameterize()
+        test_params = composer.workflowbatch_file.data['samples']
+
+        assert (len(test_params) == len(mock_paths))
+        assert (test_params[0][0]
+                == {'tag': 'SampleName',
+                    'type': 'sample',
+                    'name': 'SampleName',
+                    'value': 'lib1111'})
 
 
 class TestFlowcellSubmissionBuilder:

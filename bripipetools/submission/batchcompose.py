@@ -23,6 +23,8 @@ class BatchComposer(object):
         self.target_dir = target_dir
         if build is not None:
             self.build = build
+        else:
+            self.build = 'GRCh38'
 
     def _get_lane_order(self):
         return [re.search('[1-8]', p['name']).group()
@@ -46,10 +48,43 @@ class BatchComposer(object):
 
         return fastq_path
 
+    def _build_reference_path(self, parameter):
+        ref_dict = {
+            'GRCh38': {
+                'gtf': 'GRCh38/Homo_sapiens.GRCh38.77.gtf',
+                'refflat': 'GRCh38/Homo_sapiens.GRCh38.77.refflat.txt',
+                'ribosomal_intervals':
+                    ('GRCh38/Homo_sapiens.GRCh38.77'
+                     '.ribosomalIntervalsWheader_reorder.txt'),
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'NCBIM37': {
+                'gtf': 'NCBIM37/Mus_musculus.NCBIM37.67.gtf',
+                'refflat': 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt',
+                'ribosmal_intervals':
+                    ('NCBIM37/Mus_musculus.NCBIM37.67'
+                     '.ribosomalIntervalsWheader_reorder.txt'),
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            }
+        }
+
+        ref_type = re.sub('^annotation_', '', parameter['tag'])
+        return 'library::annotation::{}'.format(
+            ref_dict[self.build].get(ref_type)
+        )
+
+    def _prep_output_dir(self, output_type):
+
+        output_dir = os.path.join(self.target_dir, output_type)
+
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+
+        return output_dir
+
     def _build_output_path(self, sample_name, parameter):
-        # output_types = ['trimmed', 'counts', 'alignments', 'metrics',
-        #                 'QC', 'Trinity', 'log']
-        output_type_map = {'counts': 'counts',
+        output_type_map = {'trimmed': 'TrimmedFastqs',
+                           'counts': 'counts',
                            'alignments': 'alignments',
                            'metrics': 'metrics',
                            'qc': 'QC',
@@ -59,8 +94,9 @@ class BatchComposer(object):
         logger.debug("building output path of parameter '{}' for sample '{}'"
                      .format(parameter['tag'], sample_name))
         output_items = parsing.parse_output_name(parameter['tag'])
-        output_dir = os.path.join(self.target_dir,
-                                  output_type_map[output_items['type']])
+        output_dir = self._prep_output_dir(
+            output_type_map[output_items['type']]
+        )
 
         out_file = '{}_{}_{}.{}'.format(
             sample_name, output_items['source'], output_items['type'],
@@ -75,66 +111,56 @@ class BatchComposer(object):
         fc_id = parsing.get_flowcell_id(sample_path)
         sample_name = '{}_{}'.format(sample_id, fc_id).rstrip('_')
 
-        sample_params = []
+        param_values = []
         for param in self.workflow_data['parameters']:
-            if param['type'] == 'sample':
-                sample_params.append(sample_name)
+            if re.search('endpoint', param['name']):
+                param_values.append(self.endpoint)
+
+            elif param['type'] == 'sample':
+                param_values.append(sample_name)
             elif param['type'] == 'input':
-                if re.search('from_endpoint', param['name']):
-                    sample_params.append(self.endpoint)
-                elif re.search('from_path', param['name']):
-                    lane = re.search('[1-8]', param['name']).group()
-                    # for lane in self._get_lane_order():
-                    sample_params.append(
-                        util.swap_root(
-                            self._get_lane_fastq(sample_path, lane),
-                            'genomics', '/mnt/'
-                        )
+                lane = re.search('[1-8]', param['name']).group()
+                param_values.append(
+                    util.swap_root(
+                        self._get_lane_fastq(sample_path, lane),
+                        'genomics', '/mnt/'
                     )
-            # elif 'annotation' in param:
-            #     ref_path = build_ref_path(param, self.build)
-            #     sample_params.append(ref_path)
+                )
+            elif param['type'] == 'annotation':
+                param_values.append(self._build_reference_path(param))
             elif param['type'] == 'output':
-                if re.search('to_endpoint', param['name']):
-                    sample_params.append(self.endpoint)
-                elif re.search('to_path', param['name']):
-                    if re.search('^fastq_out', param['tag']):
-                        final_fastq = '%s_R1-final.fastq.gz' % sample_name
-                        output_path = os.path.join(
-                            util.swap_root(self.target_dir, 'genomics', '/mnt/'),
-                            'inputFastqs', final_fastq)
-                    else:
-                        output_path = self._build_output_path(sample_name,
-                                                              param)
-                    sample_params.append(output_path)
+                if re.search('^fastq_out', param['tag']):
+                    final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
+                    output_path = os.path.join(
+                        util.swap_root(self.target_dir, 'genomics', '/mnt/'),
+                        'inputFastqs', final_fastq
+                    )
+                else:
+                    output_path = self._build_output_path(sample_name, param)
+                param_values.append(output_path)
 
-        return sample_params
+        return param_values
 
-    # def _build_ref_path(param, build='GRCh38'):
-    #     ref_dict = {}
-    #     ref_dict['GRCh38'] = dict([('gtf', 'GRCh38/Homo_sapiens.GRCh38.77.gtf'),
-    #                                ('refflat',
-    #                                 'GRCh38/Homo_sapiens.GRCh38.77.refflat.txt'),
-    #                                ('ribosomal_intervals',
-    #                                 'GRCh38/Homo_sapiens.GRCh38.77.ribosomalIntervalsWheader_reorder.txt'),
-    #                                ('adapters',
-    #                                 'adapters/smarter_adapter_seqs_3p_5p.fasta')])
-    #     ref_dict['NCBIM37'] = dict(
-    #         [('gtf', 'NCBIM37/Mus_musculus.NCBIM37.67.gtf'),
-    #          ('refflat', 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt'),
-    #          ('ribosomal_intervals',
-    #           'NCBIM37/Mus_musculus.NCBIM37.67.ribosomalIntervalsWheader_reorder.txt'),
-    #          ('adapters', 'adapters/smarter_adapter_seqs_3p_5p.fasta')])
-    #     ref_type = re.sub('^annotation_', '', param)
-    #     ref_path = 'library::annotation::' + ref_dict[build].get(ref_type)
-    #
-    #     return ref_path
+    def parameterize(self):
+        params = self.workflow_data['parameters']
+        sample_params = []
+        for s in self.sample_paths:
+            logger.debug("setting parameters for input sample file {}"
+                         .format(s))
+            s_values = self._build_sample_parameters(s)
+            s_params = []
+            for idx, v in enumerate(s_values):
+                s_param = params[idx].copy()
+                s_param['value'] = s_values[idx]
+                s_params.append(s_param)
+            sample_params.append(s_params)
+        self.workflowbatch_file.data['samples'] = sample_params
 
-    def prep_output_dir(self, output_type):
 
-        output_dir = os.path.join(self.target_dir, output_type)
 
-        if not os.path.isdir(output_dir):
-            os.makedirs(output_dir)
 
-        return output_dir
+
+
+
+
+
