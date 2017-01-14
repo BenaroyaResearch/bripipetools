@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import datetime
 
 import mock
 import mongomock
@@ -274,6 +275,51 @@ def mock_template(filename, tmpdir):
     return str(mock_file)
 
 
+class TestBatchCreator:
+    """
+
+    """
+    def test_build_batch_name_with_defaults(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        creator = submission.BatchCreator(
+            paths=[],
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir)
+        )
+
+        test_name = creator._build_batch_name()
+
+        mock_date = datetime.date.today().strftime("%y%m%d")
+        mock_name = '{}__optimized_workflow_1'.format(mock_date)
+
+        assert (test_name == mock_name)
+
+    def test_build_batch_name_with_tags(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+        mock_grouptag = 'C00000XX'
+        mock_subgrouptags = ['P1-1', 'P99-99']
+
+        creator = submission.BatchCreator(
+            paths=[],
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag=mock_grouptag,
+            subgroup_tags=mock_subgrouptags
+        )
+
+        test_name = creator._build_batch_name()
+
+        mock_date = datetime.date.today().strftime("%y%m%d")
+        mock_name = ('{}_{}_{}_optimized_workflow_1'.format(
+            mock_date, mock_grouptag, '_'.join(mock_subgrouptags))
+        )
+
+        assert (test_name == mock_name)
 
 
 class TestFlowcellSubmissionBuilder:
