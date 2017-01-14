@@ -9,16 +9,11 @@ from .. import io
 logger = logging.getLogger(__name__)
 
 
-class BatchComposer(object):
-    def __init__(self, sample_paths, workflow_template, endpoint, target_dir,
+class BatchParameterizer(object):
+    def __init__(self, sample_paths, parameters, endpoint, target_dir,
                  build=None):
         self.sample_paths = sample_paths
-        self.workflow_template = workflow_template
-        self.workflowbatch_file = io.WorkflowBatchFile(
-            path=self.workflow_template,
-            state='template'
-        )
-        self.workflow_data = self.workflowbatch_file.parse()
+        self.parameters = parameters
         self.endpoint = endpoint
         self.target_dir = target_dir
         if build is not None:
@@ -28,7 +23,7 @@ class BatchComposer(object):
 
     def _get_lane_order(self):
         return [re.search('[1-8]', p['name']).group()
-                for p in self.workflow_data['parameters']
+                for p in self.parameters
                 if p['tag'] == 'fastq_in'
                 and re.search('from_path', p['name'])]
 
@@ -112,7 +107,7 @@ class BatchComposer(object):
         sample_name = '{}_{}'.format(sample_id, fc_id).rstrip('_')
 
         param_values = []
-        for param in self.workflow_data['parameters']:
+        for param in self.parameters:
             if re.search('endpoint', param['name']):
                 param_values.append(self.endpoint)
 
@@ -142,7 +137,6 @@ class BatchComposer(object):
         return param_values
 
     def parameterize(self):
-        params = self.workflow_data['parameters']
         sample_params = []
         for s in self.sample_paths:
             logger.debug("setting parameters for input sample file {}"
@@ -150,11 +144,11 @@ class BatchComposer(object):
             s_values = self._build_sample_parameters(s)
             s_params = []
             for idx, v in enumerate(s_values):
-                s_param = params[idx].copy()
+                s_param = self.parameters[idx].copy()
                 s_param['value'] = s_values[idx]
                 s_params.append(s_param)
             sample_params.append(s_params)
-        self.workflowbatch_file.data['samples'] = sample_params
+        self.samples = sample_params
 
 
 
