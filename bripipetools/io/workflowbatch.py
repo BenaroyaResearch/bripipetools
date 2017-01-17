@@ -3,6 +3,7 @@ Classes for reading, parsing, and writing workflow batch submit files for
 Globus Galaxy.
 """
 import logging
+import re
 
 from collections import OrderedDict
 
@@ -84,6 +85,19 @@ class WorkflowBatchFile(object):
         batch_name_line = (self.data['raw']
                            [self._locate_batch_name_line()])
         return batch_name_line.strip().split('\t')[-1]
+
+    def update_batch_name(self, batch_name):
+        """
+        Update name of workflow batch and insert in template lines.
+        """
+        self.data['batch_name'] = batch_name
+        # batch_name_line = (self.data['raw']
+        #                    [self._locate_batch_name_line()])
+        self.data['raw'][self._locate_batch_name_line()] = re.sub(
+            '<Your_project_name>', batch_name,
+            self.data['raw'][self._locate_batch_name_line()]
+        )
+        logger.debug("UPDATEDLINE:{}".format(self.data['raw'][self._locate_batch_name_line()]))
 
     def get_params(self):
         """
