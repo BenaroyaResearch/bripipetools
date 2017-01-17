@@ -641,10 +641,12 @@ class TestBatchCreator:
                 samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
                 samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
 
+        mock_endpoint = 'jeddy#srvgridftp01'
+
         creator = submission.BatchCreator(
             paths=mock_paths,
             workflow_template=mock_file,
-            endpoint='',
+            endpoint=mock_endpoint,
             base_dir=str(tmpdir),
             group_tag='',
             subgroup_tags=''
@@ -654,7 +656,9 @@ class TestBatchCreator:
         with open(test_path) as f:
             test_contents = f.readlines()
 
-        assert (test_contents == ['foo'])
+        assert (len([l for l in test_contents
+                     if re.search('^lib', l)])
+                == 4)
 
 class TestFlowcellSubmissionBuilder:
     """

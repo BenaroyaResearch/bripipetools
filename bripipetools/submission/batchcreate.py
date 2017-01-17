@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import datetime
 
 from .. import parsing
@@ -31,6 +30,8 @@ class BatchCreator(object):
             self.submit_dir = base_dir
         else:
             self.submit_dir = os.path.join(base_dir, submit_dir)
+            if not os.isdir(self.submit_dir):
+                os.makedirs(self.submit_dir)
 
         if group_tag is None:
             self.group_tag = ''
@@ -146,43 +147,9 @@ class BatchCreator(object):
         batch_filename = '{}.txt'.format(batch_name)
         batch_path = os.path.join(self.submit_dir, batch_filename)
         self.workflowbatch_file.data['samples'] = self._get_input_params()
-        self.workflowbatch_file.update_batch_name(batch_name)
+
         self.workflowbatch_file.write(
-            os.path.join(self.submit_dir, batch_filename)
+            os.path.join(self.submit_dir, batch_filename),
+            batch_name=batch_name
         )
         return batch_path
-
-
-
-
-
-
-    # def get_project_params(endpoint, header_keys, lane_order, unaligned_dir,
-    #                        project_lines=None, N=None, sort=False, build='GRCh38'):
-    #     if project_lines is None:
-    #         project_lines = []
-    #
-    #     fc_tag, proj = parse_unaligned_path(unaligned_dir)
-    #
-    #     sample_paths = [os.path.join(unaligned_dir, entry)
-    #                     for entry in os.listdir(unaligned_dir)
-    #                     if os.path.isdir(os.path.join(unaligned_dir, entry))]
-    #
-    #     if sort:
-    #         sample_paths = sorted(sample_paths,
-    #                               key=lambda x: sum(os.path.getsize(os.path.join(x, f))
-    #                                                 for f in os.listdir(x)))
-    #
-    #     if N is not None:
-    #         sample_paths = sample_paths[0:N]  # first N libs, any project
-    #
-    #     # target_dir, date_tag = prep_output_directory(unaligned_dir, proj)
-    #
-    #     for lib in unaligned_libs:
-    #         if "Undetermined" not in lib:
-    #             lib_params = build_lib_param_list(lib, endpoint, target_dir,
-    #                                               header_keys, lane_order, fc_tag,
-    #                                               build)
-    #             project_lines.append(('\t').join(lib_params) + '\n')
-    #
-    #     return (proj, fc_tag, project_lines, date_tag)
