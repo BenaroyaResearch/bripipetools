@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 class BatchCreator(object):
     """
-
+    Given a list of sample paths or folders of sample paths as well
+    as the path to a workflow tempate, creates a batch submit file
+    for the input samples.
     """
     def __init__(self, paths, workflow_template, endpoint, base_dir,
                  submit_dir=None, group_tag=None, subgroup_tags=None,

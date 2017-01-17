@@ -4,12 +4,15 @@ import re
 
 from .. import util
 from .. import parsing
-from .. import io
 
 logger = logging.getLogger(__name__)
 
 
 class BatchParameterizer(object):
+    """
+    Defines workflow batch parameters for a list of input samples,
+    given a list of parsed parameters for a Galaxy workflow.
+    """
     def __init__(self, sample_paths, parameters, endpoint, target_dir,
                  build=None):
         self.sample_paths = sample_paths

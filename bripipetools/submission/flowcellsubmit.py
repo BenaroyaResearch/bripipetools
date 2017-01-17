@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 class FlowcellSubmissionBuilder(object):
     """
-
+    Prepares workflow batch submissions for all unaligned projects
+    from a flowcell run.
     """
     def __init__(self, path, endpoint, db, workflow_dir=None):
         self.path = path
