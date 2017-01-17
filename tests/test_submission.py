@@ -844,9 +844,16 @@ class TestFlowcellSubmissionBuilder:
         builder.batch_map = {mock_workflowopts[0]: [mock_paths[0]]}
         test_paths = builder.run()
 
-        # assert (test_paths == ['foo'])
-
         with open(test_paths[0]) as f:
             test_contents = f.readlines()
 
-        assert (test_contents == ['foo'])
+        mock_date = datetime.date.today().strftime("%y%m%d")
+        mock_paths = [os.path.join(str(mock_path),
+                                   'globus_batch_submission',
+                                   ('{}_C00000XX_P1-1_optimized_workflow1.txt'
+                                    .format(mock_date)))]
+
+        assert (test_paths == mock_paths)
+        assert (len([l for l in test_contents
+                     if re.search('^lib', l)])
+                == 2)
