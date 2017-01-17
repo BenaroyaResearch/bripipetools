@@ -1,8 +1,12 @@
+import logging
 import os
 import re
 
 from .. import parsing
 from .. import annotation
+from . import BatchCreator
+
+logger = logging.getLogger(__name__)
 
 
 class FlowcellSubmissionBuilder(object):
@@ -43,13 +47,16 @@ class FlowcellSubmissionBuilder(object):
                               for p in self.annotator.get_projects()]
 
     def _assign_workflows(self):
+        workflow_opts = self.get_workflow_options()
+        self._get_project_paths()
+
         continue_assign = True
         batch_map = {}
         while continue_assign:
             print("\nFound the following projects: "
                   "[current workflows selected]")
             for i, p in enumerate(self.project_paths):
-                workflow_nums = [w for w, k in enumerate(self.workflow_opts)
+                workflow_nums = [w for w, k in enumerate(workflow_opts)
                                  if p in batch_map.get(k, [])]
                 print("   {} : {} {}".format(i, os.path.basename(p),
                                              str(workflow_nums)))
@@ -60,12 +67,12 @@ class FlowcellSubmissionBuilder(object):
             if len(p_i):
                 selected_project = self.project_paths[int(p_i)]
 
-                for j, w in enumerate(self.workflow_opts):
+                for j, w in enumerate(workflow_opts):
                     print("   {} : {}".format(j, os.path.basename(w)))
                 w_j = raw_input(("\nSelect the number of the workflow to use "
                                  "for project {}: ")
                                 .format(os.path.basename(selected_project)))
-                selected_workflow = self.workflow_opts[int(w_j)]
+                selected_workflow = workflow_opts[int(w_j)]
 
                 (batch_map.setdefault(selected_workflow, [])
                  .append(selected_project))
@@ -73,29 +80,30 @@ class FlowcellSubmissionBuilder(object):
                 continue_assign = False
         self.batch_map = batch_map
 
-    # def build_lib_param_list(lib, endpoint, target_dir, header_keys, lane_order, fc_tag, build='GRCh38'):
-    #     lib_params = []
-    #     lib_id = parse_lib_path(lib)
-    #     target_lib = lib_id + fc_tag
-    #
-    #     for param in header_keys:
-    #         if 'SampleName' in param:
-    #             lib_params.append(target_lib)
-    #         elif 'fastq_in' in param:
-    #             lib_params.append(endpoint)
-    #             for lane in lane_order:
-    #                 lib_params.append(get_lane_fastq(lib, lane))
-    #         elif 'annotation' in param:
-    #             ref_path = build_ref_path(param, build)
-    #             lib_params.append(ref_path)
-    #         elif 'out' in param:
-    #             if re.search('^fastq_out', param):
-    #                 final_fastq = '%s_R1-final.fastq.gz' % target_lib
-    #                 result_path = os.path.join(format_endpoint_dir(target_dir),
-    #                                           'inputFastqs', final_fastq)
-    #             else:
-    #                 result_path = build_result_path(target_lib, target_dir, param)
-    #             lib_params.append(endpoint)
-    #             lib_params.append(result_path)
-    #
-    #     return lib_params
+    def _get_batch_tags(self, paths):
+        group_tag = parsing.get_flowcell_id(self.path)
+        logger.debug("PATHS:{}".format(paths))
+        subgroup_tags = [parsing.get_project_label(p) for p in paths]
+
+        return group_tag, subgroup_tags
+
+    def run(self):
+        if not hasattr(self, 'batch_map'):
+            self._assign_workflows()
+
+        batch_paths = []
+        for workflow, projects in self.batch_map.items():
+            group_tag, subgroup_tags = self._get_batch_tags(projects)
+            creator = BatchCreator(
+                paths=projects,
+                workflow_template=workflow,
+                endpoint=self.endpoint,
+                base_dir=self.path,
+                submit_dir='globus_batch_submission',
+                group_tag=group_tag,
+                subgroup_tags=subgroup_tags
+            )
+            batch_paths.append(creator.create_batch())
+
+        return batch_paths
+

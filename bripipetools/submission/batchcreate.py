@@ -30,7 +30,7 @@ class BatchCreator(object):
             self.submit_dir = base_dir
         else:
             self.submit_dir = os.path.join(base_dir, submit_dir)
-            if not os.isdir(self.submit_dir):
+            if not os.path.isdir(self.submit_dir):
                 os.makedirs(self.submit_dir)
 
         if group_tag is None:

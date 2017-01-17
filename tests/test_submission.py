@@ -748,3 +748,105 @@ class TestFlowcellSubmissionBuilder:
 
         assert (builder.project_paths == mock_paths)
 
+    def test_assign_workflows(self, mock_db, tmpdir):
+        # GIVEN a flowcell run ID and an arbitrary root directory,
+        # under which a folder exists at 'genomics/Illumina/<run_id>',
+        # and that folder contains a subfolder named 'Unaligned'
+        mock_runid = '161231_INSTID_0001_AC00000XX'
+        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_runid)
+
+        mock_workflowdir = mock_path.mkdir('galaxy_workflows')
+        mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
+        mock_workflowopts = [str(mock_workflowdir.ensure(w))
+                             for w in mock_workflows
+                             if re.search('optimized', w)]
+        mock_workflowopts.sort()
+
+        # AND the unaligned folder includes multiple project folders
+        mock_projects = ['P1-1-11111111', 'P99-99-99999999']
+        mock_unaligndir = mock_path.mkdir('Unaligned')
+        mock_paths = [str(mock_unaligndir.mkdir(p)) for p in mock_projects]
+
+        builder = submission.FlowcellSubmissionBuilder(
+            path=str(mock_path),
+            endpoint=mock_endpoint,
+            db=mock_db,
+            workflow_dir=str(mock_workflowdir)
+        )
+
+        with mock.patch('__builtin__.raw_input',
+                        side_effect=iter(["0", "0", ""])):
+            builder._assign_workflows()
+
+        assert (builder.batch_map == {mock_workflowopts[0]: [mock_paths[0]]})
+
+    def test_get_batch_tags(self, mock_db, tmpdir):
+        # GIVEN a flowcell run ID and an arbitrary root directory,
+        # under which a folder exists at 'genomics/Illumina/<run_id>',
+        # and that folder contains a subfolder named 'Unaligned'
+        mock_runid = '161231_INSTID_0001_AC00000XX'
+        mock_endpoint = 'jeddy#srvgridftp01'
+
+        # AND the unaligned folder includes multiple project folders
+        mock_projects = ['P1-1-11111111', 'P99-99-99999999']
+        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_runid)
+        mock_unaligndir = mock_path.mkdir('Unaligned')
+        mock_paths = [str(mock_unaligndir.mkdir(p)) for p in mock_projects]
+
+        builder = submission.FlowcellSubmissionBuilder(
+            path=str(mock_path),
+            endpoint=mock_endpoint,
+            db=mock_db
+        )
+
+        test_grouptag, test_subgrouptags = builder._get_batch_tags(mock_paths)
+
+        assert (test_grouptag == 'C00000XX')
+        assert (test_subgrouptags == ['P1-1', 'P99-99'])
+
+    def test_run(self, mock_db, tmpdir):
+        # GIVEN a flowcell run ID and an arbitrary root directory,
+        # under which a folder exists at 'genomics/Illumina/<run_id>',
+        # and that folder contains a subfolder named 'Unaligned'
+        mock_runid = '161231_INSTID_0001_AC00000XX'
+        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_runid)
+
+        mock_workflowdir = mock_path.mkdir('galaxy_workflows')
+        mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
+        mock_workflowopts = [mock_template(w, mock_workflowdir)
+                             for w in mock_workflows
+                             if re.search('optimized', w)]
+        mock_workflowopts.sort()
+
+        # AND the unaligned folder includes multiple project folders
+        mock_projects = ['P1-1-11111111', 'P99-99-99999999']
+        mock_unaligndir = mock_path.mkdir('Unaligned')
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_projects):
+            folderpath = mock_unaligndir.mkdir(f)
+            mock_paths.append(str(folderpath))
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        builder = submission.FlowcellSubmissionBuilder(
+            path=str(mock_path),
+            endpoint=mock_endpoint,
+            db=mock_db,
+            workflow_dir=str(mock_workflowdir)
+        )
+
+        builder.batch_map = {mock_workflowopts[0]: [mock_paths[0]]}
+        test_paths = builder.run()
+
+        # assert (test_paths == ['foo'])
+
+        with open(test_paths[0]) as f:
+            test_contents = f.readlines()
+
+        assert (test_contents == ['foo'])
