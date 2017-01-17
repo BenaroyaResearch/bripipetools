@@ -97,7 +97,6 @@ class WorkflowBatchFile(object):
             '<Your_project_name>', batch_name,
             self.data['raw'][self._locate_batch_name_line()]
         )
-        logger.debug("UPDATEDLINE:{}".format(self.data['raw'][self._locate_batch_name_line()]))
 
     def get_params(self):
         """
@@ -147,11 +146,13 @@ class WorkflowBatchFile(object):
                                     for l in sample_lines]
         return self.data
 
-    def write(self, path, sample_lines=None):
+    def write(self, path, batch_name=None, sample_lines=None):
         """
         Write workflow batch data to file.
         """
         self.parse()
+        if batch_name is not None:
+            self.update_batch_name(batch_name)
 
         template_lines = self.data['raw'][0:self._locate_param_line() + 1]
         if sample_lines is None:
