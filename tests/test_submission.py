@@ -321,6 +321,340 @@ class TestBatchCreator:
 
         assert (test_name == mock_name)
 
+    def test_get_sample_paths_for_folders(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            mock_paths.append(str(folderpath))
+            for s in mock_samples[idx]:
+                folderpath.mkdir(s)
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        creator._check_input_type()
+
+        assert creator.inputs_are_folders
+
+    def test_get_sample_paths_for_samples(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                mock_paths.append(str(samplepath))
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        creator._check_input_type()
+
+        assert not creator.inputs_are_folders
+
+    def test_get_sample_paths_for_empty_samples(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                mock_paths.append(str(samplepath))
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        with pytest.raises(IndexError):
+            creator._check_input_type()
+
+    def test_prep_target_dir_for_folder(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            mock_paths.append(str(folderpath))
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        test_path = creator._prep_target_dir(mock_paths[0])
+
+        mock_date = datetime.date.today().strftime("%y%m%d")
+        mock_path = tmpdir.join(
+            'Project_P1-1Processed_globus_{}'.format(mock_date)
+        )
+
+        assert (test_path == mock_path)
+        assert os.path.isdir(str(mock_path))
+
+    def test_prep_target_dir_for_samples(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                mock_paths.append(str(samplepath))
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='Mock',
+            subgroup_tags=''
+        )
+
+        test_path = creator._prep_target_dir()
+
+        mock_date = datetime.date.today().strftime("%y%m%d")
+        mock_path = tmpdir.join(
+            'Project_MockProcessed_globus_{}'.format(mock_date)
+        )
+
+        assert (test_path == mock_path)
+        assert os.path.isdir(str(mock_path))
+
+    def test_get_sample_paths_with_defaults(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        mock_samplepaths = {}
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            mock_paths.append(str(folderpath))
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                mock_samplepaths.setdefault(idx, []).append(str(samplepath))
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        test_samplepaths = creator._get_sample_paths(mock_paths[0])
+
+        assert (test_samplepaths == mock_samplepaths[0])
+
+    def test_get_sample_paths_with_num_samples_opt(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        mock_samplepaths = {}
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            mock_paths.append(str(folderpath))
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                mock_samplepaths.setdefault(idx, []).append(str(samplepath))
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags='',
+            num_samples=1,
+        )
+
+        test_samplepaths = creator._get_sample_paths(mock_paths[0])
+
+        assert (test_samplepaths == mock_samplepaths[0][0:1])
+
+    def test_get_sample_paths_with_sort_opt(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        mock_samplepaths = {}
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            mock_paths.append(str(folderpath))
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                mock_samplepaths.setdefault(idx, []).append(str(samplepath))
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                filepath = samplepath.ensure(
+                    'sample-name_S001_L002_R1_001.fastq.gz'
+                )
+                if s == mock_samples[idx][0]:
+                    filepath.write('mock contents\n')
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags='',
+            sort=True,
+            num_samples=1
+        )
+
+        test_samplepaths = creator._get_sample_paths(mock_paths[0])
+
+        assert (test_samplepaths == mock_samplepaths[0][1:])
+
+    def test_get_input_params_for_folders(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            mock_paths.append(str(folderpath))
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        test_params = creator._get_input_params()
+
+        assert (len(test_params) == 4)
+        assert (test_params[0][0]['value'] == 'lib1111')
+
+    def test_get_input_params_for_samples(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                mock_paths.append(str(samplepath))
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        test_params = creator._get_input_params()
+
+        assert (len(test_params) == 4)
+        assert (test_params[0][0]['value'] == 'lib1111')
+
+    def test_create_batch(self, tmpdir):
+        mock_filename = 'optimized_workflow_1.txt'
+        mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_folders = ['P1-1-11111111', 'P99-99-99999999']
+        mock_samples = {0: ['lib1111-11111111', 'lib2222-22222222'],
+                        1: ['lib3333-33333333', 'lib4444-44444444']}
+        mock_paths = []
+        for idx, f in enumerate(mock_folders):
+            folderpath = tmpdir.mkdir(f)
+            mock_paths.append(str(folderpath))
+            for s in mock_samples[idx]:
+                samplepath = folderpath.mkdir(s)
+                samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+                samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        creator = submission.BatchCreator(
+            paths=mock_paths,
+            workflow_template=mock_file,
+            endpoint='',
+            base_dir=str(tmpdir),
+            group_tag='',
+            subgroup_tags=''
+        )
+
+        test_path = creator.create_batch()
+        with open(test_path) as f:
+            test_contents = f.readlines()
+
+        assert (test_contents == ['foo'])
 
 class TestFlowcellSubmissionBuilder:
     """

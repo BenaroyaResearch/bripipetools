@@ -55,27 +55,66 @@ class BatchCreator(object):
                                  '_'.join(self.subgroup_tags)]).rstrip('_')
         return '{}_{}_{}'.format(self.date_tag, batch_inputs, workflow_id)
 
-    def _get_sample_paths(self, path):
-        sample_paths = [os.path.join(path, s)
-                        for s in os.listdir(path)]
+    def _check_input_type(self):
+        try:
+            check_path = os.path.join(self.paths[0],
+                                      os.listdir(self.paths[0])[0])
+        except IndexError:
+            logger.debug("input paths appear to be empty folders; exiting",
+                         exc_info=True)
+            raise
+        logger.debug("checking whether input paths are sample folders "
+                     "or folders of sample folders based on first path '{}' "
+                     "and its first item '{}'"
+                     .format(self.paths[0], check_path))
+
+        if os.path.isdir(check_path):
+            self.inputs_are_folders = True
+        else:
+            self.inputs_are_folders = False
+
+    def _prep_target_dir(self, folder=None):
+        if folder is not None:
+            target_tag = parsing.get_project_label(os.path.basename(folder))
+        else:
+            target_tag = self.group_tag
+        target_dir = os.path.join(
+            self.base_dir,
+            'Project_{}Processed_globus_{}'.format(target_tag, self.date_tag)
+        )
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir)
+
+        return target_dir
+
+    def _get_sample_paths(self, folder):
+        sample_paths = [os.path.join(folder, s)
+                        for s in os.listdir(folder)]
+
+        logger.debug("found the following sample paths: {}"
+                     .format(sample_paths))
 
         if self.sort:
+            logger.debug("sorting samples based on file size")
             sample_paths = sorted(
                 sample_paths,
                 key=lambda x: sum(os.path.getsize(os.path.join(x, f))
                                   for f in os.listdir(x))
             )
+        else:
+            sample_paths.sort()
 
         if self.num_samples is not None:
-            sample_paths = sample_paths[0:self.num_samples]
+            max_samples = min(self.num_samples, len(sample_paths))
+            logger.debug("subsetting sample paths for folder {} to {} samples"
+                         .format(folder, max_samples))
+            sample_paths = sample_paths[0:max_samples]
 
         return sample_paths
 
-    def _prep_target_dir(self):
-        pass
-
     def _get_input_params(self):
-        if os.path.isdir(self.paths[0]):
+        self._check_input_type()
+        if self.inputs_are_folders:
             batch_params = []
             for p in self.paths:
                 target_dir = self._prep_target_dir(p)
@@ -85,7 +124,8 @@ class BatchCreator(object):
                     parameters=self.workflow_data['parameters'],
                     endpoint=self.endpoint,
                     target_dir=target_dir
-                ).parameterize()
+                )
+                parameterizer.parameterize()
                 batch_params = batch_params + parameterizer.samples
         else:
             target_dir = self._prep_target_dir()
@@ -95,7 +135,8 @@ class BatchCreator(object):
                 parameters=self.workflow_data['parameters'],
                 endpoint=self.endpoint,
                 target_dir=target_dir
-            ).parameterize()
+            )
+            parameterizer.parameterize()
             batch_params = parameterizer.samples
 
         return batch_params
@@ -103,11 +144,13 @@ class BatchCreator(object):
     def create_batch(self):
         batch_name = self._build_batch_name()
         batch_filename = '{}.txt'.format(batch_name)
-        self.workflowbatch_file.data['batch_name'] = batch_name
+        batch_path = os.path.join(self.submit_dir, batch_filename)
         self.workflowbatch_file.data['samples'] = self._get_input_params()
+        self.workflowbatch_file.update_batch_name(batch_name)
         self.workflowbatch_file.write(
-            os.path.join(self.submit_dir, '{}.txt'.format(batch_filename))
+            os.path.join(self.submit_dir, batch_filename)
         )
+        return batch_path
 
 
 
