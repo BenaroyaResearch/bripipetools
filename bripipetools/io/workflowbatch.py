@@ -3,6 +3,7 @@ Classes for reading, parsing, and writing workflow batch submit files for
 Globus Galaxy.
 """
 import logging
+import re
 
 from collections import OrderedDict
 
@@ -85,6 +86,18 @@ class WorkflowBatchFile(object):
                            [self._locate_batch_name_line()])
         return batch_name_line.strip().split('\t')[-1]
 
+    def update_batch_name(self, batch_name):
+        """
+        Update name of workflow batch and insert in template lines.
+        """
+        self.data['batch_name'] = batch_name
+        # batch_name_line = (self.data['raw']
+        #                    [self._locate_batch_name_line()])
+        self.data['raw'][self._locate_batch_name_line()] = re.sub(
+            '<Your_project_name>', batch_name,
+            self.data['raw'][self._locate_batch_name_line()]
+        )
+
     def get_params(self):
         """
         Return the parameters defined for the current workflow.
@@ -133,15 +146,18 @@ class WorkflowBatchFile(object):
                                     for l in sample_lines]
         return self.data
 
-    def write(self, path):
+    def write(self, path, batch_name=None, sample_lines=None):
         """
         Write workflow batch data to file.
         """
         self.parse()
+        if batch_name is not None:
+            self.update_batch_name(batch_name)
 
         template_lines = self.data['raw'][0:self._locate_param_line() + 1]
-        sample_lines = ['{}\n'.format('\t'.join([p['value'] for p in s]))
-                        for s in self.data['samples']]
+        if sample_lines is None:
+            sample_lines = ['{}\n'.format('\t'.join([p['value'] for p in s]))
+                            for s in self.data['samples']]
         workflow_lines = template_lines + sample_lines
 
         with open(path, 'w+') as f:

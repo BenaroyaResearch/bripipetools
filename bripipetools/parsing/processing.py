@@ -40,6 +40,22 @@ def parse_workflow_param(param):
             'name': param.split('::')[-1]}
 
 
+def parse_output_name(output_name):
+    output_name = re.sub('_out$', '', output_name)
+
+    name_parts = output_name.split('_')
+
+    output_ext = name_parts.pop(-1)
+    output_type = name_parts.pop(-1)
+    source = name_parts.pop(-1)
+    if len(name_parts):
+        source = '-'.join([name_parts.pop(-1), source])
+
+    return {'type': output_type,
+            'source': source,
+            'extension': output_ext}
+
+
 def parse_output_filename(output_path):
     """
     Parse output name indicated by parameter tag in output file

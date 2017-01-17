@@ -268,7 +268,7 @@ class TestFlowcellRunAnnotator:
         annotator.flowcellrun = mock_object
 
         # WHEN the flowcell folder path is retrieved
-        testpath = annotator._get_flowcell_path()
+        testpath = annotator.get_flowcell_path()
 
         # THEN correct flowcell folder should be found in 'genomics/Illumina/'
         assert (testpath == str(mock_path))
@@ -296,7 +296,7 @@ class TestFlowcellRunAnnotator:
 
         # THEN should raise expected exception
         with pytest.raises(OSError):
-            annotator._get_flowcell_path()
+            annotator.get_flowcell_path()
 
     def test_get_unaligned_path_for_existing_folder(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
@@ -321,7 +321,7 @@ class TestFlowcellRunAnnotator:
         annotator.flowcellrun = mock_object
 
         # WHEN the flowcell folder path is retrieved
-        testpath = annotator._get_unaligned_path()
+        testpath = annotator.get_unaligned_path()
 
         # THEN correct flowcell folder should be found in 'genomics/Illumina/'
         assert (testpath == str(mock_path))
@@ -351,7 +351,7 @@ class TestFlowcellRunAnnotator:
 
         # THEN should raise expected exception
         with pytest.raises(OSError):
-            annotator._get_unaligned_path()
+            annotator.get_unaligned_path()
 
     def test_get_flowcell_run(self, mock_db):
         # GIVEN any state and a flowcell run annotator object

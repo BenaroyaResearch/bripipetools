@@ -52,6 +52,25 @@ def get_library_id(string):
     """
     return util.matchdefault('lib[1-9]+[0-9]*', string)
 
+def get_sample_id(string):
+    """
+    More general than library ID; returns either library ID (if
+    present), or any word starting with 'Sample_', ends in a number,
+    and preceeds any non-alphanumeric characters.
+
+    :type string: str
+    :param string: any string that might contain a form of sample ID
+
+    :rtype: str
+    :return: the matching substring representing the sample ID or an
+        empty string ('') if no match found
+    """
+    sample_id = util.matchdefault('lib[1-9]+[0-9]*', string)
+    if not len(sample_id):
+        sample_id = util.matchdefault('Sample_.*[0-9]+', string)
+
+    return sample_id
+
 
 def parse_flowcell_path(flowcell_path):
     """
