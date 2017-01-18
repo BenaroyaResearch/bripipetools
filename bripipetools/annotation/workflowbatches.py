@@ -23,7 +23,8 @@ class WorkflowBatchAnnotator(object):
     Identifies, stores, and updates information about a workflow batch.
     """
     def __init__(self, workflowbatch_file, genomics_root, db):
-        logger.debug("creating an instance of WorkflowBatchAnnotator")
+        logger.debug("creating `WorkflowBatchAnnotator` for '{}'"
+                     .format(workflowbatch_file))
         self.workflowbatch_file = workflowbatch_file
         self.db = db
 
@@ -42,13 +43,13 @@ class WorkflowBatchAnnotator(object):
         Try to retrieve data for the workflow batch from GenLIMS; if
         unsuccessful, create new ``GalaxyWorkflowBatch`` object.
         """
-        logger.debug("initializing GalaxyWorkflowBatch instance")
+        logger.debug("initializing `GalaxyWorkflowBatch` instance")
         workflowbatch_file = util.swap_root(self.workflowbatch_file,
                                             'genomics', '/')
 
         try:
-            logger.debug("getting GalaxyWorkflowBatch from GenLIMS; "
-                         "searching for record with batch file {}"
+            logger.debug("getting `GalaxyWorkflowBatch` from GenLIMS; "
+                         "searching for record with batch file '{}'"
                          .format(workflowbatch_file))
             return genlims.map_to_object(
                 genlims.get_workflowbatches(
@@ -57,7 +58,7 @@ class WorkflowBatchAnnotator(object):
                 )[0]
             )
         except IndexError:
-            logger.debug("creating new GalaxyWorkflowBatch object",
+            logger.debug("creating new `GalaxyWorkflowBatch` object",
                          exc_info=True)
 
             batch_items = parsing.parse_batch_name(
@@ -78,7 +79,7 @@ class WorkflowBatchAnnotator(object):
         """
         Add any missing fields to GalaxyWorkflowBatch object.
         """
-        logger.debug("updating GalaxyWorkflowBatch object attributes")
+        logger.debug("updating `GalaxyWorkflowBatch` object attributes")
 
         batch_items = parsing.parse_batch_name(
             self.workflowbatch_data['batch_name']
@@ -91,17 +92,15 @@ class WorkflowBatchAnnotator(object):
             'flowcell_id': batch_items['flowcell_id']
         }
         self.workflowbatch.is_mapped = False
-        logger.debug("{}".format(self.workflowbatch.__dict__))
         self.workflowbatch.update_attrs(update_fields, force=True)
-        logger.debug("{}".format(self.workflowbatch.__dict__))
 
     def get_workflow_batch(self):
         """
         Return workflow batch object with updated fields.
         """
         self._update_workflowbatch()
-        logger.debug("returning workflow batch object: {}".format(
-            self.workflowbatch.to_json()))
+        logger.debug("returning workflow batch object info: {}"
+                     .format(self.workflowbatch.to_json()))
         return self.workflowbatch
 
     def get_sequenced_libraries(self):
@@ -124,7 +123,7 @@ class WorkflowBatchAnnotator(object):
         if ref != 'grch38':
             return processedlibrary
 
-        logger.debug("adding sex check QC info for {}"
+        logger.debug("adding sex check QC info for processed library '{}'"
                      .format(processedlibrary._id))
         sexchecker = qc.SexChecker(
             processedlibrary=processedlibrary,
@@ -140,8 +139,8 @@ class WorkflowBatchAnnotator(object):
         Collect processed library objects for workflow batch.
         """
         workflowbatch_id = self.workflowbatch._id
-        logger.info("getting processed libraries for workflow batch {}"
-                    .format(workflowbatch_id))
+        logger.debug("getting processed libraries for workflow batch '{}'"
+                     .format(workflowbatch_id))
 
         return [
             ProcessedLibraryAnnotator(

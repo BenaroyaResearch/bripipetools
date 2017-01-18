@@ -50,7 +50,7 @@ def get_model_class(doc):
                if re.search('^[A-Z]', n)]
     logger.debug("found the following classes: {}".format(classes))
     doc_type = re.sub(' ', '', doc['type'].title())
-    logger.debug("searching for {}".format(doc_type))
+    logger.debug("searching for '{}'".format(doc_type))
     return [c for c in classes
             if re.search(doc_type, c)][0]
 
@@ -67,7 +67,8 @@ def map_to_object(doc):
     """
     doc_class = get_model_class(doc)
     mappedclass = getattr(docs, doc_class)
-    logger.debug("mapping {} to instance of type {}".format(doc, doc_class))
+    logger.debug("mapping '{}' to instance of type '{}'"
+                 .format(doc, doc_class))
     obj = mappedclass(_id=doc['_id'], is_mapped=True)
 
     logger.debug("document has following fields: {}".format(doc.keys()))

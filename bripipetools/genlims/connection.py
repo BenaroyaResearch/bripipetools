@@ -32,7 +32,7 @@ def connect():
 
     property_file = os.environ.get('DB_PARAM_FILE')
     if property_file is None:
-        logger.info("no environmental variable set; using 'default.ini'")
+        logger.info("No environmental variable set; using 'default.ini'.")
         property_file = 'default.ini'
     else:
         logger.info("property file set: '{}'".format(property_file))
@@ -45,17 +45,17 @@ def connect():
     db_host = config.get('database', 'db_host')
     db_name = config.get('database', 'db_name')
 
-    logger.info("connecting to database '{}' on host '{}"
+    logger.info("Connecting to database '{}' on host '{}'."
                 .format(db_name, db_host))
     client = pymongo.MongoClient(db_host, 27017)
 
     try:
-        logger.info("authenticating database '{}'".format(db_name))
+        logger.info("Authenticating database '{}'.".format(db_name))
         client[db_name].authenticate(config.get('database', 'user'),
                                      config.get('database', 'password'))
     except ConfigParser.NoOptionError:
-        logger.info("no username/password provided; "
-                    "attempting to connect anyway")
+        logger.info("No username/password provided; "
+                    "attempting to connect anyway.")
 
     return client[db_name]
 
