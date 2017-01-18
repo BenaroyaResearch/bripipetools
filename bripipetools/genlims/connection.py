@@ -2,11 +2,18 @@
 Connect to the GenLIMS Mongo database.
 """
 import logging
+from logging.config import fileConfig
 import os
 import ConfigParser
 
 import pymongo
 
+config_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+    'config'
+)
+fileConfig(os.path.join(config_path, 'logging_config.ini'),
+           disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 
@@ -47,8 +54,9 @@ def connect():
         client[db_name].authenticate(config.get('database', 'user'),
                                      config.get('database', 'password'))
     except ConfigParser.NoOptionError:
-        logger.warn("no username/password provided; "
+        logger.info("no username/password provided; "
                     "attempting to connect anyway")
 
     return client[db_name]
-db = connect()
+
+# db = connect()

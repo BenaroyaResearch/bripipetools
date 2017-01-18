@@ -8,6 +8,7 @@ import click
 
 import bripipetools
 
+
 config_path = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     'config'
@@ -15,9 +16,14 @@ config_path = os.path.join(
 fileConfig(os.path.join(config_path, 'logging_config.ini'),
            disable_existing_loggers=False)
 logger = logging.getLogger()
+logger.info("starting `bripipetools`")
+DB = bripipetools.genlims.connect()
 
 
 def get_workflow_batches(flowcell_path):
+    """
+    List the workflow batch files for a flowcell run.
+    """
     submissions = os.path.join(flowcell_path, 'globus_batch_submission')
     return (os.path.join(submissions, wb)
             for wb in os.listdir(submissions)
@@ -25,6 +31,9 @@ def get_workflow_batches(flowcell_path):
 
 
 def get_processed_projects(flowcell_path):
+    """
+    List processed projects for a flowcell run.
+    """
     return (os.path.join(flowcell_path, pp)
             for pp in os.listdir(flowcell_path)
             if re.search('Project_.*Processed', pp))
@@ -32,29 +41,29 @@ def get_processed_projects(flowcell_path):
 
 def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs, 
                         project_path):
+    """
+    Execute postprocessing steps (e.g., stitching, compiling, cleaning)
+    on outputs in a processed project folder.
+    """
     project_path_short = os.path.basename(os.path.normpath(project_path))
     if clean_outputs:
-        logging.info("cleaning output files for '{}'"
-                     .format(project_path))
         bripipetools.postprocess.OutputCleaner(project_path).clean_outputs()
-
-    logger.info("combining output files for '{}' with option '{}'"
-                .format(project_path_short, output_type))
+        logger.info("Output files cleaned for '{}".format(project_path_short))
 
     combined_paths = []
     if output_type in ['c', 'a'] and 'c' not in exclude_types:
-        logger.info("generating combined counts file")
+        logger.debug("generating combined counts file")
         path = os.path.join(project_path, 'counts')
         bripipetools.postprocess.OutputStitcher(path).write_table()
 
     if output_type in ['m', 'a'] and 'm' not in exclude_types:
-        logger.info("generating combined metrics file")
+        logger.debug("generating combined metrics file")
         path = os.path.join(project_path, 'metrics')
         combined_paths.append(
             bripipetools.postprocess.OutputStitcher(path).write_table())
 
     if output_type in ['q', 'a'] and 'q' not in exclude_types:
-        logger.info("generating combined QC file(s)")
+        logger.debug("generating combined QC file(s)")
         path = os.path.join(project_path, 'QC')
         bripipetools.postprocess.OutputStitcher(
             path).write_overrepresented_seq_table()
@@ -62,7 +71,7 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
             bripipetools.postprocess.OutputStitcher(path).write_table())
 
     if output_type in ['v', 'a'] and 'v' not in exclude_types:
-        logger.info("generating combined validation file(s)")
+        logger.debug("generating combined validation file(s)")
         path = os.path.join(project_path, 'validation')
     try:
         combined_paths.append(
@@ -70,29 +79,20 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
         )
     except OSError:
         logger.warn(("no validation files found "
-                     "for project {}; skiproject_pathing").format(project_path))
+                     "for project {}; skiproject_pathing")
+                    .format(project_path))
+    logger.info("Combined output files generated for '{}' with option '{}'"
+                .format(project_path_short, output_type))
 
     if not stitch_only:
-        logger.info("merging all combined summary data tables")
         bripipetools.postprocess.OutputCompiler(combined_paths).write_table()
+        logger.info("Merged all combined summary data tables for '{}'"
+                    .format(project_path_short))
 
 
 @click.group()
 def main():
-    # logger.setLevel(logging.INFO)
-    # from logging.config import fileConfig
-    # config_path = os.path.join(
-    #     os.path.dirname(os.path.realpath(__file__)),
-    #     'config'
-    # )
-    # fileConfig(os.path.join(config_path, 'logging_config.ini'))
-    logger.info("starting `bripipetools`")
-
-
-@main.command()
-@click.option('--print-opt')
-def test(print_opt):
-    click.echo("Hello World! {}".format(print_opt))
+    pass
 
 
 @main.command()
@@ -114,13 +114,14 @@ def submit(endpoint, workflow_dir, path):
 @main.command()
 @click.argument('path')
 def dbify(path):
-    logger.info("importing data based on path {}"
-                .format(path))
+    logger.info("Importing data to '{}' based on path '{}'"
+                .format(DB.name, path))
     importer = bripipetools.dbify.ImportManager(
         path=path,
-        db=bripipetools.genlims.db
+        db=DB
     )
     importer.run()
+    logger.info("Import complete.")
 
 
 @main.command()
@@ -146,24 +147,25 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
     # import flowcell run details and raw data for sequenced libraries
-    logger.info("importing raw data for flowcell at path {}"
+    logger.info("Importing raw data for flowcell at path '{}'"
                 .format(path))
     importer = bripipetools.dbify.ImportManager(
         path=path,
         db=bripipetools.genlims.db
     )
     importer.run()
+    logger.info("Flowcell run import complete.")
 
     workflow_batches = list(get_workflow_batches(path))
-    logger.info("found the following workflow batches: {}"
-                .format(workflow_batches))
+    logger.debug("found the following workflow batches: {}"
+                 .format(workflow_batches))
 
     # check outputs of workflow batches
     genomics_root = bripipetools.util.matchdefault('.*(?=genomics)', path)
     problem_count = 0
     for wb in workflow_batches:
-        logger.info("checking outputs for workflow batch in file '{}'"
-                    .format(wb))
+        logger.debug("checking outputs for workflow batch in file '{}'"
+                     .format(wb))
         wb_outputs = bripipetools.monitoring.WorkflowBatchMonitor(
             workflowbatch_file=wb, genomics_root=genomics_root
         ).check_outputs()
@@ -183,42 +185,34 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
         proceed = raw_input("{} problems encountered; proceed? (y/[n]): "
                             .format(problem_count))
         if proceed != 'y':
-            logger.info("exiting program")
+            logger.info("Exiting program.")
             sys.exit(1)
     else:
-        logger.info("no problem outputs found")
+        logger.info("No problem outputs found with any workflow batches.")
 
     # import workflow batch details and data for processed libraries
     for wb in workflow_batches:
-        logger.info(
+        logger.debug(
             "importing processed data for workflow batch in file '{}'"
-            .format(wb))
+            .format(wb)
+        )
         bripipetools.dbify.ImportManager(
             path=wb,
             db=bripipetools.genlims.db
         ).run()
+        logger.info("Workflow batch import for '{}' complete."
+                    .format(os.path.basename(wb)))
 
     processed_projects = list(get_processed_projects(path))
-    logger.info("found the following processed projects: {}"
-                .format(processed_projects))
+    logger.debug("found the following processed projects: {}"
+                 .format(processed_projects))
 
     # post-process project files
+    logger.info("Postprocessing flowcell projects.")
     for pp in processed_projects:
         postprocess_project(output_type, exclude_types, stitch_only,
                             clean_outputs, pp)
-
-#
-# cli.add_command(test)
-# cli.add_command(submit)
-# cli.add_command(dbify)
-# cli.add_command(postprocess)
-# cli.add_command(wrapup)
+    logger.info("Project postprocessing complete.")
 
 if __name__ == "__main__":
-    # from logging.config import fileConfig
-    # config_path = os.path.join(
-    #     os.path.dirname(os.path.realpath(__file__)),
-    #     'config'
-    # )
-    # fileConfig(os.path.join(config_path, 'logging_config.ini'))
     main()
