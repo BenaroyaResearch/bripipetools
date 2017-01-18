@@ -72,6 +72,8 @@ class WorkflowBatchMonitor(object):
             flagged as ok, missing, or empty.
         """
         outputs = self._clean_output_paths(self._get_outputs())
+        logger.debug("checking status for the following outputs: {}"
+                     .format(outputs))
 
         output_status = {}
         for sample_outputs in outputs:

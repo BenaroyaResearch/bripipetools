@@ -115,8 +115,11 @@ def main(verbosity):
 @click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
               help=("path to folder containing Galaxy workflow template "
                     "files to be used for batch processing"))
+@click.option('--all-workflows/--optimized-only', default=False,
+              help=("indicate whether to include all detected workflows "
+                    "as options or to keep 'optimized' workflows only"))
 @click.argument('path')
-def submit(endpoint, workflow_dir, path):
+def submit(endpoint, workflow_dir, all_workflows, path):
     """
     Prepare batch submission for unaligned samples from a flowcell run.
     """
@@ -130,7 +133,8 @@ def submit(endpoint, workflow_dir, path):
         path=path,
         endpoint=endpoint,
         db=DB,
-        workflow_dir=workflow_dir
+        workflow_dir=workflow_dir,
+        all_workflows=all_workflows
     )
     submit_paths = submitter.run()
     for p in submit_paths:

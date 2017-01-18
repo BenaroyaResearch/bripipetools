@@ -14,7 +14,8 @@ class FlowcellSubmissionBuilder(object):
     Prepares workflow batch submissions for all unaligned projects
     from a flowcell run.
     """
-    def __init__(self, path, endpoint, db, workflow_dir=None):
+    def __init__(self, path, endpoint, db, workflow_dir=None,
+                 all_workflows=True):
         logger.debug("creating `FlowcellSubmissionBuilder` instance "
                      "for path '{}'".format(path))
         self.path = path
@@ -22,6 +23,7 @@ class FlowcellSubmissionBuilder(object):
         self.db = db
         if workflow_dir is not None:
             self.workflow_dir = workflow_dir
+        self.all_workflows = all_workflows
         self._init_annotator()
 
     def _init_annotator(self):
@@ -62,7 +64,9 @@ class FlowcellSubmissionBuilder(object):
                               for f in self.project_paths]))
 
     def _assign_workflows(self):
-        workflow_opts = self.get_workflow_options()
+        workflow_opts = self.get_workflow_options(
+            optimized_only=not self.all_workflows
+        )
         self._get_project_paths()
 
         continue_assign = True
