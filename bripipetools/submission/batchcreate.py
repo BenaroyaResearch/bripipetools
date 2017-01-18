@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import datetime
 
 from .. import parsing
@@ -65,8 +66,9 @@ class BatchCreator(object):
 
     def _check_input_type(self):
         try:
-            check_path = os.path.join(self.paths[0],
-                                      os.listdir(self.paths[0])[0])
+            check_path = [os.path.join(self.paths[0], f)
+                          for f in os.listdir(self.paths[0])
+                          if not re.search('DS_Store', f)][0]
         except IndexError:
             logger.debug("input paths appear to be empty folders; exiting",
                          exc_info=True)
@@ -100,7 +102,8 @@ class BatchCreator(object):
 
     def _get_sample_paths(self, folder):
         sample_paths = [os.path.join(folder, s)
-                        for s in os.listdir(folder)]
+                        for s in os.listdir(folder)
+                        if not re.search('DS_Store', s)]
 
         logger.debug("found the following sample paths: {}"
                      .format(sample_paths))

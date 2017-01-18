@@ -119,7 +119,7 @@ class BatchParameterizer(object):
                      .format(sample_name))
         param_values = []
         for param in self.parameters:
-            logger.debug("... current paramter: {}")
+            logger.debug("... current paramter: {}".format(param))
             if re.search('endpoint', param['name']):
                 param_values.append(self.endpoint)
 
