@@ -120,6 +120,8 @@ class BatchCreator(object):
         if self.inputs_are_folders:
             batch_params = []
             for p in self.paths:
+                logger.info("setting parameters for samples in folder {}"
+                            .format(p))
                 target_dir = self._prep_target_dir(p)
                 sample_paths = self._get_sample_paths(p)
                 parameterizer = BatchParameterizer(
@@ -131,6 +133,7 @@ class BatchCreator(object):
                 parameterizer.parameterize()
                 batch_params = batch_params + parameterizer.samples
         else:
+            logger.info("setting parameters for all samples")
             target_dir = self._prep_target_dir()
             sample_paths = self.paths
             parameterizer = BatchParameterizer(

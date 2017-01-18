@@ -175,7 +175,7 @@ class OutputStitcher(object):
             for o in outputs:
                 logger.debug("parsing overrepresented sequences "
                              "from output file {}".format(o))
-                out_items = self._parse_output_filename(o)
+                out_items = parsing.parse_output_filename(o)
                 out_source, out_type, proclib_id = out_items.values()
                 logger.debug("storing data from {} in {} {}".format(
                     out_source, proclib_id, out_type))
