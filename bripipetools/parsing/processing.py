@@ -28,9 +28,9 @@ def parse_workflow_param(param):
     param_tag = param.split('##')[0]
     if re.search('annotation', param_tag):
         param_type = 'annotation'
-    elif re.search('in', param_tag):
+    elif re.search('in$', param_tag):
         param_type = 'input'
-    elif re.search('out', param_tag):
+    elif re.search('out$', param_tag):
         param_type = 'output'
     else:
         param_type = 'sample'
@@ -42,6 +42,11 @@ def parse_workflow_param(param):
 
 def parse_output_name(output_name):
     output_name = re.sub('_out$', '', output_name)
+    if re.search('trimmed_fastq', output_name):
+        output_name = re.sub('trimmed', 'fastqmcf_trimmed', output_name)
+
+    if re.search('^trinity_fasta', output_name):
+        output_name = re.sub('trinity', 'trinity_trinity', output_name)
 
     name_parts = output_name.split('_')
 
