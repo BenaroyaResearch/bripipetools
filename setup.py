@@ -16,10 +16,14 @@ config = {
         'bripipetools': ['config/default.ini', 'data/*']
     },
     'install_requires': [
+        'Click',
         'beautifulsoup4',
         'pymongo',
         'pandas'
     ],
+    'entry_points': {
+        'console_scripts': 'bripipetools = bripipetools.__main__:cli'
+    },
     'setup_requires': ['pytest-runner'],
     'tests_require': ['pytest', 'pytest-cov', 'mock', 'mongomock'],
     'scripts': [
