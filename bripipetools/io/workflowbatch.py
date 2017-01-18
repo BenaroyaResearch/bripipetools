@@ -34,6 +34,8 @@ class WorkflowBatchFile(object):
         Read and store lines from batch submit file.
         """
         path = self.path
+        logger.debug("reading file '{}' to raw string list"
+                     .format(self.path))
         with open(path) as f:
             self.data['raw'] = f.readlines()
 

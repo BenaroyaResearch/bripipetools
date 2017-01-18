@@ -22,6 +22,8 @@ class WorkflowBatchMonitor(object):
         :param workflowbatch_file: File path of the submitted workflow
             batch file.
         """
+        logger.debug("creating `WorkflowBatchMonitor` instance for '{}'"
+                     .format(workflowbatch_file))
         self.workflowbatch_file = workflowbatch_file
         self.workflowbatch_data = io.WorkflowBatchFile(
             self.workflowbatch_file,

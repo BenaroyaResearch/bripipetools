@@ -13,7 +13,7 @@ class SexVerifier(object):
     Identifies, stores, and updates information about a workflow batch.
     """
     def __init__(self, data, processedlibrary, db):
-        logger.debug("creating an instance of SexVerifier")
+        logger.debug("creating `SexVerifier` instance")
         self.data = data
         self.processedlibrary = processedlibrary
         self.db = db
@@ -22,7 +22,7 @@ class SexVerifier(object):
         """
         Retrieve reported sex for sample.
         """
-        logger.debug("searching parents of {} for reported sex"
+        logger.debug("searching parents of '{}' for reported sex"
                      .format(parent_id))
         try:
             logger.debug("searching for 'reportedSex' field...")
@@ -47,7 +47,7 @@ class SexVerifier(object):
         :return:
         """
         reported_sex = self._retrieve_sex(self.processedlibrary.parent_id)
-        logger.debug("reported sex is {}".format(reported_sex))
+        logger.debug("reported sex is '{}'".format(reported_sex))
 
         if self.data['predicted_sex'] == reported_sex:
             self.data['sex_check'] = 'pass'

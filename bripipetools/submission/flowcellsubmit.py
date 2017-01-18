@@ -15,6 +15,8 @@ class FlowcellSubmissionBuilder(object):
     from a flowcell run.
     """
     def __init__(self, path, endpoint, db, workflow_dir=None):
+        logger.debug("creating `FlowcellSubmissionBuilder` instance "
+                     "for path '{}'".format(path))
         self.path = path
         self.endpoint = endpoint
         self.db = db
@@ -23,6 +25,7 @@ class FlowcellSubmissionBuilder(object):
         self._init_annotator()
 
     def _init_annotator(self):
+        logger.debug("initializing `FlowcellRunAnnotator` instance")
         path_items = parsing.parse_flowcell_path(self.path)
         self.annotator = annotation.FlowcellRunAnnotator(
             run_id=path_items['run_id'],
@@ -31,21 +34,32 @@ class FlowcellSubmissionBuilder(object):
         )
 
     def get_workflow_options(self, optimized_only=True):
+        logger.debug("collecting workflow templates from '{}'"
+                     .format(self.workflow_dir))
         workflow_opts = [os.path.join(self.workflow_dir, f)
                          for f in os.listdir(self.workflow_dir)
                          if 'Galaxy-API' not in f]
         workflow_opts.sort()
+        logger.debug("found the following workflow options: {}"
+                     .format([os.path.basename(f) for f in workflow_opts]))
 
         if optimized_only:
             workflow_opts = [f for f in workflow_opts
                              if re.search('optimized', f)]
+            logger.debug("keeping only optimized workflows: {}"
+                         .format([os.path.basename(f) for f in workflow_opts]))
 
         return workflow_opts
 
     def _get_project_paths(self):
         unaligned_path = self.annotator.get_unaligned_path()
+        logger.debug("collecting unaligned projects in '{}'"
+                     .format(unaligned_path))
         self.project_paths = [os.path.join(unaligned_path, p)
                               for p in self.annotator.get_projects()]
+        logger.debug("found the following unaligned projects: {}"
+                     .format([os.path.basename(os.path.normpath(f))
+                              for f in self.project_paths]))
 
     def _assign_workflows(self):
         workflow_opts = self.get_workflow_options()
@@ -75,15 +89,17 @@ class FlowcellSubmissionBuilder(object):
                                 .format(os.path.basename(selected_project)))
                 selected_workflow = workflow_opts[int(w_j)]
 
-                (batch_map.setdefault(selected_workflow, [])
-                 .append(selected_project))
+                batch_map.setdefault(selected_workflow, []).append(
+                    selected_project
+                )
+                logger.debug("current state of batch map: {}"
+                             .format(batch_map))
             else:
                 continue_assign = False
         self.batch_map = batch_map
 
     def _get_batch_tags(self, paths):
         group_tag = parsing.get_flowcell_id(self.path)
-        logger.debug("PATHS:{}".format(paths))
         subgroup_tags = [parsing.get_project_label(p) for p in paths]
 
         return group_tag, subgroup_tags
@@ -94,6 +110,9 @@ class FlowcellSubmissionBuilder(object):
 
         batch_paths = []
         for workflow, projects in self.batch_map.items():
+            logger.info("Building batch for workflow '{}' with samples "
+                        "from projects: {}"
+                        .format(os.path.basename(workflow), projects))
             group_tag, subgroup_tags = self._get_batch_tags(projects)
             creator = BatchCreator(
                 paths=projects,
@@ -105,6 +124,8 @@ class FlowcellSubmissionBuilder(object):
                 subgroup_tags=subgroup_tags
             )
             batch_paths.append(creator.create_batch())
+            logger.debug("workflow batch parameters saved in file '{}'"
+                         .format(batch_paths[-1]))
 
         return batch_paths
 

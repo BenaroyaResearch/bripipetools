@@ -21,7 +21,7 @@ class HtseqCountsFile(object):
         """
         Read file into Pandas data frame.
         """
-        logger.debug("reading file {} to data frame".format(self.path))
+        logger.debug("reading file '{}' to data frame".format(self.path))
         self.data['table'] = pd.read_table(self.path,
                                            names=['geneName', 'count'])
 

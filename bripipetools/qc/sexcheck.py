@@ -21,7 +21,7 @@ class SexChecker(object):
     """
     def __init__(self, processedlibrary, reference, workflowbatch_id,
                  genomics_root, db):
-        logger.debug("creating an instance of SexChecker for processed "
+        logger.debug("creating an instance of `SexChecker` for processed "
                      "library '{}', workflow batch ID '{}', with "
                      "genomics root '{}'"
                      .format(processedlibrary._id,
@@ -103,7 +103,7 @@ class SexChecker(object):
         """
         Return predicted sex based on X/Y gene equation and cutoff.
         """
-        logger.debug("adding sex check QC info for {}"
+        logger.debug("adding sex check QC info for '{}'"
                      .format(self.processedlibrary._id))
         self.data = SexPredictor(self.data).predict()
 
@@ -130,10 +130,10 @@ class SexChecker(object):
         )
         output_dir = os.path.join(project_path, 'validation')
         output_path = os.path.join(output_dir, output_filename)
-        logger.debug("saving sex check file {} to {}"
+        logger.debug("saving sex check file '{}' to '{}'"
                      .format(output_filename, output_dir))
         if not os.path.isdir(output_dir):
-            logger.debug("creating directory {}".format(output_dir))
+            logger.debug("creating directory '{}'".format(output_dir))
             os.makedirs(output_dir)
         with open(output_path, 'w') as f:
             writer = csv.DictWriter(f, fieldnames=self.data.keys())
@@ -152,7 +152,7 @@ class SexChecker(object):
         processed_data = [d for d in self.processedlibrary.processed_data
                           if d['workflowbatch_id']
                           == self.workflowbatch_id][0]
-        logger.debug("predicting sex based on Y-to-X gene ratio")
+        logger.debug("predicting sex based on X and Y gene data")
         self._compute_x_y_data()
         self._predict_sex()
         self._verify_sex()

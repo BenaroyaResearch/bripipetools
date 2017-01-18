@@ -14,30 +14,33 @@ class BatchParameterizer(object):
     given a list of parsed parameters for a Galaxy workflow.
     """
     def __init__(self, sample_paths, parameters, endpoint, target_dir,
-                 build=None):
+                 build='GRCh38'):
+        logger.debug("creating `BatchParametizer` instance ")
         self.sample_paths = sample_paths
         self.parameters = parameters
         self.endpoint = endpoint
         self.target_dir = target_dir
-        if build is not None:
-            self.build = build
-        else:
-            self.build = 'GRCh38'
+        self.build = build
 
     def _get_lane_order(self):
+        logger.debug("identifying lane order for input FASTQs")
         return [re.search('[1-8]', p['name']).group()
                 for p in self.parameters
                 if p['tag'] == 'fastq_in'
                 and re.search('from_path', p['name'])]
 
     def _get_lane_fastq(self, sample_path, lane):
+        logger.debug("retrieving FASTQ path for sample '{}' and lane {}"
+                     .format(sample_path, lane))
         fastq_paths = [os.path.join(sample_path, f)
                        for f in os.listdir(sample_path)
                        if re.search(r'L00{}'.format(lane), f)]
         if len(fastq_paths):
             fastq_path = fastq_paths[0]
-        # create empty file if no FASTQ exists for current lane
+
         else:
+            logger.debug("no FASTQ found for lane {}; creating empty file"
+                         .format(lane))
             empty_fastq = 'empty_L00{}.fastq.gz'.format(lane)
             fastq_path = os.path.join(sample_path, empty_fastq)
 
@@ -67,6 +70,8 @@ class BatchParameterizer(object):
         }
 
         ref_type = re.sub('^annotation_', '', parameter['tag'])
+        logger.debug("retrieving reference path for build '{}' and type '{}'"
+                     .format(self.build, ref_type))
         return 'library::annotation::{}'.format(
             ref_dict[self.build].get(ref_type)
         )
@@ -74,7 +79,8 @@ class BatchParameterizer(object):
     def _prep_output_dir(self, output_type):
 
         output_dir = os.path.join(self.target_dir, output_type)
-
+        logger.debug("creating folder '{}' to store outputs of type '{}'"
+                     .format(output_dir, output_type))
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
 
@@ -109,8 +115,11 @@ class BatchParameterizer(object):
         fc_id = parsing.get_flowcell_id(sample_path)
         sample_name = '{}_{}'.format(sample_id, fc_id).rstrip('_')
 
+        logger.debug("setting parameter values for sample '{}'"
+                     .format(sample_name))
         param_values = []
         for param in self.parameters:
+            logger.debug("... current paramter: {}")
             if re.search('endpoint', param['name']):
                 param_values.append(self.endpoint)
 
@@ -136,13 +145,14 @@ class BatchParameterizer(object):
                 else:
                     output_path = self._build_output_path(sample_name, param)
                 param_values.append(output_path)
+            logger.debug("... value set: '{}'".format(param_values[-1]))
 
         return param_values
 
     def parameterize(self):
         sample_params = []
         for s in self.sample_paths:
-            logger.debug("setting parameters for input sample file {}"
+            logger.debug("setting parameters for input sample file '{}'"
                          .format(s))
             s_values = self._build_sample_parameters(s)
             s_params = []
@@ -151,6 +161,7 @@ class BatchParameterizer(object):
                 s_param['value'] = s_values[idx]
                 s_params.append(s_param)
             sample_params.append(s_params)
+
         self.samples = sample_params
 
 

@@ -52,6 +52,7 @@ def get_library_id(string):
     """
     return util.matchdefault('lib[1-9]+[0-9]*', string)
 
+
 def get_sample_id(string):
     """
     More general than library ID; returns either library ID (if
