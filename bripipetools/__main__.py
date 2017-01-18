@@ -16,7 +16,7 @@ config_path = os.path.join(
 fileConfig(os.path.join(config_path, 'logging_config.ini'),
            disable_existing_loggers=False)
 logger = logging.getLogger()
-logger.info("starting `bripipetools`")
+logger.info("Starting `bripipetools`")
 DB = bripipetools.genlims.connect()
 
 
@@ -91,19 +91,45 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
 
 
 @click.group()
-def main():
-    pass
+@click.option('--quiet', 'verbosity', flag_value='quiet',
+              help=("only display printed outputs in the console - "
+                    "i.e., no log messages"))
+@click.option('--debug', 'verbosity', flag_value='debug',
+              help="include all debug log messages in the console")
+def main(verbosity):
+    """
+    Command line interface for the `bripipetools` library.
+    """
+    if verbosity == 'quiet':
+        logger.setLevel(logging.ERROR)
+    elif verbosity == 'debug':
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
 
 
 @main.command()
-@click.option('--endpoint', default='jeddy#srvgridftp01')
-@click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows')
+@click.option('--endpoint', default='jeddy#srvgridftp01',
+              help=("Globus Online endpoint where input data is stored "
+                    "and outputs will be saved"))
+@click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
+              help=("path to folder containing Galaxy workflow template "
+                    "files to be used for batch processing"))
 @click.argument('path')
 def submit(endpoint, workflow_dir, path):
+    """
+    Prepare batch submission for unaligned samples from a flowcell run.
+    """
+    logger.info("Creating batches for unaligned samples and projects "
+                "from flowcell run '{}'".format(path))
+    logger.info("... will search '{}' for workflow template options"
+                .format(workflow_dir))
+    logger.info("... destination endpoint for processing outputs is '{}'"
+                .format(endpoint))
     submitter = bripipetools.submission.FlowcellSubmissionBuilder(
         path=path,
         endpoint=endpoint,
-        db=bripipetools.genlims.db,
+        db=DB,
         workflow_dir=workflow_dir
     )
     submit_paths = submitter.run()
@@ -114,6 +140,10 @@ def submit(endpoint, workflow_dir, path):
 @main.command()
 @click.argument('path')
 def dbify(path):
+    """
+    Import data from a flowcell run or workflow processing batch into
+    GenLIMS database.
+    """
     logger.info("Importing data to '{}' based on path '{}'"
                 .format(DB.name, path))
     importer = bripipetools.dbify.ImportManager(
@@ -126,32 +156,59 @@ def dbify(path):
 
 @main.command()
 @click.option('--output-type', '-t', default='a',
-              type=click.Choice(['c', 'm', 'q', 'v', 'a']))
+              type=click.Choice(['c', 'm', 'q', 'v', 'a']),
+              help=("type of output file to combine: "
+                    "c [counts], m [metrics], q [qc], "
+                    "v [validation], a [all]"))
 @click.option('--exclude-types', '-x', multiple=True,
-              type=click.Choice(['c', 'm', 'q', 'v']))
-@click.option('--stitch-only/--stitch-and-compile', default=False)
-@click.option('--clean-outputs/--outputs-as-is', default=False)
+              type=click.Choice(['c', 'm', 'q', 'v']),
+              help=("type of output file to exclude: "
+                    "c [counts], m [metrics], q [qc], "
+                    "v [validation]"))
+@click.option('--stitch-only/--stitch-and-compile', default=False,
+              help=("Do NOT compile and merge all summary "
+                    "(non-count) data into a single file at "
+                    "the project level"))
+@click.option('--clean-outputs/--outputs-as-is', default=False,
+              help="Attempt to clean/organize output files")
 @click.argument('path')
 def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
+    """
+    Perform postprocessing operations on outputs of a workflow batch.
+    """
     postprocess_project(output_type, exclude_types, stitch_only,
                         clean_outputs, path)
 
 
 @main.command()
 @click.option('--output-type', '-t', default='a',
-              type=click.Choice(['c', 'm', 'q', 'v', 'a']))
+              type=click.Choice(['c', 'm', 'q', 'v', 'a']),
+              help=("type of output file to combine: "
+                    "c [counts], m [metrics], q [qc], "
+                    "v [validation], a [all]"))
 @click.option('--exclude-types', '-x', multiple=True,
-              type=click.Choice(['c', 'm', 'q', 'v']))
-@click.option('--stitch-only/--stitch-and-compile', default=False)
-@click.option('--clean-outputs/--outputs-as-is', default=False)
+              type=click.Choice(['c', 'm', 'q', 'v']),
+              help=("type of output file to exclude: "
+                    "c [counts], m [metrics], q [qc], "
+                    "v [validation]"))
+@click.option('--stitch-only/--stitch-and-compile', default=False,
+              help=("Do NOT compile and merge all summary "
+                    "(non-count) data into a single file at "
+                    "the project level"))
+@click.option('--clean-outputs/--outputs-as-is', default=False,
+              help="Attempt to clean/organize output files")
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
+    """
+    Perform 'dbify' and 'postprocess' operations on all projects and
+    workflow batches from a flowcell run.
+    """
     # import flowcell run details and raw data for sequenced libraries
     logger.info("Importing raw data for flowcell at path '{}'"
                 .format(path))
     importer = bripipetools.dbify.ImportManager(
         path=path,
-        db=bripipetools.genlims.db
+        db=DB
     )
     importer.run()
     logger.info("Flowcell run import complete.")
@@ -198,7 +255,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
         )
         bripipetools.dbify.ImportManager(
             path=wb,
-            db=bripipetools.genlims.db
+            db=DB
         ).run()
         logger.info("Workflow batch import for '{}' complete."
                     .format(os.path.basename(wb)))
