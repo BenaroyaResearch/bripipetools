@@ -16,13 +16,14 @@ class ProcessedLibraryAnnotator(object):
     Identifies, stores, and updates information about a processed library.
     """
     def __init__(self, workflowbatch_id, params, db):
-        logger.debug("creating an instance of ProcessedLibraryAnnotator")
+        logger.debug("creating `ProcessedLibraryAnnotator` instance")
         self.workflowbatch_id = workflowbatch_id
-        logger.debug("workflowbatch_id set to {}".format(workflowbatch_id))
+        logger.debug("workflowbatch_id set to '{}'".format(workflowbatch_id))
         self.db = db
         self.params = params
         self.seqlib_id = self._get_seqlib_id()
         self.proclib_id = '{}_processed'.format(self.seqlib_id)
+        logger.debug("processed library is '{}'".format(self.proclib_id))
         self.processedlibrary = self._init_processedlibrary()
 
     # TODO: move to parsing module
@@ -38,10 +39,10 @@ class ProcessedLibraryAnnotator(object):
         Try to retrieve data for the processed library from GenLIMS;
         if unsuccessful, create new ``ProcessedLibrary`` object.
         """
-        logger.debug("initializing ProcessedLibrary instance")
+        logger.debug("initializing `ProcessedLibrary` instance")
 
         try:
-            logger.debug("getting ProcessedLibrary from GenLIMS")
+            logger.debug("getting `ProcessedLibrary` from GenLIMS")
             return genlims.map_to_object(
                 genlims.get_samples(self.db, {'_id': self.proclib_id})[0])
         except IndexError:
@@ -64,7 +65,6 @@ class ProcessedLibraryAnnotator(object):
         """
         name = re.sub('_out$', '', output_name)
         name_parts = name.split('_')
-        logger.debug("{}".format(name_parts))
         if len(name_parts) == 3:
             name = '_'.join(name_parts)
             output_type = name_parts[1]
@@ -102,15 +102,16 @@ class ProcessedLibraryAnnotator(object):
         if (not len(processed_data)
                 or not any(d['workflowbatch_id'] == self.workflowbatch_id
                            for d in processed_data)):
-            logger.debug("inserting outputs from new workflow batch {} "
-                         "for processed library {}"
+            logger.debug("inserting outputs from new workflow batch '{}' "
+                         "for processed library '{}'"
                          .format(self.workflowbatch_id, self.proclib_id))
             self.processedlibrary.processed_data.append(
                 {'workflowbatch_id': self.workflowbatch_id,
-                 'outputs': self._group_outputs()})
+                 'outputs': self._group_outputs()}
+            )
         else:
-            logger.debug("updating outputs from workflow batch {} "
-                         "for processed library {}"
+            logger.debug("updating outputs from workflow batch '{}' "
+                         "for processed library '{}'"
                          .format(self.workflowbatch_id, self.proclib_id))
             batch_data = [d for d in processed_data
                           if d['workflowbatch_id'] == self.workflowbatch_id][0]
@@ -131,4 +132,7 @@ class ProcessedLibraryAnnotator(object):
         Return updated ProcessedLibrary object.
         """
         self._update_processedlibrary()
+        logger.debug("returning processed library object info: {}"
+                     .format(self.processedlibrary.__dict__))
+
         return self.processedlibrary

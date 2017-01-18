@@ -19,7 +19,7 @@ class SexcheckFile(object):
         """
         Read file into list of raw strings.
         """
-        logger.debug("reading file {} as to raw string list".format(self.path))
+        logger.debug("reading file '{}' to raw string list".format(self.path))
         with open(self.path) as f:
             self.data['raw'] = f.readlines()
 

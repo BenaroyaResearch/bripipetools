@@ -16,8 +16,8 @@ class WorkflowBatchImporter(object):
     batch, converts to documents, inserts into database.
     """
     def __init__(self, path, db):
-        logger.debug("creating an instance of ProcessingImporter")
-        logger.debug("...with arguments (path: {}, db: {})"
+        logger.debug("creating `ProcessingImporter` instance")
+        logger.debug("...with arguments (path: '{}', db: '{}')"
                      .format(path, db.name))
         self.path = path
         self.db = db
@@ -27,7 +27,7 @@ class WorkflowBatchImporter(object):
         Collect WorkflowBatch object for flowcell run.
         """
         path_items = parsing.parse_batch_file_path(self.path)
-        logger.info("collecting info for workflow batch file {}"
+        logger.info("collecting info for workflow batch file '{}'"
                     .format(path_items['workflowbatch_filename']))
 
         return annotation.WorkflowBatchAnnotator(
@@ -41,7 +41,7 @@ class WorkflowBatchImporter(object):
         Collect list of ProcessedLibrary objects for flowcell run.
         """
         path_items = parsing.parse_batch_file_path(self.path)
-        logger.info("collecting sequenced libraries for workflow batch file {}"
+        logger.info("collecting sequenced libraries for workflow batch '{}'"
                     .format(path_items['workflowbatch_filename']))
 
         return annotation.WorkflowBatchAnnotator(
@@ -55,7 +55,7 @@ class WorkflowBatchImporter(object):
         Convert WorkflowBatch object and insert into GenLIMS database.
         """
         workflowbatch = self._collect_workflowbatch()
-        logger.debug("inserting workflow batch {}".format(workflowbatch))
+        logger.debug("inserting workflow batch '{}'".format(workflowbatch))
         genlims.put_workflowbatches(self.db, workflowbatch.to_json())
 
     def _insert_processedlibraries(self):
@@ -64,7 +64,7 @@ class WorkflowBatchImporter(object):
         """
         processedlibraries = self._collect_processedlibraries()
         for pl in processedlibraries:
-            logger.debug("inserting processed library {}".format(pl))
+            logger.debug("inserting processed library '{}'".format(pl))
             genlims.put_samples(self.db, pl.to_json())
 
     def insert(self, collection='all'):
@@ -72,6 +72,10 @@ class WorkflowBatchImporter(object):
         Insert documents into GenLIMS database.
         """
         if collection in ['all', 'samples']:
+            logger.info(("Inserting processed libraries for workflow batch "
+                         "'{}' into '{}'").format(self.path, self.db.name))
             self._insert_processedlibraries()
         if collection in ['all', 'workflowbatches']:
+            logger.info("Inserting workflow batch '{}' into '{}'"
+                        .format(self.path, self.db.name))
             self._insert_workflowbatch()

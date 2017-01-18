@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import datetime
 
 from .. import parsing
@@ -18,6 +19,7 @@ class BatchCreator(object):
     def __init__(self, paths, workflow_template, endpoint, base_dir,
                  submit_dir=None, group_tag=None, subgroup_tags=None,
                  sort=False, num_samples=None, build='GRCh38'):
+        logger.debug("creating `BatchCreator` instance")
         self.paths = paths
         self.workflow_template = workflow_template
         self.workflowbatch_file = io.WorkflowBatchFile(
@@ -54,14 +56,19 @@ class BatchCreator(object):
         workflow_id = os.path.splitext(
             os.path.basename(self.workflow_template)
         )[0]
+        logger.debug("creating batch name from workflow ID '{}', "
+                     "group tag '{}', subgroup tags {}, and date tag '{}'"
+                     .format(workflow_id, self.group_tag, self.subgroup_tags,
+                             self.date_tag))
         batch_inputs = '_'.join([self.group_tag,
                                  '_'.join(self.subgroup_tags)]).rstrip('_')
         return '{}_{}_{}'.format(self.date_tag, batch_inputs, workflow_id)
 
     def _check_input_type(self):
         try:
-            check_path = os.path.join(self.paths[0],
-                                      os.listdir(self.paths[0])[0])
+            check_path = [os.path.join(self.paths[0], f)
+                          for f in os.listdir(self.paths[0])
+                          if not re.search('DS_Store', f)][0]
         except IndexError:
             logger.debug("input paths appear to be empty folders; exiting",
                          exc_info=True)
@@ -81,10 +88,13 @@ class BatchCreator(object):
             target_tag = parsing.get_project_label(os.path.basename(folder))
         else:
             target_tag = self.group_tag
+
         target_dir = os.path.join(
             self.base_dir,
             'Project_{}Processed_globus_{}'.format(target_tag, self.date_tag)
         )
+        logger.debug("creating folder for processed outputs '{}'"
+                     .format(target_dir))
         if not os.path.isdir(target_dir):
             os.makedirs(target_dir)
 
@@ -92,7 +102,8 @@ class BatchCreator(object):
 
     def _get_sample_paths(self, folder):
         sample_paths = [os.path.join(folder, s)
-                        for s in os.listdir(folder)]
+                        for s in os.listdir(folder)
+                        if not re.search('DS_Store', s)]
 
         logger.debug("found the following sample paths: {}"
                      .format(sample_paths))
@@ -109,7 +120,7 @@ class BatchCreator(object):
 
         if self.num_samples is not None:
             max_samples = min(self.num_samples, len(sample_paths))
-            logger.debug("subsetting sample paths for folder {} to {} samples"
+            logger.debug("subsetting paths for folder '{}' to {} samples"
                          .format(folder, max_samples))
             sample_paths = sample_paths[0:max_samples]
 
@@ -120,7 +131,7 @@ class BatchCreator(object):
         if self.inputs_are_folders:
             batch_params = []
             for p in self.paths:
-                logger.info("setting parameters for samples in folder {}"
+                logger.info("Setting parameters for samples in folder '{}'."
                             .format(p))
                 target_dir = self._prep_target_dir(p)
                 sample_paths = self._get_sample_paths(p)
@@ -133,7 +144,7 @@ class BatchCreator(object):
                 parameterizer.parameterize()
                 batch_params = batch_params + parameterizer.samples
         else:
-            logger.info("setting parameters for all samples")
+            logger.info("Setting parameters for all samples.")
             target_dir = self._prep_target_dir()
             sample_paths = self.paths
             parameterizer = BatchParameterizer(

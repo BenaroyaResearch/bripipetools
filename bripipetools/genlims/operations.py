@@ -23,7 +23,7 @@ def find_objects(collection):
         @wraps(f)
         def wrapper(*args):
             db, query = f(*args)
-            logger.debug("searching {} collection with query {}"
+            logger.debug("searching '{}' collection with query '{}'"
                          .format(collection, query))
             return list(db[collection].find(query))
         return wrapper
@@ -46,7 +46,7 @@ def insert_objects(collection):
             objects = [objects] if not isinstance(objects, list) else objects
             logger.debug("inserting list of objects: {}".format(objects))
             for o in objects:
-                logger.debug("inserting {} into {} collection"
+                logger.debug("inserting '{}' into '{}' collection"
                              .format(o, collection))
                 for k, v in o.items():
                     if v is not None:
@@ -129,10 +129,10 @@ def create_workflowbatch_id(db, prefix, date):
     """
     isodate = datetime.date.isoformat(date)
     query = {'_id': {'$regex': '{}_{}_.+'.format(prefix, isodate)}}
-    logger.debug("searching 'workflowbatches' collection with query {}"
+    logger.debug("searching 'workflowbatches' collection with query '{}'"
                  .format(query))
     workflowbatches = get_workflowbatches(db, query)
-    logger.debug("matched workflow batches: {}".format(workflowbatches))
+    logger.debug("matched workflow batches: '{}'".format(workflowbatches))
 
     num = 1
     if len(workflowbatches):
@@ -140,7 +140,7 @@ def create_workflowbatch_id(db, prefix, date):
                    for wb in workflowbatches])
         while True:
             num_regex = re.compile('_{}$'.format(num))
-            logger.debug("searching for workflowbatches {} ending in {}"
+            logger.debug("searching for workflowbatches '{}' ending in '{}'"
                          .format(workflowbatches, num))
             if any([num_regex.search(wb['_id']) for wb in workflowbatches]):
                 num += 1

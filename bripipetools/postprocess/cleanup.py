@@ -16,7 +16,7 @@ class OutputCleaner(object):
     processing batch for a selected project.
     """
     def __init__(self, path):
-        logger.info("creating instance of OutputCleaner")
+        logger.debug("creating `OutputCleaner` instance for '{}'".format(path))
         self.path = path
         self.output_types = self._get_output_types()
 
@@ -46,7 +46,7 @@ class OutputCleaner(object):
         """
         Unzip the contents of a compressed output file.
         """
-        logging.debug("extracting contents of {} to {}"
+        logging.debug("extracting contents of '{}' to '{}'"
                       .format(path, os.path.dirname(path)))
         paths = []
         with zipfile.ZipFile(path) as zf:
@@ -62,11 +62,11 @@ class OutputCleaner(object):
         Unnest files in a subfolder by concatenating filenames and
         moving up one level.
         """
-        logging.debug("unnesting output {} from subfolder {}"
+        logging.debug("unnesting output '{}' from subfolder '{}'"
                       .format(path, os.path.dirname(path)))
         prefix = os.path.dirname(path)
         if re.search('.zip$', path):
-            logging.debug("unzipping contents of {} before unnesting"
+            logging.debug("unzipping contents of '{}' before unnesting"
                           .format(path))
             for p in self._unzip_output(path):
                 shutil.move(p, '{}_{}'.format(prefix, os.path.basename(p)))
@@ -84,7 +84,7 @@ class OutputCleaner(object):
         filename_map = {'QC': ('fastqc_data.txt', 'fastqc_qc.txt')}
         swap = filename_map[output_type]
         newpath = re.sub(swap[0], swap[1], path)
-        logging.debug("renaming {} to {}".format(path, newpath))
+        logging.debug("renaming '{}' to '{}'".format(path, newpath))
         shutil.move(path, newpath)
         return newpath
 
@@ -100,5 +100,7 @@ class OutputCleaner(object):
                     if not outregex.search(os.path.dirname(o)):
                         self._unnest_output(o)
                 for o in os.listdir(os.path.join(self.path, output_type)):
-                    self._recode_output(os.path.join(self.path, output_type, o),
-                                        output_type)
+                    self._recode_output(
+                        os.path.join(self.path, output_type, o),
+                        output_type
+                    )

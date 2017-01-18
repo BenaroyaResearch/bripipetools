@@ -18,8 +18,8 @@ class SequencedLibraryAnnotator(object):
     Identifies, stores, and updates information about a sequenced library.
     """
     def __init__(self, path, library, project, run_id, db):
-        logger.debug("creating an instance of SequencedLibraryAnnotator "
-                     "for library {}".format(library))
+        logger.debug("creating `SequencedLibraryAnnotator` instance "
+                     "for library '{}'".format(library))
         self.path = path
         self.db = db
         self.library_id = parsing.get_library_id(library)
@@ -35,21 +35,21 @@ class SequencedLibraryAnnotator(object):
         Try to retrieve data for the sequenced library from GenLIMS;
         if unsuccessful, create new ``SequencedLibrary`` object.
         """
-        logger.debug("initializing SequencedLibrary instance")
+        logger.debug("initializing `SequencedLibrary` instance")
         try:
-            logger.debug("getting SequencedLibrary from GenLIMS")
+            logger.debug("getting `SequencedLibrary` from GenLIMS")
             return genlims.map_to_object(
                 genlims.get_samples(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
-            logger.debug("creating new SequencedLibrary object")
+            logger.debug("creating new `SequencedLibrary` object")
             return docs.SequencedLibrary(_id=self.seqlib_id)
 
     def _get_raw_data(self):
         """
         Locate and store details about raw data for sequenced library.
         """
-        logger.debug("collecting raw data details for library {}".format(
-            self.library_id))
+        logger.debug("collecting raw data details for library '{}'"
+                     .format(self.library_id))
         return [parsing.parse_fastq_filename(f)
                 for f in os.listdir(self.path)
                 if not re.search('empty', f)]
@@ -58,7 +58,7 @@ class SequencedLibraryAnnotator(object):
         """
         Add any missing fields to SequencedLibrary object.
         """
-        logger.debug("updating SequencedLibrary object attributes")
+        logger.debug("updating `SequencedLibrary` object attributes")
 
         project_items = parsing.parse_project_label(self.project_label)
         update_fields = {'project_id': project_items['project_id'],
@@ -74,6 +74,7 @@ class SequencedLibraryAnnotator(object):
         Return sequenced library object with updated fields.
         """
         self._update_sequencedlibrary()
-        logger.debug("returning sequenced library object: {}".format(
-            self.sequencedlibrary.__dict__))
+        logger.debug("returning sequenced library object info: {}".format(
+            self.sequencedlibrary.__dict__)
+        )
         return self.sequencedlibrary

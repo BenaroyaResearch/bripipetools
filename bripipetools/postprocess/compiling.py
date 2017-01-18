@@ -16,6 +16,7 @@ class OutputCompiler(object):
     into single table, stored in a file at the project level.
     """
     def __init__(self, paths):
+        logger.debug("creating `OutputCompiler` instance")
         self.paths = paths
 
     def _read_data(self):
@@ -25,7 +26,7 @@ class OutputCompiler(object):
         self.data = []
 
         for p in self.paths:
-            logger.debug("parsing output file {}".format(p))
+            logger.debug("parsing output file '{}'".format(p))
             with open(p) as f:
                 p_data = list(csv.reader(f))
                 self.data.append([p_data[0]] + sorted(p_data[1:]))
@@ -57,7 +58,7 @@ class OutputCompiler(object):
         project_path = os.path.dirname(os.path.dirname(self.paths[0]))
         table_path = os.path.join(project_path,
                                   self._build_combined_filename())
-        logger.debug("writing to file {}".format(table_path))
+        logger.debug("writing to file '{}'".format(table_path))
         with open(table_path, 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
             for row in table_data:

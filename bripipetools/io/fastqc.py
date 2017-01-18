@@ -20,7 +20,8 @@ class FastQCFile(object):
         """
         Read file into list of raw strings.
         """
-        logger.debug("reading file {} as to raw string list".format(self.path))
+        logger.debug("reading file '{}' to raw string list"
+                     .format(self.path))
         with open(self.path) as f:
             self.data['raw'] = f.readlines()
 
@@ -57,7 +58,7 @@ class FastQCFile(object):
         """
         Return a tuple with the section name and status.
         """
-        logger.debug("getting section status for {} from line {}"
+        logger.debug("getting section status for '{}' from line {}"
                      .format(section_name,
                              self.data['raw'][section_info[0]].rstrip()))
         return (section_name,

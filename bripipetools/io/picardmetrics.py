@@ -23,7 +23,7 @@ class PicardMetricsFile(object):
         """
         Read file into raw HTML string.
         """
-        logger.debug("reading file {} as to raw HTML string".format(self.path))
+        logger.debug("reading file '{}' to raw HTML string".format(self.path))
         with open(self.path) as f:
             self.data['raw'] = f.read()
 
@@ -64,11 +64,11 @@ class PicardMetricsFile(object):
             for td in tr.findAll('td'):
                 if re.search('^(\w+_*)+$', td.text):
                     td_key = td.text.replace('\n', '')
-                    logger.debug("found metrics field {}".format(td_key))
+                    logger.debug("found metrics field '{}'".format(td_key))
 
                     td_val = td.next_sibling.string.replace(u'\xa0', u'')
                     td_val = td_val.replace('\n', '')
-                    logger.debug("with corresponding value {}".format(td_val))
+                    logger.debug("with corresponding value '{}'".format(td_val))
 
                     if len(td_val) and not re.search(r'[^\d.]+',
                                                      td_val.lower()):

@@ -22,7 +22,7 @@ class OutputStitcher(object):
     from files and write CSV.
     """
     def __init__(self, path, output_type=None, outputs=None):
-
+        logger.debug("creating `OutputStitcher` for path '{}'".format(path))
         self.path = path
         if output_type is None:
             self.type = self._sniff_output_type()
@@ -66,7 +66,7 @@ class OutputStitcher(object):
             'counts': {'htseq': getattr(io, 'HtseqCountsFile')},
             'validation': {'sexcheck': getattr(io, 'SexcheckFile')}
         }
-        logger.debug("matched parser {} for output type {} and source {}"
+        logger.debug("matched parser '{}' for output type '{}' and source '{}'"
                      .format(parsers[output_type][output_source],
                              output_type, output_source))
         return parsers[output_type][output_source]
@@ -79,13 +79,13 @@ class OutputStitcher(object):
         self.data = {}
 
         for o in outputs:
-            logger.debug("parsing output file {}".format(o))
+            logger.debug("parsing output file '{}'".format(o))
             out_items = parsing.parse_output_filename(o)
             proclib_id = out_items['sample_id']
             out_type = out_items['type']
             out_source = out_items['source']
 
-            logger.debug("storing data from {} in {} {}".format(
+            logger.debug("storing data from '{}' in '{}' '{}'".format(
                 out_source, proclib_id, out_type))
             out_parser = self._get_parser(out_type, out_source)(path=o)
 
@@ -174,7 +174,7 @@ class OutputStitcher(object):
         if self.type == 'qc':
             for o in outputs:
                 logger.debug("parsing overrepresented sequences "
-                             "from output file {}".format(o))
+                             "from output file '{}'".format(o))
                 out_items = parsing.parse_output_filename(o)
                 out_source, out_type, proclib_id = out_items.values()
                 logger.debug("storing data from {} in {} {}".format(
@@ -184,7 +184,7 @@ class OutputStitcher(object):
                                         .parse_overrepresented_seqs())
                            .assign(libId=proclib_id))
                 logger.debug("found {} overrepresented sequence(s) "
-                             "for sample {}".format(len(o_table), proclib_id))
+                             "for sample '{}'".format(len(o_table), proclib_id))
                 overrep_seq_table = overrep_seq_table.append(o_table)
         return overrep_seq_table
 
@@ -196,7 +196,7 @@ class OutputStitcher(object):
                                   self._build_combined_filename())
         table_path = re.sub('_qc', '_overrep_seqs', table_path)
         table_data = self._build_overrepresented_seq_table()
-        logger.debug("writing overrepresented seqs to file {}"
+        logger.debug("writing overrepresented seqs to file '{}'"
                      .format(table_path))
         table_data.to_csv(table_path, index=False)
 

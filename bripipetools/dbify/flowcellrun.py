@@ -16,8 +16,8 @@ class FlowcellRunImporter(object):
     converts to documents, inserts into database.
     """
     def __init__(self, path, db):
-        logger.debug("creating an instance of SequencingImporter")
-        logger.debug("...with arguments (path: {}, db: {})"
+        logger.debug("creating `SequencingImporter` instance")
+        logger.debug("...with arguments (path: '{}', db: '{}')"
                      .format(path, db.name))
         self.path = path
         self.db = db
@@ -41,7 +41,7 @@ class FlowcellRunImporter(object):
         Collect list of SequencedLibrary objects for flowcell run.
         """
         path_items = parsing.parse_flowcell_path(self.path)
-        logger.info("collecting sequenced libraries for flowcell run {}"
+        logger.info("Collecting sequenced libraries for flowcell run '{}'"
                     .format(path_items['run_id']))
 
         return annotation.FlowcellRunAnnotator(
@@ -73,6 +73,10 @@ class FlowcellRunImporter(object):
         Insert documents into GenLIMS database.
         """
         if collection in ['all', 'samples']:
+            logger.info(("Inserting sequenced libraries for flowcell '{}' "
+                         "into '{}'").format(self.path, self.db.name))
             self._insert_sequencedlibraries()
         if collection in ['all', 'runs']:
+            logger.info("Inserting flowcell run '{}' into '{}'"
+                        .format(self.path, self.db.name))
             self._insert_flowcellrun()

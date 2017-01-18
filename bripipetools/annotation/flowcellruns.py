@@ -19,7 +19,7 @@ class FlowcellRunAnnotator(object):
     Identifies, stores, and updates information about a flowcell run.
     """
     def __init__(self, run_id, genomics_root, db):
-        logger.debug("creating instance of FlowcellRunAnnotator for run ID {}"
+        logger.debug("creating `FlowcellRunAnnotator` instance for run ID '{}'"
                      .format(run_id))
         self.run_id = run_id
         self.db = db
@@ -33,13 +33,13 @@ class FlowcellRunAnnotator(object):
         Try to retrieve data for the flowcell run from GenLIMS; if
         unsuccessful, create new ``FlowcellRun`` object.
         """
-        logger.debug("initializing FlowcellRun instance")
+        logger.debug("initializing `FlowcellRun` instance")
         try:
-            logger.debug("getting FlowcellRun from GenLIMS")
+            logger.debug("getting `FlowcellRun` from GenLIMS")
             return genlims.map_to_object(
                 genlims.get_runs(self.db, {'_id': self.run_id})[0])
         except IndexError:
-            logger.debug("creating new FlowcellRun object", exc_info=True)
+            logger.debug("creating new `FlowcellRun` object", exc_info=True)
             return docs.FlowcellRun(_id=self.run_id)
 
     def get_flowcell_path(self):
@@ -47,7 +47,7 @@ class FlowcellRunAnnotator(object):
         Find path to flowcell folder on the server.
         """
         illumina_path = os.path.join(self.genomics_path, 'Illumina')
-        logger.info("searching for flowcell folder")
+        logger.debug("searching for flowcell folder")
         try:
             return [os.path.join(illumina_path, p)
                     for p in os.listdir(illumina_path)
@@ -61,7 +61,7 @@ class FlowcellRunAnnotator(object):
         """
         Find path to unaligned data in flowcell folder.
         """
-        logger.info("searching for 'Unaligned' folder")
+        logger.debug("searching for 'Unaligned' folder")
         try:
             unaligned_path = os.path.join(self.get_flowcell_path(),
                                           'Unaligned')
@@ -76,7 +76,7 @@ class FlowcellRunAnnotator(object):
         """
         Add any missing fields to FlowcellRun object.
         """
-        logger.debug("updating FlowcellRun object attributes")
+        logger.debug("updating `FlowcellRun` object attributes")
         pass
 
     def get_flowcell_run(self):
@@ -84,7 +84,7 @@ class FlowcellRunAnnotator(object):
         Return flowcell run object with updated fields.
         """
         self._update_flowcellrun()
-        logger.debug("returning flowcell run object: {}".format(
+        logger.debug("returning flowcell run object info: {}".format(
             self.flowcellrun.to_json()))
         return self.flowcellrun
 
@@ -93,7 +93,7 @@ class FlowcellRunAnnotator(object):
         Collect list of projects for flowcell run.
         """
         unaligned_path = self.get_unaligned_path()
-        logger.info("collecting list of projects")
+        logger.debug("collecting list of projects")
         return [p for p in os.listdir(unaligned_path)
                 if len(parsing.get_project_label(p))]
 
@@ -107,7 +107,7 @@ class FlowcellRunAnnotator(object):
             logger.debug("subsetting projects")
             projects = [p for p in projects
                         if re.search(project, p)]
-        logger.info("collecting list of libraries")
+        logger.debug("collecting list of libraries")
         logger.debug("searching in projects {}".format(projects))
         return [l for p in projects
                 for l in os.listdir(os.path.join(unaligned_path, p))
@@ -125,7 +125,8 @@ class FlowcellRunAnnotator(object):
                         if re.search(project, p)]
         sequencedlibraries = []
         for p in projects:
-            logger.info("getting sequenced libraries for project {}".format(p))
+            logger.info("getting sequenced libraries for project '{}'"
+                        .format(p))
             libraries = self.get_libraries(p)
             sequencedlibraries += [SequencedLibraryAnnotator(
                         os.path.join(unaligned_path, p, l),
@@ -133,69 +134,3 @@ class FlowcellRunAnnotator(object):
                         ).get_sequenced_library()
                         for l in libraries]
         return sequencedlibraries
-
-
-# class SequencedLibraryAnnotator(object):
-#     """
-#     Identifies, stores, and updates information about a sequenced library.
-#     """
-#     def __init__(self, path, library, project, run_id, db):
-#         logger.info("creating an instance of SequencedLibraryAnnotator "
-#                     "for library {}".format(library))
-#         self.path = path
-#         self.db = db
-#         self.library_id = parsing.get_library_id(library)
-#         self.project_label = parsing.get_project_label(project)
-#         self.run_id = run_id
-#         self.run_items = parsing.parse_flowcell_run_id(run_id)
-#         self.seqlib_id = '{}_{}'.format(self.library_id,
-#                                         self.run_items['flowcell_id'])
-#         self.sequencedlibrary = self._init_sequencedlibrary()
-#
-#     def _init_sequencedlibrary(self):
-#         """
-#         Try to retrieve data for the sequenced library from GenLIMS;
-#         if unsuccessful, create new ``SequencedLibrary`` object.
-#         """
-#         logger.info("initializing SequencedLibrary instance")
-#         try:
-#             logger.debug("getting SequencedLibrary from GenLIMS")
-#             return genlims.map_to_object(
-#                 genlims.get_samples(self.db, {'_id': self.seqlib_id})[0])
-#         except IndexError:
-#             logger.debug("creating new SequencedLibrary object")
-#             return docs.SequencedLibrary(_id=self.seqlib_id)
-#
-#     def _get_raw_data(self):
-#         """
-#         Locate and store details about raw data for sequenced library.
-#         """
-#         logger.debug("collecting raw data details for library {}".format(
-#             self.library_id))
-#         return [parsing.parse_fastq_filename(f)
-#                 for f in os.listdir(self.path)
-#                 if not re.search('empty', f)]
-#
-#     def _update_sequencedlibrary(self):
-#         """
-#         Add any missing fields to SequencedLibrary object.
-#         """
-#         logger.debug("updating SequencedLibrary object attributes")
-#
-#         project_items = parsing.parse_project_label(self.project_label)
-#         update_fields = {'project_id': project_items['project_id'],
-#                          'subproject_id': project_items['subproject_id'],
-#                          'run_id': self.run_id,
-#                          'parent_id': self.library_id,
-#                          'raw_data': self._get_raw_data()}
-#         self.sequencedlibrary.is_mapped = False
-#         self.sequencedlibrary.update_attrs(update_fields, force=True)
-#
-#     def get_sequenced_library(self):
-#         """
-#         Return sequenced library object with updated fields.
-#         """
-#         self._update_sequencedlibrary()
-#         logger.debug("returning sequenced library object: {}".format(
-#             self.sequencedlibrary.__dict__))
-#         return self.sequencedlibrary
