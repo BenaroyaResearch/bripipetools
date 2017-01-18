@@ -265,12 +265,12 @@ class TestProcessing:
             ('annotation_tag##_::_::param_name', {'tag': 'annotation_tag',
                                                   'type': 'annotation',
                                                   'name': 'param_name'}),
-            ('in_tag##_::_::_::param_name', {'tag': 'in_tag',
-                                             'type': 'input',
-                                             'name': 'param_name'}),
-            ('out_tag##_::_::_::param_name', {'tag': 'out_tag',
-                                              'type': 'output',
+            ('mock_in##_::_::_::param_name', {'tag': 'mock_in',
+                                              'type': 'input',
                                               'name': 'param_name'}),
+            ('mock_out##_::_::_::param_name', {'tag': 'mock_out',
+                                               'type': 'output',
+                                               'name': 'param_name'}),
         ]
     )
     def test_parse_workflow_param(self, mock_param, expected_result):

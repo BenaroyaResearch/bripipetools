@@ -17,7 +17,7 @@ def mock_batchfile(filename, tmpdir):
                      'Project Name\t161231_P00-00_C00000XX\n',
                      '###TABLE DATA\n',
                      '#############\n',
-                     'SampleName\tout_tag##_::_::_::to_path\n',
+                     'SampleName\tmock_out##_::_::_::to_path\n',
                      'sample1\t/mnt/genomics/out_file1\n',
                      'sample2\t/mnt/genomics/out_file2\n']
     mock_file = tmpdir.join(filename)
@@ -47,8 +47,8 @@ class TestWorkflowBatchMonitor:
         test_outputs = monitor._get_outputs()
 
         # THEN the outputs should match the expected result
-        assert (test_outputs == [{'out_tag': '/mnt/genomics/out_file1'},
-                                 {'out_tag': '/mnt/genomics/out_file2'}])
+        assert (test_outputs == [{'mock_out': '/mnt/genomics/out_file1'},
+                                 {'mock_out': '/mnt/genomics/out_file2'}])
 
     def test_clean_output_paths(self, tmpdir):
         # GIVEN a path to a workflow batch file
@@ -64,8 +64,8 @@ class TestWorkflowBatchMonitor:
 
         # AND a list of annotated outputs in the format returned by
         # the `_get_outputs()` method above
-        mock_outputs = [{'out_tag': '/mnt/genomics/out_file1'},
-                        {'out_tag': '/mnt/genomics/out_file2'}]
+        mock_outputs = [{'mock_out': '/mnt/genomics/out_file1'},
+                        {'mock_out': '/mnt/genomics/out_file2'}]
 
         # WHEN the 'genomics' root used during batch processing is
         # replaced with the full path to the 'genomics' root relative
@@ -74,8 +74,8 @@ class TestWorkflowBatchMonitor:
 
         # THEN the cleaned output paths should match the expected result
         assert (test_outputs
-                == [{'out_tag': '{}/out_file1'.format(str(mock_genomicsdir))},
-                    {'out_tag': '{}/out_file2'.format(str(mock_genomicsdir))}])
+                == [{'mock_out': '{}/out_file1'.format(str(mock_genomicsdir))},
+                    {'mock_out': '{}/out_file2'.format(str(mock_genomicsdir))}])
 
     @pytest.mark.parametrize(
         'mock_status', ['ok', 'empty', 'missing']
@@ -99,7 +99,6 @@ class TestWorkflowBatchMonitor:
 
         if mock_status in ['ok', 'empty']:
             mock_outfile = mock_genomicsdir.ensure('out_file1')
-            logger.debug("PATH:{}".format(mock_outfile))
 
         if mock_status == 'ok':
             mock_outfile.write('mock_contents')
@@ -114,7 +113,7 @@ class TestWorkflowBatchMonitor:
         assert (all(field in status_fields
                 for field in ['exists', 'size', 'status']
                 for status_fields in test_status.values()))
-        assert (test_status[mock_outfile]['status'] == mock_status)
+        assert (test_status[str(mock_outfile)]['status'] == mock_status)
 
 
 

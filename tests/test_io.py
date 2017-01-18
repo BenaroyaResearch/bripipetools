@@ -837,7 +837,7 @@ class TestWorkflowBatchFile:
         # subsequent row (separated by tab)
         testcontents = ['###TABLE DATA\n',
                         '#############\n',
-                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'SampleName\tmock_in##_::_::_::param_name\n',
                         'sample1\tin_value1\n']
 
         # AND an io class object with the file contents stored in the
@@ -855,7 +855,7 @@ class TestWorkflowBatchFile:
         assert (test_params[0] == {'tag': 'SampleName',
                                    'type': 'sample',
                                    'name': 'SampleName'})
-        assert (test_params[1] == {'tag': 'in_tag',
+        assert (test_params[1] == {'tag': 'mock_in',
                                    'type': 'input',
                                    'name': 'param_name'})
 
@@ -866,7 +866,7 @@ class TestWorkflowBatchFile:
         # subsequent row (separated by tab)
         testcontents = ['###TABLE DATA\n',
                         '#############\n',
-                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'SampleName\tmock_in##_::_::_::param_name\n',
                         'sample1\tin_value1\n',
                         'sample2\tin_value2\n']
 
@@ -888,7 +888,7 @@ class TestWorkflowBatchFile:
              'type': 'sample',
              'value': 'sample1'},
             {'name': 'param_name',
-             'tag': 'in_tag',
+             'tag': 'mock_in',
              'type': 'input',
              'value': 'in_value1'}
         ])
@@ -905,7 +905,7 @@ class TestWorkflowBatchFile:
                         'Project Name\tDATE_P00-00_FLOWCELL\n',
                         '###TABLE DATA\n',
                         '#############\n',
-                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'SampleName\tmock_in##_::_::_::param_name\n',
                         'sample1\tin_value1\n',
                         'sample2\tin_value2\n']
         testpath = mockstringfile(''.join(testcontents), tmpdir)
@@ -926,7 +926,7 @@ class TestWorkflowBatchFile:
             'raw': testcontents,
             'parameters': [
                 {'name': 'SampleName', 'tag': 'SampleName', 'type': 'sample'},
-                {'name': 'param_name', 'tag': 'in_tag', 'type': 'input'}
+                {'name': 'param_name', 'tag': 'mock_in', 'type': 'input'}
             ],
             'samples': [
                 [
@@ -934,7 +934,7 @@ class TestWorkflowBatchFile:
                      'type': 'sample',
                      'name': 'SampleName',
                      'value': 'sample1'},
-                    {'tag': 'in_tag',
+                    {'tag': 'mock_in',
                      'type': 'input',
                      'name': 'param_name',
                      'value': 'in_value1'}
@@ -944,7 +944,7 @@ class TestWorkflowBatchFile:
                      'type': 'sample',
                      'name': 'SampleName',
                      'value': 'sample2'},
-                    {'tag': 'in_tag',
+                    {'tag': 'mock_in',
                      'type': 'input',
                      'name': 'param_name',
                      'value': 'in_value2'}
@@ -964,7 +964,7 @@ class TestWorkflowBatchFile:
                         'Project Name\tDATE_P00-00_FLOWCELL\n',
                         '###TABLE DATA\n',
                         '#############\n',
-                        'SampleName\tin_tag##_::_::_::param_name\n',
+                        'SampleName\tmock_in##_::_::_::param_name\n',
                         'sample1\tin_value1\n',
                         'sample2\tin_value2\n']
         testpath = mockstringfile(''.join(testcontents), tmpdir)
