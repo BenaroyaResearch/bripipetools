@@ -1,4 +1,5 @@
 import logging
+from logging.config import fileConfig
 import os
 import re
 import sys
@@ -7,8 +8,13 @@ import click
 
 import bripipetools
 
-logging.basicConfig()
-logger = logging.getLogger(__name__)
+config_path = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'config'
+)
+fileConfig(os.path.join(config_path, 'logging_config.ini'),
+           disable_existing_loggers=False)
+logger = logging.getLogger()
 
 
 def get_workflow_batches(flowcell_path):
@@ -72,18 +78,24 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
 
 
 @click.group()
-def cli():
-    logger.setLevel(logging.INFO)
+def main():
+    # logger.setLevel(logging.INFO)
+    # from logging.config import fileConfig
+    # config_path = os.path.join(
+    #     os.path.dirname(os.path.realpath(__file__)),
+    #     'config'
+    # )
+    # fileConfig(os.path.join(config_path, 'logging_config.ini'))
     logger.info("starting `bripipetools`")
 
 
-@click.command()
+@main.command()
 @click.option('--print-opt')
 def test(print_opt):
     click.echo("Hello World! {}".format(print_opt))
 
 
-@click.command()
+@main.command()
 @click.option('--endpoint', default='jeddy#srvgridftp01')
 @click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows')
 @click.argument('path')
@@ -99,7 +111,7 @@ def submit(endpoint, workflow_dir, path):
         print(p)
 
 
-@click.command()
+@main.command()
 @click.argument('path')
 def dbify(path):
     logger.info("importing data based on path {}"
@@ -111,7 +123,7 @@ def dbify(path):
     importer.run()
 
 
-@click.command()
+@main.command()
 @click.option('--output-type', '-t', default='a',
               type=click.Choice(['c', 'm', 'q', 'v', 'a']))
 @click.option('--exclude-types', '-x', multiple=True,
@@ -124,7 +136,7 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
                         clean_outputs, path)
 
 
-@click.command()
+@main.command()
 @click.option('--output-type', '-t', default='a',
               type=click.Choice(['c', 'm', 'q', 'v', 'a']))
 @click.option('--exclude-types', '-x', multiple=True,
@@ -195,12 +207,18 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
         postprocess_project(output_type, exclude_types, stitch_only,
                             clean_outputs, pp)
 
-
-cli.add_command(test)
-cli.add_command(submit)
-cli.add_command(dbify)
-cli.add_command(postprocess)
-cli.add_command(wrapup)
+#
+# cli.add_command(test)
+# cli.add_command(submit)
+# cli.add_command(dbify)
+# cli.add_command(postprocess)
+# cli.add_command(wrapup)
 
 if __name__ == "__main__":
-    cli()
+    # from logging.config import fileConfig
+    # config_path = os.path.join(
+    #     os.path.dirname(os.path.realpath(__file__)),
+    #     'config'
+    # )
+    # fileConfig(os.path.join(config_path, 'logging_config.ini'))
+    main()

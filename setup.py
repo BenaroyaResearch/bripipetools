@@ -13,7 +13,11 @@ config = {
     'license': 'MIT',
     'packages': ['bripipetools'],
     'package_data': {
-        'bripipetools': ['config/default.ini', 'data/*']
+        'bripipetools': [
+            'config/default.ini',
+            'config/logging_config.ini',
+            'data/*'
+        ]
     },
     'install_requires': [
         'Click',
@@ -22,7 +26,7 @@ config = {
         'pandas'
     ],
     'entry_points': {
-        'console_scripts': 'bripipetools = bripipetools.__main__:cli'
+        'console_scripts': 'bripipetools = bripipetools.__main__:main'
     },
     'setup_requires': ['pytest-runner'],
     'tests_require': ['pytest', 'pytest-cov', 'mock', 'mongomock'],
