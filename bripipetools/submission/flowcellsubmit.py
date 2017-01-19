@@ -135,7 +135,8 @@ class FlowcellSubmissionBuilder(object):
                 base_dir=self.path,
                 submit_dir='globus_batch_submission',
                 group_tag=group_tag,
-                subgroup_tags=subgroup_tags
+                subgroup_tags=subgroup_tags,
+                build=build
             )
             batch_paths.append(creator.create_batch())
             logger.debug("workflow batch parameters saved in file '{}'"
