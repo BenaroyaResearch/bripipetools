@@ -28,6 +28,8 @@ def parse_workflow_param(param):
     param_tag = param.split('##')[0]
     if re.search('annotation', param_tag):
         param_type = 'annotation'
+    elif re.search('reference', param_tag):
+        param_type = 'reference'
     elif re.search('in$', param_tag):
         param_type = 'input'
     elif re.search('out$', param_tag):

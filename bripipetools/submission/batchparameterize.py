@@ -81,12 +81,22 @@ class BatchParameterizer(object):
         )
 
     def _set_reference_value(self, parameter):
-        index_dict = {
+        ref_dict = {
+            'GRCh38': {
+                'tophat-index': 'Homo_sapiens-GRCh38'
+            },
+            'NCBIM37': {
+                'tophat-index': 'MusMusculus (NCBIM37)'
+            },
             'mm10': {
                 'bowtie2-index': 'mm10',
                 'macs2-size': 'mm'
             }
         }
+        ref_type = re.sub('^reference_', '', parameter['tag'])
+        logger.debug("retrieving reference value for build '{}' and type '{}'"
+                     .format(self.build, ref_type))
+        return ref_dict[self.build].get(ref_type)
 
     def _prep_output_dir(self, output_type):
 
@@ -148,6 +158,8 @@ class BatchParameterizer(object):
                 )
             elif param['type'] == 'annotation':
                 param_values.append(self._build_reference_path(param))
+            elif param['type'] == 'reference':
+                param_values.append(self._set_reference_value(param))
             elif param['type'] == 'output':
                 if re.search('^fastq_out', param['tag']):
                     final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
