@@ -62,7 +62,8 @@ class BatchCreator(object):
                              self.date_tag))
         batch_inputs = '_'.join([self.group_tag,
                                  '_'.join(self.subgroup_tags)]).rstrip('_')
-        return '{}_{}_{}'.format(self.date_tag, batch_inputs, workflow_id)
+        return '{}_{}_{}_{}'.format(self.date_tag, batch_inputs, workflow_id,
+                                    self.build)
 
     def _check_input_type(self):
         try:
@@ -139,7 +140,8 @@ class BatchCreator(object):
                     sample_paths=sample_paths,
                     parameters=self.workflow_data['parameters'],
                     endpoint=self.endpoint,
-                    target_dir=target_dir
+                    target_dir=target_dir,
+                    build=self.build
                 )
                 parameterizer.parameterize()
                 batch_params = batch_params + parameterizer.samples

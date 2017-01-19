@@ -67,6 +67,7 @@ class FlowcellSubmissionBuilder(object):
         workflow_opts = self.get_workflow_options(
             optimized_only=not self.all_workflows
         )
+        build_opts = ['GRCh38', 'NCBIM37', 'mm10']
         self._get_project_paths()
 
         continue_assign = True
@@ -93,7 +94,15 @@ class FlowcellSubmissionBuilder(object):
                                 .format(os.path.basename(selected_project)))
                 selected_workflow = workflow_opts[int(w_j)]
 
-                batch_map.setdefault(selected_workflow, []).append(
+                for j, b in enumerate(build_opts):
+                    print("   {} : {}".format(j, b))
+                b_j = raw_input(("\nSelect the genome build to use "
+                                 "for project {}: ")
+                                .format(os.path.basename(selected_project)))
+                selected_build = build_opts[int(b_j)]
+
+                batch_key = (selected_workflow, selected_build)
+                batch_map.setdefault(batch_key, []).append(
                     selected_project
                 )
                 logger.debug("current state of batch map: {}"
@@ -113,10 +122,11 @@ class FlowcellSubmissionBuilder(object):
             self._assign_workflows()
 
         batch_paths = []
-        for workflow, projects in self.batch_map.items():
-            logger.info("Building batch for workflow '{}' with samples "
-                        "from projects: {}"
-                        .format(os.path.basename(workflow), projects))
+        for batchkey, projects in self.batch_map.items():
+            workflow, build = batchkey
+            logger.info("Building batch for workflow '{}' and build '{}' "
+                        "with samples from projects: {}"
+                        .format(os.path.basename(workflow), build, projects))
             group_tag, subgroup_tags = self._get_batch_tags(projects)
             creator = BatchCreator(
                 paths=projects,

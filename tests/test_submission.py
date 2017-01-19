@@ -310,7 +310,7 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = '{}__optimized_workflow_1'.format(mock_date)
+        mock_name = '{}__optimized_workflow_1_GRCh38'.format(mock_date)
 
         assert (test_name == mock_name)
 
@@ -332,7 +332,7 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = ('{}_{}_{}_optimized_workflow_1'.format(
+        mock_name = ('{}_{}_{}_optimized_workflow_1_GRCh38'.format(
             mock_date, mock_grouptag, '_'.join(mock_subgrouptags))
         )
 
@@ -780,6 +780,8 @@ class TestFlowcellSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
+        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
         mock_unaligndir = mock_path.mkdir('Unaligned')
@@ -793,10 +795,11 @@ class TestFlowcellSubmissionBuilder:
         )
 
         with mock.patch('__builtin__.raw_input',
-                        side_effect=iter(["0", "0", ""])):
+                        side_effect=iter(["0", "0", "0", ""])):
             builder._assign_workflows()
 
-        assert (builder.batch_map == {mock_workflowopts[0]: [mock_paths[0]]})
+        mock_batchkey = (mock_workflowopts[0], mock_buildopts[0])
+        assert (builder.batch_map == {mock_batchkey: [mock_paths[0]]})
 
     def test_get_batch_tags(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
@@ -837,6 +840,8 @@ class TestFlowcellSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
+        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
         mock_unaligndir = mock_path.mkdir('Unaligned')
@@ -858,17 +863,20 @@ class TestFlowcellSubmissionBuilder:
             workflow_dir=str(mock_workflowdir)
         )
 
-        builder.batch_map = {mock_workflowopts[0]: [mock_paths[0]]}
+        builder.batch_map = {
+            (mock_workflowopts[0], mock_buildopts[0]): [mock_paths[0]]
+        }
         test_paths = builder.run()
 
         with open(test_paths[0]) as f:
             test_contents = f.readlines()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_paths = [os.path.join(str(mock_path),
-                                   'globus_batch_submission',
-                                   ('{}_C00000XX_P1-1_optimized_workflow1.txt'
-                                    .format(mock_date)))]
+        mock_paths = [os.path.join(
+            str(mock_path),
+            'globus_batch_submission',
+            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38.txt'.format(mock_date)
+        )]
 
         assert (test_paths == mock_paths)
         assert (len([l for l in test_contents
