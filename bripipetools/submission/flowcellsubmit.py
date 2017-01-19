@@ -68,7 +68,7 @@ class FlowcellSubmissionBuilder(object):
         workflow_opts = self.get_workflow_options(
             optimized_only=not self.all_workflows
         )
-        build_opts = ['GRCh38', 'NCBIM37', 'mm10']
+        build_opts = ['GRCh38', 'NCBIM37', 'hg19', 'mm10', 'mm9']
         self._get_project_paths()
 
         continue_assign = True

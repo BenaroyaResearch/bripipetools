@@ -68,8 +68,16 @@ class BatchParameterizer(object):
                 'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
+            'hg19': {
+                'mtfilter-bed': 'hg19/hg19_mitofilter.bed',
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
             'mm10': {
-                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
+                'mtfilter-bed': 'mm10/mm10_mitofilter.bed',
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'mm9': {
+                'mtfilter-bed': 'mm9/mm9_mitofilter.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             }
         }
@@ -84,11 +92,11 @@ class BatchParameterizer(object):
     def _set_reference_value(self, parameter):
         ref_dict = {
             'GRCh38': {
-                'tophat-index': 'Homo_sapiens-GRCh38',
+                'tophat-index': 'GRCh38',  # 'Homo_sapiens-GRCh38',
                 'hisat2-index': 'GRCh38',
-                'salmon-index': 'Human (Homo sapiens): GRCh38',
-                'picard-align-index': 'Homo_sapiens-GRCh38',
-                'picard-rnaseq-index': 'Homo_sapiens-GRCh38',
+                'salmon-index': 'GRCh38',  # 'Human (Homo sapiens): GRCh38',
+                'picard-align-index': 'GRCh38',  # 'Homo_sapiens-GRCh38',
+                'picard-rnaseq-index': 'GRCh38',  # 'Homo_sapiens-GRCh38',
                 'mixcr-species': 'Homo sapiens'
             },
             'NCBIM37': {
@@ -97,15 +105,20 @@ class BatchParameterizer(object):
                 'picard-rnaseq-index': 'MusMusculus (NCBIM37)',
                 'mixcr-species': 'Mus musculus'
             },
+            'hg19': {
+                'bowtie2-index': 'hg19',
+                'macs2-size': 'hs',
+                'picard-align-index': 'hg19'
+            },
             'mm10': {
                 'bowtie2-index': 'mm10',
                 'macs2-size': 'mm',
                 'picard-align-index': 'mm10'
             },
-            'hg19': {
-                'bowtie2-index': 'hg19',
-                'macs2-size': 'hs',
-                'picard-align-index': 'Human (Homo sapiens): hg19'
+            'mm9': {
+                'bowtie2-index': 'mm9',
+                'macs2-size': 'mm',
+                'picard-align-index': 'mm9'
             }
         }
         ref_type = re.sub('^reference_', '', parameter['tag'])
