@@ -84,20 +84,41 @@ class BatchParameterizer(object):
     def _set_reference_value(self, parameter):
         ref_dict = {
             'GRCh38': {
-                'tophat-index': 'Homo_sapiens-GRCh38'
+                'tophat-index': 'Homo_sapiens-GRCh38',
+                'hisat2-index': 'GRCh38',
+                'salmon-index': 'Human (Homo sapiens): GRCh38',
+                'picard-align-index': 'Homo_sapiens-GRCh38',
+                'picard-rnaseq-index': 'Homo_sapiens-GRCh38',
+                'mixcr-species': 'Homo sapiens'
             },
             'NCBIM37': {
-                'tophat-index': 'MusMusculus (NCBIM37)'
+                'tophat-index': 'MusMusculus (NCBIM37)',
+                'picard-align-index': 'MusMusculus (NCBIM37)',
+                'picard-rnaseq-index': 'MusMusculus (NCBIM37)',
+                'mixcr-species': 'Mus musculus'
             },
             'mm10': {
                 'bowtie2-index': 'mm10',
-                'macs2-size': 'mm'
+                'macs2-size': 'mm',
+                'picard-align-index': 'mm10'
+            },
+            'hg19': {
+                'bowtie2-index': 'hg19',
+                'macs2-size': 'hs',
+                'picard-align-index': 'Human (Homo sapiens): hg19'
             }
         }
         ref_type = re.sub('^reference_', '', parameter['tag'])
         logger.debug("retrieving reference value for build '{}' and type '{}'"
                      .format(self.build, ref_type))
-        return ref_dict[self.build].get(ref_type)
+        try:
+            return ref_dict[self.build][ref_type]
+        except KeyError:
+            logger.exception(("no reference value available for parameter '{}' "
+                              "for build '{}'; build '{}' is probably "
+                              "unsupported for selected workflow")
+                             .format(ref_type, self.build, self.build))
+            raise
 
     def _prep_output_dir(self, output_type):
 

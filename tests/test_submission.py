@@ -118,7 +118,7 @@ class TestBatchParameterizer:
         mock_path = 'library::annotation::GRCh38/Homo_sapiens.GRCh38.77.gtf'
         assert (test_path == mock_path)
 
-    def test_build_reference_path(self, mock_params):
+    def test_set_reference_value(self, mock_params):
         parameterizer = submission.BatchParameterizer(
             sample_paths=[],
             parameters=mock_params,
@@ -134,6 +134,21 @@ class TestBatchParameterizer:
 
         mock_value = 'Homo_sapiens-GRCh38'
         assert (test_value == mock_value)
+
+    def test_set_reference_value_invalid_build(self, mock_params):
+        parameterizer = submission.BatchParameterizer(
+            sample_paths=[],
+            parameters=mock_params,
+            endpoint='',
+            target_dir=''
+        )
+
+        mock_param = {'tag': 'reference_bowtie2-index',
+                      'type': 'reference',
+                      'name': 'index'}
+
+        with pytest.raises(KeyError):
+            parameterizer._set_reference_value(mock_param)
 
     def test_prep_output_dir(self, mock_params, tmpdir):
         parameterizer = submission.BatchParameterizer(

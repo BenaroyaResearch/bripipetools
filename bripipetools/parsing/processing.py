@@ -66,8 +66,8 @@ def parse_output_name(output_name):
     try:
         source = name_parts.pop(-1)
     except IndexError:
-        logging.exception("output name '{}' appears to be invalid"
-                          .format(output_name))
+        logger.exception("output name '{}' appears to be invalid"
+                         .format(output_name))
         raise
 
     if len(name_parts):
