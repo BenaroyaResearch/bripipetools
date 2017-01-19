@@ -40,7 +40,8 @@ class FlowcellSubmissionBuilder(object):
                      .format(self.workflow_dir))
         workflow_opts = [os.path.join(self.workflow_dir, f)
                          for f in os.listdir(self.workflow_dir)
-                         if 'Galaxy-API' not in f]
+                         if 'Galaxy-API' not in f
+                         and not re.search('^\.', f)]
         workflow_opts.sort()
         logger.debug("found the following workflow options: {}"
                      .format([os.path.basename(f) for f in workflow_opts]))
@@ -67,6 +68,7 @@ class FlowcellSubmissionBuilder(object):
         workflow_opts = self.get_workflow_options(
             optimized_only=not self.all_workflows
         )
+        build_opts = ['GRCh38', 'NCBIM37', 'hg19', 'mm10', 'mm9']
         self._get_project_paths()
 
         continue_assign = True
@@ -93,7 +95,15 @@ class FlowcellSubmissionBuilder(object):
                                 .format(os.path.basename(selected_project)))
                 selected_workflow = workflow_opts[int(w_j)]
 
-                batch_map.setdefault(selected_workflow, []).append(
+                for j, b in enumerate(build_opts):
+                    print("   {} : {}".format(j, b))
+                b_j = raw_input(("\nSelect the genome build to use "
+                                 "for project {}: ")
+                                .format(os.path.basename(selected_project)))
+                selected_build = build_opts[int(b_j)]
+
+                batch_key = (selected_workflow, selected_build)
+                batch_map.setdefault(batch_key, []).append(
                     selected_project
                 )
                 logger.debug("current state of batch map: {}"
@@ -108,15 +118,16 @@ class FlowcellSubmissionBuilder(object):
 
         return group_tag, subgroup_tags
 
-    def run(self):
+    def run(self, sort=False, num_samples=None):
         if not hasattr(self, 'batch_map'):
             self._assign_workflows()
 
         batch_paths = []
-        for workflow, projects in self.batch_map.items():
-            logger.info("Building batch for workflow '{}' with samples "
-                        "from projects: {}"
-                        .format(os.path.basename(workflow), projects))
+        for batchkey, projects in self.batch_map.items():
+            workflow, build = batchkey
+            logger.info("Building batch for workflow '{}' and build '{}' "
+                        "with samples from projects: {}"
+                        .format(os.path.basename(workflow), build, projects))
             group_tag, subgroup_tags = self._get_batch_tags(projects)
             creator = BatchCreator(
                 paths=projects,
@@ -125,7 +136,10 @@ class FlowcellSubmissionBuilder(object):
                 base_dir=self.path,
                 submit_dir='globus_batch_submission',
                 group_tag=group_tag,
-                subgroup_tags=subgroup_tags
+                subgroup_tags=subgroup_tags,
+                sort=sort,
+                num_samples=num_samples,
+                build=build
             )
             batch_paths.append(creator.create_batch())
             logger.debug("workflow batch parameters saved in file '{}'"

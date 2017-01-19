@@ -265,6 +265,9 @@ class TestProcessing:
             ('annotation_tag##_::_::param_name', {'tag': 'annotation_tag',
                                                   'type': 'annotation',
                                                   'name': 'param_name'}),
+            ('reference_tag##_::_::param_name', {'tag': 'reference_tag',
+                                                 'type': 'reference',
+                                                 'name': 'param_name'}),
             ('mock_in##_::_::_::param_name', {'tag': 'mock_in',
                                               'type': 'input',
                                               'name': 'param_name'}),
@@ -290,20 +293,30 @@ class TestProcessing:
             (
                     'tophat_alignments_bam_out',
                     {'type': 'alignments',
+                     'label': 'alignments',
                      'source': 'tophat',
                      'extension': 'bam'}
             ),
             (
                     'picard_markdups_metrics_html_out',
                     {'type': 'metrics',
+                     'label': 'metrics',
                      'source': 'picard-markdups',
                      'extension': 'html'}
             ),
             (
                     'picard-markdups_metrics_html_out',
                     {'type': 'metrics',
+                     'label': 'metrics',
                      'source': 'picard-markdups',
                      'extension': 'html'}
+            ),
+            (
+                    'bowtie2_alignments-rmdup_bam_out',
+                    {'type': 'alignments',
+                     'label': 'alignments-rmdup',
+                     'source': 'bowtie2',
+                     'extension': 'bam'}
             ),
         ]
     )

@@ -118,8 +118,16 @@ def main(verbosity):
 @click.option('--all-workflows/--optimized-only', default=False,
               help=("indicate whether to include all detected workflows "
                     "as options or to keep 'optimized' workflows only"))
+@click.option('--sort-samples', '-s', is_flag=True,
+              help=("sort samples from smallest to largest (based on total "
+                    "size of raw data files) before submitting; this is most "
+                    "useful when also restricting the number of samples"))
+@click.option('--num-samples', '-n', default=None, type=int,
+              help=("restrict the number of samples submitted for each "
+                    "project on the flowcell"))
 @click.argument('path')
-def submit(endpoint, workflow_dir, all_workflows, path):
+def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
+           path):
     """
     Prepare batch submission for unaligned samples from a flowcell run.
     """
@@ -136,9 +144,11 @@ def submit(endpoint, workflow_dir, all_workflows, path):
         workflow_dir=workflow_dir,
         all_workflows=all_workflows
     )
-    submit_paths = submitter.run()
+    submit_paths = submitter.run(sort=sort_samples, num_samples=num_samples)
+    print("\nPrepared the following workflow batch submit files:\n"
+          "(ready for upload to Globus Genomics)\n")
     for p in submit_paths:
-        print(p)
+        print(bripipetools.util.swap_root(p, 'genomics', '/mnt/'))
 
 
 @main.command()

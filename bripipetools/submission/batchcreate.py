@@ -62,7 +62,8 @@ class BatchCreator(object):
                              self.date_tag))
         batch_inputs = '_'.join([self.group_tag,
                                  '_'.join(self.subgroup_tags)]).rstrip('_')
-        return '{}_{}_{}'.format(self.date_tag, batch_inputs, workflow_id)
+        return '{}_{}_{}_{}'.format(self.date_tag, batch_inputs, workflow_id,
+                                    self.build)
 
     def _check_input_type(self):
         try:
@@ -139,7 +140,8 @@ class BatchCreator(object):
                     sample_paths=sample_paths,
                     parameters=self.workflow_data['parameters'],
                     endpoint=self.endpoint,
-                    target_dir=target_dir
+                    target_dir=target_dir,
+                    build=self.build
                 )
                 parameterizer.parameterize()
                 batch_params = batch_params + parameterizer.samples
@@ -151,7 +153,8 @@ class BatchCreator(object):
                 sample_paths=sample_paths,
                 parameters=self.workflow_data['parameters'],
                 endpoint=self.endpoint,
-                target_dir=target_dir
+                target_dir=target_dir,
+                build=self.build
             )
             parameterizer.parameterize()
             batch_params = parameterizer.samples
@@ -164,6 +167,9 @@ class BatchCreator(object):
         batch_path = os.path.join(self.submit_dir, batch_filename)
         self.workflowbatch_file.data['samples'] = self._get_input_params()
 
+        logger.debug("writing batch file with name '{}' to {}"
+                     .format(batch_name,
+                             os.path.join(self.submit_dir, batch_filename)))
         self.workflowbatch_file.write(
             os.path.join(self.submit_dir, batch_filename),
             batch_name=batch_name

@@ -57,14 +57,31 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('GRCh38/Homo_sapiens.GRCh38.77'
                      '.ribosomalIntervalsWheader_reorder.txt'),
+                'ribosomal-intervals':
+                    ('GRCh38/Homo_sapiens.GRCh38.77'
+                     '.ribosomalIntervalsWheader_reorder.txt'),
+                'snp-bed': 'GRCh38/all_grch38.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'NCBIM37': {
                 'gtf': 'NCBIM37/Mus_musculus.NCBIM37.67.gtf',
                 'refflat': 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt',
-                'ribosmal_intervals':
+                'ribosomal_intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
+                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'hg19': {
+                'mtfilter-bed': 'hg19/hg19_mitofilter.bed',
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'mm10': {
+                'mtfilter-bed': 'mm10/mm10_mitofilter.bed',
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'mm9': {
+                'mtfilter-bed': 'mm9/mm9_mitofilter.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             }
         }
@@ -73,8 +90,52 @@ class BatchParameterizer(object):
         logger.debug("retrieving reference path for build '{}' and type '{}'"
                      .format(self.build, ref_type))
         return 'library::annotation::{}'.format(
-            ref_dict[self.build].get(ref_type)
+            ref_dict[self.build][ref_type]
         )
+
+    def _set_reference_value(self, parameter):
+        ref_dict = {
+            'GRCh38': {
+                'tophat-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
+                'hisat2-index': 'Homo_sapiens-GRCh38',
+                'salmon-index': 'Homo_sapiens-GRCh38',  # 'Human (Homo sapiens): GRCh38',
+                'picard-align-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
+                'picard-rnaseq-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
+                'mixcr-species': 'Homo sapiens'
+            },
+            'NCBIM37': {
+                'tophat-index': 'MusMusculus (NCBIM37)',
+                'picard-align-index': 'MusMusculus (NCBIM37)',
+                'picard-rnaseq-index': 'MusMusculus (NCBIM37)',
+                'mixcr-species': 'Mus musculus'
+            },
+            'hg19': {
+                'bowtie2-index': 'hg19',
+                'macs2-size': 'hs',
+                'picard-align-index': 'hg19'
+            },
+            'mm10': {
+                'bowtie2-index': 'mm10',
+                'macs2-size': 'mm',
+                'picard-align-index': 'mm10'
+            },
+            'mm9': {
+                'bowtie2-index': 'mm9',
+                'macs2-size': 'mm',
+                'picard-align-index': 'mm9'
+            }
+        }
+        ref_type = re.sub('^reference_', '', parameter['tag'])
+        logger.debug("retrieving reference value for build '{}' and type '{}'"
+                     .format(self.build, ref_type))
+        try:
+            return ref_dict[self.build][ref_type]
+        except KeyError:
+            logger.exception(("no reference value available for parameter '{}' "
+                              "for build '{}'; build '{}' is probably "
+                              "unsupported for selected workflow")
+                             .format(ref_type, self.build, self.build))
+            raise
 
     def _prep_output_dir(self, output_type):
 
@@ -89,10 +150,15 @@ class BatchParameterizer(object):
     def _build_output_path(self, sample_name, parameter):
         output_type_map = {'trimmed': 'TrimmedFastqs',
                            'counts': 'counts',
+                           'quant': 'quant',
                            'alignments': 'alignments',
                            'metrics': 'metrics',
                            'qc': 'QC',
                            'trinity': 'Trinity',
+                           'assembly': 'assembly',
+                           'clones': 'clones',
+                           'snps': 'snps',
+                           'peaks': 'peaks',
                            'log': 'logs'}
 
         logger.debug("building output path of parameter '{}' for sample '{}'"
@@ -103,7 +169,7 @@ class BatchParameterizer(object):
         )
 
         out_file = '{}_{}_{}.{}'.format(
-            sample_name, output_items['source'], output_items['type'],
+            sample_name, output_items['source'], output_items['label'],
             output_items['extension']
         )
 
@@ -135,6 +201,8 @@ class BatchParameterizer(object):
                 )
             elif param['type'] == 'annotation':
                 param_values.append(self._build_reference_path(param))
+            elif param['type'] == 'reference':
+                param_values.append(self._set_reference_value(param))
             elif param['type'] == 'output':
                 if re.search('^fastq_out', param['tag']):
                     final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
