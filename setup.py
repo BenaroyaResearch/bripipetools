@@ -30,11 +30,6 @@ config = {
     },
     'setup_requires': ['pytest-runner'],
     'tests_require': ['pytest', 'pytest-cov', 'mock', 'mongomock'],
-    'scripts': [
-        'bin/bripipe-dbify',
-        'bin/bripipe-postprocess',
-        'bin/bripipe-wrapup',
-    ],
     'zip_safe': False
 }
 
