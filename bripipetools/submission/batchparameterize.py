@@ -57,12 +57,16 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('GRCh38/Homo_sapiens.GRCh38.77'
                      '.ribosomalIntervalsWheader_reorder.txt'),
+                'ribosomal-intervals':
+                    ('GRCh38/Homo_sapiens.GRCh38.77'
+                     '.ribosomalIntervalsWheader_reorder.txt'),
+                'snp-bed': 'GRCh38/all_grch38.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'NCBIM37': {
                 'gtf': 'NCBIM37/Mus_musculus.NCBIM37.67.gtf',
                 'refflat': 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt',
-                'ribosmal_intervals':
+                'ribosomal_intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
                 'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
@@ -86,17 +90,17 @@ class BatchParameterizer(object):
         logger.debug("retrieving reference path for build '{}' and type '{}'"
                      .format(self.build, ref_type))
         return 'library::annotation::{}'.format(
-            ref_dict[self.build].get(ref_type)
+            ref_dict[self.build][ref_type]
         )
 
     def _set_reference_value(self, parameter):
         ref_dict = {
             'GRCh38': {
-                'tophat-index': 'GRCh38',  # 'Homo_sapiens-GRCh38',
-                'hisat2-index': 'GRCh38',
-                'salmon-index': 'GRCh38',  # 'Human (Homo sapiens): GRCh38',
-                'picard-align-index': 'GRCh38',  # 'Homo_sapiens-GRCh38',
-                'picard-rnaseq-index': 'GRCh38',  # 'Homo_sapiens-GRCh38',
+                'tophat-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
+                'hisat2-index': 'Homo_sapiens-GRCh38',
+                'salmon-index': 'Homo_sapiens-GRCh38',  # 'Human (Homo sapiens): GRCh38',
+                'picard-align-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
+                'picard-rnaseq-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
                 'mixcr-species': 'Homo sapiens'
             },
             'NCBIM37': {
@@ -146,10 +150,14 @@ class BatchParameterizer(object):
     def _build_output_path(self, sample_name, parameter):
         output_type_map = {'trimmed': 'TrimmedFastqs',
                            'counts': 'counts',
+                           'quant': 'quant',
                            'alignments': 'alignments',
                            'metrics': 'metrics',
                            'qc': 'QC',
                            'trinity': 'Trinity',
+                           'assembly': 'assembly',
+                           'clones': 'clones',
+                           'snps': 'snps',
                            'peaks': 'peaks',
                            'log': 'logs'}
 
