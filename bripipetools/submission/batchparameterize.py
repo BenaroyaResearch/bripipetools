@@ -69,7 +69,8 @@ class BatchParameterizer(object):
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'mm10': {
-                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed'
+                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             }
         }
 

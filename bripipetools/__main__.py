@@ -145,8 +145,10 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
         all_workflows=all_workflows
     )
     submit_paths = submitter.run(sort=sort_samples, num_samples=num_samples)
+    print("\nPrepared the following workflow batch submit files:\n"
+          "(ready for upload to Globus Genomics)\n")
     for p in submit_paths:
-        print(p)
+        print(bripipetools.util.swap_root(p, 'genomics', '/mnt/'))
 
 
 @main.command()
