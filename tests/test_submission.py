@@ -286,7 +286,7 @@ def mock_template(filename, tmpdir):
                      'Project Name\t<Your_project_name>\n',
                      '###TABLE DATA\n',
                      '#############\n',
-                     '{}\n'.format('\t'.join(mock_params))]
+                     '{}\t'.format('\t'.join(mock_params))]
     mock_file = tmpdir.join(filename)
     mock_file.write(''.join(mock_contents))
     return str(mock_file)
@@ -672,10 +672,12 @@ class TestBatchCreator:
         test_path = creator.create_batch()
         with open(test_path) as f:
             test_contents = f.readlines()
+        logger.debug("{}".format(test_contents))
 
         assert (len([l for l in test_contents
                      if re.search('^lib', l)])
                 == 4)
+
 
 class TestFlowcellSubmissionBuilder:
     """

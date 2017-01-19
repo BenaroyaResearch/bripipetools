@@ -157,6 +157,8 @@ class WorkflowBatchFile(object):
             self.update_batch_name(batch_name)
 
         template_lines = self.data['raw'][0:self._locate_param_line() + 1]
+        template_lines[-1] = re.sub('\t$', '\n', template_lines[-1])
+
         if sample_lines is None:
             sample_lines = ['{}\n'.format('\t'.join([p['value'] for p in s]))
                             for s in self.data['samples']]
