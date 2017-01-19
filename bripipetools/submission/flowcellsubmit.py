@@ -117,7 +117,7 @@ class FlowcellSubmissionBuilder(object):
 
         return group_tag, subgroup_tags
 
-    def run(self):
+    def run(self, sort=False, num_samples=None):
         if not hasattr(self, 'batch_map'):
             self._assign_workflows()
 
@@ -136,6 +136,8 @@ class FlowcellSubmissionBuilder(object):
                 submit_dir='globus_batch_submission',
                 group_tag=group_tag,
                 subgroup_tags=subgroup_tags,
+                sort=sort,
+                num_samples=num_samples,
                 build=build
             )
             batch_paths.append(creator.create_batch())
