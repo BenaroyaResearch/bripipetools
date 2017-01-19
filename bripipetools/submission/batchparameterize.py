@@ -65,7 +65,11 @@ class BatchParameterizer(object):
                 'ribosmal_intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
+                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'mm10': {
+                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed'
             }
         }
 
@@ -75,6 +79,14 @@ class BatchParameterizer(object):
         return 'library::annotation::{}'.format(
             ref_dict[self.build].get(ref_type)
         )
+
+    def _set_reference_value(self, parameter):
+        index_dict = {
+            'mm10': {
+                'bowtie2-index': 'mm10',
+                'macs2-size': 'mm'
+            }
+        }
 
     def _prep_output_dir(self, output_type):
 
@@ -93,6 +105,7 @@ class BatchParameterizer(object):
                            'metrics': 'metrics',
                            'qc': 'QC',
                            'trinity': 'Trinity',
+                           'peaks': 'peaks',
                            'log': 'logs'}
 
         logger.debug("building output path of parameter '{}' for sample '{}'"
@@ -103,7 +116,7 @@ class BatchParameterizer(object):
         )
 
         out_file = '{}_{}_{}.{}'.format(
-            sample_name, output_items['source'], output_items['type'],
+            sample_name, output_items['source'], output_items['label'],
             output_items['extension']
         )
 

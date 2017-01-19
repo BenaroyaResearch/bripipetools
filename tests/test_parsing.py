@@ -290,20 +290,30 @@ class TestProcessing:
             (
                     'tophat_alignments_bam_out',
                     {'type': 'alignments',
+                     'label': 'alignments',
                      'source': 'tophat',
                      'extension': 'bam'}
             ),
             (
                     'picard_markdups_metrics_html_out',
                     {'type': 'metrics',
+                     'label': 'metrics',
                      'source': 'picard-markdups',
                      'extension': 'html'}
             ),
             (
                     'picard-markdups_metrics_html_out',
                     {'type': 'metrics',
+                     'label': 'metrics',
                      'source': 'picard-markdups',
                      'extension': 'html'}
+            ),
+            (
+                    'bowtie2_alignments-rmdup_bam_out',
+                    {'type': 'alignments',
+                     'label': 'alignments-rmdup',
+                     'source': 'bowtie2',
+                     'extension': 'bam'}
             ),
         ]
     )

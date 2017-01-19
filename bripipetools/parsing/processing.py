@@ -41,22 +41,38 @@ def parse_workflow_param(param):
 
 
 def parse_output_name(output_name):
-    output_name = re.sub('_out$', '', output_name)
-    if re.search('trimmed_fastq', output_name):
-        output_name = re.sub('trimmed', 'fastqmcf_trimmed', output_name)
+    output_name_short = re.sub('_out$', '', output_name)
+    if re.search('trimmed_fastq', output_name_short):
+        output_name_short = re.sub('trimmed', 'fastqmcf_trimmed',
+                                   output_name_short)
 
-    if re.search('^trinity_fasta', output_name):
-        output_name = re.sub('trinity', 'trinity_trinity', output_name)
+    if re.search('^trinity_fasta', output_name_short):
+        output_name_short = re.sub('trinity', 'trinity_trinity',
+                                   output_name_short)
 
-    name_parts = output_name.split('_')
+    name_parts = output_name_short.split('_')
+    logger.debug("output name has following parts: {}".format(name_parts))
 
     output_ext = name_parts.pop(-1)
     output_type = name_parts.pop(-1)
-    source = name_parts.pop(-1)
+    if re.search('-', output_type):
+        output_type, output_subtype = output_type.split('-')
+        output_label = '-'.join([output_type, output_subtype])
+    else:
+        output_label = output_type
+
+    try:
+        source = name_parts.pop(-1)
+    except IndexError:
+        logging.exception("output name '{}' appears to be invalid"
+                          .format(output_name))
+        raise
+
     if len(name_parts):
         source = '-'.join([name_parts.pop(-1), source])
 
     return {'type': output_type,
+            'label': output_label,
             'source': source,
             'extension': output_ext}
 
