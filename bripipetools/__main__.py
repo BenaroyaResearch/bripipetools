@@ -125,6 +125,11 @@ def main(verbosity):
 @click.option('--num-samples', '-n', default=None, type=int,
               help=("restrict the number of samples submitted for each "
                     "project on the flowcell"))
+@click.option('--manifest', '-m', is_flag=True,
+              help=("indicates that input path is a manifest of sample "
+                    "or folder paths (not a flowcell run) from which "
+                    "a workflow batch is to be created (note: options "
+                    "'sort-samples' and 'num-samples' will be ignored)"))
 @click.argument('path')
 def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
            path):
