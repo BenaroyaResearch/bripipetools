@@ -15,6 +15,44 @@ class BatchCreator(object):
     Given a list of sample paths or folders of sample paths as well
     as the path to a workflow tempate, creates a batch submit file
     for the input samples.
+
+    :type paths: list
+    :param paths: List of paths to sample folders, where each
+        folder contains one or more lane-specifc FASTQ file
+        (e.g., '<path-to-sample-folder>/sample_L001_R1.fastq.gz');
+        list can alternatively include one or more paths to folders
+        that contain sample folders (e.g., a project folder).
+    :type workflow_template: str
+    :param workflow_template: Path to workflow template file,
+        exported from Globus Genomics for API batch submission.
+    :type endpoint: str
+    :param endpoint: Globus endpoint where input files are accessed
+        and output files will be sent (e.g., 'jeddy#srvgridftp01').
+    :type base_dir: str
+    :param base_dir: Path to folder where outputs will be stored;
+        outputs will be grouped into one or more
+        'Project_<label>Processed' subfolder(s) in the ``base_dir``.
+    :type submit_dir: str
+    :param submit_dir: Name of folder where batch submit file will
+        be saved. Folder will be created under ``base_dir``. Defaults
+        to 'globus_batch_submission'.
+    :type group_tag: str
+    :param group_tag: String indicating overal group identifier for
+        workflow batches (e.g., a flowcell ID).
+    :type subgroup_tags: list
+    :param subgroup_tags: List of strings indicating subgroup
+        identifiers (e.g., project labels from a flowcell run).
+    :type sort: bool
+    :param sort: Flag indicating whether or not to sort samples from
+        smallest to largest (based on total size of raw data files)
+        before submitting; most useful when also restricting number
+        of samples.
+    :type num_samples: int
+    :param num_samples: Number of samples to submit from each folder,
+        if input paths are folders of sample folders.
+    :type build: str
+    :param build: ID string of reference genome build to be used
+        for processing current set of samples.
     """
     def __init__(self, paths, workflow_template, endpoint, base_dir,
                  submit_dir=None, group_tag=None, subgroup_tags=None,
@@ -53,6 +91,10 @@ class BatchCreator(object):
         self.num_samples = num_samples
 
     def _build_batch_name(self):
+        """
+        Construct unique batch name indicating date, workflow, and
+        build, as well as any group or subgroup identifier tags.
+        """
         workflow_id = os.path.splitext(
             os.path.basename(self.workflow_template)
         )[0]
@@ -66,6 +108,10 @@ class BatchCreator(object):
                                     self.build)
 
     def _check_input_type(self):
+        """
+        Inspect list of input paths and determine whether they
+        represent sample paths or folders of sample paths.
+        """
         try:
             check_path = [os.path.join(self.paths[0], f)
                           for f in os.listdir(self.paths[0])
@@ -85,6 +131,10 @@ class BatchCreator(object):
             self.inputs_are_folders = False
 
     def _prep_target_dir(self, folder=None):
+        """
+        Create processed output folder for an invididual input folder
+        or for the full set of samples.
+        """
         if folder is not None:
             target_tag = parsing.get_project_label(os.path.basename(folder))
         else:
@@ -102,6 +152,10 @@ class BatchCreator(object):
         return target_dir
 
     def _get_sample_paths(self, folder):
+        """
+        Return the list of sample paths for an invididual folder.
+        Optionally, sort and subset sample paths.
+        """
         sample_paths = [os.path.join(folder, s)
                         for s in os.listdir(folder)
                         if not re.search('DS_Store', s)]
@@ -128,6 +182,12 @@ class BatchCreator(object):
         return sample_paths
 
     def _get_input_params(self):
+        """
+        For each input folder or for the full list of sample paths,
+        create and map values (e.g., file paths) to each parameter
+        in the workflow template. Return the combined set of sample
+        parameter values across all samples or folders.
+        """
         self._check_input_type()
         if self.inputs_are_folders:
             batch_params = []
@@ -162,6 +222,13 @@ class BatchCreator(object):
         return batch_params
 
     def create_batch(self):
+        """
+        Create batch name, prepare output folders, parameterize
+        samples, and write the workflow batch submit file.
+
+        :rtype: str
+        :return: Path to the batch submit file.
+        """
         batch_name = self._build_batch_name()
         batch_filename = '{}.txt'.format(batch_name)
         batch_path = os.path.join(self.submit_dir, batch_filename)

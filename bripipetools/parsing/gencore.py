@@ -56,7 +56,7 @@ def get_library_id(string):
 def get_sample_id(string):
     """
     More general than library ID; returns either library ID (if
-    present), or any word starting with 'Sample_', ends in a number,
+    present), or any word starting with 'Sample\_', ends in a number,
     and preceeds any non-alphanumeric characters.
 
     :type string: str
