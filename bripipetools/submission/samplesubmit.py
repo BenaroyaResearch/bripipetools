@@ -62,12 +62,12 @@ class SampleSubmissionBuilder(object):
 
         for j, w in enumerate(workflow_opts):
             print("   {} : {}".format(j, os.path.basename(w)))
-        w_j = raw_input("\nSelect the number of the workflow to use:")
+        w_j = raw_input("\nSelect the number of the workflow to use: ")
         selected_workflow = workflow_opts[int(w_j)]
 
         for j, b in enumerate(build_opts):
             print("   {} : {}".format(j, b))
-        b_j = raw_input("\nSelect the genome build to use:")
+        b_j = raw_input("\nSelect the genome build to use: ")
         selected_build = build_opts[int(b_j)]
 
         batch_key = (selected_workflow, selected_build)

@@ -1031,4 +1031,4 @@ class TestSampleSubmissionBuilder:
         assert (test_batchpaths == mock_batchpaths)
         assert (len([l for l in test_contents
                      if re.search('^lib', l)])
-                == 32)
+                == 2)

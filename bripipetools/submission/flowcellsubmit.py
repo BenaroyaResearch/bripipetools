@@ -60,6 +60,7 @@ class FlowcellSubmissionBuilder(object):
                      .format(unaligned_path))
         self.project_paths = [os.path.join(unaligned_path, p)
                               for p in self.annotator.get_projects()]
+        self.project_paths.sort()
         logger.debug("found the following unaligned projects: {}"
                      .format([os.path.basename(os.path.normpath(f))
                               for f in self.project_paths]))
@@ -75,12 +76,18 @@ class FlowcellSubmissionBuilder(object):
         batch_map = {}
         while continue_assign:
             print("\nFound the following projects: "
-                  "[current workflows selected]")
+                  "[current workflows (w) and builds (b) selected]")
             for i, p in enumerate(self.project_paths):
-                workflow_nums = [w for w, k in enumerate(workflow_opts)
-                                 if p in batch_map.get(k, [])]
+                opts_p = map(lambda x: x[0],
+                             filter(lambda x: p in x[1], batch_map.items()))
+
+                w_p = ['w:{}'.format([w for w, k in enumerate(workflow_opts)
+                                      if k == opt[0]][0])
+                       for opt in opts_p]
+                b_p = ['b:{}'.format(opt[1]) for opt in opts_p]
+
                 print("   {} : {} {}".format(i, os.path.basename(p),
-                                             str(workflow_nums)))
+                                             zip(w_p, b_p)))
 
             p_i = raw_input("\nType the number of the project you wish "
                             "to select or hit enter to finish: ")
