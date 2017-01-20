@@ -4,7 +4,7 @@ import pytest
 import mongomock
 
 from bripipetools import model as docs
-from bripipetools import dbify
+from bripipetools import dbification
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ def mock_db():
 class TestFlowcellRunImporter:
     """
     Tests methods for the `FlowcellRunImporter` class in the
-    `bripipetools.dbify.flowcellrun` module.
+    `bripipetools.dbification.flowcellrun` module.
     """
     def test_collect_flowcellrun(self, mock_db):
         # GIVEN a path to a flowcell run folder and a connection to a
@@ -38,7 +38,7 @@ class TestFlowcellRunImporter:
         mock_path = '{}genomics/Illumina/{}'.format(mock_root, mock_id)
 
         # AND an importer object is created for the path
-        importer = dbify.FlowcellRunImporter(
+        importer = dbification.FlowcellRunImporter(
             path=mock_path,
             db=mock_db
         )
@@ -68,7 +68,7 @@ class TestFlowcellRunImporter:
                 projpath.mkdir(l)
 
         # AND an importer object is created for the path
-        importer = dbify.FlowcellRunImporter(
+        importer = dbification.FlowcellRunImporter(
             path=str(mock_path),
             db=mock_db
         )
@@ -90,7 +90,7 @@ class TestFlowcellRunImporter:
         mock_path = '{}genomics/Illumina/{}'.format(mock_root, mock_id)
 
         # AND an importer object is created for the path
-        importer = dbify.FlowcellRunImporter(
+        importer = dbification.FlowcellRunImporter(
             path=mock_path,
             db=mock_db
         )
@@ -120,7 +120,7 @@ class TestFlowcellRunImporter:
                 projpath.mkdir(l)
 
         # AND an importer object is created for the path
-        importer = dbify.FlowcellRunImporter(
+        importer = dbification.FlowcellRunImporter(
             path=str(mock_path),
             db=mock_db
         )
@@ -151,7 +151,7 @@ class TestFlowcellRunImporter:
                 projpath.mkdir(l)
 
         # AND an importer object is created for the path
-        importer = dbify.FlowcellRunImporter(
+        importer = dbification.FlowcellRunImporter(
             path=str(mock_path),
             db=mock_db
         )
@@ -185,7 +185,7 @@ def mock_batchfile(filename, tmpdir):
 class TestWorkflowBatchImporter:
     """
     Tests methods for the `WorkflowBatchImporter` class in the
-    `bripipetools.dbify.workflowbatch` module.
+    `bripipetools.dbification.workflowbatch` module.
     """
     def test_collect_workflowbatch(self, mock_db, tmpdir):
         # GIVEN a path to a workflow batch file and a connection to a
@@ -202,7 +202,7 @@ class TestWorkflowBatchImporter:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND an importer object is created for the path
-        importer = dbify.WorkflowBatchImporter(
+        importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db
         )
@@ -224,7 +224,7 @@ class TestWorkflowBatchImporter:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND an importer object is created for the path
-        importer = dbify.WorkflowBatchImporter(
+        importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db
         )
@@ -249,7 +249,7 @@ class TestWorkflowBatchImporter:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND an importer object is created for the path
-        importer = dbify.WorkflowBatchImporter(
+        importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db
         )
@@ -273,7 +273,7 @@ class TestWorkflowBatchImporter:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND an importer object is created for the path
-        importer = dbify.WorkflowBatchImporter(
+        importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db
         )
@@ -297,7 +297,7 @@ class TestWorkflowBatchImporter:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND an importer object is created for the path
-        importer = dbify.WorkflowBatchImporter(
+        importer = dbification.WorkflowBatchImporter(
             path=str(mock_path),
             db=mock_db
         )
@@ -317,7 +317,7 @@ class TestWorkflowBatchImporter:
 class TestImportManager:
     """
     Tests methods for the `ImportManager` class in the
-    `bripipetools.dbify.control` module.
+    `bripipetools.dbification.control` module.
     """
     def test_sniff_path_for_flowcell_run(self, mock_db):
         # GIVEN a path to a flowcell run folder and a connection to a
@@ -327,7 +327,7 @@ class TestImportManager:
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
 
         # AND an import manager is created for the path
-        manager = dbify.ImportManager(
+        manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db
         )
@@ -348,7 +348,7 @@ class TestImportManager:
                      .format(mock_id, mock_filename))
 
         # AND an import manager is created for the path
-        manager = dbify.ImportManager(
+        manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db
         )
@@ -366,7 +366,7 @@ class TestImportManager:
         mock_id = '161231_INSTID_0001_AC00000XX'
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
 
-        manager = dbify.ImportManager(
+        manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db
         )
@@ -375,7 +375,7 @@ class TestImportManager:
         manager._init_importer()
 
         # THEN importer should be correct type
-        assert (type(manager.importer) == dbify.FlowcellRunImporter)
+        assert (type(manager.importer) == dbification.FlowcellRunImporter)
 
     def test_init_importer_for_workflow_batch(self, mock_db):
         # GIVEN a path to a workflow batch file and a connection to a
@@ -386,7 +386,7 @@ class TestImportManager:
         mock_path = ('/mnt/genomics/Illumina/{}/globus_batch_submission/{}'
                      .format(mock_id, mock_filename))
 
-        manager = dbify.ImportManager(
+        manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db
         )
@@ -395,7 +395,7 @@ class TestImportManager:
         manager._init_importer()
 
         # THEN importer should be correct type
-        assert (type(manager.importer) == dbify.WorkflowBatchImporter)
+        assert (type(manager.importer) == dbification.WorkflowBatchImporter)
 
     def test_run_for_flowcell_run(self, mock_db, tmpdir):
         # GIVEN a path to a flowcell run folder and a connection to a
@@ -416,7 +416,7 @@ class TestImportManager:
                 projpath.mkdir(l)
 
         # AND an import manager is created for the path
-        manager = dbify.ImportManager(
+        manager = dbification.ImportManager(
             path=str(mock_path),
             db=mock_db
         )
@@ -441,7 +441,7 @@ class TestImportManager:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND an importer object is created for the path
-        manager = dbify.ImportManager(
+        manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db
         )
