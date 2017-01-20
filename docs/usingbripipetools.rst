@@ -12,18 +12,18 @@ These features are continuing to expand and evolve over time.
 Workflow batch submission
 -------------------------
 
-Batch submission to Globus Galaxy for bioinformatics data processing is currently managed through the script ``generate_fc_batch_submit.py``.
+Batch submission to Globus Galaxy for bioinformatics data processing is currently managed through ``bripipetools submit`` command, which uses the ``submission`` package.
 
 ----
 
 Post-processing
 ---------------
 
-The entrypoint for tasks related to organizing processing output files (e.g., file stitching, cleanup, etc.) is the wrapper script ``bripipe-postprocess``, which uses the ``postprocess`` module.
+The entrypoint for tasks related to organizing processing output files (e.g., file stitching, cleanup, etc.) is the ``bripipetools postprocess`` command, which uses the ``postprocess`` package.
 
 -----
 
 Data management
 ---------------
 
-Annotation of sequencing and processing data — as well as corresponding retrieval and import of data from/to the GenLIMS database — is performed through the wrapper script ``bripipe-dbify``, which uses the ``dbify`` module.
+Annotation of sequencing and processing data — as well as corresponding retrieval and import of data from/to the GenLIMS database — is performed through the ``bripipetools dbify`` command, which uses the ``dbify`` package.

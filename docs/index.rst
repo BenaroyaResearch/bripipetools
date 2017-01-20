@@ -6,7 +6,7 @@
 bripipetools
 ============
 
-**bripipetools** (i.e., BRI Pipeline Tools) is a collection of modules for managing the operation of processing workflows — as well as the input and output data for these workflows — within the Genomics and Bioinformatics Cores at the Benaroya Research Institute.
+**bripipetools** (i.e., BRI Pipeline Tools) is a collection of packages for managing the operation of processing workflows — as well as the input and output data for these workflows — within the Genomics and Bioinformatics Cores at the Benaroya Research Institute.
 
 .. warning:: **Scope & environment**
 
@@ -22,8 +22,8 @@ Contents:
    usingbripipetools.rst
    galaxy.rst
    genlims.rst
-   appmodules.rst
-   coremodules.rst
+   apppackages.rst
+   corepackages.rst
 
 Indices and tables
 ==================
