@@ -1,5 +1,5 @@
 bripipetools core packages
-=========================
+==========================
 
 "Core" packages are where most of the heavy lifting happens, and are called by application-level modules to perform various pipeline tasks. Packages are listed roughly in order of dependency hierarchy (i.e., packages listed first depend on subsequently listed packages).
 
@@ -18,7 +18,7 @@ bripipetools core packages
 ``sequencedlibraries`` module
 -----------------------------
 
-.. automodule:: bripipetools.annotation.sequencedlibraries
+.. automodule:: bripipetools.annotation.sequencedlibs
 
 -----------------------
 ``flowcellruns`` module
@@ -30,7 +30,7 @@ bripipetools core packages
 ``processedlibraries`` module
 -----------------------------
 
-.. automodule:: bripipetools.annotation.processedlibraries
+.. automodule:: bripipetools.annotation.processedlibs
 
 --------------------------
 ``workflowbatches`` module
