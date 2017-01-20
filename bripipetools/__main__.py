@@ -125,26 +125,55 @@ def main(verbosity):
 @click.option('--num-samples', '-n', default=None, type=int,
               help=("restrict the number of samples submitted for each "
                     "project on the flowcell"))
+@click.option('--manifest', '-m', is_flag=True,
+              help=("indicates that input path is a manifest of sample "
+                    "or folder paths (not a flowcell run) from which "
+                    "a workflow batch is to be created (note: options "
+                    "'sort-samples' and 'num-samples' will be ignored)"))
+@click.option('--out-dir', '-o', default=os.path.curdir,
+              help=("for input manifest, folder where outputs are to "
+                    "be saved; default is current directory"))
 @click.argument('path')
 def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
-           path):
+           manifest, out_dir, path):
     """
-    Prepare batch submission for unaligned samples from a flowcell run.
+    Prepare batch submission for unaligned samples from a flowcell run
+    or from a list of paths in a manifest file.
     """
-    logger.info("Creating batches for unaligned samples and projects "
-                "from flowcell run '{}'".format(path))
-    logger.info("... will search '{}' for workflow template options"
-                .format(workflow_dir))
-    logger.info("... destination endpoint for processing outputs is '{}'"
-                .format(endpoint))
-    submitter = bripipetools.submission.FlowcellSubmissionBuilder(
-        path=path,
-        endpoint=endpoint,
-        db=DB,
-        workflow_dir=workflow_dir,
-        all_workflows=all_workflows
-    )
-    submit_paths = submitter.run(sort=sort_samples, num_samples=num_samples)
+    if not manifest:
+        logger.info("Creating batches for unaligned samples and projects "
+                    "from flowcell run '{}'".format(path))
+        logger.info("... will search '{}' for workflow template options"
+                    .format(workflow_dir))
+        logger.info("... destination endpoint for processing outputs is '{}'"
+                    .format(endpoint))
+        submitter = bripipetools.submission.FlowcellSubmissionBuilder(
+            path=path,
+            endpoint=endpoint,
+            db=DB,
+            workflow_dir=workflow_dir,
+            all_workflows=all_workflows
+        )
+        submit_paths = submitter.run(sort=sort_samples,
+                                     num_samples=num_samples)
+    else:
+        logger.info("Creating batche unaligned samples listed in '{}'"
+                    .format(path))
+        logger.info("... will search '{}' for workflow template options"
+                    .format(workflow_dir))
+        logger.info("... destination endpoint for processing outputs is '{}'"
+                    .format(endpoint))
+        logger.info("... outputs to be saved in '{}'"
+                    .format(out_dir))
+        submitter = bripipetools.submission.SampleSubmissionBuilder(
+            manifest=path,
+            out_dir=out_dir,
+            endpoint=endpoint,
+            workflow_dir=workflow_dir,
+            all_workflows=all_workflows
+        )
+        submit_paths = submitter.run()
+
     print("\nPrepared the following workflow batch submit files:\n"
           "(ready for upload to Globus Genomics)\n")
     for p in submit_paths:

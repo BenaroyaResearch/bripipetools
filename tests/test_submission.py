@@ -720,7 +720,7 @@ class TestFlowcellSubmissionBuilder:
 
         mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
         mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
-        mock_workflowopts = [str(mock_workflowdir.mkdir(w))
+        mock_workflowopts = [str(mock_workflowdir.ensure(w))
                              for w in mock_workflows]
         mock_workflowopts.sort()
 
@@ -743,7 +743,7 @@ class TestFlowcellSubmissionBuilder:
 
         mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
         mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
-        mock_workflowopts = [str(mock_workflowdir.mkdir(w))
+        mock_workflowopts = [str(mock_workflowdir.ensure(w))
                              for w in mock_workflows
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
@@ -896,6 +896,139 @@ class TestFlowcellSubmissionBuilder:
         )]
 
         assert (test_paths == mock_paths)
+        assert (len([l for l in test_contents
+                     if re.search('^lib', l)])
+                == 2)
+
+
+class TestSampleSubmissionBuilder:
+    """
+
+    """
+    def test_read_paths(self, tmpdir):
+        mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
+        mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
+        mock_workflowopts = [str(mock_workflowdir.ensure(w))
+                             for w in mock_workflows]
+        mock_workflowopts.sort()
+
+        # mock_filename = 'optimized_workflow_1.txt'
+        # mock_file = mock_template(mock_filename, tmpdir)
+
+        mock_samples = ['lib1111-11111111', 'lib2222-22222222']
+        mock_paths = []
+        for s in mock_samples:
+            samplepath = tmpdir.mkdir(s)
+            mock_paths.append(str(samplepath))
+            samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+            samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        mock_manifest = tmpdir.join('manifest.txt')
+        mock_manifest.write('\n'.join(mock_paths))
+
+        builder = submission.SampleSubmissionBuilder(
+            manifest=str(mock_manifest),
+            out_dir=str(tmpdir),
+            endpoint='',
+            workflow_dir=str(mock_workflowdir)
+        )
+
+        builder._read_paths()
+
+        assert (builder.paths == mock_paths)
+
+    def test_get_workflow_options_for_all_workflows(self, tmpdir):
+        mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
+        mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
+        mock_workflowopts = [str(mock_workflowdir.ensure(w))
+                             for w in mock_workflows]
+        mock_workflowopts.sort()
+
+        builder = submission.SampleSubmissionBuilder(
+            manifest='',
+            out_dir=str(tmpdir),
+            endpoint='',
+            workflow_dir=str(mock_workflowdir)
+        )
+
+        test_workflowopts = builder.get_workflow_options(optimized_only=False)
+
+        assert (test_workflowopts == mock_workflowopts)
+
+    def test_assign_workflow(self, tmpdir):
+        mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
+        mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
+        mock_workflowopts = [str(mock_workflowdir.ensure(w))
+                             for w in mock_workflows]
+        mock_workflowopts.sort()
+
+        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+
+        mock_samples = ['lib1111-11111111', 'lib2222-22222222']
+        mock_paths = []
+        for s in mock_samples:
+            samplepath = tmpdir.mkdir(s)
+            mock_paths.append(str(samplepath))
+            samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+            samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        builder = submission.SampleSubmissionBuilder(
+            manifest='',
+            out_dir=str(tmpdir),
+            endpoint='',
+            workflow_dir=str(mock_workflowdir)
+        )
+
+        builder.paths = mock_paths
+
+        with mock.patch('__builtin__.raw_input',
+                        side_effect=iter(["0", "0"])):
+            builder._assign_workflow()
+
+        mock_batchkey = (mock_workflowopts[0], mock_buildopts[0])
+        assert (builder.batch_map == {mock_batchkey: mock_paths})
+
+    def test_run(self, tmpdir):
+        mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
+        mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
+        mock_workflowopts = [mock_template(w, mock_workflowdir)
+                             for w in mock_workflows
+                             if re.search('optimized', w)]
+        mock_workflowopts.sort()
+
+        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+
+        mock_samples = ['lib1111-11111111', 'lib2222-22222222']
+        mock_paths = []
+        for s in mock_samples:
+            samplepath = tmpdir.mkdir(s)
+            mock_paths.append(str(samplepath))
+            samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
+            samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
+
+        builder = submission.SampleSubmissionBuilder(
+            manifest='',
+            out_dir=str(tmpdir),
+            endpoint='',
+            workflow_dir=str(mock_workflowdir)
+        )
+
+        mock_batchkey = (mock_workflowopts[0], mock_buildopts[0])
+        builder.batch_map = {mock_batchkey: mock_paths}
+
+        test_batchpaths = builder.run()
+
+        with open(test_batchpaths[0]) as f:
+            test_contents = f.readlines()
+        logger.debug("{}".format(test_contents))
+
+        mock_date = datetime.date.today().strftime("%y%m%d")
+        mock_batchpaths = [os.path.join(
+            str(tmpdir),
+            '{}__optimized_workflow1_GRCh38.txt'.format(mock_date)
+        )]
+
+        assert (test_batchpaths == mock_batchpaths)
         assert (len([l for l in test_contents
                      if re.search('^lib', l)])
                 == 2)
