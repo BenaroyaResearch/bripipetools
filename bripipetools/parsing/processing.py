@@ -30,6 +30,8 @@ def parse_workflow_param(param):
         param_type = 'annotation'
     elif re.search('reference', param_tag):
         param_type = 'reference'
+    elif re.search('option', param_tag):
+        param_type = 'option'
     elif re.search('in$', param_tag):
         param_type = 'input'
     elif re.search('out$', param_tag):

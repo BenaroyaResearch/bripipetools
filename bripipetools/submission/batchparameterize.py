@@ -137,6 +137,32 @@ class BatchParameterizer(object):
                              .format(ref_type, self.build, self.build))
             raise
 
+    def _set_option_value(self, parameter):
+        opt_dict = {
+            'GRCh38': {
+                'tophat': {
+                    'index': 'GRCh38'  # 'Homo_sapiens-GRCh38',
+                },
+                'reorderbam': {
+                    'ref': 'GRCh38'  # 'Homo_sapiens-GRCh38',
+                }
+            }
+        }
+        opt_tool = re.sub('^option_', '', parameter['tag'])
+        opt_name = parameter['name']
+        logger.debug("retrieving option value for build '{}', tool '{}', "
+                     "and option name '{}'"
+                     .format(self.build, opt_tool, opt_name))
+        try:
+            return opt_dict[self.build][opt_tool][opt_name]
+        except KeyError:
+            logger.exception(("no option value available for option '{}' "
+                              "of tool '{}' for build '{}'; build '{}' is "
+                              "probably unsupported for selected workflow")
+                             .format(opt_name, opt_tool,
+                                     self.build, self.build))
+            raise
+
     def _prep_output_dir(self, output_type):
 
         output_dir = os.path.join(self.target_dir, output_type)
@@ -203,6 +229,8 @@ class BatchParameterizer(object):
                 param_values.append(self._build_reference_path(param))
             elif param['type'] == 'reference':
                 param_values.append(self._set_reference_value(param))
+            elif param['type'] == 'option':
+                param_values.append(self._set_option_value(param))
             elif param['type'] == 'output':
                 if re.search('^fastq_out', param['tag']):
                     final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
