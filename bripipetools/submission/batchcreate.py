@@ -18,7 +18,8 @@ class BatchCreator(object):
     """
     def __init__(self, paths, workflow_template, endpoint, base_dir,
                  submit_dir=None, group_tag=None, subgroup_tags=None,
-                 sort=False, num_samples=None, build='GRCh38'):
+                 sort=False, num_samples=None, build='GRCh38',
+                 stranded=False):
         logger.debug("creating `BatchCreator` instance")
         self.paths = paths
         self.workflow_template = workflow_template
@@ -49,6 +50,11 @@ class BatchCreator(object):
         self.date_tag = datetime.date.today().strftime("%y%m%d")
 
         self.build = build
+        self.stranded = stranded
+        if self.stranded:
+            self.strand_tag = 'stranded'
+        else:
+            self.strand_tag = 'unstrand'
         self.sort = sort
         self.num_samples = num_samples
 
@@ -57,13 +63,15 @@ class BatchCreator(object):
             os.path.basename(self.workflow_template)
         )[0]
         logger.debug("creating batch name from workflow ID '{}', "
-                     "group tag '{}', subgroup tags {}, and date tag '{}'"
+                     "group tag '{}', subgroup tags {}, date tag '{}', "
+                     "and strandedness '{}'"
                      .format(workflow_id, self.group_tag, self.subgroup_tags,
-                             self.date_tag))
+                             self.date_tag, self.strand_tag))
         batch_inputs = '_'.join([self.group_tag,
                                  '_'.join(self.subgroup_tags)]).rstrip('_')
-        return '{}_{}_{}_{}'.format(self.date_tag, batch_inputs, workflow_id,
-                                    self.build)
+        return '{}_{}_{}_{}_{}'.format(self.date_tag, batch_inputs,
+                                       workflow_id, self.build,
+                                       self.strand_tag)
 
     def _check_input_type(self):
         try:

@@ -364,7 +364,9 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = '{}__optimized_workflow_1_GRCh38'.format(mock_date)
+        mock_name = '{}__optimized_workflow_1_GRCh38_unstrand'.format(
+            mock_date
+        )
 
         assert (test_name == mock_name)
 
@@ -386,8 +388,8 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = ('{}_{}_{}_optimized_workflow_1_GRCh38'.format(
-            mock_date, mock_grouptag, '_'.join(mock_subgrouptags))
+        mock_name = '{}_{}_{}_optimized_workflow_1_GRCh38_unstrand'.format(
+                mock_date, mock_grouptag, '_'.join(mock_subgrouptags)
         )
 
         assert (test_name == mock_name)
@@ -931,7 +933,9 @@ class TestFlowcellSubmissionBuilder:
         mock_paths = [os.path.join(
             str(mock_path),
             'globus_batch_submission',
-            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38.txt'.format(mock_date)
+            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38_unstrand.txt'.format(
+                mock_date
+            )
         )]
 
         assert (test_paths == mock_paths)
@@ -1064,7 +1068,7 @@ class TestSampleSubmissionBuilder:
         mock_date = datetime.date.today().strftime("%y%m%d")
         mock_batchpaths = [os.path.join(
             str(tmpdir),
-            '{}__optimized_workflow1_GRCh38.txt'.format(mock_date)
+            '{}__optimized_workflow1_GRCh38_unstrand.txt'.format(mock_date)
         )]
 
         assert (test_batchpaths == mock_batchpaths)
