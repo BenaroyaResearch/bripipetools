@@ -141,11 +141,23 @@ class BatchParameterizer(object):
         opt_dict = {
             'GRCh38': {
                 'tophat': {
-                    'index': 'GRCh38'  # 'Homo_sapiens-GRCh38',
+                    'index': 'GRCh38'
                 },
                 'reorderbam': {
-                    'ref': 'GRCh38'  # 'Homo_sapiens-GRCh38',
-                }
+                    'ref': 'GRCh38'
+                },
+                'samtools-mpileup': {
+                    'ref_file': 'hg38'
+                },
+                'mixcr': {
+                    'species': 'hs'
+                },
+                'picard-align': {
+                    'index': 'GRCh38'
+                },
+                'picard-rnaseq': {
+                    'index': 'GRCh38'
+                },
             }
         }
         opt_tool = re.sub('^option_', '', parameter['tag'])
