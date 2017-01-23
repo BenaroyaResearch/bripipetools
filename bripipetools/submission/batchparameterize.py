@@ -14,13 +14,14 @@ class BatchParameterizer(object):
     given a list of parsed parameters for a Galaxy workflow.
     """
     def __init__(self, sample_paths, parameters, endpoint, target_dir,
-                 build='GRCh38'):
+                 build='GRCh38', stranded=False):
         logger.debug("creating `BatchParametizer` instance ")
         self.sample_paths = sample_paths
         self.parameters = parameters
         self.endpoint = endpoint
         self.target_dir = target_dir
         self.build = build
+        self.stranded = stranded
 
     def _get_lane_order(self):
         logger.debug("identifying lane order for input FASTQs")
@@ -141,7 +142,9 @@ class BatchParameterizer(object):
         opt_dict = {
             'GRCh38': {
                 'tophat': {
-                    'index': 'GRCh38'
+                    'index': 'GRCh38',
+                    'library_type': {False: 'fr-unstranded',
+                                     True: 'fr-firststrand'}
                 },
                 'reorderbam': {
                     'ref': 'GRCh38'
@@ -150,14 +153,26 @@ class BatchParameterizer(object):
                     'ref_file': 'hg38'
                 },
                 'mixcr': {
-                    'species': 'hs'
+                    'species': 'hsa'
                 },
                 'picard-align': {
                     'index': 'GRCh38'
                 },
                 'picard-rnaseq': {
-                    'index': 'GRCh38'
+                    'index': 'GRCh38',
+                    'strand_specificity': {
+                        False: 'NONE',
+                        True: 'FIRST_READ_TRANSCRIPTION_STRAND'
+                    }
                 },
+                'htseq': {
+                    'stranded': {False: 'no',
+                                 True: 'reverse'}
+                },
+                'trinity': {
+                    'library_type': {False: 'None',
+                                     True: 'F'}
+                }
             }
         }
         opt_tool = re.sub('^option_', '', parameter['tag'])
@@ -166,7 +181,12 @@ class BatchParameterizer(object):
                      "and option name '{}'"
                      .format(self.build, opt_tool, opt_name))
         try:
-            return opt_dict[self.build][opt_tool][opt_name]
+            opt_val = opt_dict[self.build][opt_tool][opt_name]
+            if type(opt_val) is dict:
+                return opt_val[self.stranded]
+            else:
+                return opt_val
+            # return opt_dict[self.build][opt_tool][opt_name]
         except KeyError:
             logger.exception(("no option value available for option '{}' "
                               "of tool '{}' for build '{}'; build '{}' is "
