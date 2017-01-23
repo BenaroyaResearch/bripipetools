@@ -853,10 +853,10 @@ class TestFlowcellSubmissionBuilder:
         )
 
         with mock.patch('__builtin__.raw_input',
-                        side_effect=iter(["0", "0", "0", ""])):
+                        side_effect=iter(["0", "0", "0", "", ""])):
             builder._assign_workflows()
 
-        mock_batchkey = (mock_workflowopts[0], mock_buildopts[0])
+        mock_batchkey = (mock_workflowopts[0], mock_buildopts[0], False)
         assert (builder.batch_map == {mock_batchkey: [mock_paths[0]]})
 
     def test_get_batch_tags(self, mock_db, tmpdir):
@@ -922,7 +922,7 @@ class TestFlowcellSubmissionBuilder:
         )
 
         builder.batch_map = {
-            (mock_workflowopts[0], mock_buildopts[0]): [mock_paths[0]]
+            (mock_workflowopts[0], mock_buildopts[0], False): [mock_paths[0]]
         }
         test_paths = builder.run()
 
