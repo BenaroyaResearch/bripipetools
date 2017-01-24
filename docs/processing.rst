@@ -4,7 +4,7 @@
 Processing data
 ***************
 
-Data processing is the primary function of ``bripipetools``, encompassing all bioinformatics operations performed on raw data (typically sequencing libraries) to generate processed output files. BRI processing pipelines do not include statistical analyses performed on output data.
+Data processing is the primary function of **bripipetools**, encompassing all bioinformatics operations performed on raw data (typically sequencing libraries) to generate processed output files. BRI processing pipelines do not include statistical analyses performed on output data.
 
 .. _process-workflows:
 
@@ -104,6 +104,16 @@ Current tools: ``SICER``, ``MACS2``
 
 -----
 
+.. _process-options:
+
+Workflow options
+================
+
+The following workflows are currently available for batch processing in Globus Genomics.
+
+-----
+
+
 .. _process-compose:
 
 Composing a workflow
@@ -111,10 +121,12 @@ Composing a workflow
 
 (in Globus Galaxy)
 
-Implementing a new (production) workflow in Globus Galaxy consists of two steps*: building a new workflow and annotating all input and output steps.
+Implementing a new (production) workflow in Globus Galaxy consists of two steps: building a new workflow and annotating all input and output steps.
 
 Building a workflow in Galaxy
 -----------------------------
+
+Use the Workflow Editor in Globus Galaxy for the following steps:
 
 1. Add all tools for processing modules (e.g., trimming, alignment, counting).
 2. Connect inputs and outputs of individual tools.
@@ -123,26 +135,74 @@ Building a workflow in Galaxy
    2. Input Dataset (for reference/annotation files)
 4. Add workflow outputs (Send Globus data)
 5. Set all get/send data endpoint and path options to 'set at runtime'
-6. (optional) Set build-specific options to 'set at runtime'
+6. (optional) Set build-specific and other options to 'set at runtime'
 7. Annotate input and output steps (and potentially build-specific parameters)
 
 Annotating parameters
 ---------------------
 
-Outputs
+For all parameters where values are to be set at runtime :superscript:`*`, tags of the following format should be added to the **Annotation / Notes** field in the Globus Galaxy Workflow Editor.
+
+:superscript:`*` "option" parameters are recognized by the combination of their ``tag`` (in the **Annotation** field) as well as their **name** which is assigned by Galaxy.
+
+Input parameters
+^^^^^^^^^^^^^^^^
+
+Input parameters — indicating local files that will be uploaded to Globus Galaxy nodes at the start of workflow processing — should have the following form:
+
+``extension_in``
+
+This typically only applies to ``fastq_in``.
+
+Output parameters
+^^^^^^^^^^^^^^^^^
+
+Output parameters are expected to have the following form:
 
 ``<source>_<type>_<extension>_<out>``
 
+For example, the tag ``picard-rnaseq_metrics_html_out`` will be parsed into a dictionary like this:::
 
-Annotation input datasets
+    {
+        'type': 'metrics',
+        'label': 'metrics',
+        'source': 'picard-rnaseq',
+        'extension': 'html'
+     }
 
-Adapter files: ``annotation_adapters`` (optional name: ``adapterFile``)
+Both source and label can be given added specificity with a hyphen-separated string (e.g., ``picard`` vs. ``picard-rnaseq`` or ``metrics`` vs. ``metrics-rmdup``). The parsing code should automatically detect and group these clauses appropriately.
+
+Annotation input paramters
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some workflows will access and load datasets stored in the Globus Galaxy library. These inputs (represented as **Input Dataset** in the workflow editor) should have annotation tags in the following form:
+
+``annotation_<type>``
+
+You can also give a name to the dataset to possibly ease navigation within the editor, but these names will not be used by downstream code.
+
+The most common annotation input parameters are the following:
+
+* GTF gene model files: ``annotation_gtf`` (optional name: ``gtfFile``)
+* Gene model refFlat files: ``annotation_refflat`` (optional name: ``refFlatFile``)
+* Ribosomal interval files: ``annotation_ribosomal-intervals`` (optional name: ``riboIntsFile``)
+* Adapter files: ``annotation_adapters`` (optional name: ``adapterFile``)
+
+
+Saving the workflow template
+----------------------------
+
+Once a workflow is finished and ready for testing...
+
+1. Click the arrow next to the workflow name in the Galaxy **Workflows** tab.
+2. Select "Submit via API batch mode".
+3. On the following page, click the link to "Export Workflow Parameters for batch submission" and save the file under ``genomics/galaxy_workflows`` (wherever the path exists relative to your local system); make sure to remove the leading ``Galaxy-API-Workflow-`` from the filename.
 
 
 Importing a new workflow to GenLIMS
 -----------------------------------
 
-**[PROPOSED]**
+**[PROPOSED]** The following ideas have not been implemented in GenLIMS or **bripipetools**; skip for now.
 
 Importing a workflow requires two inputs: the exported workflow JSON and the corresponding API batch submission template. This will create a new document in the **workflows** collection with 5 initial fields:
 
@@ -161,6 +221,7 @@ Next, you will be prompted to select fill in additional information indicating t
 Finally, if importing an "optimized" workflow, you will be asked to indicate so and provide the name/ID of the corresponding base workflow. Additionally, if there is a non-Globus Galaxy workflow that matches the imported workflow, that can be indicated as well.
 
 -----
+
 
 .. _process-run:
 
@@ -189,8 +250,10 @@ On ``srvgalaxy02`` under ``/mnt/genomics/Illumina/<flowcell-folder>/``, create a
     FC_FOLDER="/mnt/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Unaligned"
 
 
-Using the ``bripipetools`` script
----------------------------------
+Using ``bripipetools``
+----------------------
+
+The ``bripipetools`` command (which calls ``bripipetools/__main__.py``) is the entrypoint to application functionality. If you have the **bripipetools** package installed, you should be able to use this command from anywhere on your system.
 ::
 
     bripipetools --help
@@ -236,7 +299,8 @@ Using ``bripipetools`` to submit
 
     Usage: bripipetools submit [OPTIONS] PATH
 
-      Prepare batch submission for unaligned samples from a flowcell run.
+      Prepare batch submission for unaligned samples from a flowcell run or from
+      a list of paths in a manifest file.
 
     Options:
       --endpoint TEXT                 Globus Online endpoint where input data is
@@ -248,6 +312,19 @@ Using ``bripipetools`` to submit
                                       indicate whether to include all detected
                                       workflows as options or to keep 'optimized'
                                       workflows only
+      -s, --sort-samples              sort samples from smallest to largest (based
+                                      on total size of raw data files) before
+                                      submitting; this is most useful when also
+                                      restricting the number of samples
+      -n, --num-samples INTEGER       restrict the number of samples submitted for
+                                      each project on the flowcell
+      -m, --manifest                  indicates that input path is a manifest of
+                                      sample or folder paths (not a flowcell run)
+                                      from which a workflow batch is to be created
+                                      (note: options 'sort-samples' and 'num-
+                                      samples' will be ignored)
+      -o, --out-dir TEXT              for input manifest, folder where outputs are
+                                      to be saved; default is current directory
       --help                          Show this message and exit.
 
 

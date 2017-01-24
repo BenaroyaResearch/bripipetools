@@ -11,7 +11,7 @@ The vast majority of data handled by the Bioinformatics Core — and by extensio
 Protocols
 =========
 
-Operations related to experimental processing and data generation of Genomics Core samples are generally described by **protocols** (see the **GenLIMS - ADD LINK!!!** section above). Protocols are classified by type, indicating the overall goal or purpose of a procedure or series of steps. A **run** represents an identifiable instance of a protocol, typically corresponding to a specific chip, plate, or flowcell. Current protocols and associated run types are listed below.
+Operations related to experimental processing and data generation of Genomics Core samples are generally described by **protocols** (see the :ref:`genlims-page` page). Protocols are classified by type, indicating the overall goal or purpose of a procedure or series of steps. A **run** represents an identifiable instance of a protocol, typically corresponding to a specific chip, plate, or flowcell. Current protocols and associated run types are listed below.
 
 * incoming
 * RNA extraction
