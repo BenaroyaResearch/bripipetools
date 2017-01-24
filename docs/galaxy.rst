@@ -1,4 +1,7 @@
-Bioinformatics processing with Galaxy
-=====================================
+.. _galaxy-page:
+
+*****************
+Navigating Galaxy
+*****************
 
 Documentation coming soon...

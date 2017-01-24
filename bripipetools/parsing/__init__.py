@@ -4,7 +4,9 @@ provides functions for parsing and extracting information from strings
 that follow some expected nomenclature. The primary examples of this
 information are IDs, names, labels, and other metadata for files and
 objects generated either by Illumina technology or the BRI Genomics
-Core (via GenLIMS).
+Core (via GenLIMS). The ``parsing.processing`` module is also designed
+to handle specialized strings and labels related to processing
+workflows in Globus Galaxy.
 
 Depends on the ``util`` module.
 """

@@ -1,5 +1,5 @@
-bripipetools application modules
-================================
+bripipetools application packages
+=================================
 
 Application-level packages are those exposed to the user through wrapper scripts and the command line. They are used to perform common, high-level tasks related to pipeline operations and data. Packages are listed roughly in order of dependency hierarchy (i.e., packages listed first depend on subsequently listed packages).
 
@@ -9,66 +9,66 @@ Application-level packages are those exposed to the user through wrapper scripts
 
 -----
 
-``dbify`` package
------------------
+``dbification`` package
+-----------------------
 
-.. automodule:: bripipetools.dbify
+.. automodule:: bripipetools.dbification
 
 ---------------------
 ``control`` submodule
 ---------------------
 
-.. automodule:: bripipetools.dbify.control
+.. automodule:: bripipetools.dbification.control
 
 ----------------------
 ``flowcellrun`` module
 ----------------------
 
-.. automodule:: bripipetools.dbify.flowcellrun
+.. automodule:: bripipetools.dbification.flowcellrun
 
 ------------------------
 ``workflowbatch`` module
 ------------------------
 
-.. automodule:: bripipetools.dbify.workflowbatch
+.. automodule:: bripipetools.dbification.workflowbatch
 
 -----
 
-``postprocess`` package
------------------------
+``postprocessing`` package
+--------------------------
 
-.. automodule:: bripipetools.postprocess
+.. automodule:: bripipetools.postprocessing
 
 --------------------
 ``stitching`` module
 --------------------
 
-.. automodule:: bripipetools.postprocess.stitching
+.. automodule:: bripipetools.postprocessing.stitching
 
 --------------------
 ``compiling module``
 --------------------
 
-.. automodule:: bripipetools.postprocess.compiling
+.. automodule:: bripipetools.postprocessing.compiling
 
 ------------------
 ``cleanup`` module
 ------------------
 
-.. automodule:: bripipetools.postprocess.cleanup
+.. automodule:: bripipetools.postprocessing.cleanup
 
 -----
 
 ``monitoring`` package
 ----------------------
 
-.. automodule:: bripipetools.postprocess
+.. automodule:: bripipetools.monitoring
 
 --------------------------
 ``workflowbatches`` module
 --------------------------
 
-.. automodule:: bripipetools.postprocess.workflowbatches
+.. automodule:: bripipetools.monitoring.workflowbatches
 
 -----
 
@@ -82,6 +82,12 @@ Application-level packages are those exposed to the user through wrapper scripts
 -------------------------
 
 .. automodule:: bripipetools.submission.flowcellsubmit
+
+-----------------------
+``samplesubmit`` module
+-----------------------
+
+.. automodule:: bripipetools.submission.samplesubmit
 
 ----------------------
 ``batchcreate`` module

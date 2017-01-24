@@ -1,3 +1,7 @@
+***************
+Getting started
+***************
+
 Using bripipetools
 ==================
 
@@ -27,3 +31,25 @@ Data management
 ---------------
 
 Annotation of sequencing and processing data — as well as corresponding retrieval and import of data from/to the GenLIMS database — is performed through the ``bripipetools dbify`` command, which uses the ``dbify`` package.
+
+
+Installing bripipetools
+=======================
+
+::
+
+    git clone https://github.com/BenaroyaResearch/bripipetools
+    conda env create -n bripipetools environment.yml
+
+
+For development::
+
+    pip install -e .
+    py.test
+    bripipetools
+
+For production (not currently tested)::
+
+    pip install .
+    python setup.py test
+

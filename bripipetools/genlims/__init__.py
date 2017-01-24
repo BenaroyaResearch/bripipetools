@@ -1,12 +1,12 @@
 """
 Contains methods for interacting with - connecting to, retrieving data
 from, and inserting data into - the GenLIMS database at a low level.
-Under the hood, much of the functionality in this module relies on the
-pymongo client library for MongoDB. The ``genlims.operations``
-submodule provides wrapper functions for getting/putting objects
+Under the hood, much of the functionality in this package relies on
+the pymongo client library for MongoDB. The ``genlims.operations``
+module provides wrapper functions for getting/putting objects
 from/to commonly used database collections, while ``genlims.mapping``
 helps to construct Python ``model`` class objects from database
-objects. Methods in the ``genlims.connection`` module manage the
+documents. Methods in the ``genlims.connection`` module manage the
 database connection, depending on environment and configurations.
 """
 from .connection import connect

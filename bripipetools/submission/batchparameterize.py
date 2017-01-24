@@ -12,6 +12,24 @@ class BatchParameterizer(object):
     """
     Defines workflow batch parameters for a list of input samples,
     given a list of parsed parameters for a Galaxy workflow.
+
+    :type sample_paths: list
+    :param sample_paths: List of paths to sample folders, where each
+        folder contains one or more lane-specifc FASTQ file(s).
+    :type parameters: list
+    :param parameters: List of workflow parameters, parsed from a
+        workflow template file, where each parameter is represented
+        by a dict with fields ``tag``, ``type``, and ``name``.
+    :type target_dir: str
+    :param target_dir: Path to folder where outputs are to be saved.
+        Subfolders will be created within the ``target_dir`` based
+        on output type.
+    :type endpoint: str
+    :param endpoint: Globus endpoint where input files are accessed
+        and output files will be sent (e.g., 'jeddy#srvgridftp01').
+    :type build: str
+    :param build: ID string of reference genome build to be used
+        for processing current set of samples.
     """
     def __init__(self, sample_paths, parameters, endpoint, target_dir,
                  build='GRCh38'):
@@ -23,6 +41,10 @@ class BatchParameterizer(object):
         self.build = build
 
     def _get_lane_order(self):
+        """
+        Return the list of lane numbers (1-8) based on the order in
+        which they appear for input FASTQs in the parameter list.
+        """
         logger.debug("identifying lane order for input FASTQs")
         return [re.search('[1-8]', p['name']).group()
                 for p in self.parameters
@@ -30,6 +52,11 @@ class BatchParameterizer(object):
                 and re.search('from_path', p['name'])]
 
     def _get_lane_fastq(self, sample_path, lane):
+        """
+        Retrieve the path for the FASTQ file from the specified lane
+        within the sample folder. If no file exists, create and return
+        the path of an empty FASTQ file.
+        """
         logger.debug("retrieving FASTQ path for sample '{}' and lane {}"
                      .format(sample_path, lane))
         fastq_paths = [os.path.join(sample_path, f)
@@ -50,6 +77,11 @@ class BatchParameterizer(object):
         return fastq_path
 
     def _build_reference_path(self, parameter):
+        """
+        Given a parameter for an input annotation dataset stored in a
+        library on Globus Galaxy, return the path to the dataset based
+        on the current build and annotation type.
+        """
         ref_dict = {
             'GRCh38': {
                 'gtf': 'GRCh38/Homo_sapiens.GRCh38.77.gtf',
@@ -94,6 +126,11 @@ class BatchParameterizer(object):
         )
 
     def _set_reference_value(self, parameter):
+        """
+        Given a parameter for a reference option (e.g., a built-in
+        genome index) to be set at runtime, return the string value
+        for the option based on the current build and reference type.
+        """
         ref_dict = {
             'GRCh38': {
                 'tophat-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
@@ -138,7 +175,10 @@ class BatchParameterizer(object):
             raise
 
     def _prep_output_dir(self, output_type):
-
+        """
+        Create a subfolder in the ``target_dir`` to store outputs of
+        the specified type, return folder path.
+        """
         output_dir = os.path.join(self.target_dir, output_type)
         logger.debug("creating folder '{}' to store outputs of type '{}'"
                      .format(output_dir, output_type))
@@ -148,6 +188,11 @@ class BatchParameterizer(object):
         return output_dir
 
     def _build_output_path(self, sample_name, parameter):
+        """
+        Construct the full path of the current output file, formatted
+        with the sample name and source/type-specific file label (as
+        well as the appropriate extension).
+        """
         output_type_map = {'trimmed': 'TrimmedFastqs',
                            'counts': 'counts',
                            'quant': 'quant',
@@ -177,6 +222,10 @@ class BatchParameterizer(object):
                               'genomics', '/mnt/')
 
     def _build_sample_parameters(self, sample_path):
+        """
+        For a given input sample folder, create and set all parameter
+        values for input paths, output paths, and other options.
+        """
         sample_id = parsing.get_sample_id(sample_path)
         fc_id = parsing.get_flowcell_id(sample_path)
         sample_name = '{}_{}'.format(sample_id, fc_id).rstrip('_')
@@ -218,6 +267,15 @@ class BatchParameterizer(object):
         return param_values
 
     def parameterize(self):
+        """
+        Set all parameter values for the current workflow and input
+        samples and return as list of sample parameters.
+
+        :rtype: list
+        :return: List of lists, where the original input list of
+            parameter dicts has been replicated for each sample and
+            updated to include values specific for that sample.
+        """
         sample_params = []
         for s in self.sample_paths:
             logger.debug("setting parameters for input sample file '{}'"

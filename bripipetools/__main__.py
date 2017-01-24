@@ -47,35 +47,35 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
     """
     project_path_short = os.path.basename(os.path.normpath(project_path))
     if clean_outputs:
-        bripipetools.postprocess.OutputCleaner(project_path).clean_outputs()
+        bripipetools.postprocessing.OutputCleaner(project_path).clean_outputs()
         logger.info("Output files cleaned for '{}".format(project_path_short))
 
     combined_paths = []
     if output_type in ['c', 'a'] and 'c' not in exclude_types:
         logger.debug("generating combined counts file")
         path = os.path.join(project_path, 'counts')
-        bripipetools.postprocess.OutputStitcher(path).write_table()
+        bripipetools.postprocessing.OutputStitcher(path).write_table()
 
     if output_type in ['m', 'a'] and 'm' not in exclude_types:
         logger.debug("generating combined metrics file")
         path = os.path.join(project_path, 'metrics')
         combined_paths.append(
-            bripipetools.postprocess.OutputStitcher(path).write_table())
+            bripipetools.postprocessing.OutputStitcher(path).write_table())
 
     if output_type in ['q', 'a'] and 'q' not in exclude_types:
         logger.debug("generating combined QC file(s)")
         path = os.path.join(project_path, 'QC')
-        bripipetools.postprocess.OutputStitcher(
+        bripipetools.postprocessing.OutputStitcher(
             path).write_overrepresented_seq_table()
         combined_paths.append(
-            bripipetools.postprocess.OutputStitcher(path).write_table())
+            bripipetools.postprocessing.OutputStitcher(path).write_table())
 
     if output_type in ['v', 'a'] and 'v' not in exclude_types:
         logger.debug("generating combined validation file(s)")
         path = os.path.join(project_path, 'validation')
     try:
         combined_paths.append(
-            bripipetools.postprocess.OutputStitcher(path).write_table()
+            bripipetools.postprocessing.OutputStitcher(path).write_table()
         )
     except OSError:
         logger.warn(("no validation files found "
@@ -85,7 +85,7 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
                 .format(project_path_short, output_type))
 
     if not stitch_only:
-        bripipetools.postprocess.OutputCompiler(combined_paths).write_table()
+        bripipetools.postprocessing.OutputCompiler(combined_paths).write_table()
         logger.info("Merged all combined summary data tables for '{}'"
                     .format(project_path_short))
 
@@ -189,7 +189,7 @@ def dbify(path):
     """
     logger.info("Importing data to '{}' based on path '{}'"
                 .format(DB.name, path))
-    importer = bripipetools.dbify.ImportManager(
+    importer = bripipetools.dbification.ImportManager(
         path=path,
         db=DB
     )
@@ -243,13 +243,13 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
     """
-    Perform 'dbify' and 'postprocess' operations on all projects and
+    Perform 'dbification' and 'postprocessing' operations on all projects and
     workflow batches from a flowcell run.
     """
     # import flowcell run details and raw data for sequenced libraries
     logger.info("Importing raw data for flowcell at path '{}'"
                 .format(path))
-    importer = bripipetools.dbify.ImportManager(
+    importer = bripipetools.dbification.ImportManager(
         path=path,
         db=DB
     )
@@ -296,7 +296,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
             "importing processed data for workflow batch in file '{}'"
             .format(wb)
         )
-        bripipetools.dbify.ImportManager(
+        bripipetools.dbification.ImportManager(
             path=wb,
             db=DB
         ).run()
