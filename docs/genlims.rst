@@ -82,6 +82,4 @@ Perform mongo 'pull' (dump + restore)::
 Architecture
 ============
 
-
-
 Documentation coming soon...

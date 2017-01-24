@@ -23,10 +23,10 @@ Contents:
    processing.rst
    postprocessing.rst
    brigenomics.rst
-   refdata.rst
-   galaxy.rst
    genlims.rst
    basespace.rst
+   galaxy.rst
+   refdata.rst
    contributing.rst
    apppackages.rst
    corepackages.rst

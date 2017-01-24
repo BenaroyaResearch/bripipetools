@@ -1,13 +1,17 @@
 .. _process-page:
 
 ***************
-Processing Data
+Processing data
 ***************
+
+Data processing is the primary function of ``bripipetools``, encompassing all bioinformatics operations performed on raw data (typically sequencing libraries) to generate processed output files. BRI processing pipelines do not include statistical analyses performed on output data.
 
 .. _process-workflows:
 
 Workflows
 =========
+
+Workflows are the heart of bioinformatics processing operation. They comprise a repeatable series of steps performed on a collection of data files. Steps within a workflow can be broken down or categorized into specific modules, depending on the goal or output of the step.
 
 Processing modules
 ------------------
@@ -31,21 +35,21 @@ adapter trimming
 
 For certain library prep procedures (e.g., Nextera), oligonucleotide indexes will be included as part of the PCR amplifcation step, prior to library construction. In these cases, these adapter sequences will appear within reads, in contrast to typical sequencing adapters (e.g., Illumina adapters and indexes used for demultiplexing) that are nominally removed by tools like **CASAVA** and **bcl2fastq**.
 
-Current tools: `FastqMcf`
+Current tools: ``FastqMcf``
 
 quality trimming
 ^^^^^^^^^^^^^^^^
 
+Modern aligners use "dynamic" or "adaptive" trimming to remove bases from either end of individual reads to improve mapping to the reference. Reads can also be pre-processed to remove bases that do not pass a certain quality threshold. In theory, removing low quality (and thus, low confidence) bases can also improve mapping rate; however, care must be taken to impose a minimum length for trimmed reads, as extremely short reads will lead to high duplication rates and biased results.
 
 alignment
 ^^^^^^^^^
 
 This is the central step for almost all NGS processing workflows. Following any trimming, short reads are aligned to a reference genome and the results are stored in a Sequence Alignment Map (SAM) file — and more typically, in the binary BAM format. For RNA-seq data, it is important to use aligners that are "splice aware" (e.g., **TopHat** and **STAR**) to account for the fact that reads from mRNA transcripts may include one or more exons that are not adjacent in the genome (and therefore might not align). Alternatively, RNA reads could be aligned to a reference transcriptome.
 
-Current tools: ``HISAT2`, ``bowtie2``
+Current tools: ``HISAT2``, ``bowtie2``
 
 Previous tools: ``TopHat``
-
 
 counting
 ^^^^^^^^
@@ -55,7 +59,6 @@ After reads have been aligned to the genome, reference annotations (i.e., gene m
 Current tool: ``featureCounts``
 
 Previous tools: ``htseq-count``
-
 
 quantification
 ^^^^^^^^^^^^^^
@@ -67,7 +70,6 @@ SNP fingerprinting
 ^^^^^^^^^^^^^^^^^^
 
 Current tools: ``samtools``, ``bcftools``
-
 
 metrics
 ^^^^^^^
@@ -129,7 +131,7 @@ Annotating parameters
 
 Outputs
 
-``<source>\_<type>\_<extension>\_<out>``
+``<source>_<type>_<extension>_<out>``
 
 
 Annotation input datasets
@@ -139,6 +141,8 @@ Adapter files: ``annotation_adapters`` (optional name: ``adapterFile``)
 
 Importing a new workflow to GenLIMS
 -----------------------------------
+
+**[PROPOSED]**
 
 Importing a workflow requires two inputs: the exported workflow JSON and the corresponding API batch submission template. This will create a new document in the **workflows** collection with 5 initial fields:
 
@@ -185,8 +189,8 @@ On ``srvgalaxy02`` under ``/mnt/genomics/Illumina/<flowcell-folder>/``, create a
     FC_FOLDER="/mnt/genomics/Illumina/150615_D00565_0087_AC6VG0ANXX/Unaligned"
 
 
-Using `bripipetools`
---------------------
+Using the ``bripipetools`` script
+---------------------------------
 ::
 
     bripipetools --help
@@ -219,8 +223,7 @@ At this point, you'll need to identify the most applicable workflow (for a more 
 Refer to flowcell log
 ^^^^^^^^^^^^^^^^^^^^^
 
-(path to flowcell log)
-
+The flowcell log can be found at ``DFS_Chaussabel_LabShare/Illumina HiScan SQ/Flowcell log.xlsx``.
 
 Using ``bripipetools`` to submit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -340,6 +343,8 @@ Postprocessing workflow outputs
 Follow up steps
 ---------------
 
+Not all pipeline steps have been integrated into the ``bripipetools`` application code base. Remaining steps are performed with scripts located in the ``scripts`` folder.
+
 Generating gene model coverage plots
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -423,7 +428,9 @@ After running the `pulldownGalaxyData.py` script, results will be stored under t
 Retrieving details for old workflows
 ====================================
 
-Galaxy PostgreSQL Database Queries
+To collect details about old workflows and histories from processing jobs on the local Galaxy server, one can either use the **PostgreSQL** database directly, or take advantage of an **R** script for interacting with the database.
+
+Galaxy PostgreSQL database queries
 ----------------------------------
 
 Keeping track of various queries here with thought of eventually combining into scripts or functions.

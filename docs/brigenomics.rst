@@ -13,29 +13,18 @@ Protocols
 
 Operations related to experimental processing and data generation of Genomics Core samples are generally described by **protocols** (see the **GenLIMS - ADD LINK!!!** section above). Protocols are classified by type, indicating the overall goal or purpose of a procedure or series of steps. A **run** represents an identifiable instance of a protocol, typically corresponding to a specific chip, plate, or flowcell. Current protocols and associated run types are listed below.
 
-### incoming
-
-### RNA extraction
-
-### miRNA extraction
-
-### RNA purification
-
-### globin reduction
-
-### cell capture
-
-### cDNA synthesis
-
-### library prep
-
-### custom library prep
-
-### sequencing
-
-### qPCR
-
-### bioinformatics processing
+* incoming
+* RNA extraction
+* miRNA extraction
+* RNA purification
+* globin reduction
+* cell capture
+* cDNA synthesis
+* library prep
+* custom library prep
+* sequencing
+* qPCR
+* bioinformatics processing
 
 .. _genomics-storage:
 
@@ -60,44 +49,34 @@ Basic org::
 Basic landing points
 ^^^^^^^^^^^^^^^^^^^^
 
-Illumina
-
-SRA
-
-ICAC
-
-NGXBio
-
-Fluidigm
+* ``Illumina``
+* ``SRA``
+* ``ICAC``
+* ``NGXBio``
+* ``Fluidigm``
 
 
 Reference data
 ^^^^^^^^^^^^^^
 
-annotationsForGalaxy
-
-Genomes
-
-iGenomes
-
-ERCC92
+* ``annotationsForGalaxy``
+* ``Genomes``
+* ``iGenomes``
+* ``ERCC92``
 
 
 Special folders
 ^^^^^^^^^^^^^^^
-code
 
-galaxy_workflows
-
-geo_submissions
-
+* ``code``
+* ``galaxy_workflows``
+* ``geo_submissions``
 
 
 Old Galaxy data
 ^^^^^^^^^^^^^^^
 
-srvgalaxy02
-
+* ``srvgalaxy02``
 
 
 Chaussabel lab share

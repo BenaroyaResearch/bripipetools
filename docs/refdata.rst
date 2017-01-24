@@ -95,4 +95,4 @@ Library prep (and other) adapters
 Uploading to Galaxy library
 ===========================
 
-
+(steps)

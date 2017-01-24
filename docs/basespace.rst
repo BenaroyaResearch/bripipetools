@@ -32,8 +32,12 @@ Next, go to the the **Projects** tab, and for each project on the flowcell, do t
 Backing up data
 ===============
 
+The ``basemount`` tool can be used to access BaseSpace data through the command line and copy files to a local server.
+
 ``basemount``
 -------------
+
+(instructions)
 
 Using ``backup_basespace.py``
 -----------------------------
