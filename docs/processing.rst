@@ -563,7 +563,9 @@ Job metrics for datasets
     svc_galaxy=# SELECT * FROM job_to_input_dataset WHERE dataset_id IN (SELECT dataset_id FROM history_dataset_association WHERE history_id = '536');
 
 
-Magic R script
---------------
+Magic R notebook
+----------------
 
-(filename)
+(``flowcell_qc_check`` repo)
+
+``galaxy_history_annotation.Rmd``

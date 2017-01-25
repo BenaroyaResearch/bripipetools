@@ -174,8 +174,7 @@ Fixtures can be used to inject dependencies into a test.
 Sphinx & ReadTheDocs
 ====================
 
-(references)
-
+Here's one of the better Sphinx/RST guides I've come across: `sphinx.rst <https://github.com/ContinuumIO/misc-docs-info/blob/master/source/directory/sphinx.rst#python>`_.
 .. _contribute-version:
 
 Updating version
