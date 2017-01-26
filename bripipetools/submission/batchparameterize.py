@@ -146,6 +146,12 @@ class BatchParameterizer(object):
                     'library_type': {False: 'fr-unstranded',
                                      True: 'fr-firststrand'}
                 },
+                'hisat2': {
+                    'index': 'hg38'
+                },
+                'salmon': {
+                    'index': 'GRCh38'
+                },
                 'reorderbam': {
                     'ref': 'GRCh38'
                 },
@@ -172,6 +178,28 @@ class BatchParameterizer(object):
                 'trinity': {
                     'library_type': {False: 'None',
                                      True: 'F'}
+                }
+            },
+            'hg19': {
+                'bowtie2': {
+                    'index': 'hg19'
+                },
+                'picard-align': {
+                    'index': 'hg19'
+                },
+                'macs2': {
+                    'gsize': '2451960000'
+                }
+            },
+            'mm10': {
+                'bowtie2': {
+                    'index': 'mm10'
+                },
+                'picard-align': {
+                    'index': 'mm10'
+                },
+                'macs2': {
+                    'gsize': '2150570000'
                 }
             }
         }
