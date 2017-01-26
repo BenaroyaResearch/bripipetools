@@ -191,7 +191,11 @@ Fixtures can be used to inject dependencies into a test.
 Sphinx & ReadTheDocs
 ====================
 
+**Sphinx** is the syntax/interpreter used for documentation with **bripipetools**; **ReadTheDocs** provides a free hosting service for documentation generated with Sphinx. For a quick overview of how to set up and get started with Sphinx and ReadTheDocs, refer to `this page <http://read-the-docs.readthedocs.io/en/latest/getting_started.html>`_.
+
 Here's one of the better Sphinx/RST guides I've come across: `sphinx.rst <https://github.com/ContinuumIO/misc-docs-info/blob/master/source/directory/sphinx.rst#python>`_.
+
+These two are also good: `RST and Sphinx CheatSheet <http://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`_, `Sphinx-based docs style guide <http://documentation-style-guide-sphinx.readthedocs.io/en/latest/style-guide.html>`_
 
 -----
 
