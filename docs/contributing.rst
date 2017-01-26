@@ -21,6 +21,9 @@ Python style
 
 PEP8
 
+-----
+
+
 .. _contribute-envs:
 
 Anaconda and virtual environments
@@ -47,6 +50,7 @@ To deactivate the conda envirionment, use this command:::
     source deactivate
 
 -----
+
 
 .. _contribute-git:
 
@@ -96,6 +100,19 @@ OR::
 
 .. _contribute-test:
 
+Issues
+------
+
+The best way to flag a problem, a desired feature, or some other proposed change to the code is creating a new issue on GitHub. This will not only get the attention of package maintaners, but also serves as a centralized to-do list. Even for primary developers of **bripipetools**, a recommended procedure would be:
+
+1. Create a new issue describing what is wrong or missing and propose a strategy to update package code (optional: assign the issue to a package contributor)
+2. Create a new branch to address the feature or change referenced in the issue
+3. Make any changes, commit, open and merge pull request
+4. Close the issue
+
+-----
+
+
 Testing with PyTest
 ===================
 
@@ -130,7 +147,6 @@ Basic test setup
 Here's a very basic example of how to set up a test.
 
 ::
-
 
     def test_to_camel_case():
         assert to_camel_case('snake_case_string') == 'camelCaseString'
@@ -169,12 +185,17 @@ Fixtures can be used to inject dependencies into a test.
 
 -----
 
+
 .. _contribute-docs:
 
 Sphinx & ReadTheDocs
 ====================
 
 Here's one of the better Sphinx/RST guides I've come across: `sphinx.rst <https://github.com/ContinuumIO/misc-docs-info/blob/master/source/directory/sphinx.rst#python>`_.
+
+-----
+
+
 .. _contribute-version:
 
 Updating version

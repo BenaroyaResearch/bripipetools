@@ -104,6 +104,7 @@ Current tools: ``SICER``, ``MACS2``
 
 -----
 
+
 .. _process-options:
 
 Workflow options

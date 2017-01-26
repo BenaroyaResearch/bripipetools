@@ -25,8 +25,8 @@ SNP fingerprinting
 
 -----
 
-.. _postprocess-org:
 
+.. _postprocess-org:
 
 File naming & organization
 ==========================
