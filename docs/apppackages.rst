@@ -1,5 +1,9 @@
+*********************************
 bripipetools application packages
-=================================
+*********************************
+
+Overview
+========
 
 Application-level packages are those exposed to the user through wrapper scripts and the command line. They are used to perform common, high-level tasks related to pipeline operations and data. Packages are listed roughly in order of dependency hierarchy (i.e., packages listed first depend on subsequently listed packages).
 
@@ -9,26 +13,26 @@ Application-level packages are those exposed to the user through wrapper scripts
 
 -----
 
+Package details
+===============
+
 ``dbification`` package
 -----------------------
 
 .. automodule:: bripipetools.dbification
 
----------------------
 ``control`` submodule
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.dbification.control
 
-----------------------
 ``flowcellrun`` module
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.dbification.flowcellrun
 
-------------------------
 ``workflowbatch`` module
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.dbification.workflowbatch
 
@@ -39,21 +43,18 @@ Application-level packages are those exposed to the user through wrapper scripts
 
 .. automodule:: bripipetools.postprocessing
 
---------------------
 ``stitching`` module
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.postprocessing.stitching
 
---------------------
 ``compiling module``
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.postprocessing.compiling
 
-------------------
 ``cleanup`` module
-------------------
+^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.postprocessing.cleanup
 
@@ -64,9 +65,8 @@ Application-level packages are those exposed to the user through wrapper scripts
 
 .. automodule:: bripipetools.monitoring
 
---------------------------
 ``workflowbatches`` module
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.monitoring.workflowbatches
 
@@ -77,26 +77,22 @@ Application-level packages are those exposed to the user through wrapper scripts
 
 .. automodule:: bripipetools.submission
 
--------------------------
 ``flowcellsubmit`` module
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.submission.flowcellsubmit
 
------------------------
 ``samplesubmit`` module
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.submission.samplesubmit
 
-----------------------
 ``batchcreate`` module
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.submission.batchcreate
 
-----------------------------
 ``batchparameterize`` module
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: bripipetools.submission.batchparameterize

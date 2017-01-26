@@ -11,31 +11,23 @@ The vast majority of data handled by the Bioinformatics Core — and by extensio
 Protocols
 =========
 
-Operations related to experimental processing and data generation of Genomics Core samples are generally described by **protocols** (see the **GenLIMS - ADD LINK!!!** section above). Protocols are classified by type, indicating the overall goal or purpose of a procedure or series of steps. A **run** represents an identifiable instance of a protocol, typically corresponding to a specific chip, plate, or flowcell. Current protocols and associated run types are listed below.
+Operations related to experimental processing and data generation of Genomics Core samples are generally described by **protocols** (see the :ref:`genlims-page` page). Protocols are classified by type, indicating the overall goal or purpose of a procedure or series of steps. A **run** represents an identifiable instance of a protocol, typically corresponding to a specific chip, plate, or flowcell. Current protocols and associated run types are listed below.
 
-### incoming
+* incoming
+* RNA extraction
+* miRNA extraction
+* RNA purification
+* globin reduction
+* cell capture
+* cDNA synthesis
+* library prep
+* custom library prep
+* sequencing
+* qPCR
+* bioinformatics processing [PROPOSED]
 
-### RNA extraction
+-----
 
-### miRNA extraction
-
-### RNA purification
-
-### globin reduction
-
-### cell capture
-
-### cDNA synthesis
-
-### library prep
-
-### custom library prep
-
-### sequencing
-
-### qPCR
-
-### bioinformatics processing
 
 .. _genomics-storage:
 
@@ -49,55 +41,42 @@ Data storage
 Genomics share
 --------------
 
-Basic org::
-
-    Unaligned/
-    |--P123-7-31993980/
-        |--lib12829-38905932/
-        |--1-SLE-C36_S153_L007_R1_001.fastq.gz
+The 'genomics' share is the primary location at which data (sequencing or otherwise) is stored. A variety of other data files and code related to processing are also stored under the 'genomics' share, but raw data is nominally stored in one of several subfolders according to source. These are described as "landing points" below.
 
 
 Basic landing points
 ^^^^^^^^^^^^^^^^^^^^
 
-Illumina
-
-SRA
-
-ICAC
-
-NGXBio
-
-Fluidigm
+* ``Illumina`` (``/mnt/genomics/Illumina/``)
+* ``SRA`` (``/mnt/genomics/SRA/``)
+* ``ICAC`` (``/mnt/genomics/ICAC/``)
+* ``NGXBio`` (``/mnt/genomics/NGXBio/``)
+* ``Fluidigm`` (``/mnt/genomics/Fluidigm/``)
 
 
 Reference data
 ^^^^^^^^^^^^^^
 
-annotationsForGalaxy
+``/mnt/genomics/reference_data/``
 
-Genomes
-
-iGenomes
-
-ERCC92
+* ``annotationsForGalaxy``
+* ``Genomes``
+* ``iGenomes``
+* ``ERCC92``
 
 
 Special folders
 ^^^^^^^^^^^^^^^
-code
 
-galaxy_workflows
-
-geo_submissions
-
+* ``code`` (``/mnt/genomics/code/``)
+* ``galaxy_workflows`` (``/mnt/genomcis/galaxy_workflows/``)
+* ``geo_submissions`` (``/mnt/genomics/geo_submissions/``)
 
 
 Old Galaxy data
 ^^^^^^^^^^^^^^^
 
-srvgalaxy02
-
+* ``srvgalaxy02``
 
 
 Chaussabel lab share
