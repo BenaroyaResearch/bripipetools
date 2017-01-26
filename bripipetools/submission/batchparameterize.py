@@ -94,50 +94,6 @@ class BatchParameterizer(object):
             ref_dict[self.build][ref_type]
         )
 
-    def _set_reference_value(self, parameter):
-        ref_dict = {
-            'GRCh38': {
-                'tophat-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
-                'hisat2-index': 'Homo_sapiens-GRCh38',
-                'salmon-index': 'Homo_sapiens-GRCh38',  # 'Human (Homo sapiens): GRCh38',
-                'picard-align-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
-                'picard-rnaseq-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
-                'mixcr-species': 'Homo sapiens'
-            },
-            'NCBIM37': {
-                'tophat-index': 'MusMusculus (NCBIM37)',
-                'picard-align-index': 'MusMusculus (NCBIM37)',
-                'picard-rnaseq-index': 'MusMusculus (NCBIM37)',
-                'mixcr-species': 'Mus musculus'
-            },
-            'hg19': {
-                'bowtie2-index': 'hg19',
-                'macs2-size': 'hs',
-                'picard-align-index': 'hg19'
-            },
-            'mm10': {
-                'bowtie2-index': 'mm10',
-                'macs2-size': 'mm',
-                'picard-align-index': 'mm10'
-            },
-            'mm9': {
-                'bowtie2-index': 'mm9',
-                'macs2-size': 'mm',
-                'picard-align-index': 'mm9'
-            }
-        }
-        ref_type = re.sub('^reference_', '', parameter['tag'])
-        logger.debug("retrieving reference value for build '{}' and type '{}'"
-                     .format(self.build, ref_type))
-        try:
-            return ref_dict[self.build][ref_type]
-        except KeyError:
-            logger.exception(("no reference value available for parameter '{}' "
-                              "for build '{}'; build '{}' is probably "
-                              "unsupported for selected workflow")
-                             .format(ref_type, self.build, self.build))
-            raise
-
     def _set_option_value(self, parameter):
         opt_dict = {
             'GRCh38': {
@@ -214,7 +170,7 @@ class BatchParameterizer(object):
                 return opt_val[self.stranded]
             else:
                 return opt_val
-            # return opt_dict[self.build][opt_tool][opt_name]
+
         except KeyError:
             logger.exception(("no option value available for option '{}' "
                               "of tool '{}' for build '{}'; build '{}' is "
@@ -274,7 +230,6 @@ class BatchParameterizer(object):
             logger.debug("... current parameter: {}".format(param))
             if re.search('endpoint', param['name']):
                 param_values.append(self.endpoint)
-
             elif param['type'] == 'sample':
                 param_values.append(sample_name)
             elif param['type'] == 'input':
@@ -287,8 +242,6 @@ class BatchParameterizer(object):
                 )
             elif param['type'] == 'annotation':
                 param_values.append(self._build_reference_path(param))
-            elif param['type'] == 'reference':
-                param_values.append(self._set_reference_value(param))
             elif param['type'] == 'option':
                 param_values.append(self._set_option_value(param))
             elif param['type'] == 'output':
