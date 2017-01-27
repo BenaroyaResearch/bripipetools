@@ -61,6 +61,7 @@ class OutputStitcher(object):
                         'picard-rnaseq': getattr(io, 'PicardMetricsFile'),
                         'picard-markdups': getattr(io, 'PicardMetricsFile'),
                         'picard-align': getattr(io, 'PicardMetricsFile'),
+                        'picard-alignment': getattr(io, 'PicardMetricsFile'),
                         'tophat-stats': getattr(io, 'TophatStatsFile')},
             'qc': {'fastqc': getattr(io, 'FastQCFile')},
             'counts': {'htseq': getattr(io, 'HtseqCountsFile')},
@@ -176,7 +177,10 @@ class OutputStitcher(object):
                 logger.debug("parsing overrepresented sequences "
                              "from output file '{}'".format(o))
                 out_items = parsing.parse_output_filename(o)
-                out_source, out_type, proclib_id = out_items.values()
+                proclib_id = out_items['sample_id']
+                out_type = out_items['type']
+                out_source = out_items['source']
+
                 logger.debug("storing data from {} in {} {}".format(
                     out_source, proclib_id, out_type))
                 out_parser = io.FastQCFile(path=o)

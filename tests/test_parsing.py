@@ -339,7 +339,8 @@ class TestProcessing:
                      'lib1111_C00000XX_tophat_alignments.bam'),
                     {'sample_id': 'lib1111_C00000XX',
                      'type': 'alignments',
-                     'source': 'tophat'}
+                     'source': 'tophat',
+                     'label': 'alignments'}
             ),
             (
                     ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
@@ -347,7 +348,8 @@ class TestProcessing:
                      'lib1111_tophat_alignments.bam'),
                     {'sample_id': 'lib1111',
                      'type': 'alignments',
-                     'source': 'tophat'}
+                     'source': 'tophat',
+                     'label': 'alignments'}
             ),
             (
                     ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
@@ -355,7 +357,8 @@ class TestProcessing:
                      'lib1111_picard_markdups_metrics.html'),
                     {'sample_id': 'lib1111',
                      'type': 'metrics',
-                     'source': 'picard-markdups'}
+                     'source': 'picard-markdups',
+                     'label': 'metrics'}
             ),
             (
                     ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
@@ -363,7 +366,8 @@ class TestProcessing:
                      'lib1111_C00000XX_picard_markdups_metrics.html'),
                     {'sample_id': 'lib1111_C00000XX',
                      'type': 'metrics',
-                     'source': 'picard-markdups'}
+                     'source': 'picard-markdups',
+                     'label': 'metrics'}
             ),
             (
                     ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
@@ -371,7 +375,8 @@ class TestProcessing:
                      'lib1111_C00000XX_picard-markdups_metrics.html'),
                     {'sample_id': 'lib1111_C00000XX',
                      'type': 'metrics',
-                     'source': 'picard-markdups'}
+                     'source': 'picard-markdups',
+                     'label': 'metrics'}
             ),
             (
                     ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
@@ -379,7 +384,17 @@ class TestProcessing:
                      'lib1111_picard-markdups_metrics.html'),
                     {'sample_id': 'lib1111',
                      'type': 'metrics',
-                     'source': 'picard-markdups'}
+                     'source': 'picard-markdups',
+                     'label': 'metrics'}
+            ),
+            (
+                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                     'Project_P1-1Processed/qc/'
+                     'lib1111_C00000XX_fastqc_qc-R1.txt'),
+                    {'sample_id': 'lib1111_C00000XX',
+                     'type': 'qc',
+                     'source': 'fastqc',
+                     'label': 'qc-R1'}
             ),
         ]
     )

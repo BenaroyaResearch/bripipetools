@@ -92,6 +92,12 @@ def parse_output_filename(output_path):
     name_parts = output_name.split('_')
 
     output_type = name_parts.pop(-1)
+    if re.search('-', output_type):
+        output_type, output_subtype = output_type.split('-')
+        output_label = '-'.join([output_type, output_subtype])
+    else:
+        output_label = output_type
+
     source = name_parts.pop(-1)
     if (len(name_parts) <= 2
         and not re.search('(picard|tophat)', name_parts[-1])):
@@ -100,5 +106,7 @@ def parse_output_filename(output_path):
         source = '-'.join([name_parts.pop(-1), source])
         sample_id = '_'.join(name_parts)
 
-    return {'sample_id': sample_id, 'type': output_type,
+    return {'sample_id': sample_id,
+            'type': output_type,
+            'label': output_label,
             'source': source}
