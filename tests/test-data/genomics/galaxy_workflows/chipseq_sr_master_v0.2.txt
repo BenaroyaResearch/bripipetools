@@ -1,0 +1,38 @@
+#Data Export for Workflow Batch Submission Through the APII
+
+
+### INSTRUCTIONS
+#######################################
+#The following data can be used to input the parameters you have previously determined to be
+#set at runtime. Please specify the library or history where the input data can be found.
+#Once you have filled out the table you can run the API script to submit the jobs through Galaxy
+#via the API.
+
+#NOTE: If you make any changes to the workflow or edit the name of the workflow, you will need
+#to recreate the table before submitting the job via the API since some metadata parameters will
+#be modified.
+
+#NOTE: It is up to the user to make sure the input files are in the correct format for each
+#parameter being filled out.
+
+#NOTE: You will need to specify three items for input files to an application.
+#The format for an input file should be [SourceType::SourceName::file_name]:
+#1. Source Type - which can be library or history
+#2. Source Name - the name of the library or history.
+#3. Filename - specify the name of the file as it exists in the library or history.
+
+
+########################################
+
+
+### METADATA
+#######################################
+Workflow Name	chipseq_sr_master_v0.2
+Workflow id	b38909bfca762a61
+Project Name	<Your_project_name>
+#######################################
+
+
+###TABLE DATA
+#######################################
+SampleName	fastq_in##Param::5414::globus_get_data_flowcell_text::from_endpoint	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path4	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path5	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path6	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path7	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path1	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path2	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path3	fastq_in##Param::5414::globus_get_data_flowcell_text::from_path8	annotation_adapters##SourceType::SourceName::adapterFile	annotation_mtfilter-bed##SourceType::SourceName::mtfilterBedFile	fastqc_qc-R1_txt_out##Param::5421::globus_send_data::to_endpoint	fastqc_qc-R1_txt_out##Param::5421::globus_send_data::to_path	fastqc_qc-R1_txt_out##Param::5422::globus_send_data::to_endpoint	fastqc_qc-R1_txt_out##Param::5422::globus_send_data::to_path	fastqmcf_log_txt_out##Param::5424::globus_send_data::to_endpoint	fastqmcf_log_txt_out##Param::5424::globus_send_data::to_path	option_bowtie2##Param::5425::bowtie2::refGenomeSource::index	option_picard-align##Param::5426::PicardASMetrics::genomeSource::index	bowtie2_alignments_bam_out##Param::5428::globus_send_data::to_endpoint	bowtie2_alignments_bam_out##Param::5428::globus_send_data::to_path	picard-alignment_metrics_html_out##Param::5430::globus_send_data::to_endpoint	picard-alignment_metrics_html_out##Param::5430::globus_send_data::to_path	bowtie2_alignments-rmdup_bam_out##Param::5431::globus_send_data::to_endpoint	bowtie2_alignments-rmdup_bam_out##Param::5431::globus_send_data::to_path	picard-markdups_metrics_html_out##Param::5432::globus_send_data::to_endpoint	picard-markdups_metrics_html_out##Param::5432::globus_send_data::to_path	bowtie2_alignments-rmdup_bam_out##Param::5434::globus_send_data::to_endpoint	bowtie2_alignments-rmdup_bam_out##Param::5434::globus_send_data::to_path	option_macs2##Param::5435::macs2_callpeak::effective_genome_size_options::gsize	macs2_peaks_txt_out##Param::5436::globus_send_data::to_endpoint	macs2_peaks_txt_out##Param::5436::globus_send_data::to_path	macs2_peaks-narrow_bed_out##Param::5437::globus_send_data::to_endpoint	macs2_peaks-narrow_bed_out##Param::5437::globus_send_data::to_path	macs2_peaks-narrow_bed_out##Param::5438::globus_send_data::to_endpoint	macs2_peaks-narrow_bed_out##Param::5438::globus_send_data::to_path	macs2_peaks-summits_bed_out##Param::5439::globus_send_data::to_endpoint	macs2_peaks-summits_bed_out##Param::5439::globus_send_data::to_path	macs2_peaks-treatpileup_bedgraph_out##Param::5440::globus_send_data::to_endpoint	macs2_peaks-treatpileup_bedgraph_out##Param::5440::globus_send_data::to_path	macs2_peaks-extra_html_out##Param::5441::globus_send_data::to_endpoint	macs2_peaks-extra_html_out##Param::5441::globus_send_data::to_path	

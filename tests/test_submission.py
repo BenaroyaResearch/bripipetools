@@ -118,37 +118,76 @@ class TestBatchParameterizer:
         mock_path = 'library::annotation::GRCh38/Homo_sapiens.GRCh38.77.gtf'
         assert (test_path == mock_path)
 
-    def test_set_reference_value(self, mock_params):
+    def test_set_option_value(self, mock_params):
         parameterizer = submission.BatchParameterizer(
             sample_paths=[],
             parameters=mock_params,
             endpoint='',
-            target_dir=''
+            target_dir='',
+            build='GRCh38',
         )
 
-        mock_param = {'tag': 'reference_tophat-index',
-                      'type': 'reference',
+        mock_param = {'tag': 'option_tophat',
+                      'type': 'option',
                       'name': 'index'}
 
-        test_value = parameterizer._set_reference_value(mock_param)
+        test_value = parameterizer._set_option_value(mock_param)
 
-        mock_value = 'Homo_sapiens-GRCh38'
+        mock_value = 'GRCh38'
         assert (test_value == mock_value)
 
-    def test_set_reference_value_invalid_build(self, mock_params):
+    def test_set_option_value_invalid_build(self, mock_params):
         parameterizer = submission.BatchParameterizer(
             sample_paths=[],
             parameters=mock_params,
             endpoint='',
-            target_dir=''
+            target_dir='',
+            build='GRCh38'
         )
 
-        mock_param = {'tag': 'reference_bowtie2-index',
-                      'type': 'reference',
+        mock_param = {'tag': 'option_bowtie2',
+                      'type': 'option',
                       'name': 'index'}
 
         with pytest.raises(KeyError):
-            parameterizer._set_reference_value(mock_param)
+            parameterizer._set_option_value(mock_param)
+
+    def test_set_option_value_not_stranded(self, mock_params):
+        parameterizer = submission.BatchParameterizer(
+            sample_paths=[],
+            parameters=mock_params,
+            endpoint='',
+            target_dir='',
+            build='GRCh38',
+        )
+
+        mock_param = {'tag': 'option_tophat',
+                      'type': 'option',
+                      'name': 'library_type'}
+
+        test_value = parameterizer._set_option_value(mock_param)
+
+        mock_value = 'fr-unstranded'
+        assert (test_value == mock_value)
+
+    def test_set_option_value_stranded(self, mock_params):
+        parameterizer = submission.BatchParameterizer(
+            sample_paths=[],
+            parameters=mock_params,
+            endpoint='',
+            target_dir='',
+            build='GRCh38',
+            stranded=True
+        )
+
+        mock_param = {'tag': 'option_tophat',
+                      'type': 'option',
+                      'name': 'library_type'}
+
+        test_value = parameterizer._set_option_value(mock_param)
+
+        mock_value = 'fr-firststrand'
+        assert (test_value == mock_value)
 
     def test_prep_output_dir(self, mock_params, tmpdir):
         parameterizer = submission.BatchParameterizer(
@@ -325,7 +364,9 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = '{}__optimized_workflow_1_GRCh38'.format(mock_date)
+        mock_name = '{}__optimized_workflow_1_GRCh38_unstrand'.format(
+            mock_date
+        )
 
         assert (test_name == mock_name)
 
@@ -347,8 +388,8 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = ('{}_{}_{}_optimized_workflow_1_GRCh38'.format(
-            mock_date, mock_grouptag, '_'.join(mock_subgrouptags))
+        mock_name = '{}_{}_{}_optimized_workflow_1_GRCh38_unstrand'.format(
+                mock_date, mock_grouptag, '_'.join(mock_subgrouptags)
         )
 
         assert (test_name == mock_name)
@@ -812,10 +853,10 @@ class TestFlowcellSubmissionBuilder:
         )
 
         with mock.patch('__builtin__.raw_input',
-                        side_effect=iter(["0", "0", "0", ""])):
+                        side_effect=iter(["0", "0", "0", "", ""])):
             builder._assign_workflows()
 
-        mock_batchkey = (mock_workflowopts[0], mock_buildopts[0])
+        mock_batchkey = (mock_workflowopts[0], mock_buildopts[0], False)
         assert (builder.batch_map == {mock_batchkey: [mock_paths[0]]})
 
     def test_get_batch_tags(self, mock_db, tmpdir):
@@ -881,7 +922,7 @@ class TestFlowcellSubmissionBuilder:
         )
 
         builder.batch_map = {
-            (mock_workflowopts[0], mock_buildopts[0]): [mock_paths[0]]
+            (mock_workflowopts[0], mock_buildopts[0], False): [mock_paths[0]]
         }
         test_paths = builder.run()
 
@@ -892,7 +933,9 @@ class TestFlowcellSubmissionBuilder:
         mock_paths = [os.path.join(
             str(mock_path),
             'globus_batch_submission',
-            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38.txt'.format(mock_date)
+            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38_unstrand.txt'.format(
+                mock_date
+            )
         )]
 
         assert (test_paths == mock_paths)
@@ -1025,7 +1068,7 @@ class TestSampleSubmissionBuilder:
         mock_date = datetime.date.today().strftime("%y%m%d")
         mock_batchpaths = [os.path.join(
             str(tmpdir),
-            '{}__optimized_workflow1_GRCh38.txt'.format(mock_date)
+            '{}__optimized_workflow1_GRCh38_unstrand.txt'.format(mock_date)
         )]
 
         assert (test_batchpaths == mock_batchpaths)

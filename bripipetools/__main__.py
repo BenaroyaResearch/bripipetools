@@ -133,9 +133,12 @@ def main(verbosity):
 @click.option('--out-dir', '-o', default=os.path.curdir,
               help=("for input manifest, folder where outputs are to "
                     "be saved; default is current directory"))
+@click.option('--tag', '-t', default='',
+              help=("for custom sample submissions, tag for labelling "
+                    "processed outputs"))
 @click.argument('path')
 def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
-           manifest, out_dir, path):
+           manifest, out_dir, tag, path):
     """
     Prepare batch submission for unaligned samples from a flowcell run
     or from a list of paths in a manifest file.
@@ -170,7 +173,8 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
             out_dir=out_dir,
             endpoint=endpoint,
             workflow_dir=workflow_dir,
-            all_workflows=all_workflows
+            all_workflows=all_workflows,
+            tag=tag
         )
         submit_paths = submitter.run()
 

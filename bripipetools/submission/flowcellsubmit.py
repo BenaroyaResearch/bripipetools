@@ -85,9 +85,11 @@ class FlowcellSubmissionBuilder(object):
                                       if k == opt[0]][0])
                        for opt in opts_p]
                 b_p = ['b:{}'.format(opt[1]) for opt in opts_p]
+                s_p = ['stranded' if opt[2] else 'unstranded'
+                       for opt in opts_p]
 
                 print("   {} : {} {}".format(i, os.path.basename(p),
-                                             zip(w_p, b_p)))
+                                             zip(w_p, b_p, s_p)))
 
             p_i = raw_input("\nType the number of the project you wish "
                             "to select or hit enter to finish: ")
@@ -109,7 +111,10 @@ class FlowcellSubmissionBuilder(object):
                                 .format(os.path.basename(selected_project)))
                 selected_build = build_opts[int(b_j)]
 
-                batch_key = (selected_workflow, selected_build)
+                s_j = raw_input("\nIs the library type stranded? (y/[n]): ")
+                stranded = s_j == 'y'
+
+                batch_key = (selected_workflow, selected_build, stranded)
                 batch_map.setdefault(batch_key, []).append(
                     selected_project
                 )
@@ -131,7 +136,7 @@ class FlowcellSubmissionBuilder(object):
 
         batch_paths = []
         for batchkey, projects in self.batch_map.items():
-            workflow, build = batchkey
+            workflow, build, stranded = batchkey
             logger.info("Building batch for workflow '{}' and build '{}' "
                         "with samples from projects: {}"
                         .format(os.path.basename(workflow), build, projects))
@@ -146,7 +151,8 @@ class FlowcellSubmissionBuilder(object):
                 subgroup_tags=subgroup_tags,
                 sort=sort,
                 num_samples=num_samples,
-                build=build
+                build=build,
+                stranded=stranded
             )
             batch_paths.append(creator.create_batch())
             logger.debug("workflow batch parameters saved in file '{}'"

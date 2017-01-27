@@ -32,13 +32,14 @@ class BatchParameterizer(object):
         for processing current set of samples.
     """
     def __init__(self, sample_paths, parameters, endpoint, target_dir,
-                 build='GRCh38'):
+                 build='GRCh38', stranded=False):
         logger.debug("creating `BatchParametizer` instance ")
         self.sample_paths = sample_paths
         self.parameters = parameters
         self.endpoint = endpoint
         self.target_dir = target_dir
         self.build = build
+        self.stranded = stranded
 
     def _get_lane_order(self):
         """
@@ -101,7 +102,6 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
-                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'hg19': {
@@ -125,53 +125,126 @@ class BatchParameterizer(object):
             ref_dict[self.build][ref_type]
         )
 
-    def _set_reference_value(self, parameter):
-        """
-        Given a parameter for a reference option (e.g., a built-in
-        genome index) to be set at runtime, return the string value
-        for the option based on the current build and reference type.
-        """
-        ref_dict = {
+    def _set_option_value(self, parameter):
+        opt_dict = {
             'GRCh38': {
-                'tophat-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
-                'hisat2-index': 'Homo_sapiens-GRCh38',
-                'salmon-index': 'Homo_sapiens-GRCh38',  # 'Human (Homo sapiens): GRCh38',
-                'picard-align-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
-                'picard-rnaseq-index': 'Homo_sapiens-GRCh38',  # 'Homo_sapiens-GRCh38',
-                'mixcr-species': 'Homo sapiens'
+                'tophat': {
+                    'index': 'GRCh38',
+                    'library_type': {False: 'fr-unstranded',
+                                     True: 'fr-firststrand'}
+                },
+                'hisat2': {
+                    'index': 'hg38'
+                },
+                'salmon': {
+                    'index': 'GRCh38'
+                },
+                'reorderbam': {
+                    'ref': 'GRCh38'
+                },
+                'samtools-mpileup': {
+                    'ref_file': 'hg38'
+                },
+                'mixcr': {
+                    'species': 'hsa'
+                },
+                'picard-align': {
+                    'index': 'GRCh38'
+                },
+                'picard-rnaseq': {
+                    'index': 'GRCh38',
+                    'strand_specificity': {
+                        False: 'NONE',
+                        True: 'FIRST_READ_TRANSCRIPTION_STRAND'
+                    }
+                },
+                'htseq': {
+                    'stranded': {False: 'no',
+                                 True: 'reverse'}
+                },
+                'trinity': {
+                    'library_type': {False: 'None',
+                                     True: 'F'}
+                }
             },
             'NCBIM37': {
-                'tophat-index': 'MusMusculus (NCBIM37)',
-                'picard-align-index': 'MusMusculus (NCBIM37)',
-                'picard-rnaseq-index': 'MusMusculus (NCBIM37)',
-                'mixcr-species': 'Mus musculus'
+                'tophat': {
+                    'index': 'NCBIM37',
+                    'library_type': {False: 'fr-unstranded',
+                                     True: 'fr-firststrand'}
+                },
+                'hisat2': {
+                    'index': 'hg38'
+                },
+                'salmon': {
+                    'index': 'NCBIM37'
+                },
+                'reorderbam': {
+                    'ref': 'NCBIM37'
+                },
+                'mixcr': {
+                    'species': 'mus'
+                },
+                'picard-align': {
+                    'index': 'NCBIM37'
+                },
+                'picard-rnaseq': {
+                    'index': 'NCBIM37',
+                    'strand_specificity': {
+                        False: 'NONE',
+                        True: 'FIRST_READ_TRANSCRIPTION_STRAND'
+                    }
+                },
+                'htseq': {
+                    'stranded': {False: 'no',
+                                 True: 'reverse'}
+                },
+                'trinity': {
+                    'library_type': {False: 'None',
+                                     True: 'F'}
+                }
             },
             'hg19': {
-                'bowtie2-index': 'hg19',
-                'macs2-size': 'hs',
-                'picard-align-index': 'hg19'
+                'bowtie2': {
+                    'index': 'hg19'
+                },
+                'picard-align': {
+                    'index': 'hg19'
+                },
+                'macs2': {
+                    'gsize': '2451960000'
+                }
             },
             'mm10': {
-                'bowtie2-index': 'mm10',
-                'macs2-size': 'mm',
-                'picard-align-index': 'mm10'
-            },
-            'mm9': {
-                'bowtie2-index': 'mm9',
-                'macs2-size': 'mm',
-                'picard-align-index': 'mm9'
+                'bowtie2': {
+                    'index': 'mm10'
+                },
+                'picard-align': {
+                    'index': 'mm10'
+                },
+                'macs2': {
+                    'gsize': '2150570000'
+                }
             }
         }
-        ref_type = re.sub('^reference_', '', parameter['tag'])
-        logger.debug("retrieving reference value for build '{}' and type '{}'"
-                     .format(self.build, ref_type))
+        opt_tool = re.sub('^option_', '', parameter['tag'])
+        opt_name = parameter['name']
+        logger.debug("retrieving option value for build '{}', tool '{}', "
+                     "and option name '{}'"
+                     .format(self.build, opt_tool, opt_name))
         try:
-            return ref_dict[self.build][ref_type]
+            opt_val = opt_dict[self.build][opt_tool][opt_name]
+            if type(opt_val) is dict:
+                return opt_val[self.stranded]
+            else:
+                return opt_val
+
         except KeyError:
-            logger.exception(("no reference value available for parameter '{}' "
-                              "for build '{}'; build '{}' is probably "
-                              "unsupported for selected workflow")
-                             .format(ref_type, self.build, self.build))
+            logger.exception(("no option value available for option '{}' "
+                              "of tool '{}' for build '{}'; build '{}' is "
+                              "probably unsupported for selected workflow")
+                             .format(opt_name, opt_tool,
+                                     self.build, self.build))
             raise
 
     def _prep_output_dir(self, output_type):
@@ -237,7 +310,6 @@ class BatchParameterizer(object):
             logger.debug("... current parameter: {}".format(param))
             if re.search('endpoint', param['name']):
                 param_values.append(self.endpoint)
-
             elif param['type'] == 'sample':
                 param_values.append(sample_name)
             elif param['type'] == 'input':
@@ -250,8 +322,8 @@ class BatchParameterizer(object):
                 )
             elif param['type'] == 'annotation':
                 param_values.append(self._build_reference_path(param))
-            elif param['type'] == 'reference':
-                param_values.append(self._set_reference_value(param))
+            elif param['type'] == 'option':
+                param_values.append(self._set_option_value(param))
             elif param['type'] == 'output':
                 if re.search('^fastq_out', param['tag']):
                     final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
