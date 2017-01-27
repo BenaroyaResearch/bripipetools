@@ -5,7 +5,7 @@ import shutil
 import pytest
 import pandas as pd
 
-from bripipetools import postprocess
+from bripipetools import postprocessing
 from bripipetools import io
 
 logging.basicConfig(level=logging.DEBUG)
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class TestOutputStitcher:
     """
     Tests methods for the `OutputSticher` class in the
-    `bripipetools.postprocess.stitching` module, which is used
+    `bripipetools.postprocessing.stitching` module, which is used
     to combine output data across all sources and samples into
     a single table for a selected output type.
     """
@@ -33,7 +33,7 @@ class TestOutputStitcher:
         mock_path = tmpdir.join(test_input)
 
         # AND a sticher object is created for that path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -61,7 +61,7 @@ class TestOutputStitcher:
         mock_path = tmpdir.join('')
 
         # AND a stitcher object is created for that path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -100,7 +100,7 @@ class TestOutputStitcher:
             mock_file.write(''.join(m['mock_contents']))
 
         # AND a stitcher object is created for the folder path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -136,7 +136,7 @@ class TestOutputStitcher:
         mock_path = tmpdir.join('metrics')
 
         # AND a stitcher object is created for the folder path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -188,7 +188,7 @@ class TestOutputStitcher:
         mock_path = tmpdir.join('counts')
 
         # AND a stitcher object is created for the folder path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -231,7 +231,7 @@ class TestOutputStitcher:
                     .mkdir('metrics'))
 
         # AND a stitcher object is created for the folder path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -275,7 +275,7 @@ class TestOutputStitcher:
             mock_file.write(''.join(m['mock_contents']))
 
         # AND a stitcher object is created for the folder path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -326,7 +326,7 @@ class TestOutputStitcher:
             mock_file.write(''.join(m['mock_contents']))
 
         # AND a stitcher object is created for the folder path
-        stitcher = postprocess.OutputStitcher(
+        stitcher = postprocessing.OutputStitcher(
             path=str(mock_path)
         )
 
@@ -352,7 +352,7 @@ class TestOutputStitcher:
 class TestOutputCompiler:
     """
     Tests methods for the `OutputCompiler` class in the
-    `bripipetools.postprocess.compiling` module, which is used
+    `bripipetools.postprocessing.compiling` module, which is used
     to merge combined output data from multiple summary output
     types (i.e., summary indicates one value per sample).
     """
@@ -386,7 +386,7 @@ class TestOutputCompiler:
             )
 
         # AND a compiler object is created for the project folder path
-        compiler = postprocess.OutputCompiler(
+        compiler = postprocessing.OutputCompiler(
             paths=mock_paths
         )
 
@@ -413,7 +413,7 @@ class TestOutputCompiler:
 
     def test_build_table(self):
         # GIVEN a compiler object, created for an arbitrary list of paths
-        compiler = postprocess.OutputCompiler(
+        compiler = postprocessing.OutputCompiler(
             paths=[]
         )
 
@@ -458,7 +458,7 @@ class TestOutputCompiler:
             ]
 
         # AND a compiler object is created for the paths
-        compiler = postprocess.OutputCompiler(
+        compiler = postprocessing.OutputCompiler(
             paths=mock_paths
         )
 
@@ -501,7 +501,7 @@ class TestOutputCompiler:
             )
 
         # AND a compiler object is created for the project folder path
-        compiler = postprocess.OutputCompiler(
+        compiler = postprocessing.OutputCompiler(
             paths=mock_paths
         )
 
@@ -532,7 +532,7 @@ class TestOutputCompiler:
 class TestOutputCleaner:
     """
     Tests methods for the `OutputCleaner` class in the
-    `bripipetools.postprocess.cleanup` module, which is used to
+    `bripipetools.postprocessing.cleanup` module, which is used to
     reorganize and rename output files from deprecated layouts.
     """
 
@@ -543,7 +543,7 @@ class TestOutputCleaner:
             tmpdir.mkdir(outfolder)
 
         # AND a cleaner object is created for that path
-        cleaner = postprocess.OutputCleaner(
+        cleaner = postprocessing.OutputCleaner(
             path=str(tmpdir)
         )
 
@@ -568,7 +568,7 @@ class TestOutputCleaner:
             mock_paths.append(str(mock_file))
 
         # AND a cleaner object is created for that path
-        cleaner = postprocess.OutputCleaner(
+        cleaner = postprocessing.OutputCleaner(
             path=str(tmpdir)
         )
 
@@ -592,7 +592,7 @@ class TestOutputCleaner:
         shutil.rmtree(str(mock_zipdir))
 
         # AND a cleaner object is created for the path
-        outputcleaner = postprocess.OutputCleaner(
+        outputcleaner = postprocessing.OutputCleaner(
             path=str(tmpdir)
         )
 
@@ -616,7 +616,7 @@ class TestOutputCleaner:
         mock_nestpath = mock_subdir.ensure('outfile1')
 
         # AND a cleaner object is created for the path
-        outputcleaner = postprocess.OutputCleaner(
+        outputcleaner = postprocessing.OutputCleaner(
             path=str(tmpdir)
         )
 
@@ -644,7 +644,7 @@ class TestOutputCleaner:
         shutil.rmtree(str(mock_zipdir))
 
         # AND a cleaner object is created for the path
-        outputcleaner = postprocess.OutputCleaner(
+        outputcleaner = postprocessing.OutputCleaner(
             path=str(tmpdir)
         )
 
@@ -667,7 +667,7 @@ class TestOutputCleaner:
         mock_qcpath = mock_path.ensure('libID_fcID_fastqc_data.txt')
 
         # AND a cleaner object is created for the path
-        outputcleaner = postprocess.OutputCleaner(
+        outputcleaner = postprocessing.OutputCleaner(
             path=str(tmpdir))
 
         # WHEN the output file is renamed according to some predefined rule
@@ -698,7 +698,7 @@ class TestOutputCleaner:
             shutil.rmtree(str(mock_zipdir))
 
         # AND a cleaner object is created for the path
-        outputcleaner = postprocess.OutputCleaner(
+        outputcleaner = postprocessing.OutputCleaner(
             path=str(tmpdir)
         )
 

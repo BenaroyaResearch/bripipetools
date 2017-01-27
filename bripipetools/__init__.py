@@ -21,11 +21,11 @@ from . import qc
 # annotation depends on util, parsing, io, model, genlims, qc
 from . import annotation
 
-# dbify depends on util, genlims, annotation
-from . import dbify
+# dbification depends on util, genlims, annotation
+from . import dbification
 
-# postprocess depends on util, parsing, io
-from . import postprocess
+# postprocessing depends on util, parsing, io
+from . import postprocessing
 
 from . import monitoring
 

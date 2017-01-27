@@ -19,11 +19,19 @@ Contents:
 .. toctree::
    :maxdepth: 1
 
-   usingbripipetools.rst
-   galaxy.rst
+   getstarted.rst
+   processing.rst
+   postprocessing.rst
+   brigenomics.rst
    genlims.rst
+   basespace.rst
+   galaxy.rst
+   refdata.rst
+   contributing.rst
    apppackages.rst
    corepackages.rst
+
+-----
 
 Indices and tables
 ==================
