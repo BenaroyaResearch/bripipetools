@@ -338,6 +338,15 @@ Here's an example call:::
         /mnt/genomics/Illumina/150615_D00565_0087_AC6VG0ANX
 
 
+Here's another example with a manifest file::
+
+    bripipetools submit \
+        --workflow-dir /Volumes/genomics/galaxy_workflows/ \
+        --out-dir /Volumes/genomics/ICAC/Gern/ -\
+        -tag gern \
+        --manifest <(find /Volumes/genomics/ICAC/Gern -name "Sample_*")
+
+
 Submitting batches in Globus Genomics
 -------------------------------------
 
