@@ -70,7 +70,6 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
-                'mtfilter-bed': 'NCBIM37/ncbim37_mitofilter.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'hg19': {
@@ -122,6 +121,43 @@ class BatchParameterizer(object):
                 },
                 'picard-rnaseq': {
                     'index': 'GRCh38',
+                    'strand_specificity': {
+                        False: 'NONE',
+                        True: 'FIRST_READ_TRANSCRIPTION_STRAND'
+                    }
+                },
+                'htseq': {
+                    'stranded': {False: 'no',
+                                 True: 'reverse'}
+                },
+                'trinity': {
+                    'library_type': {False: 'None',
+                                     True: 'F'}
+                }
+            },
+            'NCBIM37': {
+                'tophat': {
+                    'index': 'NCBIM37',
+                    'library_type': {False: 'fr-unstranded',
+                                     True: 'fr-firststrand'}
+                },
+                'hisat2': {
+                    'index': 'hg38'
+                },
+                'salmon': {
+                    'index': 'NCBIM37'
+                },
+                'reorderbam': {
+                    'ref': 'NCBIM37'
+                },
+                'mixcr': {
+                    'species': 'mus'
+                },
+                'picard-align': {
+                    'index': 'NCBIM37'
+                },
+                'picard-rnaseq': {
+                    'index': 'NCBIM37',
                     'strand_specificity': {
                         False: 'NONE',
                         True: 'FIRST_READ_TRANSCRIPTION_STRAND'
