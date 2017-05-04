@@ -209,7 +209,8 @@ class BatchCreator(object):
                     parameters=self.workflow_data['parameters'],
                     endpoint=self.endpoint,
                     target_dir=target_dir,
-                    build=self.build
+                    build=self.build,
+                    stranded=self.stranded
                 )
                 parameterizer.parameterize()
                 batch_params = batch_params + parameterizer.samples

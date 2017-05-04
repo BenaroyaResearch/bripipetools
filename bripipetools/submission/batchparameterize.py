@@ -99,7 +99,7 @@ class BatchParameterizer(object):
             'NCBIM37': {
                 'gtf': 'NCBIM37/Mus_musculus.NCBIM37.67.gtf',
                 'refflat': 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt',
-                'ribosomal_intervals':
+                'ribosomal-intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
@@ -137,7 +137,9 @@ class BatchParameterizer(object):
                     'index': 'hg38'
                 },
                 'salmon': {
-                    'index': 'GRCh38'
+                    'index': 'GRCh38',
+                    'strandedness': {False: 'U',
+                                     True: 'SR'}
                 },
                 'reorderbam': {
                     'ref': 'GRCh38'
@@ -174,10 +176,12 @@ class BatchParameterizer(object):
                                      True: 'fr-firststrand'}
                 },
                 'hisat2': {
-                    'index': 'hg38'
+                    'index': 'NCBIM37'
                 },
                 'salmon': {
-                    'index': 'NCBIM37'
+                    'index': 'NCBIM37',
+                    'strandedness': {False: 'U',
+                                     True: 'SR'}
                 },
                 'reorderbam': {
                     'ref': 'NCBIM37'

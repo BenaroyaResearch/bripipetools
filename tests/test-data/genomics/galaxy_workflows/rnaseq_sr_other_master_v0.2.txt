@@ -1,0 +1,38 @@
+#Data Export for Workflow Batch Submission Through the APII
+
+
+### INSTRUCTIONS
+#######################################
+#The following data can be used to input the parameters you have previously determined to be
+#set at runtime. Please specify the library or history where the input data can be found.
+#Once you have filled out the table you can run the API script to submit the jobs through Galaxy
+#via the API.
+
+#NOTE: If you make any changes to the workflow or edit the name of the workflow, you will need
+#to recreate the table before submitting the job via the API since some metadata parameters will
+#be modified.
+
+#NOTE: It is up to the user to make sure the input files are in the correct format for each
+#parameter being filled out.
+
+#NOTE: You will need to specify three items for input files to an application.
+#The format for an input file should be [SourceType::SourceName::file_name]:
+#1. Source Type - which can be library or history
+#2. Source Name - the name of the library or history.
+#3. Filename - specify the name of the file as it exists in the library or history.
+
+
+########################################
+
+
+### METADATA
+#######################################
+Workflow Name	rnaseq_sr_other_master_v0.2
+Workflow id	b097aa89aea7743c
+Project Name	<Your_project_name>
+#######################################
+
+
+###TABLE DATA
+#######################################
+SampleName	fastq_in##Param::6429::globus_get_data_flowcell_text::from_endpoint	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path4	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path5	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path6	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path7	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path1	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path2	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path3	fastq_in##Param::6429::globus_get_data_flowcell_text::from_path8	annotation_adapters##SourceType::SourceName::adapterFile	annotation_gtf##SourceType::SourceName::gtfFile	annotation_refflat##SourceType::SourceName::refflatFile	annotation_ribosomal-intervals##SourceType::SourceName::ribointsFile	fastqc_qc-R1_txt_out##Param::6438::globus_send_data::to_endpoint	fastqc_qc-R1_txt_out##Param::6438::globus_send_data::to_path	fastqc_qc-R1_txt_out##Param::6439::globus_send_data::to_endpoint	fastqc_qc-R1_txt_out##Param::6439::globus_send_data::to_path	fastqmcf_log_txt_out##Param::6441::globus_send_data::to_endpoint	fastqmcf_log_txt_out##Param::6441::globus_send_data::to_path	option_tophat##Param::6443::tophat::refGenomeSource::index	option_tophat##Param::6443::tophat::singlePaired::sParams::library_type	option_salmon##Param::6444::salmon::refTranscriptSource::index	option_salmon##Param::6444::salmon::single_or_paired::strandedness	option_reorderbam##Param::6445::picard1.128_ReorderSam::source::ref	tophat_alignments_bam_out##Param::6446::globus_send_data::to_endpoint	tophat_alignments_bam_out##Param::6446::globus_send_data::to_path	salmon_quant_txt_out##Param::6449::globus_send_data::to_endpoint	salmon_quant_txt_out##Param::6449::globus_send_data::to_path	salmon_quant-gene_txt_out##Param::6450::globus_send_data::to_endpoint	salmon_quant-gene_txt_out##Param::6450::globus_send_data::to_path	option_picard-align##Param::6451::PicardASMetrics::genomeSource::index	option_picard-rnaseq##Param::6452::picard_CollectRnaSeqMetrics::genomeSource::index	option_picard-rnaseq##Param::6452::picard_CollectRnaSeqMetrics::strand_specificity	tophat_alignments-rmdup_bam_out##Param::6453::globus_send_data::to_endpoint	tophat_alignments-rmdup_bam_out##Param::6453::globus_send_data::to_path	picard-markdups_metrics_html_out##Param::6455::globus_send_data::to_endpoint	picard-markdups_metrics_html_out##Param::6455::globus_send_data::to_path	picard-alignment_metrics_html_out##Param::6457::globus_send_data::to_endpoint	picard-alignment_metrics_html_out##Param::6457::globus_send_data::to_path	picard-rnaseq_metrics_html_out##Param::6458::globus_send_data::to_endpoint	picard-rnaseq_metrics_html_out##Param::6458::globus_send_data::to_path	option_htseq##Param::6461::htseq_count::stranded	option_htseq##Param::6463::htseq_count::stranded	htseq_counts_txt_out##Param::6464::globus_send_data::to_endpoint	htseq_counts_txt_out##Param::6464::globus_send_data::to_path	htseq_metrics_txt_out##Param::6465::globus_send_data::to_endpoint	htseq_metrics_txt_out##Param::6465::globus_send_data::to_path	htseq_counts-rmdup_txt_out##Param::6466::globus_send_data::to_endpoint	htseq_counts-rmdup_txt_out##Param::6466::globus_send_data::to_path	
