@@ -28,8 +28,7 @@ class SexPredictor(object):
             # n_y = n_x = 0
             self.data['y_x_gene_ratio'] = n_y
         else:
-            self.data['y_x_gene_ratio'] = (float(self.data['y_genes'])
-                                       / float(self.data['x_genes']))
+            self.data['y_x_gene_ratio'] = n_y / n_x
 
     def _compute_y_x_count_ratio(self):
         """
@@ -40,8 +39,7 @@ class SexPredictor(object):
         if n_x == 0:
             self.data['y_x_count_ratio'] = n_y
         else:
-            self.data['y_x_count_ratio'] = (float(self.data['y_counts'])
-                                       / float(self.data['x_counts']))
+            self.data['y_x_count_ratio'] = n_y / n_x
 
     def _predict_sex(self, cutoff=1, equation='y_sq_over_tot'):
         """
@@ -62,10 +60,24 @@ class SexPredictor(object):
         }
         equation = possible_eqs[equation]
         logger.debug("using equation: {}".format(equation))
-        value = (float(self.data['y_counts']**2)
-                 / float(self.data['total_counts']))
+
+        if equation == '(y_counts^2 / total_counts) > cutoff':
+            n_y_sq = float(self.data['y_counts'])**2
+            n_tot = float(self.data['total_counts'])
+            if n_tot == 0:
+                value = n_y_sq
+            else:
+                value = n_y_sq / n_tot
+
+        elif equation == '(y_genes / x_genes) > cutoff':
+            value = float(self.data['y_x_gene_ratio'])
+
+        elif equation == '(y_counts / x_counts) > cutoff':
+            value = float(self.data['y_x_count_ratio'])
+
         logger.debug("value for current sample is {}"
                      .format(value))
+        print("DEBUG: eq = ", equation, "value = ", value)
         self.data['sexcheck_eqn'] = equation
         self.data['sexcheck_cutoff'] = cutoff
 
