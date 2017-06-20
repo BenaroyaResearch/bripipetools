@@ -22,6 +22,11 @@ Workflow batch submission
 
 Batch submission to Globus Galaxy for bioinformatics data processing is currently managed through ``bripipetools submit`` command, which uses the ``submission`` package.
 
+Quality control
+---------------
+
+Quality control functions (for example, sexchecking) are accessed using the ``bripipetools qc``, which accepts a path to a workflowbatch file and performs the appropriate analyses for the data listed in the batch file.
+
 Post-processing
 ---------------
 
@@ -56,4 +61,3 @@ For production (not currently tested)::
 
     pip install .
     python setup.py test
-
