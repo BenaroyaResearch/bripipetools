@@ -77,7 +77,6 @@ class SexPredictor(object):
 
         logger.debug("value for current sample is {}"
                      .format(value))
-        print("DEBUG: eq = ", equation, "value = ", value)
         self.data['sexcheck_eqn'] = equation
         self.data['sexcheck_cutoff'] = cutoff
 
