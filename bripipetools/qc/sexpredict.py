@@ -23,9 +23,8 @@ class SexPredictor(object):
         n_x = float(self.data['x_genes'])
         if n_x == 0:
             # for now, set ot number of y counts.
-            # might be better to set to something very large,
-            # or to cutoff + n_y? This nicely handles instance where
-            # n_y = n_x = 0
+            # This nicely handles instance where
+            # n_y = n_x = 0, but may need to be revisited
             self.data['y_x_gene_ratio'] = n_y
         else:
             self.data['y_x_gene_ratio'] = n_y / n_x

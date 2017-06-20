@@ -134,6 +134,11 @@ class WorkflowBatchAnnotator(object):
         )
         return sexchecker.update()
 
+    def _run_qc(self, processedlibrary):
+        # runs all QC that we want to perform;
+        # for now this is just _check_sex
+        return self._check_sex(processedlibrary)
+
     def get_processed_libraries(self, project=None, qc=False):
         """
         Collect processed library objects for workflow batch.
@@ -146,12 +151,9 @@ class WorkflowBatchAnnotator(object):
             ProcessedLibraryAnnotator(
                 workflowbatch_id, sample_params, self.db
             ).get_processed_library()
-            if not qc else self._check_sex(
+            if not qc else self._run_qc(
                 ProcessedLibraryAnnotator(
                     workflowbatch_id, sample_params, self.db
                 ).get_processed_library()
             ) for sample_params in self.workflowbatch_data['samples']
             ]
-
-
-

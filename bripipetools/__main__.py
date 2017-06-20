@@ -39,7 +39,7 @@ def get_processed_projects(flowcell_path):
             if re.search('Project_.*Processed', pp))
 
 
-def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs, 
+def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
                         project_path):
     """
     Execute postprocessing steps (e.g., stitching, compiling, cleaning)
@@ -200,6 +200,22 @@ def dbify(path):
     importer.run()
     logger.info("Import complete.")
 
+@main.command()
+@click.argument('path')
+def qc(path):
+    """
+    Run quality control analyses on a target project specified by a
+    workflow batch file. Note that this does not update the database,
+    unlike running dbify on a workflow batch file.
+    """
+    logger.info("Running quality control on project based on path ''{}''"
+                .format(path))
+    path_items = bripipetools.parsing.parse_batch_file_path(path)
+    annotator = bripipetools.annotation.WorkflowBatchAnnotator(
+        workflowbatch_file=path,
+        genomics_root=path_items['genomics_root'],
+        db = DB
+    ).get_processed_libraries(qc=True)
 
 @main.command()
 @click.option('--output-type', '-t', default='a',
