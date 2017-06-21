@@ -15,12 +15,13 @@ class WorkflowBatchImporter(object):
     Collects WorkflowBatch and ProcessedLibrary objects from a processing
     batch, converts to documents, inserts into database.
     """
-    def __init__(self, path, db):
+    def __init__(self, path, db, qc_opts):
         logger.debug("creating `ProcessingImporter` instance")
         logger.debug("...with arguments (path: '{}', db: '{}')"
                      .format(path, db.name))
         self.path = path
         self.db = db
+        self.qc_opts = qc_opts
 
     def _collect_workflowbatch(self):
         """
@@ -33,7 +34,8 @@ class WorkflowBatchImporter(object):
         return annotation.WorkflowBatchAnnotator(
             workflowbatch_file=self.path,
             genomics_root=path_items['genomics_root'],
-            db=self.db
+            db=self.db,
+            qc_opts = self.qc_opts
             ).get_workflow_batch()
 
     def _collect_processedlibraries(self):
@@ -47,7 +49,8 @@ class WorkflowBatchImporter(object):
         return annotation.WorkflowBatchAnnotator(
             workflowbatch_file=self.path,
             genomics_root=path_items['genomics_root'],
-            db=self.db
+            db=self.db,
+            qc_opts=self.qc_opts
             ).get_processed_libraries(qc=True)
 
     def _insert_workflowbatch(self):

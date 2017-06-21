@@ -22,7 +22,7 @@ class WorkflowBatchAnnotator(object):
     """
     Identifies, stores, and updates information about a workflow batch.
     """
-    def __init__(self, workflowbatch_file, genomics_root, db):
+    def __init__(self, workflowbatch_file, genomics_root, db, qc_opts):
         logger.debug("creating `WorkflowBatchAnnotator` for '{}'"
                      .format(workflowbatch_file))
         self.workflowbatch_file = workflowbatch_file
@@ -37,6 +37,8 @@ class WorkflowBatchAnnotator(object):
         logger.debug("setting 'genomics' path")
         self.genomics_root = genomics_root
         self.genomics_path = os.path.join(genomics_root, 'genomics')
+
+        self.qc_opts = qc_opts
 
     def _init_workflowbatch(self):
         """
@@ -130,7 +132,8 @@ class WorkflowBatchAnnotator(object):
             reference=ref,
             workflowbatch_id=self.workflowbatch._id,
             genomics_root=self.genomics_root,
-            db=self.db
+            db=self.db,
+            qc_opts = self.qc_opts
         )
         return sexchecker.update()
 

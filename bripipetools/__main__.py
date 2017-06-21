@@ -185,8 +185,17 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
 
 
 @main.command()
+@click.option('--sexmodel', default='y_sq_over_tot',
+              help=("The model for determining the gender based on "
+                "X and Y chromosome reads. Possible options are:\n"
+                "\'y_sq_over_tot\': y_counts^2 / total_counts\n"
+                "\'gene_ratio\': y_genes / x_genes\n"
+                "\'counts_ratio\': y_counts / x_counts"))
+@click.option('--sexcutoff', default=1.0,
+              help=("The cutoff for the sexmodel, where 'M' is the "
+                "prediction for a sexmodel value greater than cutoff"))
 @click.argument('path')
-def dbify(path):
+def dbify(sexmodel, sexcutoff, path):
     """
     Import data from a flowcell run or workflow processing batch into
     GenLIMS database.
@@ -195,14 +204,24 @@ def dbify(path):
                 .format(DB.name, path))
     importer = bripipetools.dbification.ImportManager(
         path=path,
-        db=DB
+        db=DB,
+        qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     )
     importer.run()
     logger.info("Import complete.")
 
 @main.command()
+@click.option('--sexmodel', default='y_sq_over_tot',
+              help=("The model for determining the gender based on "
+                "X and Y chromosome reads. Possible options are:\n"
+                "\'y_sq_over_tot\': y_counts^2 / total_counts\n"
+                "\'gene_ratio\': y_genes / x_genes\n"
+                "\'counts_ratio\': y_counts / x_counts"))
+@click.option('--sexcutoff', default=1.0,
+              help=("The cutoff for the sexmodel, where male is the "
+                "prediction for a sexmodel value greater than cutoff"))
 @click.argument('path')
-def qc(path):
+def qc(sexmodel, sexcutoff, path):
     """
     Run quality control analyses on a target project specified by a
     workflow batch file. Note that this does not update the database,
@@ -214,7 +233,8 @@ def qc(path):
     annotator = bripipetools.annotation.WorkflowBatchAnnotator(
         workflowbatch_file=path,
         genomics_root=path_items['genomics_root'],
-        db = DB
+        db = DB,
+        qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     ).get_processed_libraries(qc=True)
 
 @main.command()

@@ -63,6 +63,9 @@ class TestSexChecker:
         mock_object = mock_proclib()
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -70,7 +73,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=str(tmpdir),
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # WHEN X chromosome genes are loaded from expected package file
@@ -86,6 +90,9 @@ class TestSexChecker:
         mock_object = mock_proclib()
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -93,7 +100,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=str(tmpdir),
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # WHEN Y chromosome genes are loaded from expected package file
@@ -114,6 +122,9 @@ class TestSexChecker:
         mock_object = mock_proclib(count_filename=mock_filename)
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -121,7 +132,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=str(tmpdir),
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # WHEN the full path to the counts file is retrieved
@@ -143,6 +155,9 @@ class TestSexChecker:
         mock_object = mock_proclib(count_filename=mock_filename)
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -150,7 +165,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=str(tmpdir),
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # WHEN X and Y chromosome specific counts are extracted from the
@@ -184,6 +200,9 @@ class TestSexChecker:
         mock_object = mock_proclib(count_filename=mock_filename)
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -191,7 +210,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=str(tmpdir),
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # WHEN all X and Y related count data are pre-computed, then results
@@ -216,6 +236,9 @@ class TestSexChecker:
         mock_object = mock_proclib()
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -223,7 +246,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=str(tmpdir),
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # AND X/Y count summary data are stored as a dict in the object's
@@ -248,6 +272,9 @@ class TestSexChecker:
         mock_object = mock_proclib()
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -255,7 +282,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=str(tmpdir),
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # AND the result of sex prediction is stored in the object's data
@@ -293,6 +321,9 @@ class TestSexChecker:
         mock_object = mock_proclib(count_filename=mock_countfile)
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -300,7 +331,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=mock_root,
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # AND X/Y count summary data as well as the result of sex prediction
@@ -342,6 +374,9 @@ class TestSexChecker:
         mock_object = mock_proclib(count_filename=mock_countfile)
         mock_batchid = mock_object.processed_data[0]['workflowbatch_id']
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a SexChecker is created for the processed library and
         # corresponding workflow batch ID
         checker = qc.SexChecker(
@@ -349,7 +384,8 @@ class TestSexChecker:
             reference='grch38',
             workflowbatch_id=mock_batchid,
             genomics_root=mock_root,
-            db=mock_db
+            db=mock_db,
+            qc_opts = mock_qc_opts
         )
 
         # WHEN sex check validation is appended to processed data for the
@@ -380,8 +416,11 @@ class TestSexPredictor:
                      'y_counts': 6,
                      'total_counts': 10}
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a predictor object created for the data
-        predictor = qc.SexPredictor(data=mock_data)
+        predictor = qc.SexPredictor(data=mock_data, qc_opts=mock_qc_opts)
 
         # WHEN the ratio of detected Y genes to detected X genes is
         # computed and stored in the 'y_x_gene_ratio' field of the
@@ -402,8 +441,11 @@ class TestSexPredictor:
                      'y_counts': 6,
                      'total_counts': 10}
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a predictor object created for the data
-        predictor = qc.SexPredictor(data=mock_data)
+        predictor = qc.SexPredictor(data=mock_data, qc_opts=mock_qc_opts)
 
         # WHEN the ratio of total Y counts to total X counts is
         # computed and stored in the 'y_x_count_ratio' field of the
@@ -424,8 +466,11 @@ class TestSexPredictor:
                      'y_counts': 6,
                      'total_counts': 10}
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a predictor object created for the data
-        predictor = qc.SexPredictor(data=mock_data)
+        predictor = qc.SexPredictor(data=mock_data, qc_opts=mock_qc_opts)
 
         # WHEN sex is predicted based on a pre-determined function of
         # X and Y gene counts and stored in the 'predicted_sex' field
@@ -449,8 +494,11 @@ class TestSexPredictor:
                      'y_counts': 6,
                      'total_counts': 10}
 
+        # AND a set of quality control options
+        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+
         # AND a predictor object created for the data
-        predictor = qc.SexPredictor(data=mock_data)
+        predictor = qc.SexPredictor(data=mock_data, qc_opts=mock_qc_opts)
 
         # WHEN sex is predicted
         predictor.predict()

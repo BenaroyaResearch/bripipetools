@@ -10,9 +10,11 @@ class SexPredictor(object):
     """
     Predicts sex based X and Y gene count data using a pre-defined rule.
     """
-    def __init__(self, data):
+    def __init__(self, data, qc_opts):
         logger.debug("creating `SexPredictor` instance")
         self.data = data
+        self.sexmodel = qc_opts["sexmodel"]
+        self.sexcutoff = qc_opts["sexcutoff"]
 
     def _compute_y_x_gene_ratio(self):
         """
@@ -40,7 +42,7 @@ class SexPredictor(object):
         else:
             self.data['y_x_count_ratio'] = n_y / n_x
 
-    def _predict_sex(self, cutoff=1, equation='y_sq_over_tot'):
+    def _predict_sex(self):
         """
         Return predicted sex based on X/Y gene equation and cutoff.
         """
@@ -55,12 +57,12 @@ class SexPredictor(object):
         possible_eqs={
             'y_sq_over_tot': '(y_counts^2 / total_counts) > cutoff',
             'gene_ratio': '(y_genes / x_genes) > cutoff',
-            'count_ratio': '(y_counts / x_counts) > cutoff'
+            'counts_ratio': '(y_counts / x_counts) > cutoff'
         }
-        equation = possible_eqs[equation]
+        equation = possible_eqs[self.sexmodel]
         logger.debug("using equation: {}".format(equation))
 
-        if equation == '(y_counts^2 / total_counts) > cutoff':
+        if self.sexmodel == 'y_sq_over_tot':
             n_y_sq = float(self.data['y_counts'])**2
             n_tot = float(self.data['total_counts'])
             if n_tot == 0:
@@ -68,18 +70,18 @@ class SexPredictor(object):
             else:
                 value = n_y_sq / n_tot
 
-        elif equation == '(y_genes / x_genes) > cutoff':
+        elif self.sexmodel == 'gene_ratio':
             value = float(self.data['y_x_gene_ratio'])
 
-        elif equation == '(y_counts / x_counts) > cutoff':
+        elif self.sexmodel == 'counts_ratio':
             value = float(self.data['y_x_count_ratio'])
 
         logger.debug("value for current sample is {}"
                      .format(value))
         self.data['sexcheck_eqn'] = equation
-        self.data['sexcheck_cutoff'] = cutoff
+        self.data['sexcheck_cutoff'] = self.sexcutoff
 
-        if value > cutoff:
+        if value > self.sexcutoff:
             self.data['predicted_sex'] = 'male'
         else:
             self.data['predicted_sex'] = 'female'

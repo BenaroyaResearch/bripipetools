@@ -15,12 +15,13 @@ class ImportManager(object):
     a scope of data to be imported into GenLIMS; selects the
     appropriate importer class and makes insert command available.
     """
-    def __init__(self, path, db):
+    def __init__(self, path, db, qc_opts):
         logger.debug("creating `ImportManager` instance")
         logger.debug("...with arguments (path: '{}', db: '{}')"
                      .format(path, db.name))
         self.path = path
         self.db = db
+        self.qc_opts = qc_opts
 
     def _sniff_path(self):
         """
@@ -43,7 +44,8 @@ class ImportManager(object):
             'workflowbatch_file': WorkflowBatchImporter
         }
         importer = importer_opts[path_type]
-        self.importer = importer(path=self.path, db=self.db)
+        self.importer = importer(path=self.path, db=self.db, 
+                                 qc_opts=self.qc_opts)
 
     def run(self):
         """
