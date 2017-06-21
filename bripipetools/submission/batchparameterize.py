@@ -90,9 +90,6 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('GRCh38/Homo_sapiens.GRCh38.77'
                      '.ribosomalIntervalsWheader_reorder.txt'),
-                'ribosomal-intervals':
-                    ('GRCh38/Homo_sapiens.GRCh38.77'
-                     '.ribosomalIntervalsWheader_reorder.txt'),
                 'snp-bed': 'GRCh38/all_grch38.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
@@ -115,6 +112,13 @@ class BatchParameterizer(object):
             'mm9': {
                 'mtfilter-bed': 'mm9/mm9_mitofilter.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },  
+            'ebv': {
+                 'gtf': 'EBV_HHV4/EBV_HHV4.gtf',
+                 'refflat': 'EBV_HHV4/EBV_HHV4.refflat.txt',
+                 'ribosomal_intervals': ('EBV_HHV4/EBV_HHV4'
+                                         '.ribosomalIntervalsEmpty.txt'),
+                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             }
         }
 
@@ -138,8 +142,7 @@ class BatchParameterizer(object):
                 },
                 'salmon': {
                     'index': 'GRCh38',
-                    'strandedness': {False: 'U',
-                                     True: 'SR'}
+                    'strandedness': {False: 'U', True: 'SR'}
                 },
                 'reorderbam': {
                     'ref': 'GRCh38'
@@ -180,8 +183,7 @@ class BatchParameterizer(object):
                 },
                 'salmon': {
                     'index': 'NCBIM37',
-                    'strandedness': {False: 'U',
-                                     True: 'SR'}
+                    'strandedness': {False: 'U', True: 'SR'}
                 },
                 'reorderbam': {
                     'ref': 'NCBIM37'
@@ -194,6 +196,40 @@ class BatchParameterizer(object):
                 },
                 'picard-rnaseq': {
                     'index': 'NCBIM37',
+                    'strand_specificity': {
+                        False: 'NONE',
+                        True: 'FIRST_READ_TRANSCRIPTION_STRAND'
+                    }
+                },
+                'htseq': {
+                    'stranded': {False: 'no',
+                                 True: 'reverse'}
+                },
+                'trinity': {
+                    'library_type': {False: 'None',
+                                     True: 'F'}
+                }
+            },
+            'ebv': {
+                'tophat': {
+                    'index': 'EBV',
+                    'library_type': {False: 'fr-unstranded',
+                                     True: 'fr-firststrand'}
+                },
+                'salmon': {
+                    'index': 'EBV'
+                },
+                'reorderbam': {
+                    'ref': 'EBV'
+                },
+                'mixcr': {
+                    'species': 'EBV'
+                },
+                'picard-align': {
+                    'index': 'EBV'
+                },
+                'picard-rnaseq': {
+                    'index': 'EBV',
                     'strand_specificity': {
                         False: 'NONE',
                         True: 'FIRST_READ_TRANSCRIPTION_STRAND'

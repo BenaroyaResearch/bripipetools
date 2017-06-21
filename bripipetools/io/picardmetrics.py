@@ -64,17 +64,23 @@ class PicardMetricsFile(object):
             for td in tr.findAll('td'):
                 if re.search('^(\w+_*)+$', td.text):
                     td_key = td.text.replace('\n', '')
-                    logger.debug("found metrics field '{}'".format(td_key))
+                    logger.debug("found long metrics field '{}'".format(td_key))
 
                     td_val = td.next_sibling.string.replace(u'\xa0', u'')
                     td_val = td_val.replace('\n', '')
-                    logger.debug("with corresponding value '{}'".format(td_val))
+                    logger.debug("with corresponding long value '{}'".format(td_val))
 
                     if len(td_val) and not re.search(r'[^\d.]+',
                                                      td_val.lower()):
                         td_val = float(td_val)
-                    metrics[td_key] = td_val
-        logger.debug("parsed metrics table: {}".format(metrics))
+                    # The following is a bug fix for the fact that
+                    # wide tables don't have values for some keys at the end of the row (LIBRARY, GROUP, etc.)
+                    # Don't write metrics that have empty string keys in long tables.
+                    # The goal is to match metric keys from wide and long tables.
+                    # (Long picard-rnaseq tables are an aberration when the library is of very poor quality) 
+                    if td_val != '':
+                        metrics[td_key] = td_val
+        logger.debug("parsed long metrics table: {}".format(metrics))
         return metrics
 
     def _parse_wide(self):
@@ -89,17 +95,17 @@ class PicardMetricsFile(object):
             for td in tr.findAll('td'):
                 if re.search('^[A-Z]+', td.text):
                     td_keys = td.text.split('\t')
-                    logger.debug("found metrics fields: {}".format(td_keys))
+                    logger.debug("found wide metrics fields: {}".format(td_keys))
 
                     td_vals = tr.next_sibling.next_sibling.text.split('\t')
-                    logger.debug("found corresponding values: {}"
+                    logger.debug("found corresponding wide values: {}"
                                  .format(td_vals))
 
                     metrics_tmp = dict(zip(td_keys, td_vals))
                     metrics.update({k: float(v) if not re.search(r'[^\d.]+', v)
                                     else v
                                     for k, v in metrics_tmp.items()})
-        logger.debug("parsed metrics table: {}".format(metrics))
+        logger.debug("parsed wide metrics table: {}".format(metrics))
         return metrics
 
     def parse(self):
