@@ -153,15 +153,18 @@ class OutputStitcher(object):
         """
         Parse input path to create filename for combined CSV file.
         """
-        path_parts = re.sub('.*Illumina/', '', self.path).split('/')
+        path_parts = re.sub('.*Illumina/|.*ICAC/', '', self.path).split('/')
         logger.debug("building combined filename from path parts {}"
                      .format(path_parts))
         run_items = parsing.parse_flowcell_run_id(path_parts[0])
         project_label = parsing.get_project_label(path_parts[1])
         date = util.matchdefault('[0-9]{6}', path_parts[1])
-        filename_base = '{}_{}_{}'.format(project_label,
-                                          run_items['flowcell_id'],
-                                          date)
+        if project_label != '' and run_items['flowcell_id'] != '':
+            filename_base = '{}_{}_{}'.format(project_label,
+                                              run_items['flowcell_id'],
+                                              date)
+        else:
+            filename_base = path_parts[0]
         return '{}_combined_{}.csv'.format(filename_base.rstrip('_'),
                                            self.type)
 

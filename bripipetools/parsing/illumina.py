@@ -46,7 +46,11 @@ def parse_flowcell_run_id(run_id):
         logger.warning("input string does not appear to contain a valid date")
         date = None
 
-    instr_id = id_parts[1]
+    try:
+        instr_id = id_parts[1]
+    except IndexError:
+        logger.warning("input string does not contain a vaild instrument number")
+        instr_id = None
 
     try:
         run_num = int(id_parts[2])
