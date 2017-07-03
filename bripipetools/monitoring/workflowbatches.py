@@ -93,5 +93,46 @@ class WorkflowBatchMonitor(object):
                              .format(out_path, output_status[out_path]))
 
         return output_status
+        
+    def check_project_outputs(self, project_id):
+        """
+        Check whether all expected output files are present for each
+        sample in the batch that is part of the indicated project.
+
+        :rtype: dict
+        :return: A dict, where for each sample, output files are
+            flagged as ok, missing, or empty.
+        """
+        all_outputs = self._clean_output_paths(self._get_outputs())
+        logger.debug("checking status for the following outputs: {}"
+                     .format(all_outputs))
+                     
+        project_outputs = []
+        for sample_output in all_outputs:
+            project_output = {k:v for k,v 
+                              in sample_output.items() 
+                              if project_id in v}
+            if project_output:
+                project_outputs.append(project_output)
+
+        output_status = {}
+
+        for sample_outputs in project_outputs:
+            for out_tag, out_path in sample_outputs.items():
+                logger.debug("checking status for output '{}' at path '{}'"
+                             .format(out_tag, out_path))
+                path_exists = os.path.exists(out_path)
+                path_size = os.stat(out_path).st_size if path_exists else 0
+                path_status = 'empty' if path_size == 0 else 'ok'
+                path_status = 'missing' if not path_exists else path_status
+                output_status[out_path] = {
+                    'exists': path_exists,
+                    'size': path_size,
+                    'status': path_status
+                }
+                logger.debug("status info for output at path '{}' is {}"
+                             .format(out_path, output_status[out_path]))
+
+        return output_status
 
 

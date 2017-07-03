@@ -259,6 +259,50 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
     """
     Perform postprocessing operations on outputs of a workflow batch.
     """
+    
+    # Find all workflow batch files for a given project
+    project_id = bripipetools.parsing.get_project_label(path)
+    
+    print project_id
+    flowcell_dir = os.path.abspath(os.path.join(path, '..'))
+    
+    workflow_batches =  list(wb for wb in 
+                            list(get_workflow_batches(flowcell_dir))
+                            if project_id in wb)
+    
+    logger.debug("found the following workflow batches: {}"
+                 .format(workflow_batches))
+                 
+    # check outputs of workflow batches
+    genomics_root = bripipetools.util.matchdefault('.*(?=genomics)', path)
+    problem_count = 0
+    for wb in workflow_batches:
+        logger.debug("checking outputs for workflow batch in file '{}'"
+                     .format(wb))
+        wb_outputs = bripipetools.monitoring.WorkflowBatchMonitor(
+            workflowbatch_file=wb, genomics_root=genomics_root
+        ).check_project_outputs(project_id)
+
+        problem_outputs = filter(lambda x: x[1]['status'] != 'ok',
+                                 wb_outputs.items())
+        problem_count += len(problem_outputs)
+        if len(problem_outputs):
+            output_warnings = map(lambda x: 'OUTPUT {}: {}'.format(
+                x[1]['status'].upper(), x[0]
+            ), problem_outputs)
+            for w in output_warnings:
+                logger.warning(w)
+
+    # give option to continue
+    if problem_count > 0:
+        proceed = raw_input("{} problems encountered; proceed? (y/[n]): "
+                            .format(problem_count))
+        if proceed != 'y':
+            logger.info("Exiting program.")
+            sys.exit(1)
+    else:
+        logger.info("No problem outputs found with any workflow batches.")
+    
     postprocess_project(output_type, exclude_types, stitch_only,
                         clean_outputs, path)
 
