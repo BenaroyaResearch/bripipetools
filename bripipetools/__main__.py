@@ -324,8 +324,18 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
                     "the project level"))
 @click.option('--clean-outputs/--outputs-as-is', default=False,
               help="Attempt to clean/organize output files")
+@click.option('--sexmodel', default='y_sq_over_tot',
+              help=("The model for determining the gender based on "
+                "X and Y chromosome reads. Possible options are:\n"
+                "\'y_sq_over_tot\': y_counts^2 / total_counts\n"
+                "\'gene_ratio\': y_genes / x_genes\n"
+                "\'counts_ratio\': y_counts / x_counts"))
+@click.option('--sexcutoff', default=1.0,
+              help=("The cutoff for the sexmodel, where 'M' is the "
+                "prediction for a sexmodel value greater than cutoff"))
 @click.argument('path')
-def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
+def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel, 
+           sexcutoff, path):
     """
     Perform 'dbification' and 'postprocessing' operations on all projects and
     workflow batches from a flowcell run.
@@ -335,7 +345,8 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
                 .format(path))
     importer = bripipetools.dbification.ImportManager(
         path=path,
-        db=DB
+        db=DB,
+        qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     )
     importer.run()
     logger.info("Flowcell run import complete.")
@@ -382,7 +393,8 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
         )
         bripipetools.dbification.ImportManager(
             path=wb,
-            db=DB
+            db=DB,
+            qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
         ).run()
         logger.info("Workflow batch import for '{}' complete."
                     .format(os.path.basename(wb)))
