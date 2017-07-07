@@ -40,7 +40,7 @@ The ``basemount`` tool can be used to access BaseSpace data through the command 
 
 `BaseMount <https://basemount.basespace.illumina.com/>`_ is a tool provided by Illumina that allows you to mount BaseSpace data as a file system through an API.
 
-From ``srvgalaxy02``, to activate the mount point::
+From ``srvgalaxy01``, to activate the mount point::
 
     basemount /mnt/genomics/Illumina/basespace_mount/
 

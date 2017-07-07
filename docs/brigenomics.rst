@@ -69,7 +69,7 @@ Special folders
 ^^^^^^^^^^^^^^^
 
 * ``code`` (``/mnt/genomics/code/``)
-* ``galaxy_workflows`` (``/mnt/genomcis/galaxy_workflows/``)
+* ``galaxy_workflows`` (``/mnt/genomics/galaxy_workflows/``)
 * ``geo_submissions`` (``/mnt/genomics/geo_submissions/``)
 
 

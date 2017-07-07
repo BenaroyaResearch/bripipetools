@@ -229,7 +229,7 @@ Finally, if importing an "optimized" workflow, you will be asked to indicate so 
 Running a workflow
 ==================
 
-All of the following steps except the initial **BaseSpace** download should work while on ``srvgalaxy02``.
+All of the following steps except the initial **BaseSpace** download should work while on ``srvgalaxy01``.
 
 Pipeline steps
 --------------
@@ -244,7 +244,7 @@ Downloading & prepping data
 
 When a new flow cell is ready for processing, a notification email is sent from the **Genomics Core** via **BaseSpace**. Information about the flowcell and corresponding projects can be found in the ``Flowcell log.xlsx`` file under ``DFS_Chaussabel_LabShare/Illumina HiScan SQ/`` on the [``srvstor01``](srvstor01.brivmrc.org) server. In particular, you'll need to pay attention to the ``Lane Contents`` tab to determine the appropriate workflow to use for each project.
 
-On ``srvgalaxy02`` under ``/mnt/genomics/Illumina/<flowcell-folder>/``, create a new folder called ``Unaligned/`` (if it doesn't already exist). Modify permissions such that all users can write to and read from the folder (``chmod -R 777 Unaligned/``). The new folder should look something like this:
+On ``srvgalaxy01`` under ``/mnt/genomics/Illumina/<flowcell-folder>/``, create a new folder called ``Unaligned/`` (if it doesn't already exist). Modify permissions such that all users can write to and read from the folder (``chmod -R 777 Unaligned/``). The new folder should look something like this:
 
 ::
 
@@ -451,7 +451,7 @@ Generating gene model coverage plots
 Running MiXCR (depending on workflow version)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Note: requires SLURM!! (must run on server ``srvgalaxy02``)
+Note: requires SLURM!! (must run on server ``srvgalaxy01``)
 
 ::
 

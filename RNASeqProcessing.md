@@ -47,12 +47,12 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ Watch for red boxes, indicating a failed step - most times it's a transfer step, which you can manually re-trigger to complete (not a fatal error, just resubmit).  Also at the time of this writing, the "delete workflow log" is failing (theoretically, as a workflow sucessfully completes, it is auto-deleted from the saved histories list)  You may have to delete completed workflows yourself.
 
 7. Post Processing
-	+ Run these operations within `bripipetools` repostory, either on your own machine, or on srvgalaxy02.  If you are on a Mac, the leading mount may start with `/Volumes` instead of `/mnt`.
+	+ Run these operations within `bripipetools` repostory, either on your own machine, or on srvgalaxy01.  If you are on a Mac, the leading mount may start with `/Volumes` instead of `/mnt`.
 	+ Concatenate trinity results:
 		+ `% while read path; do python scripts/concatenate_trinity_output.py $path; done < <(find /mnt/genomics/Illumina/{FlowcellID} -name "Trinity" -maxdepth 2)`
 	+ Or for a single Project:
 		+ `% python scripts/concatenate_trinity_output.py /mnt/genomics/Illumina/{FlowcellID}/{ProjectID}/Trinity`
-	+ If a TCR based run, then run mixcr as well (**must** be done on srvgalaxy02):
+	+ If a TCR based run, then run mixcr as well (**must** be done on srvgalaxy01):
 		+ `% while read path; do outdir="$(dirname $path)/mixcrOutput_trinity"; python /mnt/genomics/code/shared/bripipetools/scripts/run_mixcr.py -i $path -o $outdir; done < <(find /mnt/genomics/Illumina/{FlowcellID} -name "Trinity" -maxdepth 2)`
 	+ Wrap up the processing, stitching together files, inserting data into tg3 with:
 		+ `% bripipetools wrapup /mnt/genomics/Illumina/{FlowcellID}/`
