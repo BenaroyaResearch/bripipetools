@@ -21,7 +21,11 @@ def build_mixcr_cmd(inLib, resultsDir):
     tempVdjca = libBase + '_mixcrAlign.vdjca'
     tempClns = libBase + '_mixcrAssemble.clns'
 
-    alignCmd = ("mixcr align -l TCR -r %s %s %s" %
+    # Old version: `-l` (locus) flag deprecated, replaced with
+    # `-c` (chain) flag after version 2.0
+    #alignCmd = ("mixcr align -l TCR -r %s %s %s" %
+    #            (mixcrOut, inLib, tempVdjca))
+    alignCmd = ("mixcr align -c TCR -r %s %s %s" %
                 (mixcrOut, inLib, tempVdjca))
     assembleCmd = ("mixcr assemble -r %s %s %s" %
                    (mixcrOut, tempVdjca, tempClns))
