@@ -191,7 +191,7 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
                 "\'y_sq_over_tot\': y_counts^2 / total_counts\n"
                 "\'gene_ratio\': y_genes / x_genes\n"
                 "\'counts_ratio\': y_counts / x_counts"))
-@click.option('--sexcutoff', default=1.0,
+@click.option('--sexcutoff', default=0.5,
               help=("The cutoff for the sexmodel, where 'M' is the "
                 "prediction for a sexmodel value greater than cutoff"))
 @click.argument('path')
@@ -217,7 +217,7 @@ def dbify(sexmodel, sexcutoff, path):
                 "\'y_sq_over_tot\': y_counts^2 / total_counts\n"
                 "\'gene_ratio\': y_genes / x_genes\n"
                 "\'counts_ratio\': y_counts / x_counts"))
-@click.option('--sexcutoff', default=1.0,
+@click.option('--sexcutoff', default=0.5,
               help=("The cutoff for the sexmodel, where male is the "
                 "prediction for a sexmodel value greater than cutoff"))
 @click.argument('path')
@@ -330,7 +330,7 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
                 "\'y_sq_over_tot\': y_counts^2 / total_counts\n"
                 "\'gene_ratio\': y_genes / x_genes\n"
                 "\'counts_ratio\': y_counts / x_counts"))
-@click.option('--sexcutoff', default=1.0,
+@click.option('--sexcutoff', default=0.5,
               help=("The cutoff for the sexmodel, where 'M' is the "
                 "prediction for a sexmodel value greater than cutoff"))
 @click.argument('path')
