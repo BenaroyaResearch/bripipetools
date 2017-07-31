@@ -96,7 +96,7 @@ class BatchParameterizer(object):
             'NCBIM37': {
                 'gtf': 'NCBIM37/Mus_musculus.NCBIM37.67.gtf',
                 'refflat': 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt',
-                'ribosomal-intervals':
+                'ribosomal_intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
