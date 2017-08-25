@@ -136,7 +136,7 @@ class FlowcellRunImporter(object):
                          "into '{}'").format(self.path, self.db.name))
             self._insert_librarymetrics()
 
-        if collection in ['all', 'runs']:
+        if collection in ['all', 'flowcell', 'runs']:
             logger.info("Inserting flowcell run '{}' into '{}'"
                         .format(self.path, self.db.name))
             self._insert_flowcellrun()

@@ -206,7 +206,7 @@ def dbify(sexmodel, sexcutoff, path):
         db=DB,
         qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     )
-    importer.run()
+    importer.run(collections='validate')
     logger.info("Import complete.")
 
 @main.command()
@@ -248,7 +248,7 @@ def researchdb(path):
         db=RB,
         qc_opts=None
     )
-    importer.run(collections='metrics')
+    importer.run(collections='researchdb')
     logger.info("Import complete.")
 
 @main.command()
@@ -307,7 +307,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, path):
         path=path,
         db=DB
     )
-    importer.run()
+    importer.run(collections='all')
     logger.info("Flowcell run import complete.")
 
     workflow_batches = list(get_workflow_batches(path))
