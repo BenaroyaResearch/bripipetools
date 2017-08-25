@@ -80,7 +80,7 @@ class OutputReader(object):
         self.data = {}
 
         for o in outputs:
-            logger.info("parsing output file '{}'".format(o))
+            logger.debug("parsing output file '{}'".format(o))
             out_items = parsing.parse_output_filename(o)
             proclib_id = out_items['sample_id']
             out_type = out_items['type']
@@ -91,13 +91,13 @@ class OutputReader(object):
 
             #self.data.setdefault(out_type, {}).setdefault(proclib_id, []).append({out_source: out_parser.parse()})
             dataframe = out_parser.parse()
-            
+            #logger.info("dataframe: {}".format(dataframe))
             if self.type == 'counts':
-                self.data = dataframe.set_index('geneName')['count'].to_dict()
+                self.data = [dataframe.set_index('geneName')['count'].to_dict()]
             else:
-                self.data.setdefault(out_type, {}).setdefault(proclib_id, []).append({out_source: out_parser.parse()})
+                self.data.setdefault(out_type, []).append({out_source: out_parser.parse()})
         
-        return [self.data]
+        return self.data
         
         
         

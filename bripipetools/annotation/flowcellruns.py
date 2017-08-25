@@ -11,6 +11,7 @@ from .. import genlims
 from .. import model as docs
 from . import SequencedLibraryAnnotator
 from . import LibraryGeneCountAnnotator
+from . import LibraryMetricsAnnotator
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +124,7 @@ class FlowcellRunAnnotator(object):
                 for l in os.listdir(os.path.join(unaligned_path, p))
                 if len(parsing.get_library_id(l))]
 
-    def get_processed_libraries(self, project=None):
+    def get_processed_libraries(self, project=None, sub_path="counts"):
         """
         Collect list of libraries for flowcell run from one or all projects.
         """
@@ -136,7 +137,7 @@ class FlowcellRunAnnotator(object):
         logger.debug("collecting list of libraries")
         logger.debug("searching in projects {}".format(projects))
         return [l for p in projects
-                for l in os.listdir(os.path.join(flowcell_path, p, "counts"))
+                for l in os.listdir(os.path.join(flowcell_path, p, sub_path))
                 if len(parsing.get_library_id(l))]
 
     def get_sequenced_libraries(self, project=None):
@@ -184,3 +185,28 @@ class FlowcellRunAnnotator(object):
                         ).get_library_gene_counts()
                         for l in libraries]
         return librarygenecounts
+    
+    def get_library_metrics(self, project=None):
+        """
+        Collect library gene count objects for flowcell run.
+        """
+
+        projects = self.get_processed_projects()
+        if project is not None:
+            logger.debug("subsetting projects")
+            projects = [p for p in projects
+                        if re.search(project, p)]
+        librarymetrics = []
+        for p in projects:
+            logger.info("getting library metrics for project '{}'"
+                        .format(p))
+            libraries = self.get_processed_libraries(p)
+            #logger.info("getting libraries '{}'".format(libraries))
+
+            librarymetrics += [LibraryMetricsAnnotator(
+                        os.path.join(self.get_flowcell_path(), p),
+                        l, p, self.run_id, self.db
+                        ).get_library_metrics()
+                        for l in libraries]
+        return librarymetrics
+

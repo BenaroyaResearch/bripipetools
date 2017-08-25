@@ -11,7 +11,7 @@ database connection, depending on environment and configurations.
 """
 from .connection import connect
 from .operations import (find_objects, insert_objects,
-                         get_samples, get_counts, get_runs, get_workflowbatches,
-                         put_samples, put_counts, put_runs, put_workflowbatches,
+                         get_samples, get_counts, get_metrics, get_runs, get_workflowbatches,
+                         put_samples, put_counts, put_metrics, put_runs, put_workflowbatches,
                          create_workflowbatch_id, search_ancestors)
 from .mapping import (map_keys, get_model_class, map_to_object)

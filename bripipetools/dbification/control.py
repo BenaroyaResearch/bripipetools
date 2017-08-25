@@ -47,9 +47,9 @@ class ImportManager(object):
         self.importer = importer(path=self.path, db=self.db, 
                                  qc_opts=self.qc_opts)
 
-    def run(self):
+    def run(self, collections='all'):
         """
         Execute the insert method of the selected importer.
         """
         self._init_importer()
-        self.importer.insert()
+        self.importer.insert(collections)

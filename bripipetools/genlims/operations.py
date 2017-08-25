@@ -74,6 +74,13 @@ def get_counts(db, query):
     """
     return db, query
 
+@find_objects('metrics')
+def get_metrics(db, query):
+    """
+    Return list of documents from 'metrics' collection based on query.
+    """
+    return db, query
+
 
 @find_objects('runs')
 def get_runs(db, query):
@@ -106,6 +113,13 @@ def put_counts(db, counts):
     Insert each document in list into 'counts' collection.
     """
     return db, counts
+
+@insert_objects('metrics')
+def put_metrics(db, metrics):
+    """
+    Insert each document in list into 'metrics' collection.
+    """
+    return db, metrics
 
 
 @insert_objects('runs')

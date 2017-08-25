@@ -66,6 +66,21 @@ class FlowcellRunImporter(object):
             db=self.db
             ).get_library_gene_counts()
 
+    def _collect_librarymetrics(self):
+        """
+        Collect list of library metrics objects for flowcell run.
+        """
+        path_items = parsing.parse_flowcell_path(self.path)
+#        print("path: {}, items: {}".format(self.path, path_items))
+        logger.info("collecting library metrics for flowcell run '{}'"
+                    .format(path_items['run_id']))
+
+        return annotation.FlowcellRunAnnotator(
+            run_id=path_items['run_id'],
+            genomics_root=path_items['genomics_root'],
+            db=self.db
+            ).get_library_metrics()
+
     def _insert_flowcellrun(self):
         """
         Convert FlowcellRun object and insert into GenLIMS database.
@@ -93,6 +108,15 @@ class FlowcellRunImporter(object):
             logger.debug("inserting library gene counts '{}'".format(lgc))
             genlims.put_counts(self.db, lgc.to_json())
 
+    def _insert_librarymetrics(self):
+        """
+        Convert Library Results objects and insert into Research database.
+        """
+        librarymetrics = self._collect_librarymetrics()
+        for lgc in librarymetrics:
+            logger.debug("inserting library metrics '{}'".format(lgc))
+            genlims.put_metrics(self.db, lgc.to_json())
+
     def insert(self, collection='all'):
         """
         Insert documents into GenLIMS database.
@@ -101,10 +125,17 @@ class FlowcellRunImporter(object):
             logger.info(("Inserting sequenced libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_sequencedlibraries()
-        if collection in ['all', 'counts']:
+            
+        if collection in ['all', 'researchdb', 'counts']:
             logger.info(("Inserting gene counts for libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_librarygenecounts()
+            
+        if collection in ['all', 'researchdb', 'metrics']:
+            logger.info(("Inserting metrics for libraries for flowcell '{}' "
+                         "into '{}'").format(self.path, self.db.name))
+            self._insert_librarymetrics()
+
         if collection in ['all', 'runs']:
             logger.info("Inserting flowcell run '{}' into '{}'"
                         .format(self.path, self.db.name))

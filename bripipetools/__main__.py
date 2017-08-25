@@ -248,7 +248,7 @@ def researchdb(path):
         db=RB,
         qc_opts=None
     )
-    importer.run()
+    importer.run(collections='metrics')
     logger.info("Import complete.")
 
 @main.command()

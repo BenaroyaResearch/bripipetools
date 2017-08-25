@@ -13,6 +13,7 @@ Depends on the ``util`` and ``parsing`` modules.
 """
 from .documents import (convert_keys, TG3Object,
                         GenericSample, Library, SequencedLibrary,
-                        ProcessedLibrary, GeneCounts, GenericRun, FlowcellRun,
+                        ProcessedLibrary, GeneCounts, Metrics,
+                        GenericRun, FlowcellRun,
                         GenericWorkflow, GlobusGalaxyWorkflow,
                         GenericWorkflowBatch, GalaxyWorkflowBatch)

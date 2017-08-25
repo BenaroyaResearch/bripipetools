@@ -11,6 +11,7 @@ with missing fields, information is compiled, parsed, and formatted
 """
 from .sequencedlibs import SequencedLibraryAnnotator
 from .librarygenecounts import LibraryGeneCountAnnotator
+from .librarymetrics import LibraryMetricsAnnotator
 from .flowcellruns import FlowcellRunAnnotator
 from .processedlibs import ProcessedLibraryAnnotator
 from .workflowbatches import WorkflowBatchAnnotator
