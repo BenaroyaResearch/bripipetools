@@ -10,6 +10,8 @@ with missing fields, information is compiled, parsed, and formatted
 (as needed) from files on the server.
 """
 from .sequencedlibs import SequencedLibraryAnnotator
+from .librarygenecounts import LibraryGeneCountAnnotator
 from .flowcellruns import FlowcellRunAnnotator
 from .processedlibs import ProcessedLibraryAnnotator
 from .workflowbatches import WorkflowBatchAnnotator
+

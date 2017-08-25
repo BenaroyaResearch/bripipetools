@@ -10,6 +10,7 @@ from .. import parsing
 from .. import genlims
 from .. import model as docs
 from . import SequencedLibraryAnnotator
+from . import LibraryGeneCountAnnotator
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,15 @@ class FlowcellRunAnnotator(object):
         return [p for p in os.listdir(unaligned_path)
                 if len(parsing.get_project_label(p))]
 
+    def get_processed_projects(self):
+        """
+        List processed projects for a flowcell run.
+        """
+        flowcell_path = self.get_flowcell_path()
+        return (pp
+            for pp in os.listdir(flowcell_path)
+            if re.search('Project_.*Processed', pp))
+
     def get_libraries(self, project=None):
         """
         Collect list of libraries for flowcell run from one or all projects.
@@ -111,6 +121,22 @@ class FlowcellRunAnnotator(object):
         logger.debug("searching in projects {}".format(projects))
         return [l for p in projects
                 for l in os.listdir(os.path.join(unaligned_path, p))
+                if len(parsing.get_library_id(l))]
+
+    def get_processed_libraries(self, project=None):
+        """
+        Collect list of libraries for flowcell run from one or all projects.
+        """
+        flowcell_path = self.get_flowcell_path()
+        projects = self.get_processed_projects()
+        if project is not None:
+            logger.debug("subsetting projects")
+            projects = [p for p in projects
+                        if re.search(project, p)]
+        logger.debug("collecting list of libraries")
+        logger.debug("searching in projects {}".format(projects))
+        return [l for p in projects
+                for l in os.listdir(os.path.join(flowcell_path, p, "counts"))
                 if len(parsing.get_library_id(l))]
 
     def get_sequenced_libraries(self, project=None):
@@ -134,3 +160,27 @@ class FlowcellRunAnnotator(object):
                         ).get_sequenced_library()
                         for l in libraries]
         return sequencedlibraries
+    
+    def get_library_gene_counts(self, project=None):
+        """
+        Collect library gene count objects for flowcell run.
+        """
+
+        projects = self.get_processed_projects()
+        if project is not None:
+            logger.debug("subsetting projects")
+            projects = [p for p in projects
+                        if re.search(project, p)]
+        librarygenecounts = []
+        for p in projects:
+            logger.info("getting library gene counts for project '{}'"
+                        .format(p))
+            libraries = self.get_processed_libraries(p)
+            #logger.info("getting libraries '{}'".format(libraries))
+
+            librarygenecounts += [LibraryGeneCountAnnotator(
+                        os.path.join(self.get_flowcell_path(), p),
+                        l, p, self.run_id, self.db
+                        ).get_library_gene_counts()
+                        for l in libraries]
+        return librarygenecounts

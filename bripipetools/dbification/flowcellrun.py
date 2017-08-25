@@ -51,6 +51,21 @@ class FlowcellRunImporter(object):
             db=self.db
             ).get_sequenced_libraries()
 
+    def _collect_librarygenecounts(self):
+        """
+        Collect list of library gene count objects for flowcell run.
+        """
+        path_items = parsing.parse_flowcell_path(self.path)
+#        print("path: {}, items: {}".format(self.path, path_items))
+        logger.info("collecting library gene counts for flowcell run '{}'"
+                    .format(path_items['run_id']))
+
+        return annotation.FlowcellRunAnnotator(
+            run_id=path_items['run_id'],
+            genomics_root=path_items['genomics_root'],
+            db=self.db
+            ).get_library_gene_counts()
+
     def _insert_flowcellrun(self):
         """
         Convert FlowcellRun object and insert into GenLIMS database.
@@ -69,6 +84,15 @@ class FlowcellRunImporter(object):
             logger.debug("inserting sequenced library {}".format(sl))
             genlims.put_samples(self.db, sl.to_json())
 
+    def _insert_librarygenecounts(self):
+        """
+        Convert Library Results objects and insert into Research database.
+        """
+        librarygenecounts = self._collect_librarygenecounts()
+        for lgc in librarygenecounts:
+            logger.debug("inserting library gene counts '{}'".format(lgc))
+            genlims.put_counts(self.db, lgc.to_json())
+
     def insert(self, collection='all'):
         """
         Insert documents into GenLIMS database.
@@ -77,6 +101,10 @@ class FlowcellRunImporter(object):
             logger.info(("Inserting sequenced libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_sequencedlibraries()
+        if collection in ['all', 'counts']:
+            logger.info(("Inserting gene counts for libraries for flowcell '{}' "
+                         "into '{}'").format(self.path, self.db.name))
+            self._insert_librarygenecounts()
         if collection in ['all', 'runs']:
             logger.info("Inserting flowcell run '{}' into '{}'"
                         .format(self.path, self.db.name))

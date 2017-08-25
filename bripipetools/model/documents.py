@@ -193,6 +193,30 @@ class ProcessedLibrary(GenericSample):
         """
         self._processed_data = value
 
+class GeneCounts(GenericSample):
+    """
+    Research Database object in 'counts' collection of type 'Library Counts'
+    """
+    def __init__(self, **kwargs):
+        sample_type = 'gene counts'
+        self._gene_counts = []
+        super(GeneCounts, self).__init__(type=sample_type, **kwargs)
+
+    @property
+    def gene_counts(self):
+        """
+        Return list of dictionaries with information about each set
+        of data processing outputs (i.e., from workflow batches).
+        """
+        return self._gene_counts
+
+    @gene_counts.setter
+    def gene_counts(self, value):
+        """
+        Set processed data.
+        """
+        self._gene_counts = value
+
 
 class GenericRun(TG3Object):
     """

@@ -67,6 +67,14 @@ def get_samples(db, query):
     return db, query
 
 
+@find_objects('counts')
+def get_counts(db, query):
+    """
+    Return list of documents from 'counts' collection based on query.
+    """
+    return db, query
+
+
 @find_objects('runs')
 def get_runs(db, query):
     """
@@ -90,6 +98,14 @@ def put_samples(db, samples):
     Insert each document in list into 'samples' collection.
     """
     return db, samples
+
+
+@insert_objects('counts')
+def put_counts(db, counts):
+    """
+    Insert each document in list into 'counts' collection.
+    """
+    return db, counts
 
 
 @insert_objects('runs')
