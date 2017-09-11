@@ -32,7 +32,7 @@ def find_objects(collection):
 
 def insert_objects(collection):
     """
-    Return a decorator that inserts one or more objectsin into
+    Return a decorator that inserts one or more objects in into
     specified collection; if object exists, updates any individual
     fields that are not empty in the input object.
 

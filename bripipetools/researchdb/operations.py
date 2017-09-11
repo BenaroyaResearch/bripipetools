@@ -1,5 +1,5 @@
 """
-Basic operations for the GenLIMS Mongo database.
+Basic operations for the ResearchDB Mongo database.
 """
 import logging
 import re
@@ -58,19 +58,62 @@ def insert_objects(collection):
         return wrapper
     return decorator
 
+@find_objects('genomicsSamples')
+def get_samples(db, query):
+    """
+    Return list of documents from 'samples' collection based on query.
+    """
+    return db, query
 
-@find_objects('counts')
+
+@find_objects('genomicsCounts')
 def get_counts(db, query):
     """
     Return list of documents from 'counts' collection based on query.
     """
     return db, query
 
+@find_objects('genomicsMetrics')
+def get_metrics(db, query):
+    """
+    Return list of documents from 'metrics' collection based on query.
+    """
+    return db, query
 
-@insert_objects('counts')
+@find_objects('genomicsRuns')
+def get_runs(db, query):
+    """
+    Return list of documents from 'runs' collection based on query.
+    """
+    return db, query
+
+
+@insert_objects('genomicsSamples')
+def put_samples(db, samples):
+    """
+    Insert each document in list into 'samples' collection.
+    """
+    return db, samples
+
+
+@insert_objects('genomicsCounts')
 def put_counts(db, counts):
     """
     Insert each document in list into 'counts' collection.
     """
     return db, counts
+
+@insert_objects('genomicsMetrics')
+def put_metrics(db, metrics):
+    """
+    Insert each document in list into 'metrics' collection.
+    """
+    return db, metrics
+
+@insert_objects('genomicsRuns')
+def put_runs(db, runs):
+    """
+    Insert each document in list into 'runs' collection.
+    """
+    return db, runs
 

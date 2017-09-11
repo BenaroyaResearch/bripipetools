@@ -195,7 +195,7 @@ class ProcessedLibrary(GenericSample):
 
 class GeneCounts(TG3Object):
     """
-    Research Database object in 'counts' collection of type 'Library Counts'
+    Research Database object in 'counts' collection of type 'gene counts'
     """
     def __init__(self, **kwargs):
         sample_type = 'gene counts'
@@ -205,8 +205,8 @@ class GeneCounts(TG3Object):
     @property
     def gene_counts(self):
         """
-        Return list of dictionaries with information about each set
-        of data processing outputs (i.e., from workflow batches).
+        Return list of dictionaries with information about each library's
+        genecounts.
         """
         return self._gene_counts
 
@@ -219,27 +219,27 @@ class GeneCounts(TG3Object):
 
 class Metrics(TG3Object):
     """
-    Research Database object in 'counts' collection of type 'Library Counts'
+    Research Database object in 'metrics' collection of type 'metrics'
     """
     def __init__(self, **kwargs):
         sample_type = 'metrics'
-        self._metrics = []
+        self._htseq = [] # one word metric we can used as an idicator
         super(Metrics, self).__init__(type=sample_type, **kwargs)
 
     @property
     def metrics(self):
         """
-        Return list of dictionaries with information about each set
-        of data processing outputs (i.e., from workflow batches).
+        Return list of dictionaries with information about each library's
+        metrics.
         """
-        return self._metrics
+        return self._htseq
 
     @metrics.setter
     def metrics(self, value):
         """
-        Set processed data.
+        Set metrics data.
         """
-        self._metrics = value
+        self._htseq = value
 
 
 class GenericRun(TG3Object):

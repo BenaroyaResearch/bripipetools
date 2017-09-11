@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import csv
+import string
 
 import pandas as pd
 
@@ -93,9 +94,10 @@ class OutputReader(object):
             dataframe = out_parser.parse()
             #logger.info("dataframe: {}".format(dataframe))
             if self.type == 'counts':
-                self.data = [dataframe.set_index('geneName')['count'].to_dict()]
+                self.data = dataframe.set_index('geneName')['count'].to_dict()
             else:
-                self.data.setdefault(out_type, []).append({out_source: out_parser.parse()})
+                mod_source = out_source.replace("-", "_")
+                self.data.setdefault(out_type, []).append({mod_source: out_parser.parse()})
         
         return self.data
         
