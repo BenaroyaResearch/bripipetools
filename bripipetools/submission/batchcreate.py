@@ -144,7 +144,7 @@ class BatchCreator(object):
         or for the full set of samples.
         """
         if folder is not None:
-            target_tag = parsing.get_project_label(os.path.basename(folder))
+            target_tag = parsing.get_project_label(folder)
         else:
             target_tag = self.group_tag
 

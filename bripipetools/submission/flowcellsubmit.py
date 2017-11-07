@@ -137,10 +137,33 @@ class FlowcellSubmissionBuilder(object):
         batch_paths = []
         for batchkey, projects in self.batch_map.items():
             workflow, build, stranded = batchkey
+            
+            # Need to handle new version of BaseSpace directory structure,
+            # Old dir structure:
+            # Project Folder -> Lib Folder -> fastq.gz file(s)
+            # New dir structure:
+            # Project Folder -> FASTQ Folder -> Lib Folder -> fastq.gz file(s)
+            for i in range(0, len(projects)):
+                # If new structure, there should only be one FASTQ folder.
+                # IF old structure, first folder should contain a libID
+                subdir = [s for s in os.listdir(projects[i])
+                          if not re.search('DS_Store', s)][0]
+                          
+                logger.debug("Subdirectory of {} identified as {}"
+                             .format(projects[i], subdir))
+                             
+                if (not re.search('lib[0-9]+', subdir) and 
+                    not re.search('DS_Store', subdir)):
+                    logger.debug("New BaseSpace dir type. Moving from {} to {}"
+                                 .format(projects[i], subdir))
+                    projects[i] = os.path.join(projects[i], subdir)
+            
+            
             logger.info("Building batch for workflow '{}' and build '{}' "
                         "with samples from projects: {}"
                         .format(os.path.basename(workflow), build, projects))
             group_tag, subgroup_tags = self._get_batch_tags(projects)
+            
             creator = BatchCreator(
                 paths=projects,
                 workflow_template=workflow,

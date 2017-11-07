@@ -85,6 +85,9 @@ def parse_fastq_filename(path):
     lane_id = util.matchdefault('(?<=_)L00[1-8]', path)
     read_id = util.matchdefault('(?<=_)R[1-2]', path)
     sample_num = int(util.matchdefault('(?<=_S)[0-9]+', path))
+    
+    logger.debug("Found fastq file {} for lane {} with read {} and sample {}"
+                 .format(path, lane_id, read_id, sample_num))
 
     return {'path': path, 'lane_id': lane_id, 'read_id': read_id,
             'sample_number': sample_num}

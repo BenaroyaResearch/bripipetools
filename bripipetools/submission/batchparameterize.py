@@ -58,6 +58,7 @@ class BatchParameterizer(object):
         within the sample folder. If no file exists, create and return
         the path of an empty FASTQ file.
         """
+                        
         logger.debug("retrieving FASTQ path for sample '{}' and lane {}"
                      .format(sample_path, lane))
         fastq_paths = [os.path.join(sample_path, f)
