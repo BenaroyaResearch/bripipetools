@@ -54,7 +54,16 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
     if output_type in ['c', 'a'] and 'c' not in exclude_types:
         logger.debug("generating combined counts file")
         path = os.path.join(project_path, 'counts')
-        bripipetools.postprocessing.OutputStitcher(path).write_table()
+        # Determine whether the path exists before calling write_table
+        # important for eg: ChIPseq, which doesn't contain a 'counts' folder.
+        if not os.path.exists(path):
+            proceed = raw_input("{} not found & will be skipped. Proceed? (y/[n]): "
+                                .format(path))
+            if proceed != 'y':
+                logger.info("Exiting program.")
+                sys.exit(1)
+        else:
+            bripipetools.postprocessing.OutputStitcher(path).write_table()
 
     if output_type in ['m', 'a'] and 'm' not in exclude_types:
         logger.debug("generating combined metrics file")
