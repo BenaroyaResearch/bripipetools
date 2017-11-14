@@ -13,6 +13,8 @@ Processing fastq to counts using Globus Genomics Galaxy
 			+ \\\\ZED-SEA-01\genomics WinOS (set to z: drive)
 	+ Optionally: inspect run QC at basespace website
 	+ Project downloads can take a few minutes to an hour - an entire flowcell will take about 1-2 hrs to download, depending on the number of libraries, and sequencing technology.
+	
+**NB:** Starting in October 2017, the BaseSpace data directory structure changed slightly. The upshot is that if projects were run split between multiple lanes in a flowcell, the FASTQ files for these projects need to be placed in the correct folder. The script `fix_new_basespace_lanes.sh` should handle this. If this script is _not_ run, there will be no error or indication that anything went wrong, but only one lane's worth of data will be processed per project.
 
 2. Create worklow batch file
 	+ **Prerequisites:** Install Anaconda2; running bash; instance of bripipetools repository from github (your own copy, or the copy in `/mnt/genomics/code/shared`)
