@@ -18,7 +18,7 @@ def get_flowcell_id(string):
     :return: the matching substring representing the flowcell ID or an
         empty string ('') if no match found
     """
-    return util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*X(X|Y)', string)
+    return util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*X(X|Y|2)', string)
 
 
 def parse_flowcell_run_id(run_id):
