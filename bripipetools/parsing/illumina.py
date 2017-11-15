@@ -59,7 +59,7 @@ def parse_flowcell_run_id(run_id):
                        "run number")
         run_num = None
 
-    fc_id = util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*X(X|Y)', run_id)
+    fc_id = util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*X(X|Y|2)', run_id)
     fc_pos = util.matchdefault('.{1}(?=%s)' % fc_id, run_id)
 
     return {'date': date, 'instrument_id': instr_id, 'run_number': run_num,
