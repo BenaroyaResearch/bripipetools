@@ -11,7 +11,7 @@ def get_lib_base(filePath):
     libBase = re.search('.*(lib|SRR)[0-9]+', filePath).group()
     return libBase
 
-def build_mixcr_cmd(inLib, resultsDir):
+def build_mixcr_cmd(inLib, resultsDir, region = "full"):
     libBase = get_lib_base(inLib)
     fileBase = os.path.basename(libBase)
     libBase = os.path.join(resultsDir, fileBase)
@@ -25,10 +25,20 @@ def build_mixcr_cmd(inLib, resultsDir):
     # `-c` (chain) flag after version 2.0
     #alignCmd = ("mixcr align -l TCR -r %s %s %s" %
     #            (mixcrOut, inLib, tempVdjca))
-    alignCmd = ("mixcr align -c TCR -r %s %s %s" %
-                (mixcrOut, inLib, tempVdjca))
-    assembleCmd = ("mixcr assemble -r %s %s %s" %
-                   (mixcrOut, tempVdjca, tempClns))
+    
+    # align to and produce sequence for entire chain
+    if region == "full":
+        alignCmd = ("mixcr align -c TCR -OvParameters.geneFeatureToAlign=VTranscript -r %s %s %s" %
+                   (mixcrOut, inLib, tempVdjca))
+        assembleCmd = ("mixcr assemble -OassemblingFeatures=VDJRegion -r %s %s %s" %
+                      (mixcrOut, tempVdjca, tempClns))
+    # align to and produce sequence for only CDR3 region              
+    elif region == "CDR3":
+        alignCmd = ("mixcr align -c TCR -r %s %s %s" %
+                    (mixcrOut, inLib, tempVdjca))
+        assembleCmd = ("mixcr assemble -r %s %s %s" %
+                       (mixcrOut, tempVdjca, tempClns))
+                       
     exportCmd = ("mixcr exportClones %s %s" %
                  (tempClns, outClns))
     exportPrettyCmd = ("mixcr exportAlignmentsPretty %s %s" %
