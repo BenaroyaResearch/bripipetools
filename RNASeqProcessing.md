@@ -56,6 +56,8 @@ Processing fastq to counts using Globus Genomics Galaxy
 		+ `% python scripts/concatenate_trinity_output.py /mnt/genomics/Illumina/{FlowcellID}/{ProjectID}/Trinity`
 	+ If a TCR based run, then run mixcr as well (**must** be done on srvgalaxy01):
 		+ `% while read path; do outdir="$(dirname $path)/mixcrOutput_trinity"; python /mnt/genomics/code/shared/bripipetools/scripts/run_mixcr.py -i $path -o $outdir; done < <(find /mnt/genomics/Illumina/{FlowcellID} -name "Trinity" -maxdepth 2)`
+		+ Generate a summary file of the productive TCR chains found in each library:
+		+ `% Rscript --vanilla /mnt/genomics/code/shared/bripipetools/scripts/summarize_mixcr_output.R /mnt/genomics/Illumina/{FlowcellID}`
 	+ Wrap up the processing, stitching together files, inserting data into tg3 with:
 		+ `% bripipetools wrapup /mnt/genomics/Illumina/{FlowcellID}/`
 	+ Watch for missing files in the output of wrapup - select no, if there are missing files, and go back to galaxy and re-transfer if necessary, or recreate from above.
