@@ -9,5 +9,4 @@ class.
 """
 from .flowcellrun import FlowcellRunImporter
 from .workflowbatch import WorkflowBatchImporter
-from .libraryresults import LibraryResultsImporter
 from .control import ImportManager
