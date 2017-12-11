@@ -18,7 +18,7 @@ fileConfig(os.path.join(config_path, 'logging_config.ini'),
 logger = logging.getLogger()
 logger.info("Starting `bripipetools`")
 DB = bripipetools.genlims.connect()
-
+RB = bripipetools.researchdb.connect()
 
 def get_workflow_batches(flowcell_path):
     """
@@ -97,7 +97,6 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
         bripipetools.postprocessing.OutputCompiler(combined_paths).write_table()
         logger.info("Merged all combined summary data tables for '{}'"
                     .format(project_path_short))
-
 
 @click.group()
 @click.option('--quiet', 'verbosity', flag_value='quiet',
@@ -216,7 +215,7 @@ def dbify(sexmodel, sexcutoff, path):
         db=DB,
         qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     )
-    importer.run()
+    importer.run(collections='validate')
     logger.info("Import complete.")
 
 @main.command()
@@ -245,6 +244,21 @@ def qc(sexmodel, sexcutoff, path):
         db = DB,
         qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     ).get_processed_libraries(qc=True)
+
+@main.command()
+@click.argument('path')
+def researchdb(path):
+    """
+    Push library results to research database
+    """
+    logger.info("Research Database Name: {} based on path {}".format(RB.name, path))
+    importer = bripipetools.dbification.ImportManager(
+        path=path,
+        db=RB,
+        qc_opts=None
+    )
+    importer.run(collections='researchdb')
+    logger.info("Import complete.")
 
 @main.command()
 @click.option('--output-type', '-t', default='a',
@@ -357,7 +371,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
         db=DB,
         qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     )
-    importer.run()
+    importer.run(collections='all')
     logger.info("Flowcell run import complete.")
 
     workflow_batches = list(get_workflow_batches(path))

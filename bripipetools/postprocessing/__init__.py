@@ -12,3 +12,4 @@ are named and organized on the disk.
 from .stitching import OutputStitcher
 from .cleanup import OutputCleaner
 from .compiling import OutputCompiler
+from .reading import OutputReader

@@ -193,6 +193,54 @@ class ProcessedLibrary(GenericSample):
         """
         self._processed_data = value
 
+class GeneCounts(TG3Object):
+    """
+    Research Database object in 'counts' collection of type 'gene counts'
+    """
+    def __init__(self, **kwargs):
+        sample_type = 'gene counts'
+        self._gene_counts = []
+        super(GeneCounts, self).__init__(type=sample_type, **kwargs)
+
+    @property
+    def gene_counts(self):
+        """
+        Return list of dictionaries with information about each library's
+        genecounts.
+        """
+        return self._gene_counts
+
+    @gene_counts.setter
+    def gene_counts(self, value):
+        """
+        Set processed data.
+        """
+        self._gene_counts = value
+
+class Metrics(TG3Object):
+    """
+    Research Database object in 'metrics' collection of type 'metrics'
+    """
+    def __init__(self, **kwargs):
+        sample_type = 'metrics'
+        self._htseq = [] # one word metric we can used as an idicator
+        super(Metrics, self).__init__(type=sample_type, **kwargs)
+
+    @property
+    def metrics(self):
+        """
+        Return list of dictionaries with information about each library's
+        metrics.
+        """
+        return self._htseq
+
+    @metrics.setter
+    def metrics(self, value):
+        """
+        Set metrics data.
+        """
+        self._htseq = value
+
 
 class GenericRun(TG3Object):
     """

@@ -1,17 +1,16 @@
 """
 Contains methods for interacting with - connecting to, retrieving data
-from, and inserting data into - the GenLIMS database at a low level.
+from, and inserting data into - the Research database at a low level.
 Under the hood, much of the functionality in this package relies on
-the pymongo client library for MongoDB. The ``genlims.operations``
+the pymongo client library for MongoDB. The ``researchdb.operations``
 module provides wrapper functions for getting/putting objects
-from/to commonly used database collections, while ``genlims.mapping``
+from/to commonly used database collections, while ``researchdb.mapping``
 helps to construct Python ``model`` class objects from database
 documents. Methods in the ``genlims.connection`` module manage the
 database connection, depending on environment and configurations.
 """
 from .connection import connect
 from .operations import (find_objects, insert_objects,
-                         get_samples, get_counts, get_metrics, get_runs, get_workflowbatches,
-                         put_samples, put_counts, put_metrics, put_runs, put_workflowbatches,
-                         create_workflowbatch_id, search_ancestors)
+                         get_counts, get_metrics, get_samples, get_runs,
+                         put_counts, put_metrics, put_samples, put_runs)
 from .mapping import (map_keys, get_model_class, map_to_object)

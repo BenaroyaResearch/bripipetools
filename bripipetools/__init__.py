@@ -15,6 +15,9 @@ from . import model
 # genlims depends on util, model
 from . import genlims
 
+# researchdb depends on util, model
+from . import researchdb
+
 # qc depends on io
 from . import qc
 

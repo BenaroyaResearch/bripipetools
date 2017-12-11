@@ -32,7 +32,7 @@ def find_objects(collection):
 
 def insert_objects(collection):
     """
-    Return a decorator that inserts one or more objectsin into
+    Return a decorator that inserts one or more objects in into
     specified collection; if object exists, updates any individual
     fields that are not empty in the input object.
 
@@ -67,6 +67,21 @@ def get_samples(db, query):
     return db, query
 
 
+@find_objects('counts')
+def get_counts(db, query):
+    """
+    Return list of documents from 'counts' collection based on query.
+    """
+    return db, query
+
+@find_objects('metrics')
+def get_metrics(db, query):
+    """
+    Return list of documents from 'metrics' collection based on query.
+    """
+    return db, query
+
+
 @find_objects('runs')
 def get_runs(db, query):
     """
@@ -90,6 +105,21 @@ def put_samples(db, samples):
     Insert each document in list into 'samples' collection.
     """
     return db, samples
+
+
+@insert_objects('counts')
+def put_counts(db, counts):
+    """
+    Insert each document in list into 'counts' collection.
+    """
+    return db, counts
+
+@insert_objects('metrics')
+def put_metrics(db, metrics):
+    """
+    Insert each document in list into 'metrics' collection.
+    """
+    return db, metrics
 
 
 @insert_objects('runs')
