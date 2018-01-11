@@ -40,8 +40,18 @@ def sniff_sample_sheet(app_logs_path):
     with open(sample_sheet_file) as f:
         while True:
             ss_line = f.readline()
+            # try to sniff flowcell ID from the experiment name
             if re.search('experimentname', re.sub(' ', '', ss_line).lower()):
-                return ss_line.rstrip().split('_')[1]
+                expid = ss_line.rstrip().split('_')
+                if(len(expid) > 1):
+                    return ss_line.rstrip().split('_')[1]
+            # if flowcell ID isn't in expt name, try to sniff based on regex
+            else:
+                tmpfcid = re.search('((A|B|C|D)([A-Z]|[0-9])*X(X|Y|2))', ss_line)
+                if tmpfcid:
+                    return tmpfcid.group(1)
+                else:
+                    pass
             pass
 
 def copy_data(flowcell_path, app_logs_path, app_props_path):
