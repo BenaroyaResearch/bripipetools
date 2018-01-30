@@ -20,14 +20,14 @@ logger.info("Starting `bripipetools`")
 DB = bripipetools.genlims.connect()
 RB = bripipetools.researchdb.connect()
 
-def get_workflow_batches(flowcell_path):
+def get_workflow_batches(flowcell_path, all_workflows=False):
     """
     List the workflow batch files for a flowcell run.
     """
     submissions = os.path.join(flowcell_path, 'globus_batch_submission')
     return (os.path.join(submissions, wb)
             for wb in os.listdir(submissions)
-            if 'optimized' in wb)
+            if ('optimized' in wb or all_workflows))
 
 
 def get_processed_projects(flowcell_path):
@@ -87,7 +87,7 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
             bripipetools.postprocessing.OutputStitcher(path).write_table()
         )
     except OSError:
-        logger.warn(("no validation files found "
+        logger.warn(("no validation files found"
                      "for project {}; skiproject_pathing")
                     .format(project_path))
     logger.info("Combined output files generated for '{}' with option '{}'"
@@ -277,8 +277,12 @@ def researchdb(path):
                     "the project level"))
 @click.option('--clean-outputs/--outputs-as-is', default=False,
               help="Attempt to clean/organize output files")
+@click.option('--all-workflows/--optimized-only', default=False,
+              help=("indicate whether to include all detected workflows "
+                    "as options or to keep 'optimized' workflows only"))
 @click.argument('path')
-def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
+def postprocess(output_type, exclude_types, stitch_only, clean_outputs, 
+                all_workflows, path):
     """
     Perform postprocessing operations on outputs of a workflow batch.
     """
@@ -290,7 +294,7 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
     flowcell_dir = os.path.abspath(os.path.join(path, '..'))
     
     workflow_batches =  list(wb for wb in 
-                            list(get_workflow_batches(flowcell_dir))
+                            list(get_workflow_batches(flowcell_dir, all_workflows))
                             if project_id in wb)
     
     logger.debug("found the following workflow batches: {}"
@@ -356,9 +360,12 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs, path):
 @click.option('--sexcutoff', default=0.5,
               help=("The cutoff for the sexmodel, where 'M' is the "
                 "prediction for a sexmodel value greater than cutoff"))
+@click.option('--all-workflows/--optimized-only', default=False,
+              help=("indicate whether to include all detected workflows "
+                    "as options or to keep 'optimized' workflows only"))
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel, 
-           sexcutoff, path):
+           sexcutoff, all_workflows, path):
     """
     Perform 'dbification' and 'postprocessing' operations on all projects and
     workflow batches from a flowcell run.
@@ -374,7 +381,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
     importer.run(collections='all')
     logger.info("Flowcell run import complete.")
 
-    workflow_batches = list(get_workflow_batches(path))
+    workflow_batches = list(get_workflow_batches(path, all_workflows))
     logger.debug("found the following workflow batches: {}"
                  .format(workflow_batches))
 
