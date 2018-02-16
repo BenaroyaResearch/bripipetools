@@ -13,11 +13,12 @@ def parse_batch_name(batch_name):
     labels, and flowcell ID.
     """
     name_parts = batch_name.split('_')
+    project_parts = [x for x in name_parts if re.match("P[0-9]*-[0-9]*", x)]
     date = datetime.datetime.strptime(name_parts.pop(0), '%y%m%d')
 
     fc_id = name_parts.pop(-1)
 
-    return {'date': date, 'projects': name_parts, 'flowcell_id': fc_id}
+    return {'date': date, 'projects': project_parts, 'flowcell_id': fc_id}
 
 
 def parse_workflow_param(param):
