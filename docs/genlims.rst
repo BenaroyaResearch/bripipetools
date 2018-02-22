@@ -72,7 +72,7 @@ Perform mongo 'pull' (dump + restore)::
 
     cd $HOME
     rm -rf dump/dc
-    mongodump -u browser -p bibliome --host srvtg301 -d tg3
+    mongodump -u <user> -p <password> --host srvtg301 -d tg3
     cd dump/tg3
     rm logging*
     rm system.*
