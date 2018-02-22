@@ -264,23 +264,6 @@ def researchdb(path):
     )
     importer.run(collections='researchdb')
     logger.info("Import complete.")
-    
-@main.command()
-@click.argument('path')
-def debug(path):
-    """
-    Debug function to look at workflow file
-    """
-    logger.info("Loading workflow file {}".format(path))
-    wfFile = bripipetools.io.WorkflowFile(
-        path=path
-    )
-    #wfData = wfFile.parse()
-    #logger.info("Workflow data loaded and parsed as: {}".format(wfData))
-    wfName = wfFile.get_workflow_name()
-    logger.info("Workflow name is {}".format(wfName))
-    wfTools = wfFile.get_tool_versions()
-    logger.info("Workflow tools are identified as: {}".format(wfTools))
 
 @main.command()
 @click.option('--output-type', '-t', default='a',

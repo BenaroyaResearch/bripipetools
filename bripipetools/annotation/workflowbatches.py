@@ -35,15 +35,16 @@ class WorkflowBatchAnnotator(object):
             ).parse()
         self.workflowbatch = self._init_workflowbatch()
         
-        # DEBUG
-        self.workflow_dir = self.run_opts["workflow_dir"]
-        self.workflow_file = os.path.join(
-            self.workflow_dir, 
-            self.workflowbatch_data['workflow_name']+".ga"
-        )
-        self.workflow_data = io.WorkflowFile(
-            self.workflow_file
-        ).parse()
+        if ("workflow_dir" in self.run_opts):
+            logger.debug("Attempting to parse workflow file")
+            self.workflow_dir = self.run_opts["workflow_dir"]
+            self.workflow_file = os.path.join(
+                self.workflow_dir, 
+                self.workflowbatch_data['workflow_name']+".ga"
+            )
+            self.workflow_data = io.WorkflowFile(
+                self.workflow_file
+            ).parse()
 
         logger.debug("setting 'genomics' path")
         self.genomics_root = genomics_root
