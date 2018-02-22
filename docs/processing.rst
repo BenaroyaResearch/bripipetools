@@ -19,7 +19,7 @@ Processing modules
 data QC
 ^^^^^^^
 
-Quality control refers to basic inspection and computation of quality metrics/statistics for *raw* sequencing data. Of course, quality assessment can and should occur at multiple stages from data generation to analysis. However, due to historical reasons, "QC" in the context of the pipeline almost exclusively implies tools and outputs related to the characteristics of FASTQ files. The *de facto* tool for this step is **FastQC - ADD LINK!!!** (and should continue to be for the forseeable future). Elements of raw sequencing data QC not covered by FastQC that might be worth incorporating in future versions of the pipeline include library complexity (maybe that's it?).
+Quality control refers to basic inspection and computation of quality metrics/statistics for *raw* sequencing data. Of course, quality assessment can and should occur at multiple stages from data generation to analysis. However, due to historical reasons, "QC" in the context of the pipeline almost exclusively implies tools and outputs related to the characteristics of FASTQ files. The *de facto* tool for this step is `FASTQC <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_. (and should continue to be for the forseeable future). Elements of raw sequencing data QC not covered by FastQC that might be worth incorporating in future versions of the pipeline include library complexity (maybe that's it?).
 
 Current tool: ``FastQC``
 
@@ -190,15 +190,26 @@ The most common annotation input parameters are the following:
 * Adapter files: ``annotation_adapters`` (optional name: ``adapterFile``)
 
 
-Saving the workflow template
-----------------------------
+Saving the workflow for use in bripipetools
+-------------------------------------------
 
-Once a workflow is finished and ready for testing...
+Once a workflow is finished and ready for testing, both the workflow template and the workflow detail files must be downloaded from Galaxy. The template file will be used to generate workflow batch files, and the workflow detail file will be used to store tool version information in the research database.
+
+Save the workflow template
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Click the arrow next to the workflow name in the Galaxy **Workflows** tab.
 2. Select "Submit via API batch mode".
-3. On the following page, click the link to "Export Workflow Parameters for batch submission" and save the file under ``genomics/galaxy_workflows`` (wherever the path exists relative to your local system); make sure to remove the leading ``Galaxy-API-Workflow-`` from the filename.
+3. On the following page, click the link to "Export Workflow Parameters for batch submission" and save the .txt file under ``genomics/galaxy_workflows`` (wherever the path exists relative to your local system); make sure to remove the leading ``Galaxy-API-Workflow-`` from the filename.
 
+Save the workflow details
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Click the arrow next to the workflow name in the Galaxy **Workflows** tab.
+2. Select "Download or Export"
+3. Click the link that says "Download workflow to file so that it can be saved or imported into another Galaxy server" and save the .ga file under ``genomics/galaxy_workflows`` (wherever the path exists relative to your local system); make sure to remove the leading ``Galaxy-Workflow-`` from the filename.
+
+You should now have a template file with a ``.txt`` extension and a details file with a ``.ga`` extension, with otherwise identical file names that corresponding to your workflow. Note that bripipetools requires both of these files for a given workflow in order to function properly.
 
 Importing a new workflow to GenLIMS
 -----------------------------------
