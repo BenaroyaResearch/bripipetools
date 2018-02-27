@@ -69,7 +69,7 @@ class FlowcellSubmissionBuilder(object):
         workflow_opts = self.get_workflow_options(
             optimized_only=not self.all_workflows
         )
-        build_opts = ['GRCh38', 'NCBIM37', 'hg19', 'mm10', 'mm9', 'ebv']
+        build_opts = ['GRCh38.77', 'GRCh38.91', 'NCBIM37.67', 'hg19', 'mm10', 'mm9', 'ebv']
         self._get_project_paths()
 
         continue_assign = True
@@ -106,8 +106,8 @@ class FlowcellSubmissionBuilder(object):
 
                 for j, b in enumerate(build_opts):
                     print("   {} : {}".format(j, b))
-                b_j = raw_input(("\nSelect the genome build to use "
-                                 "for project {}: ")
+                b_j = raw_input(("\nSelect the genome build (and release, "
+                                 "if applicable) to use for project {}: ")
                                 .format(os.path.basename(selected_project)))
                 selected_build = build_opts[int(b_j)]
 

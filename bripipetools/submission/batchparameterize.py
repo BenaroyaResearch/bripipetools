@@ -85,7 +85,7 @@ class BatchParameterizer(object):
         on the current build and annotation type.
         """
         ref_dict = {
-            'GRCh38': {
+            'GRCh38.77': {
                 'gtf': 'GRCh38/Homo_sapiens.GRCh38.77.gtf',
                 'refflat': 'GRCh38/Homo_sapiens.GRCh38.77.refflat.txt',
                 'ribosomal_intervals':
@@ -94,7 +94,16 @@ class BatchParameterizer(object):
                 'snp-bed': 'GRCh38/all_grch38.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
-            'NCBIM37': {
+            'GRCh38.91': {
+                'gtf': 'GRCh38/Homo_sapiens.GRCh38.91.gtf',
+                'refflat': 'GRCh38/Homo_sapiens.GRCh38.91.refflat.txt',
+                'ribosomal_intervals':
+                    ('GRCh38/Homo_sapiens.GRCh38.91'
+                     '.ribosomalIntervalsWheader.txt'),
+                'snp-bed': 'GRCh38/all_grch38.bed',
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'NCBIM37.67': {
                 'gtf': 'NCBIM37/Mus_musculus.NCBIM37.67.gtf',
                 'refflat': 'NCBIM37/Mus_musculus.NCBIM37.67.refflat.txt',
                 'ribosomal_intervals':

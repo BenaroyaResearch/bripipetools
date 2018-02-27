@@ -112,10 +112,14 @@ class PicardMetricsFile(object):
         """
         Parse metrics table and return dictionary.
         """
-        self._read_file()
-        self._get_table()
-        table_format = self._check_table_format()
-        if table_format == 'long':
-            return self._parse_long()
-        else:
-            return self._parse_wide()
+        try:
+            self._read_file()
+            self._get_table()
+            table_format = self._check_table_format()
+            if table_format == 'long':
+                return self._parse_long()
+            else:
+                return self._parse_wide()
+        except IndexError:
+            logger.info("WARNING! Parsing file {} failed.".format(self.path))
+            return {}

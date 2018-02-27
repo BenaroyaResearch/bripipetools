@@ -100,7 +100,7 @@ def parse_output_filename(output_path):
 
     source = name_parts.pop(-1)
     if (len(name_parts) <= 2
-        and not re.search('(picard|tophat)', name_parts[-1])):
+        and not re.search('(picard|tophat|star)', name_parts[-1])):
         sample_id = '_'.join(name_parts)
     else:
         source = '-'.join([name_parts.pop(-1), source])
