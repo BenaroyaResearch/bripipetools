@@ -186,6 +186,14 @@ parse_project_name <- function(proj_folder){
   return(p)
 }
 
+# accepts a flow cell project folder path name with a Trinity folder,
+# returns a list of all the libs in the Trinity folder
+get_trinity_libs <- function(project_folder){
+  all_trin_files <- list.files(file.path(project_folder, "Trinity"))
+  trin_libs <- str_extract(all_trin_files, "lib[0-9]+")
+  return(trin_libs)
+}
+
 # accepts a flow cell folder path name string
 # returns a list of project folders that contain mixcrOutput_trinity
 find_projects_with_mixcr <- function(fc_folder){
@@ -203,12 +211,45 @@ find_projects_with_mixcr <- function(fc_folder){
 #########################################################
 # MiXCR functions
 #########################################################
+# validate that all of the Trinity outputs made it into MiXCR files
+validate_mixcr_output <- function(proj_folder){
+  trin_libs <- get_trinity_libs(proj_folder)
+  mixcr_files <- list.files(file.path(proj_folder, "mixcrOutput_trinity"))
+  
+  mixcr_file_suffixes <- 
+    c("_mixcrAlign.vdjca",
+      "_mixcrAlignPretty.txt",
+      "_mixcrAssemble.clns",
+      "_mixcrClns.txt",
+      "_mixcrReport.txt")
+  
+  missing_files <- NULL
+  for (lib in trin_libs){
+    if(!is.na(lib)){
+      for (suffix in mixcr_file_suffixes){
+        srch_str <- paste0(lib, suffix)
+        if(!any(str_detect(mixcr_files, srch_str))){
+          missing_files <- c(missing_files, srch_str)
+        }
+      }
+    }
+  }
+  
+  if(!is.null(missing_files)){
+    print("ERROR: The following files were expected but not found:")
+    print(missing_files)
+    return(FALSE)
+  } else {
+    return(TRUE)
+  }
+}
+
 # generate a mixcr summary for a project folder containing 
 # a mixcrOutput_trinity folder
 make_mixcr_summary <- function(proj_folder){
   pname <- parse_project_name(proj_folder)
   currdate <- format(Sys.Date(), "%y%m%d")
-  mixcr_file <- paste(pname, currdate, "mixcr_summary.csv", sep = "_")
+  mixcr_file <- paste(pname, "mixcr_summary.csv", sep = "_")
   mixcr_jxns <- read_mixcr(folder = file.path(proj_folder, "mixcrOutput_trinity"))
   write_csv(mixcr_jxns, file.path(proj_folder, mixcr_file))
 }
@@ -217,7 +258,9 @@ make_mixcr_summary <- function(proj_folder){
 run_prog <- function(fc_path){
   project_paths <- find_projects_with_mixcr(fc_path)
   for (p in project_paths){
-    make_mixcr_summary(p)
+    if(validate_mixcr_output(p)){
+      make_mixcr_summary(p)
+    }
   }
 }
 
