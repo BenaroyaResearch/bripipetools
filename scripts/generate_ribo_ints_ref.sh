@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Inputs:
+# GTF file for the genome annotation release
+# BAM file (only header is used)
+# Output:
+# Generates a picard-style interval list file with the same name as the GTF 
+# and the extension ".ribosomalIntervalsWheader.txt"
+
+
 GTF_IN=$1
 BAM_IN=$2
 
