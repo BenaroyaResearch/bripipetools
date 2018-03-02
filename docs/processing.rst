@@ -35,19 +35,23 @@ adapter trimming
 
 For certain library prep procedures (e.g., Nextera), oligonucleotide indexes will be included as part of the PCR amplifcation step, prior to library construction. In these cases, these adapter sequences will appear within reads, in contrast to typical sequencing adapters (e.g., Illumina adapters and indexes used for demultiplexing) that are nominally removed by tools like **CASAVA** and **bcl2fastq**.
 
-Current tools: ``FastqMcf``
+Current tool: ``FastqMcf``
 
 quality trimming
 ^^^^^^^^^^^^^^^^
 
 Modern aligners use "dynamic" or "adaptive" trimming to remove bases from either end of individual reads to improve mapping to the reference. Reads can also be pre-processed to remove bases that do not pass a certain quality threshold. In theory, removing low quality (and thus, low confidence) bases can also improve mapping rate; however, care must be taken to impose a minimum length for trimmed reads, as extremely short reads will lead to high duplication rates and biased results.
 
+Current tool: ``FASTQ Quality Trimmer``
+
 alignment
 ^^^^^^^^^
 
 This is the central step for almost all NGS processing workflows. Following any trimming, short reads are aligned to a reference genome and the results are stored in a Sequence Alignment Map (SAM) file — and more typically, in the binary BAM format. For RNA-seq data, it is important to use aligners that are "splice aware" (e.g., **TopHat** and **STAR**) to account for the fact that reads from mRNA transcripts may include one or more exons that are not adjacent in the genome (and therefore might not align). Alternatively, RNA reads could be aligned to a reference transcriptome.
 
-Current tools: ``HISAT2``, ``bowtie2``
+In summer of 2018, after multiple comparisons between STAR-aligned and TopHat-aligned libraries, we decided to transition our workflows to STAR from TopHat.
+
+Current tools: ``STAR``
 
 Previous tools: ``TopHat``
 
@@ -56,9 +60,7 @@ counting
 
 After reads have been aligned to the genome, reference annotations (i.e., gene models) can be used to inspect and quantify read coverage within regions of interest (e.g., exons).
 
-Current tool: ``featureCounts``
-
-Previous tools: ``htseq-count``
+Current tool: ``htseq-count``
 
 quantification
 ^^^^^^^^^^^^^^
@@ -82,11 +84,15 @@ Current tools: ``Picard``
 VDJ annotation
 ^^^^^^^^^^^^^^
 
+Many projects (eg: scRNAseq projects) involve identification of TCR sequences. To achieve sequencing of these highly polymorphic sequences, we first perform a de novo assembly using **Trinity** (see below), and then use **MiXCR** to identify the TCR chains from the assembly.
+
 Current tools: ``mixcr``
 
 
 assembly
 ^^^^^^^^
+
+For experiments where it doesn't make sense to align to a reference (eg: no reference available, huge number of polymorphisms), we perform a de novo assembly of the reads. This essentially aligns the reads to one another in a series of steps, building long sequences representing transcripts from the short reads of fragments. These long transcript sequences can then be used for a number of purposes, such as building a transcriptome, or aligning transcripts with partially conserved and partially variable regions (as in TCR identification).
 
 Current tools: ``Trinity``
 
@@ -97,11 +103,6 @@ variant calling
 Current tools: ``samtools``, ``bcftools``
 
 
-peak calling
-^^^^^^^^^^^^
-
-Current tools: ``SICER``, ``MACS2``
-
 -----
 
 
@@ -111,6 +112,14 @@ Workflow options
 ================
 
 The following workflows are currently available for batch processing in Globus Genomics.
+
+TruSeq, Stranded, STAR (with or without Trinity)
+Nextera, Non-stranded, STAR (with or without Trinity)
+
+**Deprecated Workflows**
+TruSeq, Stranded, TopHat (with or without Trinity)
+Nextera, Non-stranded, TopHat (with or without Trinity)
+
 
 -----
 
