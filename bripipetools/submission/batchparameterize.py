@@ -91,7 +91,7 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('GRCh38/Homo_sapiens.GRCh38.77'
                      '.ribosomalIntervalsWheader_reorder.txt'),
-                'snp-bed': 'GRCh38/all_grch38.bed',
+                'snp-bed': 'GRCh38/GRCh38_NGSCheckMateSNP.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'GRCh38.91': {
@@ -100,7 +100,7 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('GRCh38/Homo_sapiens.GRCh38.91'
                      '.ribosomalIntervalsWheader.txt'),
-                'snp-bed': 'GRCh38/all_grch38.bed',
+                'snp-bed': 'GRCh38/GRCh38_NGSCheckMateSNP.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'NCBIM37.67': {

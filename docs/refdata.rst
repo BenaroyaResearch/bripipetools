@@ -29,32 +29,16 @@ Ribosomal intervals
 
 Either build using ``generate_ribo_ints_ref.sh`` or in Globus Galaxy using **Generate_Ribosomal_Reference_File** workflow.
 
-SNP Panel
----------
+SNP Panel for Sample Identification
+-----------------------------------
 
-VCF file (``all_grch37.vcf``) obtained `here <https://github.com/gatoravi/maury>`_, based on `this study <https://www.ncbi.nlm.nih.gov/pubmed/24070238>`_
+NGSCheckMate SNP panel (``GRCh38_NGSCheckMateSNP``) obtained `here <https://github.com/parklab/NGSCheckMate/blob/master/SNP/SNP_GRCh37_hg19_wChr.bed>`_, based on `this study <https://www.ncbi.nlm.nih.gov/pubmed/28369524>`_
 
-
-Saved at:
-
-``/mnt/genomics/reference_data/annotationsForGalaxy/GRCh38/all_grch37.vcf``
-
-(even though it's not GRCh38)
-
-
-Re-mapped to GRCh38 using NCBI `remap tool <https://www.ncbi.nlm.nih.gov/genome/tools/remap/>`_:
+Re-mapped to GRCh38 using UCSC `LiftOver tool <https://genome.ucsc.edu/cgi-bin/hgLiftOver>`_:
 
 GRCh37 (hg19) -> GRCh38 (hg38)
 
-
-Converted to BED using ``bedops``:
-
-::
-
-    vcf2bed --snvs < all_grch38.vcf > all_grch38.bed
-
-
-Uploaded to Globus Galaxy. Added to data library.
+Uploaded to Globus Galaxy and added to data library as GRCh38_NGSCheckMateSNP.bed.
 
 
 Non-mitochondrial BED file
