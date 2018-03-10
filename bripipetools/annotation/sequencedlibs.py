@@ -50,7 +50,7 @@ class SequencedLibraryAnnotator(object):
         """
         logger.debug("collecting raw data details for library '{}'"
                      .format(self.library_id))
-        return [parsing.parse_fastq_filename(f)
+        return [parsing.parse_fastq_filename(os.path.join(self.path, f))
                 for f in os.listdir(self.path)
                 if not re.search('empty', f)]
 
