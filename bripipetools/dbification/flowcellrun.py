@@ -16,13 +16,13 @@ class FlowcellRunImporter(object):
     Collects FlowcellRun and SequencedLibrary objects from a sequencing run,
     converts to documents, inserts into database.
     """
-    def __init__(self, path, db, qc_opts):
+    def __init__(self, path, db, run_opts):
         logger.debug("creating `SequencingImporter` instance")
         logger.debug("...with arguments (path: '{}', db: '{}')"
                      .format(path, db.name))
         self.path = path
         self.db = db
-        self.qc_opts = qc_opts
+        self.run_opts = run_opts
 
     def _collect_flowcellrun(self):
         """

@@ -20,7 +20,7 @@ class SexChecker(object):
     based on pre-defined rule.
     """
     def __init__(self, processedlibrary, reference, workflowbatch_id,
-                 genomics_root, db, qc_opts):
+                 genomics_root, db, run_opts):
         logger.debug("creating an instance of `SexChecker` for processed "
                      "library '{}', workflow batch ID '{}', with "
                      "genomics root '{}'"
@@ -33,7 +33,7 @@ class SexChecker(object):
         self.genomics_root = genomics_root
         self.db = db
 
-        self.qc_opts = qc_opts
+        self.run_opts = run_opts
 
     def _load_x_genes(self, ref='grch38'):
         """
@@ -107,7 +107,7 @@ class SexChecker(object):
         """
         logger.debug("adding sex check QC info for '{}'"
                      .format(self.processedlibrary._id))
-        self.data = SexPredictor(self.data, self.qc_opts).predict()
+        self.data = SexPredictor(self.data, self.run_opts).predict()
 
     def _verify_sex(self):
         """

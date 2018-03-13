@@ -13,7 +13,7 @@ Currently, there are three primary functions served by package modules:
 
 - Generation of workflow instructions and submission of data processing batches
 - Collection and organization of output data from bioinformatics processing workflows
-- Annotation and import of pipeline input & output data into the Genomics Core Mongo database — i.e., **GenLIMS**
+- Annotation and import of pipeline input & output data into Mongo databases — i.e., **GenLIMS** and the **Research Database**
 
 These features are continuing to expand and evolve over time.
 
