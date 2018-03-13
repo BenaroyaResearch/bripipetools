@@ -50,7 +50,7 @@ while getopts ":plad:n:" opt; do
       searchdepth=$OPTARG
       ;;
     \? )
-      eecho "Usage: $0 [-a|p|l] [-d <root search dir>] [-n <search depth>]"
+      echo "Usage: $0 [-a|p|l] [-d <root search dir>] [-n <search depth>]"
       exit 1
       ;;
     :)
