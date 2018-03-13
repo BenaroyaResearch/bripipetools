@@ -371,9 +371,12 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
 @click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
               help=("path to folder containing .ga Galaxy workflow "
                     "files to be used for batch processing"))
+@click.option('--database', default='all',
+              help=("Database to contain sample information. Options are:\n"
+              "\'researchdb\'\n\'genlims\'\n\'all\'\n\'none\'"))
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel, 
-           sexcutoff, all_workflows, workflow_dir, path):
+           sexcutoff, all_workflows, workflow_dir, database, path):
     """
     Perform 'dbification' and 'postprocessing' operations on all projects and
     workflow batches from a flowcell run.
@@ -430,15 +433,30 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             "importing processed data for workflow batch in file '{}'"
             .format(wb)
         )
-        bripipetools.dbification.ImportManager(
-            path=wb,
-            db=DB,
-            run_opts = {"sexmodel":sexmodel, 
-                        "sexcutoff":sexcutoff,
-                        "workflow_dir": workflow_dir}
-        ).run()
-        logger.info("Workflow batch import for '{}' complete."
-                    .format(os.path.basename(wb)))
+        if (database in ['genlims', 'all']):
+            logger.debug("Importing data into GenLIMS Database: {}".
+                format(DB.name))
+            bripipetools.dbification.ImportManager(
+                path=wb,
+                db=DB,
+                run_opts = {"sexmodel":sexmodel, 
+                            "sexcutoff":sexcutoff,
+                            "workflow_dir": workflow_dir}
+            ).run()
+            logger.info("Workflow batch import for '{}' complete."
+                        .format(os.path.basename(wb)))
+                        
+        if (database in ['researchdb', 'all']):
+            logger.debug("Importing data into Research Database: {}".
+                format(RB.name))
+            importer = bripipetools.dbification.ImportManager(
+                path=path,
+                db=RB,
+                run_opts=None
+            )
+            importer.run(collections='researchdb')
+            logger.info("Workflow batch import for '{}' complete."
+                        .format(os.path.basename(wb)))
 
     processed_projects = list(get_processed_projects(path))
     logger.debug("found the following processed projects: {}"
