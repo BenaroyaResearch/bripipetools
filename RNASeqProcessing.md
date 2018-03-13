@@ -61,6 +61,8 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ Wrap up the processing, stitching together files, inserting data into tg3 with:
 		+ `% bripipetools wrapup /mnt/genomics/Illumina/{FlowcellID}/`
 	+ Watch for missing files in the output of wrapup - select no, if there are missing files, and go back to galaxy and re-transfer if necessary, or recreate from above.
+	+ If a run with SNP data, you can perform kinship analysis to identify potential sample swaps:
+		+ `% scripts/calculate_kinship.sh -d /mnt/genomics/Illumina/{FlowcellID}/`
 	+ Finally, create the gene metrics plots:
 		+ `% while read path; do python scripts/plot_gene_coverage.py $path/; done < <(find /mnt/genomics/Illumina/{FlowcellID} -name "metrics" -maxdepth 2)`
 
