@@ -32,7 +32,7 @@ class BatchParameterizer(object):
         for processing current set of samples.
     """
     def __init__(self, sample_paths, parameters, endpoint, target_dir,
-                 build='GRCh38', stranded=False):
+                 build='GRCh38.77', stranded=False):
         logger.debug("creating `BatchParametizer` instance ")
         self.sample_paths = sample_paths
         self.parameters = parameters
@@ -115,7 +115,7 @@ class BatchParameterizer(object):
                 'gtf': 'GRCm38/Mus_musculus.GRCm38.91.gtf',
                 'refflat': 'GRCm38/Mus_musculus.GRCm38.91.refflat.txt',
                 'ribosomal_intervals':
-                    ('GRCm38/MMus_musculus.GRCm38.91'
+                    ('GRCm38/Mus_musculus.GRCm38.91'
                      '.ribosomalIntervalsWheader.txt'),
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },

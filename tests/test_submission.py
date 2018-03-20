@@ -364,7 +364,7 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = '{}__optimized_workflow_1_GRCh38_unstrand'.format(
+        mock_name = '{}__optimized_workflow_1_GRCh38.77_unstrand'.format(
             mock_date
         )
 
@@ -388,7 +388,7 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = '{}_{}_{}_optimized_workflow_1_GRCh38_unstrand'.format(
+        mock_name = '{}_{}_{}_optimized_workflow_1_GRCh38.77_unstrand'.format(
                 mock_date, mock_grouptag, '_'.join(mock_subgrouptags)
         )
 
@@ -838,7 +838,7 @@ class TestFlowcellSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
@@ -898,7 +898,7 @@ class TestFlowcellSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
@@ -933,7 +933,7 @@ class TestFlowcellSubmissionBuilder:
         mock_paths = [os.path.join(
             str(mock_path),
             'globus_batch_submission',
-            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38_unstrand.txt'.format(
+            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38.77_unstrand.txt'.format(
                 mock_date
             )
         )]
@@ -1005,7 +1005,7 @@ class TestSampleSubmissionBuilder:
                              for w in mock_workflows]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         mock_samples = ['lib1111-11111111', 'lib2222-22222222']
         mock_paths = []
@@ -1039,7 +1039,7 @@ class TestSampleSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         mock_samples = ['lib1111-11111111', 'lib2222-22222222']
         mock_paths = []
@@ -1068,7 +1068,7 @@ class TestSampleSubmissionBuilder:
         mock_date = datetime.date.today().strftime("%y%m%d")
         mock_batchpaths = [os.path.join(
             str(tmpdir),
-            '{}__optimized_workflow1_GRCh38_unstrand.txt'.format(mock_date)
+            '{}__optimized_workflow1_GRCh38.77_unstrand.txt'.format(mock_date)
         )]
 
         assert (test_batchpaths == mock_batchpaths)

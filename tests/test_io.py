@@ -672,7 +672,14 @@ class TestWorkflowFile:
     def test_parse(self, tmpdir):
         # GIVEN a file, where data is reported in a JSON-like
         # map of key-value pairs
-        testcontents = '{"field": "value"}'
+        testname = "wkflow_name"
+        testtoolname = "globus_tool"
+        testversion = "1.0.0"
+        testcontents = ('{"name": "' + testname + '",' +
+                        '"steps":{' +
+                        '"0":{' +
+                        '"tool_id": "' + testtoolname + '",' +
+                        '"tool_version": "' + testversion + '"}}}')
         testpath = mockstringfile(testcontents, tmpdir)
 
         # AND an io class object is created for that file
@@ -684,6 +691,11 @@ class TestWorkflowFile:
         # THEN the contents should be stored as a dictionary in the
         # raw field of the file object's data attribute
         assert len(testdata)
+        
+        # AND workflow name and tool information should be stored as dicts in
+        # the name and tools fields of the file object's data attribute
+        assert (testdata['name'] == testname and
+                testdata['tools'][testtoolname] == testversion)
 
 
 class TestWorkflowBatchFile:

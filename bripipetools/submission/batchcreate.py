@@ -56,7 +56,7 @@ class BatchCreator(object):
     """
     def __init__(self, paths, workflow_template, endpoint, base_dir,
                  submit_dir=None, group_tag=None, subgroup_tags=None,
-                 sort=False, num_samples=None, build='GRCh38',
+                 sort=False, num_samples=None, build='GRCh38.77',
                  stranded=False):
         logger.debug("creating `BatchCreator` instance")
         self.paths = paths

@@ -94,13 +94,18 @@ class SampleSubmissionBuilder(object):
             # New dir structure:
             # Project Folder -> FASTQ Folder -> Lib Folder -> fastq.gz file(s)
             for i in range(0, len(paths)):
-                subdir = os.listdir(paths[i])[0]
-                logger.debug("Subdirectory of {} identified as {}"
-                             .format(paths[i], subdir))
-                if (not re.search('lib[0-9]+', subdir)):
-                    logger.debug("Found new BaseSpace format. Moving from {} to {}"
+                # check if given a path to sample
+                currpath = os.path.basename(os.path.normpath(paths[i]))
+                logger.debug("Looking at directory {}".format(currpath))
+                if (not re.search('lib[0-9]+', currpath)):
+                    # check if old or new format
+                    subdir = os.listdir(paths[i])[0]
+                    logger.debug("Subdirectory of {} identified as {}"
                                  .format(paths[i], subdir))
-                    paths[i] = os.path.join(paths[i], subdir)
+                    if (not re.search('lib[0-9]+', subdir)):
+                        logger.debug("Found new BaseSpace format. Moving from {} to {}"
+                                     .format(paths[i], subdir))
+                        paths[i] = os.path.join(paths[i], subdir)
                 
             creator = BatchCreator(
                 paths=paths,
