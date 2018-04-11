@@ -87,7 +87,7 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
             bripipetools.postprocessing.OutputStitcher(path).write_table()
         )
     except OSError:
-        logger.warn(("no validation files found"
+        logger.warn(("no validation files found "
                      "for project {}; skiproject_pathing")
                     .format(project_path))
     logger.info("Combined output files generated for '{}' with option '{}'"
@@ -452,7 +452,9 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             importer = bripipetools.dbification.ImportManager(
                 path=path,
                 db=RB,
-                run_opts=None
+                run_opts = {"sexmodel":sexmodel, 
+                            "sexcutoff":sexcutoff,
+                            "workflow_dir": workflow_dir}
             )
             importer.run(collections='researchdb')
             logger.info("Workflow batch import for '{}' complete."

@@ -131,8 +131,8 @@ class WorkflowBatchAnnotator(object):
         Retrieve reported sex for sample and compare to predicted sex
         of processed library.
         """
-        ref = util.matchdefault('(grch38|ncbim37)',
-                                self.workflowbatch_data['workflow_name'])
+        ref = util.matchdefault('(grch38|ncbim37|GRCh38|GRCm38)',
+                                self.workflowbatch_data['workflow_name']).lower()
         if ref != 'grch38':
             return processedlibrary
 
