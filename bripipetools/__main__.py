@@ -394,8 +394,19 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
     logger.info("Flowcell run import complete.")
 
     workflow_batches = list(get_workflow_batches(path, all_workflows))
-    logger.debug("found the following workflow batches: {}"
-                 .format(workflow_batches))
+    # If non-optimized workflows were used, the all-workflows flag is 
+    # necessary to get, eg: sexcheck information.
+    if len(workflow_batches) == 0:
+        proceed = raw_input("No workflow batches detected.\n"
+                            "Did you mean to use the '--all-workflows' tag?\n"
+                            "Further processing may not include all data.\n"
+                            "Continue processing? (y/[n]): ")
+        if proceed != 'y':
+            logger.info("Exiting program.")
+            sys.exit(1)
+    else:
+        logger.debug("found the following workflow batches: {}"
+                     .format(workflow_batches))
 
     # check outputs of workflow batches
     genomics_root = bripipetools.util.matchdefault('.*(?=genomics)', path)
