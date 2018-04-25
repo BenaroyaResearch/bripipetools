@@ -23,8 +23,9 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ `% source activate bripipetools` (activate is from anaconda2)
 	+ Create a batch submission file while in the bripipetools environment:
 	+ `(bripipetools) bash-3.2$ bripipetools submit --workflow-dir /Volumes/genomics/galaxy_workflows/ /mnt/genomics/Illumina/{FlowcellID}` You may need to use the `--all-workflows` option if you want to use a non standard workflow.
-	+ Select projects that have used the same technology, strandedness, and reference genome (or  whatever combination you'd like)  The result is a workflow batch file.
+	+ Select projects that have used the same technology, strandedness, and reference genome (or whatever combination you'd like)  The result is a workflow batch file.
 	+ Don't worry if the path doesn't look right, use the path that looks like /mnt/genomics..., this is how it will appear on the machine that Globus Genomics uses for access (srvgridftp01)
+	+ Note that for human projects, bripipetools will try to determine which libraries come from the same donor, to facilitate SNP-based confirmation of sample labels. If the related libraries can not be automatically determined, you will be prompted to input this information manually. If this information is unknown, you can either skip this step by pressing 'enter' when prompted, or assign all libraries the same donor id. The SNP analysis can then be used to determine which libraries were likely to originate from the same donors.s
 
 3. Prepare Globus transfer endpoint
 	+ **Prerequisite**: Globus ID account
