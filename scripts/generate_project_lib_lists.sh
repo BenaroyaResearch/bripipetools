@@ -62,8 +62,8 @@ while getopts ":plad:n:" opt; do
 done
 
 # set up file names for output
-proj_file=$(date +'%y%m%d')-project_list.txt
-lib_file=$(date +'%y%m%d')-lib_list.txt
+proj_file=project_list_$(date +'%y%m%d').txt
+lib_file=lib_list_$(date +'%y%m%d').txt
 
 # get list of all projects
 if [ "$find_projects" = true ]
@@ -82,19 +82,28 @@ then
   cd $workingdir
   libpaths=$(find "`pwd`" -maxdepth $searchdepth -regex ".*\.fastq.gz$" | grep -E lib[0-9]+)
   
-  printf "libId\tflowcellId\tprojectId\tprojectFolder\tfastqPath\n" > $lib_file
+  printf "libID\tlibFolder\tflowcellFolder\tprojectFolder\tserverLocation\tfilePath\n" > $lib_file
   for libpath in $libpaths
   do
     ### grep -Eo will return all matches; use awk instead
     libid=$(echo "$libpath" | \
       awk 'match($0, /lib[0-9]+/){ print substr($0, RSTART, RLENGTH) }')
-    fcid=$(echo "$libpath" | \
-      awk 'match($0, /[a-zA-Z0-9]+X[X|Y|2]/){ print substr($0, RSTART, RLENGTH) }')
+    libfolder=$(echo "$libpath" | \
+      awk 'match($0, /\/[^\/]*lib[0-9]+[^\/]*\//){ print substr($0, RSTART, RLENGTH) }')
+    fcfolder=$(echo "$libpath" | \
+      awk 'match($0, /\/[^\/]*[a-zA-Z0-9]+X[X|Y|2][^\/]*\//){ print substr($0, RSTART, RLENGTH) }')
     projfolder=$(echo "$libpath" |\
-      awk 'match($0, /\/.*P[0-9]+.*\//){ print substr($0, RSTART, RLENGTH) }')
+      awk 'match($0, /\/[^\/]*P[0-9]+[^\/]*\//){ print substr($0, RSTART, RLENGTH) }')
     projid=$(echo "$libpath" |\
       awk 'match($0, /P[0-9]+[a-zA-Z0-9-]*/){ print substr($0, RSTART, RLENGTH) }')
+    serverloc=$(echo "$libpath" |\
+      awk 'match($0, '$fcfolder'){ print substr($0, 0, RSTART-1) }')
+    filepath=$(echo "$libpath" | xargs dirname)
     
-    printf "%s\t%s\t%s\t%s\t%s\n" $libid $fcid $projid $projfolder $libpath
+    printf "%s\t%s\t%s\t%s\t%s\t%s\n" $libid $libfolder $fcfolder $projfolder $serverloc $filepath
   done >> $lib_file
+  
+  # clean up duplicates. This is an ugly fix...
+  awk '!seen[$0]++' $lib_file > tmp.txt
+  mv tmp.txt $lib_file
 fi
