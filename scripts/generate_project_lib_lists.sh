@@ -103,7 +103,9 @@ then
     printf "%s\t%s\t%s\t%s\t%s\t%s\n" $libid $libfolder $fcfolder $projfolder $serverloc $filepath
   done >> $lib_file
   
-  # clean up duplicates. This is an ugly fix...
+  # clean up duplicates and globus-generated FASTQs. This is an ugly fix...
   awk '!seen[$0]++' $lib_file > tmp.txt
+  mv tmp.txt $lib_file
+  cat $lib_file | awk '!/inputFastqs/' > tmp.txt
   mv tmp.txt $lib_file
 fi
