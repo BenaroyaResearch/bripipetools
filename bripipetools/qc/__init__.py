@@ -12,3 +12,4 @@ other output types generated through processing.
 from .sexpredict import SexPredictor
 from .sexverify import SexVerifier
 from .sexcheck import SexChecker
+from .snpcheck import SnpChecker
