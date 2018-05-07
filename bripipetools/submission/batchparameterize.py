@@ -335,7 +335,8 @@ class BatchParameterizer(object):
                            'clones': 'clones',
                            'snps': 'snps',
                            'peaks': 'peaks',
-                           'log': 'logs'}
+                           'log': 'logs',
+                           'unmapped': 'unmapped'}
 
         logger.debug("building output path of parameter '{}' for sample '{}'"
                      .format(parameter['tag'], sample_name))
