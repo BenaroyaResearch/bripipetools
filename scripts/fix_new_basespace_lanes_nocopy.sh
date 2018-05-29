@@ -24,8 +24,8 @@ do
         fromPath=$dataFolder/$projFolder/$fastqFolder/$currFolder
         toPath=$dataFolder/$projFolder/$fastqFolder/$firstFolder
         echo "Found files" `ls $fromPath`
-        echo "Copying files from" $currFolder "to" $firstFolder
-        cp $fromPath/* $toPath
+        echo "Moving files from" $currFolder "to" $firstFolder
+        mv $fromPath/* $toPath
         
         # Change the name of the old folder to "dup****" rather than "lib****"
         renamedFolder=`echo $currFolder | sed s/lib/dup/g`
