@@ -355,7 +355,7 @@ Here's an example call:::
 
     bripipetools submit \
         --workflow-dir /mnt/genomics/galaxy_workflows \
-        --endpoint jeddy#srvgridftp01
+        --endpoint benaroyaresearch#BRIGridFTP
         /mnt/genomics/Illumina/150615_D00565_0087_AC6VG0ANX
 
 
@@ -374,7 +374,7 @@ Submitting batches in Globus Genomics
 Authenticating Globus endpoint
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-First, sign in to Globus Online and navigate to the **Manage Data** page. In the field for "Endpoint", select ``jeddy#srvgridftp01``, after which you'll be prompted to enter your login credentials for the ``srvgridftp01`` BRI server. Make sure to expand the "advanced" options and set the "Credential Lifetime" to 10000 hours (that way, you won't need to reauthenticate for about a week).
+First, sign in to Globus Online and navigate to the **Manage Data** page. In the field for "Endpoint", select ``benaroyaresearch#BRIGridFTP``, after which you'll be prompted to enter your login credentials for the ``srvgridftp01`` BRI server. Make sure to expand the "advanced" options and set the "Credential Lifetime" to 10000 hours (that way, you won't need to reauthenticate for about a week).
 
 
 Uploading batch submit files

@@ -117,7 +117,7 @@ def main(verbosity):
 
 
 @main.command()
-@click.option('--endpoint', default='jeddy#srvgridftp01',
+@click.option('--endpoint', default='benaroyaresearch#BRIGridFTP',
               help=("Globus Online endpoint where input data is stored "
                     "and outputs will be saved"))
 @click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
