@@ -29,7 +29,7 @@ Processing fastq to counts using Globus Genomics Galaxy
 3. Prepare Globus transfer endpoint
 	+ **Prerequisite**: Globus ID account
 	+ Authenticate at [Globus](https://www.globus.org/app/transfer) with your globusid credentials
-	+ Activate jeddy#srvgridftp01, with your BRI credentials.  Use Advanced setting: 10,000hrs (will get you the 7 day max of authentication)
+	+ Activate benaroyaresearch#BRIGridFTP, with your BRI credentials.  Use Advanced setting: 10,000hrs (will get you the 7 day max of authentication)
 
 4. Upload workflow batch file to Globus Genomics (from step 2)
 	+ Go to the [BRI instance of Globus Genomics](https://benaroyaresearch.globusgenomics.org/)
