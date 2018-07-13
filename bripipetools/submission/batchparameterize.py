@@ -26,7 +26,7 @@ class BatchParameterizer(object):
         on output type.
     :type endpoint: str
     :param endpoint: Globus endpoint where input files are accessed
-        and output files will be sent (e.g., 'jeddy#srvgridftp01').
+        and output files will be sent (e.g., 'benaroyaresearch#BRIGridFTP').
     :type build: str
     :param build: ID string of reference genome build to be used
         for processing current set of samples.
