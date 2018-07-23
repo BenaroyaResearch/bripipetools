@@ -340,7 +340,7 @@ def main(argv):
                         help=("specify the Globus Online endpoint "
                               "where input data is stored / results are "
                               "to be saved - e.g., "
-                              "jeddy#srvgridftp01"))
+                              "benaroyaresearch#BRIGridFTP"))
     parser.add_argument('-f', '--flowcell_dir',
                         required=True,
                         default=None,
