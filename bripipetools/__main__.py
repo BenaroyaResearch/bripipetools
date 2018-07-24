@@ -437,6 +437,18 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             sys.exit(1)
     else:
         logger.info("No problem outputs found with any workflow batches.")
+        
+    # Push info into ResDB                        
+    if (database in ['researchdb', 'all']):
+        logger.debug("Importing data into Research Database: {}".
+            format(RB.name))
+        bripipetools.dbification.ImportManager(
+            path=path,
+            db=RB,
+            run_opts = {"sexmodel":sexmodel, 
+                        "sexcutoff":sexcutoff}
+        ).run(collections='researchdb')
+        logger.info("Research Database import complete.")
 
     # import workflow batch details and data for processed libraries
     for wb in workflow_batches:
@@ -456,20 +468,20 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             ).run()
             logger.info("Workflow batch import for '{}' complete."
                         .format(os.path.basename(wb)))
-                        
-        if (database in ['researchdb', 'all']):
-            logger.debug("Importing data into Research Database: {}".
-                format(RB.name))
-            importer = bripipetools.dbification.ImportManager(
-                path=path,
-                db=RB,
-                run_opts = {"sexmodel":sexmodel, 
-                            "sexcutoff":sexcutoff,
-                            "workflow_dir": workflow_dir}
-            )
-            importer.run(collections='researchdb')
-            logger.info("Workflow batch import for '{}' complete."
-                        .format(os.path.basename(wb)))
+        #                 
+        # if (database in ['researchdb', 'all']):
+        #     logger.debug("Importing data into Research Database: {}".
+        #         format(RB.name))
+        #     importer = bripipetools.dbification.ImportManager(
+        #         path=path,
+        #         db=RB,
+        #         run_opts = {"sexmodel":sexmodel, 
+        #                     "sexcutoff":sexcutoff,
+        #                     "workflow_dir": workflow_dir}
+        #     )
+        #     importer.run(collections='researchdb')
+        #     logger.info("Workflow batch import for '{}' complete."
+        #                 .format(os.path.basename(wb)))
 
     processed_projects = list(get_processed_projects(path))
     logger.debug("found the following processed projects: {}"
