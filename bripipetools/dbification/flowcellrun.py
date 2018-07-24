@@ -1,11 +1,11 @@
 """
-Class for importing data from a sequencing run into GenLIMS as new objects.
+Class for importing data from a sequencing run into GenLIMS and the 
+Research DB as new objects.
 """
 import logging
 
 from .. import parsing
-from .. import genlims
-from .. import researchdb
+from .. import database
 from .. import annotation
 
 logger = logging.getLogger(__name__)
@@ -89,10 +89,7 @@ class FlowcellRunImporter(object):
         flowcellrun = self._collect_flowcellrun()
         logger.debug("inserting flowcell run {} into {}"
                      .format(flowcellrun, self.db.name))
-        if collection == 'researchdb':
-            researchdb.put_runs(self.db, flowcellrun.to_json())
-        else:
-            genlims.put_runs(self.db, flowcellrun.to_json())
+        database.put_runs(self.db, flowcellrun.to_json())
 
     def _insert_sequencedlibraries(self, collection='all'):
         """
@@ -101,10 +98,7 @@ class FlowcellRunImporter(object):
         sequencedlibraries = self._collect_sequencedlibraries()
         for sl in sequencedlibraries:
             logger.debug("inserting sequenced library {}".format(sl))
-            if collection == 'researchdb':
-                researchdb.put_samples(self.db, sl.to_json())
-            else:
-                genlims.put_samples(self.db, sl.to_json())
+            database.put_samples(self.db, sl.to_json())
 
     def _insert_librarygenecounts(self, collection='researchdb'):
         """
@@ -113,10 +107,7 @@ class FlowcellRunImporter(object):
         librarygenecounts = self._collect_librarygenecounts()
         for lgc in librarygenecounts:
             logger.debug("inserting library gene counts '{}'".format(lgc))
-            if collection == 'researchdb':
-                researchdb.put_counts(self.db, lgc.to_json())
-            else:
-                genlims.put_counts(self.db, lgc.to_json())
+            database.put_counts(self.db, lgc.to_json())
 
     def _insert_librarymetrics(self, collection='researchdb'):
         """
@@ -125,10 +116,7 @@ class FlowcellRunImporter(object):
         librarymetrics = self._collect_librarymetrics()
         for lgc in librarymetrics:
             logger.debug("inserting library metrics '{}'".format(lgc))
-            if collection == 'researchdb':
-                researchdb.put_metrics(self.db, lgc.to_json())
-            else:
-                genlims.put_metrics(self.db, lgc.to_json())
+            database.put_metrics(self.db, lgc.to_json())
 
     def insert(self, collection='all'):
         """

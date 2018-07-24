@@ -4,7 +4,7 @@ Class for importing data from a processing batch into GenLIMS as new objects.
 import logging
 
 from .. import parsing
-from .. import genlims
+from .. import database
 from .. import annotation
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class WorkflowBatchImporter(object):
         """
         workflowbatch = self._collect_workflowbatch()
         logger.debug("inserting workflow batch '{}'".format(workflowbatch))
-        genlims.put_workflowbatches(self.db, workflowbatch.to_json())
+        database.put_workflowbatches(self.db, workflowbatch.to_json())
 
     def _insert_processedlibraries(self):
         """
@@ -68,7 +68,7 @@ class WorkflowBatchImporter(object):
         processedlibraries = self._collect_processedlibraries()
         for pl in processedlibraries:
             logger.debug("inserting processed library '{}'".format(pl))
-            genlims.put_samples(self.db, pl.to_json())
+            database.put_samples(self.db, pl.to_json())
 
     def insert(self, collection='all'):
         """

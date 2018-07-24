@@ -10,7 +10,7 @@ import datetime
 from .. import util
 from .. import parsing
 from .. import io
-from .. import genlims
+from .. import database
 from .. import qc
 from .. import model as docs
 from . import ProcessedLibraryAnnotator
@@ -63,8 +63,8 @@ class WorkflowBatchAnnotator(object):
             logger.debug("getting `GalaxyWorkflowBatch` from GenLIMS; "
                          "searching for record with batch file '{}'"
                          .format(workflowbatch_file))
-            return genlims.map_to_object(
-                genlims.get_workflowbatches(
+            return database.map_to_object(
+                database.get_workflowbatches(
                     self.db,
                     {'workflowbatchFile': workflowbatch_file}
                 )[0]
@@ -77,7 +77,7 @@ class WorkflowBatchAnnotator(object):
                 self.workflowbatch_data['batch_name']
             )
 
-            workflowbatch_id = genlims.create_workflowbatch_id(
+            workflowbatch_id = database.create_workflowbatch_id(
                 db=self.db,
                 prefix='globusgalaxy',
                 date=batch_items['date']
@@ -96,13 +96,15 @@ class WorkflowBatchAnnotator(object):
         batch_items = parsing.parse_batch_name(
             self.workflowbatch_data['batch_name']
         )
+        run_id = parsing.parse_run_id_for_batch(self.workflowbatch_file)
 
         update_fields = {
             'workflow_id': self.workflowbatch_data['workflow_name'],
             'date': batch_items['date'],
             'projects': batch_items['projects'],
             'flowcell_id': batch_items['flowcell_id'],
-            'tools': self.workflow_data['tools']
+            'tools': self.workflow_data['tools'],
+            'run_id': run_id
         }
         self.workflowbatch.is_mapped = False
         self.workflowbatch.update_attrs(update_fields, force=True)

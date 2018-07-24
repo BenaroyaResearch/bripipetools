@@ -7,7 +7,7 @@ import os
 import re
 
 from .. import parsing
-from .. import genlims
+from .. import database
 from .. import model as docs
 from . import SequencedLibraryAnnotator
 from . import LibraryGeneCountAnnotator
@@ -38,8 +38,8 @@ class FlowcellRunAnnotator(object):
         logger.debug("initializing `FlowcellRun` instance")
         try:
             logger.debug("getting `FlowcellRun` from GenLIMS")
-            return genlims.map_to_object(
-                genlims.get_runs(self.db, {'_id': self.run_id})[0])
+            return database.map_to_object(
+                database.get_runs(self.db, {'_id': self.run_id})[0])
         except IndexError:
             logger.debug("creating new `FlowcellRun` object", exc_info=True)
             return docs.FlowcellRun(_id=self.run_id)

@@ -66,25 +66,25 @@ Package details
 
 -----
 
-``genlims`` package
+``database`` package
 -------------------
 
-.. automodule:: bripipetools.genlims
+.. automodule:: bripipetools.database
 
 ``connection`` module
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: bripipetools.genlims.connection
+.. automodule:: bripipetools.database.connection
 
 ``operations`` module
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: bripipetools.genlims.operations
+.. automodule:: bripipetools.database.operations
 
 ``mapping`` module
 ^^^^^^^^^^^^^^^^^^
 
-.. automodule:: bripipetools.genlims.mapping
+.. automodule:: bripipetools.database.mapping
 
 -----
 

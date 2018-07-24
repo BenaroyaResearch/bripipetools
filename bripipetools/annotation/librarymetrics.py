@@ -6,8 +6,7 @@ import os
 import re
 
 from .. import parsing
-from .. import genlims
-from .. import researchdb
+from .. import database
 from .. import postprocessing
 from .. import model as docs
 
@@ -37,8 +36,8 @@ class LibraryMetricsAnnotator(object):
         logger.debug("initializing `Metrics` instance")
         try:
             logger.debug("getting `Metrics` from ResearchDatabase")
-            return researchdb.map_to_object(
-                researchdb.get_metrics(self.db, {'_id': self.seqlib_id})[0])
+            return database.map_to_object(
+                database.get_metrics(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
             logger.debug("creating new `Metrics` object")
             return docs.Metrics(_id=self.seqlib_id)
