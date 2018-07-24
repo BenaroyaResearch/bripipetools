@@ -64,7 +64,5 @@ class LibraryGeneCountAnnotator(object):
         Return sequenced library object with updated fields.
         """
         self._update_librarycounts()
-        logger.debug("returning sequenced library object info: {}".format(
-            self.librarycounts.__dict__)
-        )
+        logger.debug("returning sequenced library object info")
         return self.librarycounts
