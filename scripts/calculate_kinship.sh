@@ -9,17 +9,23 @@
 # values (which should be high) to the inter-subject kinship values, 
 # (which should be low), potential sample swaps can be identified and corrected.
 # 
+# Note that in the absence of the `-a` option, it is assumed that the 'snps'
+# directory for each project contains one .vcf file per library, which will be
+# used to generate the "all-libs.lst" family file for kinship analysis.
+# 
 # Usage: 
 # ./calculate_kinship.sh -d <flowcell directory> [-s] [-m]
 # 
 # -d <flowcell directory>: the location of a project containing a snps folder
 #
 # -m turns OFF MDS value calculation by KING
+# -a turns OFF auto-generation of an all-libs_family.lst file
 #
 ################################################################################
-usage="Usage: $0 -d <flowcell directory> [-m]"
+usage="Usage: $0 -d <flowcell directory> [-m] [-a]"
 
 kingflags="--kinship --duplicate --mds"
+buildfamfile=true
 # get user-set params
 while getopts ":d:sm" opt; do
   case $opt in
@@ -27,7 +33,10 @@ while getopts ":d:sm" opt; do
       workingdir=$OPTARG
       ;;
     m)
-      kingflags="--kinship"
+      kingflags="--kinship --duplicate"
+      ;;
+    a)
+      buildfamfile=false
       ;;
     \? )
       echo $usage
@@ -53,6 +62,13 @@ snpdirs=$(find "`pwd`" -name snps)
 for dir in $snpdirs
 do
   cd $dir
+  
+  # default mode: build an "all-libs.lst" family file
+  if [ "$buildfamfile" = true ]
+  then
+    ls | grep -E ".vcf$" | sed 's/.vcf$//' > all-libs.lst
+  fi
+
   
   # each .lst file should indicate a subject, containing a list of libraries 
   # that are labeled as originating from that subject
@@ -105,8 +121,3 @@ do
   done
   
 done
-
-
-
-
-

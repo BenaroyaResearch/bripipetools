@@ -160,5 +160,3 @@ class SnpChecker(object):
     def check_snps(self):
         self._build_lib_list()
         self._write_family_files()
-        
-        quit()
