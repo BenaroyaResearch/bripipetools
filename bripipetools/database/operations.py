@@ -89,41 +89,48 @@ def get_runs(db, query):
     """
     return db, query
 
-
 @find_objects('workflowbatches')
 def get_workflowbatches(db, query):
     """
-    Return list of documents from 'workflow batches' collection based
+    Return list of documents from 'workflowbatches' collection based
+    on query.
+    """
+    return db, query
+
+@find_objects('genomicsWorkflowbatches')
+def get_genomicsWorkflowbatches(db, query):
+    """
+    Return list of documents from 'genomicsWorkflowbatches' collection based
     on query.
     """
     return db, query
     
 @find_objects('genomicsSamples')
-def get_samples(db, query):
+def get_genomicsSamples(db, query):
     """
-    Return list of documents from 'samples' collection based on query.
+    Return list of documents from 'genomicsSamples' collection based on query.
     """
     return db, query
 
 
 @find_objects('genomicsCounts')
-def get_counts(db, query):
+def get_genomicsCounts(db, query):
     """
-    Return list of documents from 'counts' collection based on query.
+    Return list of documents from 'genomicsCounts' collection based on query.
     """
     return db, query
 
 @find_objects('genomicsMetrics')
-def get_metrics(db, query):
+def get_genomicsMetrics(db, query):
     """
-    Return list of documents from 'metrics' collection based on query.
+    Return list of documents from 'genomicsMetrics' collection based on query.
     """
     return db, query
 
 @find_objects('genomicsRuns')
-def get_runs(db, query):
+def get_genomicsRuns(db, query):
     """
-    Return list of documents from 'runs' collection based on query.
+    Return list of documents from 'genomicsRuns' collection based on query.
     """
     return db, query
     
@@ -158,41 +165,47 @@ def put_runs(db, runs):
     """
     return db, runs
 
-
 @insert_objects('workflowbatches')
 def put_workflowbatches(db, workflowbatches):
     """
     Insert each document in list into 'workflowbatches' collection.
     """
     return db, workflowbatches
+
+@insert_objects('genomicsWorkflowbatches')
+def put_genomicsWorkflowbatches(db, workflowbatches):
+    """
+    Insert each document in list into 'genomicsWorkflowbatches' collection.
+    """
+    return db, workflowbatches
     
     
 @insert_objects('genomicsSamples')
-def put_samples(db, samples):
+def put_genomicsSamples(db, samples):
     """
-    Insert each document in list into 'samples' collection.
+    Insert each document in list into 'genomicsSamples' collection.
     """
     return db, samples
 
 
 @insert_objects('genomicsCounts')
-def put_counts(db, counts):
+def put_genomicsCounts(db, counts):
     """
-    Insert each document in list into 'counts' collection.
+    Insert each document in list into 'genomicsCounts' collection.
     """
     return db, counts
 
 @insert_objects('genomicsMetrics')
-def put_metrics(db, metrics):
+def put_genomicsMetrics(db, metrics):
     """
-    Insert each document in list into 'metrics' collection.
+    Insert each document in list into 'genomicsMetrics' collection.
     """
     return db, metrics
 
 @insert_objects('genomicsRuns')
-def put_runs(db, runs):
+def put_genomicsRuns(db, runs):
     """
-    Insert each document in list into 'runs' collection.
+    Insert each document in list into 'genomicsRuns' collection.
     """
     return db, runs
 

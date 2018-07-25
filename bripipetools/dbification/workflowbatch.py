@@ -1,5 +1,6 @@
 """
-Class for importing data from a processing batch into GenLIMS as new objects.
+Class for importing data from a processing batch into databases as new objects.
+Supports both research database ("genomics...") and GenLIMS collections.
 """
 import logging
 
@@ -55,30 +56,55 @@ class WorkflowBatchImporter(object):
 
     def _insert_workflowbatch(self):
         """
-        Convert WorkflowBatch object and insert into GenLIMS database.
+        Convert WorkflowBatch object and insert into database.
         """
         workflowbatch = self._collect_workflowbatch()
         logger.debug("inserting workflow batch '{}'".format(workflowbatch))
         database.put_workflowbatches(self.db, workflowbatch.to_json())
+        
+    def _insert_genomicsWorkflowbatch(self):
+        """
+        Convert WorkflowBatch object and insert into database.
+        """
+        workflowbatch = self._collect_workflowbatch()
+        logger.debug("inserting workflow batch '{}'".format(workflowbatch))
+        database.put_genomicsWorkflowbatches(self.db, workflowbatch.to_json())
 
     def _insert_processedlibraries(self):
         """
-        Convert ProcessedLibrary objects and insert into GenLIMS database.
+        Convert ProcessedLibrary objects and insert into database.
         """
         processedlibraries = self._collect_processedlibraries()
         for pl in processedlibraries:
             logger.debug("inserting processed library '{}'".format(pl))
             database.put_samples(self.db, pl.to_json())
+            
+    def _insert_genomicsProcessedlibraries(self):
+        """
+        Convert ProcessedLibrary objects and insert into database.
+        """
+        processedlibraries = self._collect_processedlibraries()
+        for pl in processedlibraries:
+            logger.debug("inserting processed library '{}'".format(pl))
+            database.put_genomicsSamples(self.db, pl.to_json())
 
     def insert(self, collection='all'):
         """
-        Insert documents into GenLIMS database.
+        Insert documents into databases. Note that ResearchDB collections
+        are prepended by "genomics" to indicate the data origin.
         """
-        if collection in ['all', 'samples']:
+        # Data for GenLIMS
+        if collection in ['all', 'samples', 'genlims']:
             logger.info(("Inserting processed libraries for workflow batch "
                          "'{}' into '{}'").format(self.path, self.db.name))
             self._insert_processedlibraries()
-        if collection in ['all', 'workflowbatches']:
+        
+        # Data for ResearchDB
+        if collection in ['all', 'genomicsSamples', 'researchdb']:
+            logger.info(("Inserting processed libraries for workflow batch "
+                         "'{}' into '{}'").format(self.path, self.db.name))
+            self._insert_genomicsProcessedlibraries()
+        if collection in ['all', 'genomicsWorkflowbatches', 'researchdb']:
             logger.info("Inserting workflow batch '{}' into '{}'"
                         .format(self.path, self.db.name))
-            self._insert_workflowbatch()
+            self._insert_genomicsWorkflowbatch()

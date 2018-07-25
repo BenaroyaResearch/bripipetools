@@ -47,7 +47,7 @@ class ImportManager(object):
         self.importer = importer(path=self.path, db=self.db, 
                                  run_opts=self.run_opts)
 
-    def run(self, collections='all'):
+    def run(self, collections='genlims'):
         """
         Execute the insert method of the selected importer.
         """

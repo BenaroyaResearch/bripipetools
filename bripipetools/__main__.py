@@ -392,7 +392,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             db=DB,
             run_opts = {"sexmodel":sexmodel, 
                     "sexcutoff":sexcutoff}
-        ).run(collections='all')
+        ).run(collections='genlims')
         logger.info("GenLIMS flowcell run import complete.")
     
     # Push data into ResDB                   
@@ -467,7 +467,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
                 run_opts = {"sexmodel":sexmodel, 
                             "sexcutoff":sexcutoff,
                             "workflow_dir": workflow_dir}
-            ).run()
+            ).run(collections='genlims')
             logger.info("GenLIMS workflow batch import for '{}' complete."
                         .format(os.path.basename(wb)))
         
@@ -480,7 +480,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
                 run_opts = {"sexmodel":sexmodel, 
                             "sexcutoff":sexcutoff,
                             "workflow_dir": workflow_dir}
-            ).run()
+            ).run(collections='researchdb')
             logger.info("ResDB workflow batch import for '{}' complete."
                         .format(os.path.basename(wb)))
 
