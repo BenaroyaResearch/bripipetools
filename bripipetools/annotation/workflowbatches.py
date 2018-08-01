@@ -149,22 +149,8 @@ class WorkflowBatchAnnotator(object):
             run_opts = self.run_opts
         )
         return sexchecker.update()
-        
-    def _check_snps(self):
-        """
-        Compare SNPs from related libraries (ie: libs from the same donor) 
-        in order to identify potentially mislabeled samples
-        """
-        
-        snpchecker = qc.SnpChecker(
-            workflowbatch_data = self.workflowbatch_data,
-            genomics_root = self.genomics_root,
-            db = self.db
-        ).check_snps()
 
     def _run_qc(self, processedlibrary):
-        # runs all QC that we want to perform
-        self._check_snps()
         return self._check_sex(processedlibrary)
 
     def get_processed_libraries(self, project=None, qc=False):
