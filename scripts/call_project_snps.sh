@@ -25,6 +25,6 @@ mkdir $projectdir/snps
 for infile in $(ls $projectdir/alignments/ | grep -E .bam$)
 do
   echo "Processing $infile"
-  sbatch -N 1 --exclusive -J $infile -o $projectdir/snp/${infile}_slurm.out ./call_lib_snps.sh $projectdir/alignments/$infile $projectdir/snps
+  sbatch -N 1 --exclusive -J $infile -o $projectdir/snps/${infile}_slurm.out ./call_lib_snps.sh $projectdir/alignments/$infile $projectdir/snps
 done
 
