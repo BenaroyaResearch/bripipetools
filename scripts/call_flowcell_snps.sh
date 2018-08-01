@@ -26,5 +26,5 @@ projects=`ls $fcdir | grep -E "Project_P[0-9]+"`
 for p in $projects
 do
   echo "Calling SNPs for project "$p
-  ./call_project_snps.sh <flowcell directory>
+  ./call_project_snps.sh $p
 done
