@@ -78,7 +78,7 @@ if [ "$flowcell" ]; then
   for currp in $projects
   do
     echo "Processing project $currp..."
-    queries=$(find $currp/unmapped -name *.fasta)
+    queries=$(find $currp/unmapped -name "*.fasta")
     for currq in $queries
     do
       run_blast_for_query $currq $db
@@ -88,7 +88,7 @@ if [ "$flowcell" ]; then
   
 elif [ "$project" ]; then
   echo "Processing project $project..."
-  queries=$(find $project/unmapped -name *.fasta)
+  queries=$(find $project/unmapped -name "*.fasta")
   for currq in $queries
   do
     run_blast_for_query $currq $db
