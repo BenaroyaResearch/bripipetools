@@ -16,7 +16,8 @@
 # Usage: 
 # ./calculate_kinship.sh -d <flowcell directory> [-s] [-m]
 # 
-# -d <flowcell directory>: the location of a project containing a snps folder
+# -d <flowcell directory>: the location of a flowcell with projects
+#                          containing a snps folder
 #
 # -m turns OFF MDS value calculation by KING
 # -a turns OFF auto-generation of an all-libs_family.lst file
@@ -27,7 +28,7 @@ usage="Usage: $0 -d <flowcell directory> [-m] [-a]"
 kingflags="--kinship --duplicate --mds"
 buildfamfile=true
 # get user-set params
-while getopts ":d:sm" opt; do
+while getopts ":d:am" opt; do
   case $opt in
     d)
       workingdir=$OPTARG
