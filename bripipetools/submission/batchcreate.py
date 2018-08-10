@@ -27,7 +27,7 @@ class BatchCreator(object):
         exported from Globus Genomics for API batch submission.
     :type endpoint: str
     :param endpoint: Globus endpoint where input files are accessed
-        and output files will be sent (e.g., 'jeddy#srvgridftp01').
+        and output files will be sent (e.g., 'benaroyaresearch#BRIGridFTP').
     :type base_dir: str
     :param base_dir: Path to folder where outputs will be stored;
         outputs will be grouped into one or more
@@ -56,7 +56,7 @@ class BatchCreator(object):
     """
     def __init__(self, paths, workflow_template, endpoint, base_dir,
                  submit_dir=None, group_tag=None, subgroup_tags=None,
-                 sort=False, num_samples=None, build='GRCh38',
+                 sort=False, num_samples=None, build='GRCh38.77',
                  stranded=False):
         logger.debug("creating `BatchCreator` instance")
         self.paths = paths

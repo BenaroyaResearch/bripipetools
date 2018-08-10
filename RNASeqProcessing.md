@@ -23,8 +23,9 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ `% source activate bripipetools` (activate is from anaconda2)
 	+ Create a batch submission file while in the bripipetools environment:
 	+ `(bripipetools) bash-3.2$ bripipetools submit --workflow-dir /Volumes/genomics/galaxy_workflows/ /mnt/genomics/Illumina/{FlowcellID}` You may need to use the `--all-workflows` option if you want to use a non standard workflow.
-	+ Select projects that have used the same technology, strandedness, and reference genome (or  whatever combination you'd like)  The result is a workflow batch file.
+	+ Select projects that have used the same technology, strandedness, and reference genome (or whatever combination you'd like)  The result is a workflow batch file.
 	+ Don't worry if the path doesn't look right, use the path that looks like /mnt/genomics..., this is how it will appear on the machine that Globus Genomics uses for access (srvgridftp01)
+	+ Note that for human projects, bripipetools will try to determine which libraries come from the same donor, to facilitate SNP-based confirmation of sample labels. If the related libraries can not be automatically determined, you will be prompted to input this information manually. If this information is unknown, you can either skip this step by pressing 'enter' when prompted, or assign all libraries the same donor id. The SNP analysis can then be used to determine which libraries were likely to originate from the same donors.s
 
 3. Prepare Globus transfer endpoint
 	+ **Prerequisite**: Globus ID account
@@ -61,6 +62,10 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ Wrap up the processing, stitching together files, inserting data into tg3 with:
 		+ `% bripipetools wrapup /mnt/genomics/Illumina/{FlowcellID}/`
 	+ Watch for missing files in the output of wrapup - select no, if there are missing files, and go back to galaxy and re-transfer if necessary, or recreate from above.
+	+ In order to call SNPs for a flow cell run, you can run the following script:
+		+ `% scripts/call_flowcell_snps.sh /mnt/genomics/Illumina/{FlowcellID}/`
+	+ If the run contains SNP data, you can perform kinship analysis to identify potential sample swaps:
+		+ `% scripts/calculate_kinship.sh -d /mnt/genomics/Illumina/{FlowcellID}/`
 	+ Finally, create the gene metrics plots:
 		+ `% while read path; do python scripts/plot_gene_coverage.py $path/; done < <(find /mnt/genomics/Illumina/{FlowcellID} -name "metrics" -maxdepth 2)`
 

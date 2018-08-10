@@ -10,11 +10,11 @@ class SexPredictor(object):
     """
     Predicts sex based X and Y gene count data using a pre-defined rule.
     """
-    def __init__(self, data, qc_opts):
+    def __init__(self, data, run_opts):
         logger.debug("creating `SexPredictor` instance")
         self.data = data
-        self.sexmodel = qc_opts["sexmodel"]
-        self.sexcutoff = qc_opts["sexcutoff"]
+        self.sexmodel = run_opts["sexmodel"]
+        self.sexcutoff = run_opts["sexcutoff"]
 
     def _compute_y_x_gene_ratio(self):
         """

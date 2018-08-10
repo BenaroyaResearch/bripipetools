@@ -38,7 +38,8 @@ class SampleSubmissionBuilder(object):
         workflow_opts = [os.path.join(self.workflow_dir, f)
                          for f in os.listdir(self.workflow_dir)
                          if 'Galaxy-API' not in f
-                         and not re.search('^\.', f)]
+                         and not re.search('^\.', f)
+                         and re.search('.txt$', f)]
         workflow_opts.sort()
         logger.debug("found the following workflow options: {}"
                      .format([os.path.basename(f) for f in workflow_opts]))
@@ -58,7 +59,7 @@ class SampleSubmissionBuilder(object):
         workflow_opts = self.get_workflow_options(
             optimized_only=not self.all_workflows
         )
-        build_opts = ['GRCh38.77', 'GRCh38.91', 'NCBIM37.67', 'hg19', 'mm10', 'mm9', 'ebv']
+        build_opts = ['GRCh38.77', 'GRCh38.91', 'NCBIM37.67', 'GRCm38.91', 'hg19', 'mm10', 'mm9', 'ebv']
 
         for j, w in enumerate(workflow_opts):
             print("   {} : {}".format(j, os.path.basename(w)))
@@ -93,13 +94,18 @@ class SampleSubmissionBuilder(object):
             # New dir structure:
             # Project Folder -> FASTQ Folder -> Lib Folder -> fastq.gz file(s)
             for i in range(0, len(paths)):
-                subdir = os.listdir(paths[i])[0]
-                logger.debug("Subdirectory of {} identified as {}"
-                             .format(paths[i], subdir))
-                if (not re.search('lib[0-9]+', subdir)):
-                    logger.debug("Found new BaseSpace format. Moving from {} to {}"
+                # check if given a path to sample
+                currpath = os.path.basename(os.path.normpath(paths[i]))
+                logger.debug("Looking at directory {}".format(currpath))
+                if (not re.search('lib[0-9]+', currpath)):
+                    # check if old or new format
+                    subdir = os.listdir(paths[i])[0]
+                    logger.debug("Subdirectory of {} identified as {}"
                                  .format(paths[i], subdir))
-                    paths[i] = os.path.join(paths[i], subdir)
+                    if (not re.search('lib[0-9]+', subdir)):
+                        logger.debug("Found new BaseSpace format. Moving from {} to {}"
+                                     .format(paths[i], subdir))
+                        paths[i] = os.path.join(paths[i], subdir)
                 
             creator = BatchCreator(
                 paths=paths,

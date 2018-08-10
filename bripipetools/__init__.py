@@ -1,6 +1,6 @@
-__author__ = 'James A. Eddy'
-__email__ = 'james.a.eddy@gmail.com'
-__version__ = '0.4.0'
+__author__ = 'James A. Eddy; Mario G. Rosasco'
+__email__ = 'james.a.eddy@gmail.com; m.g.rosasco@gmail.com'
+__version__ = '0.6.0'
 
 from . import util
 
@@ -12,19 +12,16 @@ from . import io
 # model depends on util, parsing
 from . import model
 
-# genlims depends on util, model
-from . import genlims
-
-# researchdb depends on util, model
-from . import researchdb
+# database depends on util, model
+from . import database
 
 # qc depends on io
 from . import qc
 
-# annotation depends on util, parsing, io, model, genlims, qc
+# annotation depends on util, parsing, io, model, database, qc
 from . import annotation
 
-# dbification depends on util, genlims, annotation
+# dbification depends on util, database, annotation
 from . import dbification
 
 # postprocessing depends on util, parsing, io

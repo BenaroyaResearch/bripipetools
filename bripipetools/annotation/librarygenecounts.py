@@ -6,7 +6,7 @@ import os
 import re
 
 from .. import parsing
-from .. import genlims
+from .. import database
 from .. import postprocessing
 from .. import model as docs
 
@@ -36,8 +36,8 @@ class LibraryGeneCountAnnotator(object):
         logger.debug("initializing `GeneCounts` instance")
         try:
             logger.debug("getting `GeneCounts` from ResearchDatabase")
-            return genlims.map_to_object(
-                genlims.get_counts(self.db, {'_id': self.seqlib_id})[0])
+            return database.map_to_object(
+                database.get_counts(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
             logger.debug("creating new `GeneCounts` object")
             return docs.GeneCounts(_id=self.seqlib_id)
@@ -64,7 +64,5 @@ class LibraryGeneCountAnnotator(object):
         Return sequenced library object with updated fields.
         """
         self._update_librarycounts()
-        logger.debug("returning sequenced library object info: {}".format(
-            self.librarycounts.__dict__)
-        )
+        logger.debug("returning sequenced library object info")
         return self.librarycounts

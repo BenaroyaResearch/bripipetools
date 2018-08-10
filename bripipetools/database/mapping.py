@@ -67,8 +67,12 @@ def map_to_object(doc):
     """
     doc_class = get_model_class(doc)
     mappedclass = getattr(docs, doc_class)
-    logger.debug("mapping '{}' to instance of type '{}'"
-                 .format(doc, doc_class))
+    if (doc_class != 'GeneCounts'):
+        logger.debug("mapping '{}' to instance of type '{}'"
+                     .format(doc, doc_class))
+    else:
+        logger.debug("mapping instance of type '{}'"
+                     .format(doc_class))
     obj = mappedclass(_id=doc['_id'], is_mapped=True)
 
     logger.debug("document has following fields: {}".format(doc.keys()))

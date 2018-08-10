@@ -103,6 +103,12 @@ class TestSequencedLibraryAnnotator:
                      .mkdir(mock_lib))
         mock_data = '/sample-name_S001_L001_R1_001.fastq.gz'
         mock_path.ensure(mock_data)
+        mock_data_path = ('/genomics/Illumina/'
+                         + mock_runid
+                         + '/Unaligned/'
+                         + mock_project + '/'
+                         + mock_lib
+                         + mock_data)
         annotator = annotation.SequencedLibraryAnnotator(
             path=str(mock_path),
             library=mock_lib,
@@ -116,7 +122,7 @@ class TestSequencedLibraryAnnotator:
 
         # THEN the path field of the raw data file should match
         # the expected result
-        assert (test_data[0]['path'] == mock_data)
+        assert (test_data[0]['path'] == mock_data_path)
 
     def test_update_sequencedlibrary(self, mock_db, tmpdir):
         # GIVEN an annotator object created for a sequenced library with
@@ -512,7 +518,21 @@ def mock_batchfile(filename, tmpdir):
     mock_file = tmpdir.join(filename)
     mock_file.write(''.join(mock_contents))
     return str(mock_file)
-
+    
+@pytest.fixture(scope='function')
+def mock_workflowfile(filename, tmpdir):
+    # GIVEN a simplified workflow batch content with protypical contents
+    mock_contents = ['{',
+                     '"name": "optimized_workflow_1",',
+                     '"steps":{',
+                     '"0":{',
+                     '"tool_id": "some_tool",',
+                     '"tool_version": "1.0.0"',
+                     '}}}']
+    mock_file = tmpdir.join(filename)
+    mock_file.write(''.join(mock_contents))
+    return str(mock_file)
+    
 
 class TestWorkflowBatchAnnotator:
     """
@@ -534,8 +554,8 @@ class TestWorkflowBatchAnnotator:
              'date': datetime.datetime(2016, 12, 31, 0, 0),
              'type': 'Galaxy workflow batch'})
 
-        # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        # AND a set of run options
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an annotator object is created for the workflow batch with
         # an arbitrary 'genomics' root specified
@@ -543,7 +563,7 @@ class TestWorkflowBatchAnnotator:
             workflowbatch_file=mock_file,
             db=mock_db,
             genomics_root='/mnt',
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN the model object is initiated for the annotator
@@ -562,8 +582,8 @@ class TestWorkflowBatchAnnotator:
         mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
         mock_file = mock_batchfile(mock_filename, tmpdir)
 
-        # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        # AND a set of run options
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND a connection to a database in which a document corresponding
         # to the workflow batch does not exist
@@ -574,7 +594,7 @@ class TestWorkflowBatchAnnotator:
             workflowbatch_file=mock_file,
             db=mock_db,
             genomics_root='/mnt',
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN the model object is initiated for the annotator
@@ -589,17 +609,23 @@ class TestWorkflowBatchAnnotator:
     def test_update_workflowbatch(self, mock_db, tmpdir):
         # GIVEN an annotator object created for a workflow batch with
         # associated workflow batch file
-        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
-        mock_file = mock_batchfile(mock_filename, tmpdir)
+        mock_batch_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_batch = mock_batchfile(mock_batch_filename, tmpdir)
+        
+        # AND a workflow file corresponding to the workflow batch
+        mock_wkflow_filename = 'optimized_workflow_1.ga'
+        mock_workflow = mock_workflowfile(mock_wkflow_filename, tmpdir)
 
-        # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        # AND a set of run options
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', 
+                         "sexcutoff":1,
+                         "workflow_dir":str(tmpdir)}
 
         annotator = annotation.WorkflowBatchAnnotator(
-            workflowbatch_file=mock_file,
+            workflowbatch_file=mock_batch,
             db=mock_db,
             genomics_root='/mnt',
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN the mapped model object is updated to add any missing fields
@@ -616,14 +642,20 @@ class TestWorkflowBatchAnnotator:
         mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
         mock_file = mock_batchfile(mock_filename, tmpdir)
 
-        # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        # AND a workflow file corresponding to the workflow batch
+        mock_wkflow_filename = 'optimized_workflow_1.ga'
+        mock_workflow = mock_workflowfile(mock_wkflow_filename, tmpdir)
+
+        # AND a set of run options
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', 
+                         "sexcutoff":1,
+                         "workflow_dir":str(tmpdir)}
 
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_file,
             db=mock_db,
             genomics_root='/mnt',
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN the mapped model object is retrieved
@@ -640,14 +672,14 @@ class TestWorkflowBatchAnnotator:
         mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
         mock_file = mock_batchfile(mock_filename, tmpdir)
 
-        # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        # AND a set of run options
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_file,
             db=mock_db,
             genomics_root='/mnt',
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN the list of sequenced libraries processed in the workflow

@@ -1,5 +1,5 @@
 """
-Connect to the Research Mongo database.
+Connect to a BRI Mongo database.
 """
 import logging
 from logging.config import fileConfig
@@ -17,7 +17,7 @@ fileConfig(os.path.join(config_path, 'logging_config.ini'),
 logger = logging.getLogger(__name__)
 
 
-def connect():
+def connect(db_config_name):
     """
     Check the current environment to determine which database
     parameters to use, then connect to the target database on the
@@ -42,8 +42,8 @@ def connect():
     property_path = os.path.join(config_path, property_file)
     with open(property_path) as f:
         config.readfp(f)
-    db_host = config.get('researchdb', 'db_host')
-    db_name = config.get('researchdb', 'db_name')
+    db_host = config.get(db_config_name, 'db_host')
+    db_name = config.get(db_config_name, 'db_name')
 
     logger.info("Connecting to database '{}' on host '{}'."
                 .format(db_name, db_host))
@@ -51,8 +51,8 @@ def connect():
 
     try:
         logger.info("Authenticating database '{}'.".format(db_name))
-        client[db_name].authenticate(config.get('researchdb', 'user'),
-                                     config.get('researchdb', 'password'))
+        client[db_name].authenticate(config.get(db_config_name, 'user'),
+                                     config.get(db_config_name, 'password'))
     except ConfigParser.NoOptionError:
         logger.info("No username/password provided; "
                     "attempting to connect anyway.")

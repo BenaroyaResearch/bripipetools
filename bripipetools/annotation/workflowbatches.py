@@ -10,7 +10,7 @@ import datetime
 from .. import util
 from .. import parsing
 from .. import io
-from .. import genlims
+from .. import database
 from .. import qc
 from .. import model as docs
 from . import ProcessedLibraryAnnotator
@@ -22,23 +22,33 @@ class WorkflowBatchAnnotator(object):
     """
     Identifies, stores, and updates information about a workflow batch.
     """
-    def __init__(self, workflowbatch_file, genomics_root, db, qc_opts):
+    def __init__(self, workflowbatch_file, genomics_root, db, run_opts):
         logger.debug("creating `WorkflowBatchAnnotator` for '{}'"
                      .format(workflowbatch_file))
         self.workflowbatch_file = workflowbatch_file
         self.db = db
+        self.run_opts = run_opts
 
         self.workflowbatch_data = io.WorkflowBatchFile(
             self.workflowbatch_file,
             state='submit'
             ).parse()
         self.workflowbatch = self._init_workflowbatch()
+        
+        if ("workflow_dir" in self.run_opts):
+            logger.debug("Attempting to parse workflow file")
+            self.workflow_dir = self.run_opts["workflow_dir"]
+            self.workflow_file = os.path.join(
+                self.workflow_dir, 
+                self.workflowbatch_data['workflow_name']+".ga"
+            )
+            self.workflow_data = io.WorkflowFile(
+                self.workflow_file
+            ).parse()
 
         logger.debug("setting 'genomics' path")
         self.genomics_root = genomics_root
         self.genomics_path = os.path.join(genomics_root, 'genomics')
-
-        self.qc_opts = qc_opts
 
     def _init_workflowbatch(self):
         """
@@ -53,8 +63,8 @@ class WorkflowBatchAnnotator(object):
             logger.debug("getting `GalaxyWorkflowBatch` from GenLIMS; "
                          "searching for record with batch file '{}'"
                          .format(workflowbatch_file))
-            return genlims.map_to_object(
-                genlims.get_workflowbatches(
+            return database.map_to_object(
+                database.get_workflowbatches(
                     self.db,
                     {'workflowbatchFile': workflowbatch_file}
                 )[0]
@@ -67,7 +77,7 @@ class WorkflowBatchAnnotator(object):
                 self.workflowbatch_data['batch_name']
             )
 
-            workflowbatch_id = genlims.create_workflowbatch_id(
+            workflowbatch_id = database.create_workflowbatch_id(
                 db=self.db,
                 prefix='globusgalaxy',
                 date=batch_items['date']
@@ -86,12 +96,15 @@ class WorkflowBatchAnnotator(object):
         batch_items = parsing.parse_batch_name(
             self.workflowbatch_data['batch_name']
         )
+        run_id = parsing.parse_run_id_for_batch(self.workflowbatch_file)
 
         update_fields = {
             'workflow_id': self.workflowbatch_data['workflow_name'],
             'date': batch_items['date'],
             'projects': batch_items['projects'],
-            'flowcell_id': batch_items['flowcell_id']
+            'flowcell_id': batch_items['flowcell_id'],
+            'tools': self.workflow_data['tools'],
+            'run_id': run_id
         }
         self.workflowbatch.is_mapped = False
         self.workflowbatch.update_attrs(update_fields, force=True)
@@ -120,8 +133,8 @@ class WorkflowBatchAnnotator(object):
         Retrieve reported sex for sample and compare to predicted sex
         of processed library.
         """
-        ref = util.matchdefault('(grch38|ncbim37)',
-                                self.workflowbatch_data['workflow_name'])
+        ref = util.matchdefault('(grch38|ncbim37|GRCh38|GRCm38)',
+                                self.workflowbatch_data['workflow_name']).lower()
         if ref != 'grch38':
             return processedlibrary
 
@@ -133,13 +146,11 @@ class WorkflowBatchAnnotator(object):
             workflowbatch_id=self.workflowbatch._id,
             genomics_root=self.genomics_root,
             db=self.db,
-            qc_opts = self.qc_opts
+            run_opts = self.run_opts
         )
         return sexchecker.update()
 
     def _run_qc(self, processedlibrary):
-        # runs all QC that we want to perform;
-        # for now this is just _check_sex
         return self._check_sex(processedlibrary)
 
     def get_processed_libraries(self, project=None, qc=False):

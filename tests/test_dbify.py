@@ -38,13 +38,13 @@ class TestFlowcellRunImporter:
         mock_path = '{}genomics/Illumina/{}'.format(mock_root, mock_id)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an importer object is created for the path
         importer = dbification.FlowcellRunImporter(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN collecting model object for flowcell run
@@ -72,13 +72,13 @@ class TestFlowcellRunImporter:
                 projpath.mkdir(l)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an importer object is created for the path
         importer = dbification.FlowcellRunImporter(
             path=str(mock_path),
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN collecting model objects for sequenced libraries
@@ -98,13 +98,13 @@ class TestFlowcellRunImporter:
         mock_path = '{}genomics/Illumina/{}'.format(mock_root, mock_id)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an importer object is created for the path
         importer = dbification.FlowcellRunImporter(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN flowcell run is inserted into database
@@ -132,13 +132,13 @@ class TestFlowcellRunImporter:
                 projpath.mkdir(l)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an importer object is created for the path
         importer = dbification.FlowcellRunImporter(
             path=str(mock_path),
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN sequenced libraries are inserted into database
@@ -167,13 +167,13 @@ class TestFlowcellRunImporter:
                 projpath.mkdir(l)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an importer object is created for the path
         importer = dbification.FlowcellRunImporter(
             path=str(mock_path),
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN all objects are inserted into database
@@ -201,6 +201,20 @@ def mock_batchfile(filename, tmpdir):
     mock_file.write(''.join(mock_contents))
     return str(mock_file)
 
+@pytest.fixture(scope='function')
+def mock_workflowfile(filename, tmpdir):
+    # GIVEN a simplified workflow batch content with protypical contents
+    mock_contents = ['{',
+                     '"name": "optimized_workflow_1",',
+                     '"steps":{',
+                     '"0":{',
+                     '"tool_id": "some_tool",',
+                     '"tool_version": "1.0.0"',
+                     '}}}']
+    mock_file = tmpdir.join(filename)
+    mock_file.write(''.join(mock_contents))
+    return str(mock_file)
+    
 
 class TestWorkflowBatchImporter:
     """
@@ -220,15 +234,21 @@ class TestWorkflowBatchImporter:
 
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
+        
+        # AND a workflow file corresponding to the workflow batch
+        mock_wkflow_filename = 'optimized_workflow_1.ga'
+        mock_workflow = mock_workflowfile(mock_wkflow_filename, tmpdir)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', 
+                         "sexcutoff":1,
+                         "workflow_dir":str(tmpdir)}
 
         # AND an importer object is created for the path
         importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN collecting model object for workflow batch
@@ -248,13 +268,13 @@ class TestWorkflowBatchImporter:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an importer object is created for the path
         importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN collecting model objects for processed libraries
@@ -276,14 +296,20 @@ class TestWorkflowBatchImporter:
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
 
+        # AND a workflow file corresponding to the workflow batch
+        mock_wkflow_filename = 'optimized_workflow_1.ga'
+        mock_workflow = mock_workflowfile(mock_wkflow_filename, tmpdir)
+
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', 
+                         "sexcutoff":1,
+                         "workflow_dir":str(tmpdir)}
 
         # AND an importer object is created for the path
         importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN workflow batch is inserted into database
@@ -305,13 +331,13 @@ class TestWorkflowBatchImporter:
         mock_path = mock_batchfile(mock_filename, mock_path)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an importer object is created for the path
         importer = dbification.WorkflowBatchImporter(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN processed libraries inserted into database
@@ -332,14 +358,20 @@ class TestWorkflowBatchImporter:
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
 
+        # AND a workflow file corresponding to the workflow batch
+        mock_wkflow_filename = 'optimized_workflow_1.ga'
+        mock_workflow = mock_workflowfile(mock_wkflow_filename, tmpdir)
+
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', 
+                         "sexcutoff":1,
+                         "workflow_dir":str(tmpdir)}
 
         # AND an importer object is created for the path
         importer = dbification.WorkflowBatchImporter(
             path=str(mock_path),
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN all objects are inserted into database
@@ -367,13 +399,13 @@ class TestImportManager:
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an import manager is created for the path
         manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN path is checked to determine type
@@ -392,13 +424,13 @@ class TestImportManager:
                      .format(mock_id, mock_filename))
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an import manager is created for the path
         manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN path is checked to determine type
@@ -415,12 +447,12 @@ class TestImportManager:
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # AND an import manager is created for the path
@@ -439,12 +471,12 @@ class TestImportManager:
                      .format(mock_id, mock_filename))
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN importer object is initialized
@@ -472,13 +504,13 @@ class TestImportManager:
                 projpath.mkdir(l)
 
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
 
         # AND an import manager is created for the path
         manager = dbification.ImportManager(
             path=str(mock_path),
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN all objects are inserted into database
@@ -500,14 +532,20 @@ class TestImportManager:
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
 
+        # AND a workflow file corresponding to the workflow batch
+        mock_wkflow_filename = 'optimized_workflow_1.ga'
+        mock_workflow = mock_workflowfile(mock_wkflow_filename, tmpdir)
+
         # AND a set of quality control options
-        mock_qc_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
+        mock_run_opts = {"sexmodel":'y_sq_over_tot', 
+                         "sexcutoff":1,
+                         "workflow_dir":str(tmpdir)}
 
         # AND an importer object is created for the path
         manager = dbification.ImportManager(
             path=mock_path,
             db=mock_db,
-            qc_opts = mock_qc_opts
+            run_opts = mock_run_opts
         )
 
         # WHEN all objects are inserted into database

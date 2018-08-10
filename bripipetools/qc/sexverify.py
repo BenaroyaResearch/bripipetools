@@ -3,7 +3,7 @@ Class and methods to perform routine sex check on all processed libraries.
 """
 import logging
 
-from .. import genlims
+from .. import database
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +26,13 @@ class SexVerifier(object):
                      .format(parent_id))
         try:
             logger.debug("searching for 'reportedSex' field...")
-            return genlims.search_ancestors(
+            return database.search_ancestors(
                 self.db, parent_id, 'reportedSex'
                 ).lower()
         except AttributeError:
             try:
                 logger.debug("searching for 'gender' field...")
-                return genlims.search_ancestors(
+                return database.search_ancestors(
                     self.db, parent_id, 'gender'
                     ).lower()
             except AttributeError:

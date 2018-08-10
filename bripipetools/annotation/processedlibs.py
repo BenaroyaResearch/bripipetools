@@ -5,7 +5,7 @@ import logging
 import re
 
 from .. import util
-from .. import genlims
+from .. import database
 from .. import model as docs
 
 logger = logging.getLogger(__name__)
@@ -43,8 +43,8 @@ class ProcessedLibraryAnnotator(object):
 
         try:
             logger.debug("getting `ProcessedLibrary` from GenLIMS")
-            return genlims.map_to_object(
-                genlims.get_samples(self.db, {'_id': self.proclib_id})[0])
+            return database.map_to_object(
+                database.get_samples(self.db, {'_id': self.proclib_id})[0])
         except IndexError:
             logger.debug("creating new ProcessedLibrary object")
             return docs.ProcessedLibrary(_id=self.proclib_id)

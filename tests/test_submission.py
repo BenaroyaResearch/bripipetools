@@ -244,7 +244,7 @@ class TestBatchParameterizer:
             for lane in range(2, 9)
             }
 
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
         mock_targetdir = (tmpdir.join('genomics').join(mock_runid))
 
         parameterizer = submission.BatchParameterizer(
@@ -364,7 +364,7 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = '{}__optimized_workflow_1_GRCh38_unstrand'.format(
+        mock_name = '{}__optimized_workflow_1_GRCh38.77_unstrand'.format(
             mock_date
         )
 
@@ -388,7 +388,7 @@ class TestBatchCreator:
         test_name = creator._build_batch_name()
 
         mock_date = datetime.date.today().strftime("%y%m%d")
-        mock_name = '{}_{}_{}_optimized_workflow_1_GRCh38_unstrand'.format(
+        mock_name = '{}_{}_{}_optimized_workflow_1_GRCh38.77_unstrand'.format(
                 mock_date, mock_grouptag, '_'.join(mock_subgrouptags)
         )
 
@@ -714,7 +714,7 @@ class TestBatchCreator:
                 samplepath.ensure('sample-name_S001_L001_R1_001.fastq.gz')
                 samplepath.ensure('sample-name_S001_L002_R1_001.fastq.gz')
 
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
 
         creator = submission.BatchCreator(
             paths=mock_paths,
@@ -742,7 +742,7 @@ class TestFlowcellSubmissionBuilder:
     def test_init_annotator(self, mock_db):
         mock_runid = '161231_INSTID_0001_AC00000XX'
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_runid)
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
 
         builder = submission.FlowcellSubmissionBuilder(
             path=mock_path,
@@ -757,7 +757,7 @@ class TestFlowcellSubmissionBuilder:
     def test_get_workflow_options_for_all_workflows(self, mock_db, tmpdir):
         mock_runid = '161231_INSTID_0001_AC00000XX'
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_runid)
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
 
         mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
         mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
@@ -780,7 +780,7 @@ class TestFlowcellSubmissionBuilder:
                                                           tmpdir):
         mock_runid = '161231_INSTID_0001_AC00000XX'
         mock_path = '/mnt/genomics/Illumina/{}'.format(mock_runid)
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
 
         mock_workflowdir = tmpdir.mkdir('galaxy_workflows')
         mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
@@ -805,7 +805,7 @@ class TestFlowcellSubmissionBuilder:
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
         mock_runid = '161231_INSTID_0001_AC00000XX'
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
@@ -828,7 +828,7 @@ class TestFlowcellSubmissionBuilder:
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
         mock_runid = '161231_INSTID_0001_AC00000XX'
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
         mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_runid)
 
         mock_workflowdir = mock_path.mkdir('galaxy_workflows')
@@ -838,7 +838,7 @@ class TestFlowcellSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
@@ -864,7 +864,7 @@ class TestFlowcellSubmissionBuilder:
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
         mock_runid = '161231_INSTID_0001_AC00000XX'
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
@@ -888,7 +888,7 @@ class TestFlowcellSubmissionBuilder:
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
         mock_runid = '161231_INSTID_0001_AC00000XX'
-        mock_endpoint = 'jeddy#srvgridftp01'
+        mock_endpoint = 'benaroyaresearch#BRIGridFTP'
         mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_runid)
 
         mock_workflowdir = mock_path.mkdir('galaxy_workflows')
@@ -898,7 +898,7 @@ class TestFlowcellSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
@@ -933,7 +933,7 @@ class TestFlowcellSubmissionBuilder:
         mock_paths = [os.path.join(
             str(mock_path),
             'globus_batch_submission',
-            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38_unstrand.txt'.format(
+            '{}_C00000XX_P1-1_optimized_workflow1_GRCh38.77_unstrand.txt'.format(
                 mock_date
             )
         )]
@@ -1005,7 +1005,7 @@ class TestSampleSubmissionBuilder:
                              for w in mock_workflows]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         mock_samples = ['lib1111-11111111', 'lib2222-22222222']
         mock_paths = []
@@ -1039,7 +1039,7 @@ class TestSampleSubmissionBuilder:
                              if re.search('optimized', w)]
         mock_workflowopts.sort()
 
-        mock_buildopts = ['GRCh38', 'NCBIM37', 'mm10']
+        mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
 
         mock_samples = ['lib1111-11111111', 'lib2222-22222222']
         mock_paths = []
@@ -1068,7 +1068,7 @@ class TestSampleSubmissionBuilder:
         mock_date = datetime.date.today().strftime("%y%m%d")
         mock_batchpaths = [os.path.join(
             str(tmpdir),
-            '{}__optimized_workflow1_GRCh38_unstrand.txt'.format(mock_date)
+            '{}__optimized_workflow1_GRCh38.77_unstrand.txt'.format(mock_date)
         )]
 
         assert (test_batchpaths == mock_batchpaths)

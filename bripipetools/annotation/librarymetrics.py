@@ -6,8 +6,7 @@ import os
 import re
 
 from .. import parsing
-from .. import genlims
-from .. import researchdb
+from .. import database
 from .. import postprocessing
 from .. import model as docs
 
@@ -36,9 +35,9 @@ class LibraryMetricsAnnotator(object):
         """
         logger.debug("initializing `Metrics` instance")
         try:
-            logger.debug("getting `Metrics` from ResearchDatabase")
-            return researchdb.map_to_object(
-                researchdb.get_metrics(self.db, {'_id': self.seqlib_id})[0])
+            logger.debug("getting `genomicsMetrics` from ResearchDatabase")
+            return database.map_to_object(
+                database.get_genomicsMetrics(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
             logger.debug("creating new `Metrics` object")
             return docs.Metrics(_id=self.seqlib_id)
@@ -58,6 +57,9 @@ class LibraryMetricsAnnotator(object):
 #                          'run_id': self.run_id,
 #                          'parent_id': self.library_id}
         self.librarymetrics.is_mapped = False
+        seqlib_id_parts = self.seqlib_id.split("_")
+        self.librarymetrics.libraryId = seqlib_id_parts[0]
+        self.librarymetrics.flowcellId = seqlib_id_parts[1]
         #self.librarymetrics.update_attrs(metrics, force=True)
         for m, r in metrics.items():
             #logger.info("{} metrics update_attrs {} <-> {}".format(self.seqlib_id, m, r))

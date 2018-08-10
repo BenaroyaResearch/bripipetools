@@ -119,7 +119,7 @@ def build_figure(ncDf, metDf, project, fc, outFolder):
             ymax = max(ncDf[lib].max() + 0.1, 1.0)
 
             ax_i = fig.add_subplot(numRows, 3, idx + 1)
-            ncDf[lib].plot(color=colorList[mccColorIdx - 1],
+            ncDf[lib].plot(color=[colorList[mccColorIdx - 1],0,0],
                          ax=ax_i, xlim=(-5,105), ylim=(0,ymax))
 
             ax_i.text(100, 0.1, ('FASTQ reads: %s\n'
@@ -132,11 +132,12 @@ def build_figure(ncDf, metDf, project, fc, outFolder):
             ax_i.get_yaxis().tick_left()
 
             ax_i.set_title('%s [%1.2f]' % (lib, mcc))
-            ax_i.set_axis_bgcolor('white')
+            ax_i.set_facecolor('white')
 
         fig.set_size_inches(7.5, figHeight)
         fig.tight_layout(rect=(0, 0, 1, plotMargin))
-        fig.savefig(outFolder + project + '_' + 'geneModelCoverage.pdf')
+        fig.savefig(outFolder + project + '_' + 'geneModelCoverage.pdf',
+              format = "pdf")
 
 def main(argv):
     logging.basicConfig(level=logging.INFO)

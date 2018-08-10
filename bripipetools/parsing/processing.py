@@ -3,6 +3,8 @@ import datetime
 import os
 import re
 
+from .. import util
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,12 +14,23 @@ def parse_batch_name(batch_name):
     return individual components indicating date, list of project
     labels, and flowcell ID.
     """
+    
+    fc_id = util.matchdefault('(?<=(_))([A-Z]|[0-9])*X(X|Y|2)', batch_name)
     name_parts = batch_name.split('_')
+    project_ids = [x for x in name_parts if re.match("P[0-9]*-[0-9]*", x)]
     date = datetime.datetime.strptime(name_parts.pop(0), '%y%m%d')
 
-    fc_id = name_parts.pop(-1)
+    return {'date': date, 
+            'projects': project_ids, 
+            'flowcell_id': fc_id}
 
-    return {'date': date, 'projects': name_parts, 'flowcell_id': fc_id}
+
+def parse_run_id_for_batch(batch_file):
+    """
+    Parse the run id (YYMMDD_D00565_####_FCID) from a path to a batch file.
+    """
+    name_parts = batch_file.split('/')
+    return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+X(X|Y|2)$", p)][0]
 
 
 def parse_workflow_param(param):

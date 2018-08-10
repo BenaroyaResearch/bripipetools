@@ -17,8 +17,8 @@ fileConfig(os.path.join(config_path, 'logging_config.ini'),
            disable_existing_loggers=False)
 logger = logging.getLogger()
 logger.info("Starting `bripipetools`")
-DB = bripipetools.genlims.connect()
-RB = bripipetools.researchdb.connect()
+DB = bripipetools.database.connect("database")
+RB = bripipetools.database.connect("researchdb")
 
 def get_workflow_batches(flowcell_path, all_workflows=False):
     """
@@ -87,7 +87,7 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
             bripipetools.postprocessing.OutputStitcher(path).write_table()
         )
     except OSError:
-        logger.warn(("no validation files found"
+        logger.warn(("no validation files found "
                      "for project {}; skiproject_pathing")
                     .format(project_path))
     logger.info("Combined output files generated for '{}' with option '{}'"
@@ -117,7 +117,7 @@ def main(verbosity):
 
 
 @main.command()
-@click.option('--endpoint', default='jeddy#srvgridftp01',
+@click.option('--endpoint', default='benaroyaresearch#BRIGridFTP',
               help=("Globus Online endpoint where input data is stored "
                     "and outputs will be saved"))
 @click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
@@ -202,8 +202,11 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
 @click.option('--sexcutoff', default=0.5,
               help=("The cutoff for the sexmodel, where 'M' is the "
                 "prediction for a sexmodel value greater than cutoff"))
+@click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
+              help=("path to folder containing .ga Galaxy workflow "
+                    "files to be used for batch processing"))
 @click.argument('path')
-def dbify(sexmodel, sexcutoff, path):
+def dbify(sexmodel, sexcutoff, workflow_dir, path):
     """
     Import data from a flowcell run or workflow processing batch into
     GenLIMS database.
@@ -213,9 +216,11 @@ def dbify(sexmodel, sexcutoff, path):
     importer = bripipetools.dbification.ImportManager(
         path=path,
         db=DB,
-        qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
+        run_opts = {"sexmodel":sexmodel, 
+                    "sexcutoff":sexcutoff,
+                    "workflow_dir":workflow_dir}
     )
-    importer.run(collections='validate')
+    importer.run(collections='all')
     logger.info("Import complete.")
 
 @main.command()
@@ -242,7 +247,7 @@ def qc(sexmodel, sexcutoff, path):
         workflowbatch_file=path,
         genomics_root=path_items['genomics_root'],
         db = DB,
-        qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
+        run_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     ).get_processed_libraries(qc=True)
 
 @main.command()
@@ -255,7 +260,7 @@ def researchdb(path):
     importer = bripipetools.dbification.ImportManager(
         path=path,
         db=RB,
-        qc_opts=None
+        run_opts=None
     )
     importer.run(collections='researchdb')
     logger.info("Import complete.")
@@ -363,27 +368,59 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
 @click.option('--all-workflows/--optimized-only', default=False,
               help=("indicate whether to include all detected workflows "
                     "as options or to keep 'optimized' workflows only"))
+@click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
+              help=("path to folder containing .ga Galaxy workflow "
+                    "files to be used for batch processing"))
+@click.option('--database-type', default='all',
+              help=("Database to contain sample information. Options are:\n"
+              "\'researchdb\'\n\'genlims\'\n\'all\'\n\'none\'"))
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel, 
-           sexcutoff, all_workflows, path):
+           sexcutoff, all_workflows, workflow_dir, database_type, path):
     """
     Perform 'dbification' and 'postprocessing' operations on all projects and
     workflow batches from a flowcell run.
     """
-    # import flowcell run details and raw data for sequenced libraries
-    logger.info("Importing raw data for flowcell at path '{}'"
-                .format(path))
-    importer = bripipetools.dbification.ImportManager(
-        path=path,
-        db=DB,
-        qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
-    )
-    importer.run(collections='all')
-    logger.info("Flowcell run import complete.")
+    
+    # Push data into GenLIMS                   
+    if (database_type in ['genlims', 'all']):
+        # import flowcell run details and raw data for sequenced libraries
+        logger.info("Importing raw data for flowcell at path '{}' into GenLIMS"
+                    .format(path))
+        bripipetools.dbification.ImportManager(
+            path=path,
+            db=DB,
+            run_opts = {"sexmodel":sexmodel, 
+                    "sexcutoff":sexcutoff}
+        ).run(collections='genlims')
+        logger.info("GenLIMS flowcell run import complete.")
+    
+    # Push data into ResDB                   
+    if (database_type in ['researchdb', 'all']):
+        logger.info("Importing raw data for flowcell at path '{}' into ResDB"
+                    .format(path))
+        bripipetools.dbification.ImportManager(
+            path=path,
+            db=RB,
+            run_opts = {"sexmodel":sexmodel, 
+                        "sexcutoff":sexcutoff}
+        ).run(collections='researchdb')
+        logger.info("Research Database flowcell run import complete.")
 
     workflow_batches = list(get_workflow_batches(path, all_workflows))
-    logger.debug("found the following workflow batches: {}"
-                 .format(workflow_batches))
+    # If non-optimized workflows were used, the all-workflows flag is 
+    # necessary to get, eg: sexcheck information.
+    if len(workflow_batches) == 0:
+        proceed = raw_input("No workflow batches detected.\n"
+                            "Did you mean to use the '--all-workflows' tag?\n"
+                            "Further processing may not include all data.\n"
+                            "Continue processing? (y/[n]): ")
+        if proceed != 'y':
+            logger.info("Exiting program.")
+            sys.exit(1)
+    else:
+        logger.debug("found the following workflow batches: {}"
+                     .format(workflow_batches))
 
     # check outputs of workflow batches
     genomics_root = bripipetools.util.matchdefault('.*(?=genomics)', path)
@@ -421,13 +458,31 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             "importing processed data for workflow batch in file '{}'"
             .format(wb)
         )
-        bripipetools.dbification.ImportManager(
-            path=wb,
-            db=DB,
-            qc_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
-        ).run()
-        logger.info("Workflow batch import for '{}' complete."
-                    .format(os.path.basename(wb)))
+        if (database_type in ['genlims', 'all']):
+            logger.debug("Importing data into GenLIMS Database: {}".
+                format(DB.name))
+            bripipetools.dbification.ImportManager(
+                path=wb,
+                db=DB,
+                run_opts = {"sexmodel":sexmodel, 
+                            "sexcutoff":sexcutoff,
+                            "workflow_dir": workflow_dir}
+            ).run(collections='genlims')
+            logger.info("GenLIMS workflow batch import for '{}' complete."
+                        .format(os.path.basename(wb)))
+        
+        if (database_type in ['researchdb', 'all']):
+            logger.debug("Importing data into ResDB Database: {}".
+                format(DB.name))
+            bripipetools.dbification.ImportManager(
+                path=wb,
+                db=RB,
+                run_opts = {"sexmodel":sexmodel, 
+                            "sexcutoff":sexcutoff,
+                            "workflow_dir": workflow_dir}
+            ).run(collections='researchdb')
+            logger.info("ResDB workflow batch import for '{}' complete."
+                        .format(os.path.basename(wb)))
 
     processed_projects = list(get_processed_projects(path))
     logger.debug("found the following processed projects: {}"

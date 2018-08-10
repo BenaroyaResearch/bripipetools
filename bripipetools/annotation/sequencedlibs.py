@@ -7,7 +7,7 @@ import os
 import re
 
 from .. import parsing
-from .. import genlims
+from .. import database
 from .. import model as docs
 
 logger = logging.getLogger(__name__)
@@ -38,8 +38,8 @@ class SequencedLibraryAnnotator(object):
         logger.debug("initializing `SequencedLibrary` instance")
         try:
             logger.debug("getting `SequencedLibrary` from GenLIMS")
-            return genlims.map_to_object(
-                genlims.get_samples(self.db, {'_id': self.seqlib_id})[0])
+            return database.map_to_object(
+                database.get_samples(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
             logger.debug("creating new `SequencedLibrary` object")
             return docs.SequencedLibrary(_id=self.seqlib_id)
@@ -50,7 +50,7 @@ class SequencedLibraryAnnotator(object):
         """
         logger.debug("collecting raw data details for library '{}'"
                      .format(self.library_id))
-        return [parsing.parse_fastq_filename(f)
+        return [parsing.parse_fastq_filename(os.path.join(self.path, f))
                 for f in os.listdir(self.path)
                 if not re.search('empty', f)]
 

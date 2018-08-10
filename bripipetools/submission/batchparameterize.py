@@ -26,13 +26,13 @@ class BatchParameterizer(object):
         on output type.
     :type endpoint: str
     :param endpoint: Globus endpoint where input files are accessed
-        and output files will be sent (e.g., 'jeddy#srvgridftp01').
+        and output files will be sent (e.g., 'benaroyaresearch#BRIGridFTP').
     :type build: str
     :param build: ID string of reference genome build to be used
         for processing current set of samples.
     """
     def __init__(self, sample_paths, parameters, endpoint, target_dir,
-                 build='GRCh38', stranded=False):
+                 build='GRCh38.77', stranded=False):
         logger.debug("creating `BatchParametizer` instance ")
         self.sample_paths = sample_paths
         self.parameters = parameters
@@ -91,7 +91,7 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('GRCh38/Homo_sapiens.GRCh38.77'
                      '.ribosomalIntervalsWheader_reorder.txt'),
-                'snp-bed': 'GRCh38/all_grch38.bed',
+                'snp-bed': 'GRCh38_NGSCheckMate_andInterestingSNP.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'GRCh38.91': {
@@ -100,7 +100,7 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('GRCh38/Homo_sapiens.GRCh38.91'
                      '.ribosomalIntervalsWheader.txt'),
-                'snp-bed': 'GRCh38/all_grch38.bed',
+                'snp-bed': 'GRCh38_NGSCheckMate_andInterestingSNP.bed',
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'NCBIM37.67': {
@@ -109,6 +109,14 @@ class BatchParameterizer(object):
                 'ribosomal_intervals':
                     ('NCBIM37/Mus_musculus.NCBIM37.67'
                      '.ribosomalIntervalsWheader_reorder.txt'),
+                'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
+            },
+            'GRCm38.91': {
+                'gtf': 'GRCm38/Mus_musculus.GRCm38.91.gtf',
+                'refflat': 'GRCm38/Mus_musculus.GRCm38.91.refflat.txt',
+                'ribosomal_intervals':
+                    ('GRCm38/Mus_musculus.GRCm38.91'
+                     '.ribosomalIntervalsWheader.txt'),
                 'adapters': 'adapters/smarter_adapter_seqs_3p_5p.fasta'
             },
             'hg19': {
@@ -327,7 +335,8 @@ class BatchParameterizer(object):
                            'clones': 'clones',
                            'snps': 'snps',
                            'peaks': 'peaks',
-                           'log': 'logs'}
+                           'log': 'logs',
+                           'unmapped': 'unmapped'}
 
         logger.debug("building output path of parameter '{}' for sample '{}'"
                      .format(parameter['tag'], sample_name))

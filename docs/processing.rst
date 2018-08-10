@@ -19,7 +19,7 @@ Processing modules
 data QC
 ^^^^^^^
 
-Quality control refers to basic inspection and computation of quality metrics/statistics for *raw* sequencing data. Of course, quality assessment can and should occur at multiple stages from data generation to analysis. However, due to historical reasons, "QC" in the context of the pipeline almost exclusively implies tools and outputs related to the characteristics of FASTQ files. The *de facto* tool for this step is **FastQC - ADD LINK!!!** (and should continue to be for the forseeable future). Elements of raw sequencing data QC not covered by FastQC that might be worth incorporating in future versions of the pipeline include library complexity (maybe that's it?).
+Quality control refers to basic inspection and computation of quality metrics/statistics for *raw* sequencing data. Of course, quality assessment can and should occur at multiple stages from data generation to analysis. However, due to historical reasons, "QC" in the context of the pipeline almost exclusively implies tools and outputs related to the characteristics of FASTQ files. The *de facto* tool for this step is `FASTQC <http://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_. (and should continue to be for the forseeable future). Elements of raw sequencing data QC not covered by FastQC that might be worth incorporating in future versions of the pipeline include library complexity (maybe that's it?).
 
 Current tool: ``FastQC``
 
@@ -35,19 +35,23 @@ adapter trimming
 
 For certain library prep procedures (e.g., Nextera), oligonucleotide indexes will be included as part of the PCR amplifcation step, prior to library construction. In these cases, these adapter sequences will appear within reads, in contrast to typical sequencing adapters (e.g., Illumina adapters and indexes used for demultiplexing) that are nominally removed by tools like **CASAVA** and **bcl2fastq**.
 
-Current tools: ``FastqMcf``
+Current tool: ``FastqMcf``
 
 quality trimming
 ^^^^^^^^^^^^^^^^
 
 Modern aligners use "dynamic" or "adaptive" trimming to remove bases from either end of individual reads to improve mapping to the reference. Reads can also be pre-processed to remove bases that do not pass a certain quality threshold. In theory, removing low quality (and thus, low confidence) bases can also improve mapping rate; however, care must be taken to impose a minimum length for trimmed reads, as extremely short reads will lead to high duplication rates and biased results.
 
+Current tool: ``FASTQ Quality Trimmer``
+
 alignment
 ^^^^^^^^^
 
 This is the central step for almost all NGS processing workflows. Following any trimming, short reads are aligned to a reference genome and the results are stored in a Sequence Alignment Map (SAM) file — and more typically, in the binary BAM format. For RNA-seq data, it is important to use aligners that are "splice aware" (e.g., **TopHat** and **STAR**) to account for the fact that reads from mRNA transcripts may include one or more exons that are not adjacent in the genome (and therefore might not align). Alternatively, RNA reads could be aligned to a reference transcriptome.
 
-Current tools: ``HISAT2``, ``bowtie2``
+In summer of 2018, after multiple comparisons between STAR-aligned and TopHat-aligned libraries, we decided to transition our workflows to STAR from TopHat.
+
+Current tools: ``STAR``
 
 Previous tools: ``TopHat``
 
@@ -56,9 +60,7 @@ counting
 
 After reads have been aligned to the genome, reference annotations (i.e., gene models) can be used to inspect and quantify read coverage within regions of interest (e.g., exons).
 
-Current tool: ``featureCounts``
-
-Previous tools: ``htseq-count``
+Current tool: ``htseq-count``
 
 quantification
 ^^^^^^^^^^^^^^
@@ -82,11 +84,15 @@ Current tools: ``Picard``
 VDJ annotation
 ^^^^^^^^^^^^^^
 
+Many projects (eg: scRNAseq projects) involve identification of TCR sequences. To achieve sequencing of these highly polymorphic sequences, we first perform a de novo assembly using **Trinity** (see below), and then use **MiXCR** to identify the TCR chains from the assembly.
+
 Current tools: ``mixcr``
 
 
 assembly
 ^^^^^^^^
+
+For experiments where it doesn't make sense to align to a reference (eg: no reference available, huge number of polymorphisms), we perform a de novo assembly of the reads. This essentially aligns the reads to one another in a series of steps, building long sequences representing transcripts from the short reads of fragments. These long transcript sequences can then be used for a number of purposes, such as building a transcriptome, or aligning transcripts with partially conserved and partially variable regions (as in TCR identification).
 
 Current tools: ``Trinity``
 
@@ -97,11 +103,6 @@ variant calling
 Current tools: ``samtools``, ``bcftools``
 
 
-peak calling
-^^^^^^^^^^^^
-
-Current tools: ``SICER``, ``MACS2``
-
 -----
 
 
@@ -111,6 +112,14 @@ Workflow options
 ================
 
 The following workflows are currently available for batch processing in Globus Genomics.
+
+TruSeq, Stranded, STAR (with or without Trinity)
+Nextera, Non-stranded, STAR (with or without Trinity)
+
+**Deprecated Workflows**
+TruSeq, Stranded, TopHat (with or without Trinity)
+Nextera, Non-stranded, TopHat (with or without Trinity)
+
 
 -----
 
@@ -190,15 +199,26 @@ The most common annotation input parameters are the following:
 * Adapter files: ``annotation_adapters`` (optional name: ``adapterFile``)
 
 
-Saving the workflow template
-----------------------------
+Saving the workflow for use in bripipetools
+-------------------------------------------
 
-Once a workflow is finished and ready for testing...
+Once a workflow is finished and ready for testing, both the workflow template and the workflow detail files must be downloaded from Galaxy. The template file will be used to generate workflow batch files, and the workflow detail file will be used to store tool version information in the research database.
+
+Save the workflow template
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Click the arrow next to the workflow name in the Galaxy **Workflows** tab.
 2. Select "Submit via API batch mode".
-3. On the following page, click the link to "Export Workflow Parameters for batch submission" and save the file under ``genomics/galaxy_workflows`` (wherever the path exists relative to your local system); make sure to remove the leading ``Galaxy-API-Workflow-`` from the filename.
+3. On the following page, click the link to "Export Workflow Parameters for batch submission" and save the .txt file under ``genomics/galaxy_workflows`` (wherever the path exists relative to your local system); make sure to remove the leading ``Galaxy-API-Workflow-`` from the filename.
 
+Save the workflow details
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Click the arrow next to the workflow name in the Galaxy **Workflows** tab.
+2. Select "Download or Export"
+3. Click the link that says "Download workflow to file so that it can be saved or imported into another Galaxy server" and save the .ga file under ``genomics/galaxy_workflows`` (wherever the path exists relative to your local system); make sure to remove the leading ``Galaxy-Workflow-`` from the filename.
+
+You should now have a template file with a ``.txt`` extension and a details file with a ``.ga`` extension, with otherwise identical file names that corresponding to your workflow. Note that bripipetools requires both of these files for a given workflow in order to function properly.
 
 Importing a new workflow to GenLIMS
 -----------------------------------
@@ -335,7 +355,7 @@ Here's an example call:::
 
     bripipetools submit \
         --workflow-dir /mnt/genomics/galaxy_workflows \
-        --endpoint jeddy#srvgridftp01
+        --endpoint benaroyaresearch#BRIGridFTP
         /mnt/genomics/Illumina/150615_D00565_0087_AC6VG0ANX
 
 
@@ -354,7 +374,7 @@ Submitting batches in Globus Genomics
 Authenticating Globus endpoint
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-First, sign in to Globus Online and navigate to the **Manage Data** page. In the field for "Endpoint", select ``jeddy#srvgridftp01``, after which you'll be prompted to enter your login credentials for the ``srvgridftp01`` BRI server. Make sure to expand the "advanced" options and set the "Credential Lifetime" to 10000 hours (that way, you won't need to reauthenticate for about a week).
+First, sign in to Globus Online and navigate to the **Manage Data** page. In the field for "Endpoint", select ``benaroyaresearch#BRIGridFTP``, after which you'll be prompted to enter your login credentials for the ``srvgridftp01`` BRI server. Make sure to expand the "advanced" options and set the "Credential Lifetime" to 10000 hours (that way, you won't need to reauthenticate for about a week).
 
 
 Uploading batch submit files
