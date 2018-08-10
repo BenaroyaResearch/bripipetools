@@ -14,7 +14,7 @@
 # used to generate the "all-libs.lst" family file for kinship analysis.
 # 
 # Usage: 
-# ./calculate_kinship.sh -d <flowcell directory> [-s] [-m]
+# ./calculate_kinship.sh -d <flowcell directory> [-a] [-m]
 # 
 # -d <flowcell directory>: the location of a flowcell with projects
 #                          containing a snps folder
