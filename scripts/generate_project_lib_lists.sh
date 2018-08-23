@@ -65,6 +65,10 @@ done
 proj_file=project_list_$(date +'%y%m%d').txt
 lib_file=lib_list_$(date +'%y%m%d').txt
 
+# set record separator to be newline to handle paths/names with spaces
+OIFS="$IFS"
+IFS=$'\n'
+
 # get list of all projects
 if [ "$find_projects" = true ]
 then
@@ -98,10 +102,13 @@ then
       awk 'match($0, /P[0-9]+[a-zA-Z0-9-]*/){ print substr($0, RSTART, RLENGTH) }')
     serverloc=$(echo "$libpath" |\
       awk 'match($0, '$fcfolder'){ print substr($0, 0, RSTART-1) }')
-    filepath=$(echo "$libpath" | xargs dirname)
+    filepath=$(echo "$libpath" | xargs -d '\n' dirname)
     
     printf "%s\t%s\t%s\t%s\t%s\t%s\n" $libid $libfolder $fcfolder $projfolder $serverloc $filepath
   done >> $lib_file
+  
+  # restore record separator 
+  IFS="$OIFS"
   
   # clean up duplicates and globus-generated FASTQs. This is an ugly fix...
   awk '!seen[$0]++' $lib_file > tmp.txt
