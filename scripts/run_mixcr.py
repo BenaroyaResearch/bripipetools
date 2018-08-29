@@ -48,7 +48,7 @@ def build_mixcr_cmd(inLib, resultsDir, region = "full"):
 
 def build_slurm_cmd(mixcrCmd, excludeNodes):
     if(excludeNodes != None):
-        sbatchCmd = 'sbatch -x' + excludeNodes + '-N 1 --exclusive -J runMixcr.py -o slurm.out --open-mode=append <<EOF\n#!/bin/bash'
+        sbatchCmd = 'sbatch -x' + excludeNodes + ' -N 1 --exclusive -J runMixcr.py -o slurm.out --open-mode=append <<EOF\n#!/bin/bash'
     else:
         sbatchCmd = 'sbatch -N 1 --exclusive -J runMixcr.py -o slurm.out --open-mode=append <<EOF\n#!/bin/bash'
     
