@@ -46,10 +46,13 @@ def build_mixcr_cmd(inLib, resultsDir, region = "full"):
     mixcrCmd = ('\n').join([alignCmd, assembleCmd, exportCmd, exportPrettyCmd])
     return mixcrCmd
 
-def build_slurm_cmd(mixcrCmd):
-    cmdList = ['sbatch -N 1 --exclusive -J runMixcr.py -o slurm.out --open-mode=append <<EOF\n#!/bin/bash',
-               mixcrCmd,
-               'EOF']
+def build_slurm_cmd(mixcrCmd, excludeNodes):
+    if(excludeNodes != None):
+        sbatchCmd = 'sbatch -x' + excludeNodes + '-N 1 --exclusive -J runMixcr.py -o slurm.out --open-mode=append <<EOF\n#!/bin/bash'
+    else:
+        sbatchCmd = 'sbatch -N 1 --exclusive -J runMixcr.py -o slurm.out --open-mode=append <<EOF\n#!/bin/bash'
+    
+    cmdList = [sbatchCmd, mixcrCmd, 'EOF']
     slurmCmd = ('\n').join(cmdList)
     return slurmCmd
 
@@ -63,6 +66,10 @@ def main(argv):
                         required=True,
                         default=None,
                         help=("path to output results direcotry"))
+    parser.add_argument('-x', '--excludeNodes',
+                        required=False,
+                        default=None,
+                        help=("comma-separated SLURM node(s) to exclude"))
     # parser.add_argument('-s', '--sourceType,
     #                     required=False,
     #                     nargs=1,
@@ -77,6 +84,7 @@ def main(argv):
     # Specify inputs
     inputDir = os.path.abspath(args.inputDir)
     resultsDir = os.path.join(os.path.dirname(inputDir), args.resultsDir)
+    excludeNodes = args.excludeNodes
     # sourceType = args.sourceType
 
     if not os.path.isdir(resultsDir):
@@ -86,7 +94,7 @@ def main(argv):
 
     for inLib in inputLibs:
         mixcrCmd = build_mixcr_cmd(inLib, resultsDir)
-        slurmCmd = build_slurm_cmd(mixcrCmd)
+        slurmCmd = build_slurm_cmd(mixcrCmd, excludeNodes)
         os.system(slurmCmd)
         print slurmCmd + '\n'
 
