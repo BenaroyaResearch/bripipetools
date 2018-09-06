@@ -27,8 +27,9 @@ class HtseqMetricsFile(object):
         """
         Get key-value pairs from text lines and return dictionary.
         """
+        # note that htseq metrics are all ints, so cast values as ints
         self.data['table'] = {l.strip().split('\t')[0].lstrip('__'):
-                              l.strip().split('\t')[1]
+                              int(l.strip().split('\t')[1])
                               for l in self.data['raw']}
 
     def parse(self):
