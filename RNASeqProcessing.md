@@ -82,7 +82,7 @@ Processing fastq to counts using Globus Genomics Galaxy
 		+ `% basemount --unmount ~/basespace_mount`
 		
 9. Gotchas:
-	+ There are permissions under `/mnt/genomics/Illumina/{FlowCellID}` to will need to keep an eye on specifically:
+	+ There are permissions under `/mnt/genomics/Illumina/{FlowCellID}` that you'll need to keep an eye on. Specifically:
 	+ Make sure you are in group NAS_BIOINF1 (check with `% id` or `% groups`)
 	+ Make sure you have write access to the flowcell directory - your credentials will be used to create directories and download files from Globus Genomics on your behalf.
 	+ For the mixcr run, make sure slurm.out is writeable by you (or the world). This is easiest to achieve by running the `run_mixcr.py` script from the `/mnt/genomics/Illumina/` directory. 
