@@ -100,7 +100,7 @@ do
         # Create the gzipped file if it doesn't exist
         if [ ! -f $gzname ]; then
           echo "$gzname not found. Creating from $libname..."
-          bgzip -f $libname
+          bgzip -f -c $libname > $gzname
           
           echo "Indexing $gzname"
           tabix -f -p vcf $gzname
