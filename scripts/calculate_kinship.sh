@@ -14,24 +14,30 @@
 # used to generate the "all-libs.lst" family file for kinship analysis.
 # 
 # Usage: 
-# ./calculate_kinship.sh -d <flowcell directory> [-a] [-m]
+# ./calculate_kinship.sh -d <flowcell directory> [-a] [-m] [-s <snp directory>]
 # 
 # -d <flowcell directory>: the location of a flowcell with projects
 #                          containing a snps folder
+# -s <snp directory>: the name of the directory within each project that
+#                     contains the SNP information (in .vcf format).
 #
 # -m turns OFF MDS value calculation by KING
 # -a turns OFF auto-generation of an all-libs_family.lst file
 #
 ################################################################################
-usage="Usage: $0 -d <flowcell directory> [-m] [-a]"
+usage="Usage: $0 -d <flowcell directory> [-m] [-a] [-s <snp directory>]"
 
 kingflags="--kinship --duplicate --mds"
 buildfamfile=true
+snpdirname="snps"
 # get user-set params
-while getopts ":d:am" opt; do
+while getopts ":d:s:am" opt; do
   case $opt in
     d)
       workingdir=$OPTARG
+      ;;
+    s)
+      snpdirname=$OPTARG
       ;;
     m)
       kingflags="--kinship --duplicate"
@@ -59,7 +65,7 @@ fi
 
 # GET LISTS OF FAMILIES FROM TARGET FLOWCELL FOLDER 
 cd $workingdir
-snpdirs=$(find "`pwd`" -name snps)
+snpdirs=$(find "`pwd`" -name $snpdirname)
 for dir in $snpdirs
 do
   cd $dir
