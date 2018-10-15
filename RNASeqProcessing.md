@@ -72,6 +72,8 @@ Processing fastq to counts using Globus Genomics Galaxy
 		+ `% scripts/calculate_kinship.sh -d /mnt/genomics/Illumina/{FlowcellID}/`
 	+ Finally, create the gene metrics plots:
 		+ `% while read path; do python scripts/plot_gene_coverage.py $path/; done < <(find /mnt/genomics/Illumina/{FlowcellID} -name "metrics" -maxdepth 2)`
+	+ Once the projects are processed, you can use the following script to generate a list of project links to send to the appropriate analysts:
+		+ `% scripts/generate_project_links.sh /mnt/genomics/Illumina/{FlowcellID}`
 
 8. Backup Illumina run data
 	+  Mount Illumina basespace data using the basemount tool (uses Linux userspace mount). The first time you use it you will need to authenticate to the Illumina servers.  See: [Illumina Basemount](https://basemount.basespace.illumina.com/) for vidoes, documentation and the like. Perform all actions as unprivilaged user (not root, do not sudo).
