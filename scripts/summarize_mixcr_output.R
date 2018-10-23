@@ -251,16 +251,27 @@ make_mixcr_summary <- function(proj_folder){
   currdate <- format(Sys.Date(), "%y%m%d")
   mixcr_file <- paste(pname, "mixcr_summary.csv", sep = "_")
   mixcr_jxns <- read_mixcr(folder = file.path(proj_folder, "mixcrOutput_trinity"))
+  if(nrow(mixcr_jxns) == 0){
+    print(paste("WARNING: No junctions were detected in project", proj_folder))
+    return(1)
+  }
   write_csv(mixcr_jxns, file.path(proj_folder, mixcr_file))
+  return(0)
 }
 
 # Run the program on a given flowcell path
 run_prog <- function(fc_path){
+  nFailedProjects <- 0
   project_paths <- find_projects_with_mixcr(fc_path)
   for (p in project_paths){
     if(validate_mixcr_output(p)){
-      make_mixcr_summary(p)
+      nFailedProjects <- 
+        nFailedProjects +
+        make_mixcr_summary(p) # returns 0 if success, 1 if failure
     }
+  }
+  if (nFailedProjects > 0){
+    print(paste("WARNING: There were", nFailedProjects, "projects with issues."))
   }
 }
 
