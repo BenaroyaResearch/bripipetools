@@ -9,6 +9,7 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import lxml.html as lh
 
 
 def read_rnaseq_metrics(path):
@@ -42,10 +43,23 @@ def get_norm_cov(rnaseq_metrics_lines):
                               .group()
                               .split('\t')[-1])
                         for line in cov_hist_lines]
+        # THIS IS A HACK-Y WORKAROUND. NEED TO PARSE TABLE BETTER
         except AttributeError:
-            logger.warn("no coverage histogram found, returning empty list")
-            norm_cov = []
+            try:
+                logger.warn("parsing failed; attempting to parse histogram from "
+                            "alternative location (lines 30-131)")
+                cov_hist_lines = rnaseq_metrics_lines[30:131]
+                norm_cov = [float(re.search('[0-9]*\t[0-9]+(\.[0-9]+)*', line)
+                                  .group()
+                                  .split('\t')[-1])
+                            for line in cov_hist_lines]
+            except AttributeError:
+                logger.warn("no coverage histogram found, returning empty list")
+                norm_cov = []
     return norm_cov
+    
+# def scrape_norm_cov_table(path):
+#     lh.parse(path)
 
 def build_norm_cov_df(metrics_path):
     rnaseq_metrics_files = [os.path.join(metrics_path, f)
