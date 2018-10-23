@@ -22,12 +22,12 @@ class SnpChecker(object):
     donor. SNPs called in these libraries are then analyzed to generate a 
     kinship score to help identify mislabeled libraries.
     """
-    def __init__(self, workflowbatch_data, genomics_root, db):
+    def __init__(self, workflowbatch_data, pipeline_root, db):
         logger.debug("creating an instance of `SnpChecker` "
-                     "with genomics root '{}'"
-                     .format(genomics_root))
+                     "with pipeline root '{}'"
+                     .format(pipeline_root))
         self.workflowbatch_data = workflowbatch_data
-        self.genomics_root = genomics_root
+        self.pipeline_root = pipeline_root
         self.db = db
         self.lib_list = dict()      # {lib: {libfamily:, write:, fname:}}
         self.family_list = dict()   # {libfamily: [libs]}
@@ -139,7 +139,7 @@ class SnpChecker(object):
         for curr_fam in self.family_list:
             vcf_pathname = self.lib_list[curr_fam]['fname']
             snp_dir = os.path.dirname(vcf_pathname)
-            snp_dir = util.swap_root(snp_dir, 'genomics', self.genomics_root)
+            snp_dir = util.swap_root(snp_dir, 'pipeline', self.pipeline_root)
             
             family_libs = self.family_list[curr_fam]
             f = open(os.path.join(snp_dir, curr_fam+"_family.lst"), 'w')

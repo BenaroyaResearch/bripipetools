@@ -38,7 +38,7 @@ class TestWorkflowBatchMonitor:
         # AND a monitor object is created for the workflow batch
         monitor = monitoring.WorkflowBatchMonitor(
             workflowbatch_file=mock_path,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # WHEN the list of annotated outputs are retrieved for the
@@ -52,14 +52,14 @@ class TestWorkflowBatchMonitor:
 
     def test_clean_output_paths(self, tmpdir):
         # GIVEN a path to a workflow batch file
-        mock_genomicsdir = tmpdir.mkdir('genomics')
+        mock_genomicsdir = tmpdir.mkdir('pipeline')
         mock_filename = '161231_P00-00_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_genomicsdir)
 
         # AND a monitor object is created for the workflow batch
         monitor = monitoring.WorkflowBatchMonitor(
             workflowbatch_file=mock_path,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND a list of annotated outputs in the format returned by
@@ -82,14 +82,14 @@ class TestWorkflowBatchMonitor:
     )
     def test_check_outputs(self, tmpdir, mock_status):
         # GIVEN a path to a workflow batch file
-        mock_genomicsdir = tmpdir.mkdir('genomics')
+        mock_genomicsdir = tmpdir.mkdir('pipeline')
         mock_filename = '161231_P00-00_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_genomicsdir)
 
         # AND a monitor object is created for the workflow batch
         monitor = monitoring.WorkflowBatchMonitor(
             workflowbatch_file=mock_path,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND a path to 'out_file1', where the file itself is either

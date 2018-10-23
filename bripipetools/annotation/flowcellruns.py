@@ -20,15 +20,15 @@ class FlowcellRunAnnotator(object):
     """
     Identifies, stores, and updates information about a flowcell run.
     """
-    def __init__(self, run_id, genomics_root, db):
+    def __init__(self, run_id, pipeline_root, db):
         logger.debug("creating `FlowcellRunAnnotator` instance for run ID '{}'"
                      .format(run_id))
         self.run_id = run_id
         self.db = db
         self.flowcellrun = self._init_flowcellrun()
 
-        logger.debug("setting 'genomics' path")
-        self.genomics_path = os.path.join(genomics_root, 'genomics')
+        logger.debug("setting 'pipeline' path")
+        self.genomics_path = os.path.join(pipeline_root, 'pipeline')
 
     def _init_flowcellrun(self):
         """

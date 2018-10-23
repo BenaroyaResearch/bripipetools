@@ -189,7 +189,7 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
     print("\nPrepared the following workflow batch submit files:\n"
           "(ready for upload to Globus Genomics)\n")
     for p in submit_paths:
-        print(bripipetools.util.swap_root(p, 'genomics', '/mnt/'))
+        print(bripipetools.util.swap_root(p, 'pipeline', '/mnt/Bioinformatics/'))
 
 
 @main.command()
@@ -245,7 +245,7 @@ def qc(sexmodel, sexcutoff, path):
     path_items = bripipetools.parsing.parse_batch_file_path(path)
     annotator = bripipetools.annotation.WorkflowBatchAnnotator(
         workflowbatch_file=path,
-        genomics_root=path_items['genomics_root'],
+        pipeline_root=path_items['pipeline_root'],
         db = DB,
         run_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     ).get_processed_libraries(qc=True)
@@ -306,13 +306,13 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
                  .format(workflow_batches))
                  
     # check outputs of workflow batches
-    genomics_root = bripipetools.util.matchdefault('.*(?=genomics)', path)
+    pipeline_root = bripipetools.util.matchdefault('.*(?=pipeline)', path)
     problem_count = 0
     for wb in workflow_batches:
         logger.debug("checking outputs for workflow batch in file '{}'"
                      .format(wb))
         wb_outputs = bripipetools.monitoring.WorkflowBatchMonitor(
-            workflowbatch_file=wb, genomics_root=genomics_root
+            workflowbatch_file=wb, pipeline_root=pipeline_root
         ).check_project_outputs(project_id)
 
         problem_outputs = filter(lambda x: x[1]['status'] != 'ok',
@@ -423,13 +423,13 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
                      .format(workflow_batches))
 
     # check outputs of workflow batches
-    genomics_root = bripipetools.util.matchdefault('.*(?=genomics)', path)
+    pipeline_root = bripipetools.util.matchdefault('.*(?=pipeline)', path)
     problem_count = 0
     for wb in workflow_batches:
         logger.debug("checking outputs for workflow batch in file '{}'"
                      .format(wb))
         wb_outputs = bripipetools.monitoring.WorkflowBatchMonitor(
-            workflowbatch_file=wb, genomics_root=genomics_root
+            workflowbatch_file=wb, pipeline_root=pipeline_root
         ).check_outputs()
 
         problem_outputs = filter(lambda x: x[1]['status'] != 'ok',

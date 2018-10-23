@@ -22,7 +22,7 @@ class WorkflowBatchAnnotator(object):
     """
     Identifies, stores, and updates information about a workflow batch.
     """
-    def __init__(self, workflowbatch_file, genomics_root, db, run_opts):
+    def __init__(self, workflowbatch_file, pipeline_root, db, run_opts):
         logger.debug("creating `WorkflowBatchAnnotator` for '{}'"
                      .format(workflowbatch_file))
         self.workflowbatch_file = workflowbatch_file
@@ -46,9 +46,9 @@ class WorkflowBatchAnnotator(object):
                 self.workflow_file
             ).parse()
 
-        logger.debug("setting 'genomics' path")
-        self.genomics_root = genomics_root
-        self.genomics_path = os.path.join(genomics_root, 'genomics')
+        logger.debug("setting 'pipeline' path")
+        self.pipeline_root = pipeline_root
+        self.genomics_path = os.path.join(pipeline_root, 'pipeline')
 
     def _init_workflowbatch(self):
         """
@@ -57,7 +57,7 @@ class WorkflowBatchAnnotator(object):
         """
         logger.debug("initializing `GalaxyWorkflowBatch` instance")
         workflowbatch_file = util.swap_root(self.workflowbatch_file,
-                                            'genomics', '/')
+                                            'pipeline', '/')
 
         try:
             logger.debug("getting `GalaxyWorkflowBatch` from GenLIMS; "
@@ -144,7 +144,7 @@ class WorkflowBatchAnnotator(object):
             processedlibrary=processedlibrary,
             reference=ref,
             workflowbatch_id=self.workflowbatch._id,
-            genomics_root=self.genomics_root,
+            pipeline_root=self.pipeline_root,
             db=self.db,
             run_opts = self.run_opts
         )

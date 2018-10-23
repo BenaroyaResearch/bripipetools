@@ -34,7 +34,7 @@ class FlowcellRunImporter(object):
 
         return annotation.FlowcellRunAnnotator(
             run_id=path_items['run_id'],
-            genomics_root=path_items['genomics_root'],
+            pipeline_root=path_items['pipeline_root'],
             db=self.db
             ).get_flowcell_run()
 
@@ -48,7 +48,7 @@ class FlowcellRunImporter(object):
 
         return annotation.FlowcellRunAnnotator(
             run_id=path_items['run_id'],
-            genomics_root=path_items['genomics_root'],
+            pipeline_root=path_items['pipeline_root'],
             db=self.db
             ).get_sequenced_libraries()
 
@@ -63,7 +63,7 @@ class FlowcellRunImporter(object):
 
         return annotation.FlowcellRunAnnotator(
             run_id=path_items['run_id'],
-            genomics_root=path_items['genomics_root'],
+            pipeline_root=path_items['pipeline_root'],
             db=self.db
             ).get_library_gene_counts()
 
@@ -78,7 +78,7 @@ class FlowcellRunImporter(object):
 
         return annotation.FlowcellRunAnnotator(
             run_id=path_items['run_id'],
-            genomics_root=path_items['genomics_root'],
+            pipeline_root=path_items['pipeline_root'],
             db=self.db
             ).get_library_metrics()
 

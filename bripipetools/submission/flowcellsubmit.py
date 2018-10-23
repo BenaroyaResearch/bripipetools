@@ -31,7 +31,7 @@ class FlowcellSubmissionBuilder(object):
         path_items = parsing.parse_flowcell_path(self.path)
         self.annotator = annotation.FlowcellRunAnnotator(
             run_id=path_items['run_id'],
-            genomics_root=path_items['genomics_root'],
+            pipeline_root=path_items['pipeline_root'],
             db=self.db
         )
 

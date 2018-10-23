@@ -351,7 +351,7 @@ class BatchParameterizer(object):
         )
 
         return util.swap_root(os.path.join(output_dir, out_file),
-                              'genomics', '/mnt/')
+                              'pipeline', '/mnt/Bioinformatics/')
 
     def _build_sample_parameters(self, sample_path):
         """
@@ -376,7 +376,7 @@ class BatchParameterizer(object):
                 param_values.append(
                     util.swap_root(
                         self._get_lane_fastq(sample_path, lane),
-                        'genomics', '/mnt/'
+                        'pipeline', '/mnt/Bioinformatics/'
                     )
                 )
             elif param['type'] == 'annotation':
@@ -387,7 +387,7 @@ class BatchParameterizer(object):
                 if re.search('^fastq_out', param['tag']):
                     final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
                     output_path = os.path.join(
-                        util.swap_root(self.target_dir, 'genomics', '/mnt/'),
+                        util.swap_root(self.target_dir, 'pipeline', '/mnt/Bioinformatics/'),
                         'inputFastqs', final_fastq
                     )
                 else:

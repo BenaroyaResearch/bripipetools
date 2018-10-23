@@ -34,7 +34,7 @@ class WorkflowBatchImporter(object):
 
         return annotation.WorkflowBatchAnnotator(
             workflowbatch_file=self.path,
-            genomics_root=path_items['genomics_root'],
+            pipeline_root=path_items['pipeline_root'],
             db=self.db,
             run_opts = self.run_opts
             ).get_workflow_batch()
@@ -49,7 +49,7 @@ class WorkflowBatchImporter(object):
 
         return annotation.WorkflowBatchAnnotator(
             workflowbatch_file=self.path,
-            genomics_root=path_items['genomics_root'],
+            pipeline_root=path_items['pipeline_root'],
             db=self.db,
             run_opts=self.run_opts
             ).get_processed_libraries(qc=True)

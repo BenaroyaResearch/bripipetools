@@ -86,18 +86,18 @@ class TestGencore:
         'mock_path, expected_result',
         [
             (
-                    '/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX',
-                    {'genomics_root': '/mnt/',
+                    '/mnt/pipeline/Illumina/161231_INSTID_0001_AC00000XX',
+                    {'pipeline_root': '/mnt/',
                      'run_id': '161231_INSTID_0001_AC00000XX'}
             ),
             (
-                    'genomics/Illumina/161231_INSTID_0001_AC00000XX',
-                    {'genomics_root': '',
+                    'pipeline/Illumina/161231_INSTID_0001_AC00000XX',
+                    {'pipeline_root': '',
                      'run_id': '161231_INSTID_0001_AC00000XX'}
             ),
             (
-                    '/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX/',
-                    {'genomics_root': '/mnt/',
+                    '/mnt/pipeline/Illumina/161231_INSTID_0001_AC00000XX/',
+                    {'pipeline_root': '/mnt/',
                      'run_id': '161231_INSTID_0001_AC00000XX'}
             ),
         ]
@@ -106,12 +106,12 @@ class TestGencore:
         # GIVEN any state
 
         # WHEN a flowcell path of format...
-        # '<genomics_root>/genomics/Illumina/<run_id>' is parsed
+        # '<pipeline_root>/genomics/Illumina/<run_id>' is parsed
         # into component items (note: function assumes, but does not
         # test that path ends in a folder with valid run ID)
         test_items = parsing.parse_flowcell_path(mock_path)
 
-        # THEN the dictionary include the expected 'genomics_root' and
+        # THEN the dictionary include the expected 'pipeline_root' and
         # flowcell 'run_id'
         assert (test_items == expected_result)
 
@@ -119,15 +119,15 @@ class TestGencore:
         'mock_path, expected_result',
         [
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'globus_batch_submission/workflow-batch-filename.txt'),
-                    {'genomics_root': '/mnt/',
+                    {'pipeline_root': '/mnt/',
                      'workflowbatch_filename': 'workflow-batch-filename.txt'}
             ),
             (
-                    ('genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'globus_batch_submission/workflow-batch-filename.txt'),
-                    {'genomics_root': '',
+                    {'pipeline_root': '',
                      'workflowbatch_filename': 'workflow-batch-filename.txt'}
             ),
         ]
@@ -136,12 +136,12 @@ class TestGencore:
         # GIVEN any state
 
         # WHEN a workflow batch file path of format...
-        # '<genomics_root>/genomics/Illumina/<run_id>/...
+        # '<pipeline_root>/genomics/Illumina/<run_id>/...
         #  globus_batch_submission/<workflowbatch_filename>' is parsed
         # into component items
         test_items = parsing.parse_batch_file_path(mock_path)
 
-        # THEN the dictionary include the expected 'genomics_root' and
+        # THEN the dictionary include the expected 'pipeline_root' and
         # 'workflowbatch_filename'
         assert (test_items == expected_result)
 

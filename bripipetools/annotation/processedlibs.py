@@ -89,7 +89,7 @@ class ProcessedLibraryAnnotator(object):
                     output_items['type'], []
                     ).append(
                         {'source': output_items['source'],
-                         'file': util.swap_root(v, 'genomics', '/'),
+                         'file': util.swap_root(v, 'pipeline', '/'),
                          'name': output_items['name']})
         return grouped_outputs
 

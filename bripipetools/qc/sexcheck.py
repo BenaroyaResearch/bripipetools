@@ -20,17 +20,17 @@ class SexChecker(object):
     based on pre-defined rule.
     """
     def __init__(self, processedlibrary, reference, workflowbatch_id,
-                 genomics_root, db, run_opts):
+                 pipeline_root, db, run_opts):
         logger.debug("creating an instance of `SexChecker` for processed "
                      "library '{}', workflow batch ID '{}', with "
-                     "genomics root '{}'"
+                     "pipeline root '{}'"
                      .format(processedlibrary._id,
                              workflowbatch_id,
-                             genomics_root))
+                             pipeline_root))
         self.processedlibrary = processedlibrary
         self.reference = reference
         self.workflowbatch_id = workflowbatch_id
-        self.genomics_root = genomics_root
+        self.pipeline_root = pipeline_root
         self.db = db
 
         self.run_opts = run_opts
@@ -64,7 +64,7 @@ class SexChecker(object):
         Construct the absolute path to the counts file for the specified
         workflow batch.
         """
-        return [os.path.join(self.genomics_root,
+        return [os.path.join(self.pipeline_root,
                              d['outputs']['counts'][0]['file'].lstrip('/'))
                 for d in self.processedlibrary.processed_data
                 if d['workflowbatch_id'] == self.workflowbatch_id][0]

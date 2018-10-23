@@ -220,7 +220,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root='/mnt'
+            pipeline_root='/mnt'
         )
 
         # WHEN the model object is initiated for the annotator
@@ -242,7 +242,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root='/mnt'
+            pipeline_root='/mnt'
         )
 
         # WHEN the model object is initiated for the annotator
@@ -264,7 +264,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND the annotator object has a mapped model object with the
@@ -289,7 +289,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND the annotator object has a mapped model object with the
@@ -309,7 +309,7 @@ class TestFlowcellRunAnnotator:
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and that folder contains a subfolder named 'Unaligned'
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('pipeline').mkdir('Illumina').mkdir(mock_id)
                     .mkdir('Unaligned'))
 
         # AND an annotator object created for a flowcell run ID with that
@@ -317,7 +317,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND the annotator object has a mapped model object with the
@@ -337,14 +337,14 @@ class TestFlowcellRunAnnotator:
         # under which a folder exists at 'genomics/Illumina/<run_id>',
         # and there is no subfolder named 'Unaligned'
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = tmpdir.mkdir('pipeline').mkdir('Illumina').mkdir(mock_id)
 
         # AND an annotator object created for a flowcell run ID with that
         # directory specified as 'genomics' root
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND the annotator object has a mapped model object with the
@@ -365,7 +365,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root='/mnt'
+            pipeline_root='/mnt'
         )
 
         # AND the annotator object has a mapped model object with the
@@ -388,7 +388,7 @@ class TestFlowcellRunAnnotator:
 
         # AND the unaligned folder includes multiple project folders
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('pipeline').mkdir('Illumina').mkdir(mock_id)
                     .mkdir('Unaligned'))
         for p in mock_projects:
             mock_path.mkdir(p)
@@ -398,7 +398,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND the annotator object has a mapped model object with the
@@ -425,7 +425,7 @@ class TestFlowcellRunAnnotator:
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
         mock_libs = {0: ['lib1111-11111111', 'lib2222-22222222'],
                     1: ['lib3333-33333333', 'lib4444-44444444']}
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('pipeline').mkdir('Illumina').mkdir(mock_id)
                      .mkdir('Unaligned'))
         for idx, p in enumerate(mock_projects):
             projpath = mock_path.mkdir(p)
@@ -437,7 +437,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND the annotator object has a mapped model object with the
@@ -466,7 +466,7 @@ class TestFlowcellRunAnnotator:
         mock_projects = ['P1-1-11111111', 'P99-99-99999999']
         mock_libs = {0: ['lib1111-11111111', 'lib2222-22222222'],
                     1: ['lib3333-33333333', 'lib4444-44444444']}
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('pipeline').mkdir('Illumina').mkdir(mock_id)
                     .mkdir('Unaligned'))
         for idx, p in enumerate(mock_projects):
             projpath = mock_path.mkdir(p)
@@ -480,7 +480,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            genomics_root=str(tmpdir)
+            pipeline_root=str(tmpdir)
         )
 
         # AND the annotator object has a mapped model object with the
@@ -562,7 +562,7 @@ class TestWorkflowBatchAnnotator:
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_file,
             db=mock_db,
-            genomics_root='/mnt',
+            pipeline_root='/mnt',
             run_opts = mock_run_opts
         )
 
@@ -593,7 +593,7 @@ class TestWorkflowBatchAnnotator:
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_file,
             db=mock_db,
-            genomics_root='/mnt',
+            pipeline_root='/mnt',
             run_opts = mock_run_opts
         )
 
@@ -624,7 +624,7 @@ class TestWorkflowBatchAnnotator:
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_batch,
             db=mock_db,
-            genomics_root='/mnt',
+            pipeline_root='/mnt',
             run_opts = mock_run_opts
         )
 
@@ -654,7 +654,7 @@ class TestWorkflowBatchAnnotator:
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_file,
             db=mock_db,
-            genomics_root='/mnt',
+            pipeline_root='/mnt',
             run_opts = mock_run_opts
         )
 
@@ -678,7 +678,7 @@ class TestWorkflowBatchAnnotator:
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_file,
             db=mock_db,
-            genomics_root='/mnt',
+            pipeline_root='/mnt',
             run_opts = mock_run_opts
         )
 

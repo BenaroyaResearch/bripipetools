@@ -78,7 +78,10 @@ def parse_flowcell_path(flowcell_path):
     Return 'genomics' root and run ID based on directory path.
     """
     # TODO: raise some sort of exception, if path doesn't end in valid run id
-    return {'genomics_root': util.matchdefault('.*(?=genomics)', flowcell_path),
+    # return {'genomics_root': util.matchdefault('.*(?=genomics)', flowcell_path),
+    #         'run_id': os.path.basename(flowcell_path.rstrip('/'))}
+    # Upon move to Isilon, "genomics" root is now "bioinformatics/pipeline" root
+    return {'pipeline_root': util.matchdefault('.*(?=pipeline)', flowcell_path),
             'run_id': os.path.basename(flowcell_path.rstrip('/'))}
 
 
@@ -86,7 +89,11 @@ def parse_batch_file_path(batchfile_path):
     """
     Return 'genomics' root and batch file name based on directory path.
     """
-    return {'genomics_root': util.matchdefault('.*(?=genomics)',
+    # return {'genomics_root': util.matchdefault('.*(?=genomics)',
+    #                                            batchfile_path),
+    #         'workflowbatch_filename': os.path.basename(batchfile_path)}
+    # Upon move to Isilon, "genomics" root is now "bioinformatics/pipeline" root
+    return {'pipeline_root': util.matchdefault('.*(?=pipeline)',
                                                batchfile_path),
             'workflowbatch_filename': os.path.basename(batchfile_path)}
 
