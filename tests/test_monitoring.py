@@ -18,8 +18,8 @@ def mock_batchfile(filename, tmpdir):
                      '###TABLE DATA\n',
                      '#############\n',
                      'SampleName\tmock_out##_::_::_::to_path\n',
-                     'sample1\t/mnt/genomics/out_file1\n',
-                     'sample2\t/mnt/genomics/out_file2\n']
+                     'sample1\t/mnt/bioinformatics/pipeline/out_file1\n',
+                     'sample2\t/mnt/bioinformatics/pipeline/out_file2\n']
     mock_file = tmpdir.join(filename)
     mock_file.write(''.join(mock_contents))
     return str(mock_file)
@@ -47,35 +47,37 @@ class TestWorkflowBatchMonitor:
         test_outputs = monitor._get_outputs()
 
         # THEN the outputs should match the expected result
-        assert (test_outputs == [{'mock_out': '/mnt/genomics/out_file1'},
-                                 {'mock_out': '/mnt/genomics/out_file2'}])
+        assert (test_outputs == 
+                [{'mock_out': '/mnt/bioinformatics/pipeline/out_file1'},
+                 {'mock_out': '/mnt/bioinformatics/pipeline/out_file2'}])
 
     def test_clean_output_paths(self, tmpdir):
         # GIVEN a path to a workflow batch file
-        mock_genomicsdir = tmpdir.mkdir('pipeline')
+        mock_pipelineroot = tmpdir.mkdir('bioinformatics')
+        mock_pipelinedir = mock_pipelineroot.mkdir('pipeline')
         mock_filename = '161231_P00-00_C00000XX_workflow-name.txt'
-        mock_path = mock_batchfile(mock_filename, mock_genomicsdir)
+        mock_path = mock_batchfile(mock_filename, mock_pipelinedir)
 
         # AND a monitor object is created for the workflow batch
         monitor = monitoring.WorkflowBatchMonitor(
             workflowbatch_file=mock_path,
-            pipeline_root=str(tmpdir)
+            pipeline_root=str(mock_pipelineroot)
         )
 
         # AND a list of annotated outputs in the format returned by
         # the `_get_outputs()` method above
-        mock_outputs = [{'mock_out': '/mnt/genomics/out_file1'},
-                        {'mock_out': '/mnt/genomics/out_file2'}]
+        mock_outputs = [{'mock_out': '/mnt/bioinformatics/pipeline/out_file1'},
+                        {'mock_out': '/mnt/bioinformatics/pipeline/out_file2'}]
 
-        # WHEN the 'genomics' root used during batch processing is
-        # replaced with the full path to the 'genomics' root relative
+        # WHEN the 'pipeline' root used during batch processing is
+        # replaced with the full path to the 'pipeline' root relative
         # to the current file system
         test_outputs = monitor._clean_output_paths(mock_outputs)
 
         # THEN the cleaned output paths should match the expected result
         assert (test_outputs
-                == [{'mock_out': '{}/out_file1'.format(str(mock_genomicsdir))},
-                    {'mock_out': '{}/out_file2'.format(str(mock_genomicsdir))}])
+                == [{'mock_out': '{}/out_file1'.format(str(mock_pipelinedir))},
+                    {'mock_out': '{}/out_file2'.format(str(mock_pipelinedir))}])
 
     @pytest.mark.parametrize(
         'mock_status', ['ok', 'empty', 'missing']
