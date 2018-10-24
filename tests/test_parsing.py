@@ -86,18 +86,18 @@ class TestGencore:
         'mock_path, expected_result',
         [
             (
-                    '/mnt/pipeline/Illumina/161231_INSTID_0001_AC00000XX',
-                    {'pipeline_root': '/mnt/',
+                    '/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX',
+                    {'pipeline_root': '/mnt/bioinformatics/',
                      'run_id': '161231_INSTID_0001_AC00000XX'}
             ),
             (
-                    'pipeline/Illumina/161231_INSTID_0001_AC00000XX',
-                    {'pipeline_root': '',
+                    'bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX',
+                    {'pipeline_root': 'bioinformatics/',
                      'run_id': '161231_INSTID_0001_AC00000XX'}
             ),
             (
-                    '/mnt/pipeline/Illumina/161231_INSTID_0001_AC00000XX/',
-                    {'pipeline_root': '/mnt/',
+                    '/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX/',
+                    {'pipeline_root': '/mnt/bioinformatics/',
                      'run_id': '161231_INSTID_0001_AC00000XX'}
             ),
         ]
@@ -119,15 +119,15 @@ class TestGencore:
         'mock_path, expected_result',
         [
             (
-                    ('/mnt/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'globus_batch_submission/workflow-batch-filename.txt'),
-                    {'pipeline_root': '/mnt/',
+                    {'pipeline_root': '/mnt/bioinformatics/',
                      'workflowbatch_filename': 'workflow-batch-filename.txt'}
             ),
             (
-                    ('pipeline/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'globus_batch_submission/workflow-batch-filename.txt'),
-                    {'pipeline_root': '',
+                    {'pipeline_root': 'bioinformatics/',
                      'workflowbatch_filename': 'workflow-batch-filename.txt'}
             ),
         ]
@@ -219,7 +219,7 @@ class TestIllumina:
 
         # WHEN a standard Illumina FASTQ filename is parsed into its
         # component items
-        mock_path = ('tests/test-data/genomics/Illumina/'
+        mock_path = ('tests/test-data/bioinformatics/pipeline/Illumina/'
                      '150615_D00565_0087_AC6VG0ANXX/Unaligned/'
                      'P14-12-23221204/lib7293-25920016/'
                      'MXU01-CO072_S1_L001_R1_001.fastq.gz')
@@ -228,7 +228,7 @@ class TestIllumina:
         # THEN the components should be correctly parsed and assigned to
         # appropriate field in the output dictionary
         assert (test_items['path']
-                == ('/genomics/Illumina/'
+                == ('/bioinformatics/pipeline/Illumina/'
                     '150615_D00565_0087_AC6VG0ANXX/Unaligned/'
                     'P14-12-23221204/lib7293-25920016/'
                     'MXU01-CO072_S1_L001_R1_001.fastq.gz'))
@@ -334,7 +334,7 @@ class TestProcessing:
         'mock_path, expected_result',
         [
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/alignments/'
                      'lib1111_C00000XX_tophat_alignments.bam'),
                     {'sample_id': 'lib1111_C00000XX',
@@ -343,7 +343,7 @@ class TestProcessing:
                      'label': 'alignments'}
             ),
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/alignments/'
                      'lib1111_tophat_alignments.bam'),
                     {'sample_id': 'lib1111',
@@ -352,7 +352,7 @@ class TestProcessing:
                      'label': 'alignments'}
             ),
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/metrics/'
                      'lib1111_picard_markdups_metrics.html'),
                     {'sample_id': 'lib1111',
@@ -361,7 +361,7 @@ class TestProcessing:
                      'label': 'metrics'}
             ),
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/metrics/'
                      'lib1111_C00000XX_picard_markdups_metrics.html'),
                     {'sample_id': 'lib1111_C00000XX',
@@ -370,7 +370,7 @@ class TestProcessing:
                      'label': 'metrics'}
             ),
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/metrics/'
                      'lib1111_C00000XX_picard-markdups_metrics.html'),
                     {'sample_id': 'lib1111_C00000XX',
@@ -379,7 +379,7 @@ class TestProcessing:
                      'label': 'metrics'}
             ),
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/metrics/'
                      'lib1111_picard-markdups_metrics.html'),
                     {'sample_id': 'lib1111',
@@ -388,7 +388,7 @@ class TestProcessing:
                      'label': 'metrics'}
             ),
             (
-                    ('/mnt/genomics/Illumina/161231_INSTID_0001_AC00000XX'
+                    ('/mnt/bioinformatics/pipeline/Illumina/161231_INSTID_0001_AC00000XX'
                      'Project_P1-1Processed/qc/'
                      'lib1111_C00000XX_fastqc_qc-R1.txt'),
                     {'sample_id': 'lib1111_C00000XX',
