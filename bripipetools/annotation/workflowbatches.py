@@ -48,7 +48,7 @@ class WorkflowBatchAnnotator(object):
 
         logger.debug("setting 'pipeline' path")
         self.pipeline_root = pipeline_root
-        self.genomics_path = os.path.join(pipeline_root, 'pipeline')
+        self.pipeline_path = os.path.join(pipeline_root, 'pipeline')
 
     def _init_workflowbatch(self):
         """

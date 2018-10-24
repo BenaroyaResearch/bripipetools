@@ -96,14 +96,16 @@ class TestSequencedLibraryAnnotator:
         mock_lib = 'lib1111'
         mock_project = 'P1-1'
         mock_runid = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                     .mkdir('pipeline')
+                     .mkdir('Illumina')
                      .mkdir(mock_runid)
                      .mkdir('Unaligned')
                      .mkdir(mock_project)
                      .mkdir(mock_lib))
         mock_data = '/sample-name_S001_L001_R1_001.fastq.gz'
         mock_path.ensure(mock_data)
-        mock_data_path = ('/genomics/Illumina/'
+        mock_data_path = ('/bioinformatics/pipeline/Illumina/'
                          + mock_runid
                          + '/Unaligned/'
                          + mock_project + '/'
@@ -242,7 +244,7 @@ class TestFlowcellRunAnnotator:
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
-            pipeline_root='/mnt'
+            pipeline_root='/mnt/bioinformatics/'
         )
 
         # WHEN the model object is initiated for the annotator
@@ -255,12 +257,15 @@ class TestFlowcellRunAnnotator:
 
     def test_get_flowcell_path_for_existing_folder(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
-        # under which a folder exists at the path 'genomics/Illumina/<run_id>'
+        # under which a folder exists at the path 
+        # 'pipeline/Illumina/<run_id>'
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id))
 
         # AND an annotator object created for a flowcell run ID with that
-        # directory specified as 'genomics' root
+        # directory specified as 'pipeline' root
         annotator = annotation.FlowcellRunAnnotator(
             run_id=mock_id,
             db=mock_db,
@@ -639,7 +644,7 @@ class TestWorkflowBatchAnnotator:
     def test_get_workflow_batch(self, mock_db, tmpdir):
         # GIVEN an annotator object created for a workflow batch with
         # associated workflow batch file
-        mock_filename = '161231_P00-00_C00000XX_optimized_workflow_1.txt'
+        mock_filename = '161231_C00000XX_P00-00_optimized_workflow_1.txt'
         mock_file = mock_batchfile(mock_filename, tmpdir)
 
         # AND a workflow file corresponding to the workflow batch
@@ -654,7 +659,7 @@ class TestWorkflowBatchAnnotator:
         annotator = annotation.WorkflowBatchAnnotator(
             workflowbatch_file=mock_file,
             db=mock_db,
-            pipeline_root='/mnt',
+            pipeline_root='/mnt/bioinformatics',
             run_opts = mock_run_opts
         )
 

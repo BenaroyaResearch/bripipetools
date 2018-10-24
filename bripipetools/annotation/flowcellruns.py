@@ -28,7 +28,7 @@ class FlowcellRunAnnotator(object):
         self.flowcellrun = self._init_flowcellrun()
 
         logger.debug("setting 'pipeline' path")
-        self.genomics_path = os.path.join(pipeline_root, 'pipeline')
+        self.pipeline_path = os.path.join(pipeline_root, 'pipeline')
 
     def _init_flowcellrun(self):
         """
@@ -48,15 +48,15 @@ class FlowcellRunAnnotator(object):
         """
         Find path to flowcell folder on the server.
         """
-        illumina_path = os.path.join(self.genomics_path, 'Illumina')
+        illumina_path = os.path.join(self.pipeline_path, 'Illumina')
         logger.debug("searching for flowcell folder")
         try:
             return [os.path.join(illumina_path, p)
                     for p in os.listdir(illumina_path)
                     if p == self.flowcellrun._id][0]
         except OSError:
-            logger.error("'genomics' path '{}' is invalid".format(
-                self.genomics_path))
+            logger.error("'pipeline' path '{}' is invalid".format(
+                self.pipeline_path))
             raise
 
     def get_unaligned_path(self):

@@ -30,7 +30,10 @@ def parse_run_id_for_batch(batch_file):
     Parse the run id (YYMMDD_D00565_####_FCID) from a path to a batch file.
     """
     name_parts = batch_file.split('/')
-    return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+X(X|Y|2)$", p)][0]
+    try:
+        return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+X(X|Y|2)$", p)][0]
+    except IndexError:
+        return "Could not determine."
 
 
 def parse_workflow_param(param):

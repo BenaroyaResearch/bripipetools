@@ -81,7 +81,7 @@ def parse_fastq_filename(path):
     :return: a dict with fields for 'path' (with root removed),
         'lane_id', 'read_id', and 'sample_number'
     """
-    path = util.swap_root(path, 'pipeline', '/')
+    path = util.swap_root(path, 'bioinformatics', '/')
     lane_id = util.matchdefault('(?<=_|-)L00[1-8]', path)
     read_id = util.matchdefault('(?<=_)R[1-2]', path)
     sample_num_str = util.matchdefault('(?<=_S)[0-9]+', path)
