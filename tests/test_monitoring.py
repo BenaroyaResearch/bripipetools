@@ -84,9 +84,9 @@ class TestWorkflowBatchMonitor:
     )
     def test_check_outputs(self, tmpdir, mock_status):
         # GIVEN a path to a workflow batch file
-        mock_genomicsdir = tmpdir.mkdir('pipeline')
+        mock_pipelinedir = tmpdir.mkdir('pipeline')
         mock_filename = '161231_P00-00_C00000XX_workflow-name.txt'
-        mock_path = mock_batchfile(mock_filename, mock_genomicsdir)
+        mock_path = mock_batchfile(mock_filename, mock_pipelinedir)
 
         # AND a monitor object is created for the workflow batch
         monitor = monitoring.WorkflowBatchMonitor(
@@ -97,10 +97,10 @@ class TestWorkflowBatchMonitor:
         # AND a path to 'out_file1', where the file itself is either
         # 'missing' (no file exists), 'empty' (file exists, but size is
         # zero), or 'ok' (file exists and is non-empty
-        mock_outfile = mock_genomicsdir.join('out_file1')
+        mock_outfile = mock_pipelinedir.join('out_file1')
 
         if mock_status in ['ok', 'empty']:
-            mock_outfile = mock_genomicsdir.ensure('out_file1')
+            mock_outfile = mock_pipelinedir.ensure('out_file1')
 
         if mock_status == 'ok':
             mock_outfile.write('mock_contents')
