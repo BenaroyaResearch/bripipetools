@@ -21,6 +21,8 @@ class WorkflowBatchMonitor(object):
         :type workflowbatch_file: str
         :param workflowbatch_file: File path of the submitted workflow
             batch file.
+        :type pipeline_root: str
+        :param pipeline_root: Path to the root directory for processing
         """
         logger.debug("creating `WorkflowBatchMonitor` instance for '{}'"
                      .format(workflowbatch_file))
