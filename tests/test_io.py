@@ -264,8 +264,9 @@ class TestTophatStatsFile:
     def test_parse_lines(self):
         # GIVEN some file content, where data is reported in a table
         # with each row containing value and field (separated by tab)
-        testcontents = ['value1\ttotal reads in fastq file\n',
-                        'value2\treads aligned in sam file\n']
+        # and values can be cast into floats
+        testcontents = ['12345\ttotal reads in fastq file\n',
+                        '54321\treads aligned in sam file\n']
 
         # AND an io class object with the file contents stored in the
         # raw field of its data attribute
@@ -278,15 +279,16 @@ class TestTophatStatsFile:
         table_data = testfile.data['table']
 
         # THEN the table should include key-value pairs for each
-        # field, stored in a dict
-        assert (table_data == {'fastq_total_reads': 'value1',
-                               'reads_aligned_sam': 'value2'})
+        # field, stored in a dict, with values of type float
+        assert (table_data == {'fastq_total_reads': 12345.0,
+                               'reads_aligned_sam': 54321.0})
 
     def test_parse(self, tmpdir):
         # GIVEN a file, where data is reported in a table
         # with each row containing value and field (separated by tab)
-        testcontents = ('value1\ttotal reads in fastq file\n'
-                        'value2\treads aligned in sam file\n')
+        # and values can be cast into floats
+        testcontents = ('12345\ttotal reads in fastq file\n'
+                        '54321\treads aligned in sam file\n')
         testpath = mockstringfile(testcontents, tmpdir)
 
         # AND an io class object is created for that file
@@ -296,9 +298,9 @@ class TestTophatStatsFile:
         table_data = testfile.parse()
 
         # THEN the table should include key-value pairs for each
-        # field, stored in a dict
-        assert (table_data == {'fastq_total_reads': 'value1',
-                               'reads_aligned_sam': 'value2'})
+        # field, stored in a dict, with values of type float
+        assert (table_data == {'fastq_total_reads': 12345.0,
+                               'reads_aligned_sam': 54321.0})
 
 
 class TestHtseqMetricsFile:
@@ -324,8 +326,9 @@ class TestHtseqMetricsFile:
     def test_parse_lines(self, tmpdir):
         # GIVEN some file content, where data is reported in a table
         # with each row containing field and value (separated by tab)
-        testcontents = ['__field_1\tvalue1\n',
-                        '__field_2\tvalue2\n']
+        # where values can be cast to ints
+        testcontents = ['__field_1\t123\n',
+                        '__field_2\t321\n']
         testpath = mockstringfile(''.join(testcontents), tmpdir)
 
         # AND an io class object with the file contents stored in the
@@ -339,15 +342,16 @@ class TestHtseqMetricsFile:
         table_data = testfile.data['table']
 
         # THEN the table should include key-value pairs for each
-        # field, stored in a dict
-        assert (table_data == {'field_1': 'value1',
-                               'field_2': 'value2'})
+        # field, stored in a dict, with integer values
+        assert (table_data == {'field_1': 123,
+                               'field_2': 321})
 
     def test_parse(self, tmpdir):
         # GIVEN a file, where data is reported in a table
         # with each row containing field and value (separated by tab)
-        testcontents = ['__field_1\tvalue1\n',
-                        '__field_2\tvalue2\n']
+        # where values can be cast to ints
+        testcontents = ['__field_1\t123\n',
+                        '__field_2\t321\n']
         testpath = mockstringfile(''.join(testcontents), tmpdir)
 
         # AND an io class object is created for that file
@@ -357,9 +361,9 @@ class TestHtseqMetricsFile:
         table_data = testfile.parse()
 
         # THEN the table should include key-value pairs for each
-        # field, stored in a dict
-        assert (table_data == {'field_1': 'value1',
-                               'field_2': 'value2'})
+        # field, stored in a dict, with integer values
+        assert (table_data == {'field_1': 123,
+                               'field_2': 321})
 
 
 class TestSexcheckFile:
