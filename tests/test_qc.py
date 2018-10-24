@@ -72,7 +72,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=str(tmpdir),
+            pipeline_root=str(tmpdir),
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -99,7 +99,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=str(tmpdir),
+            pipeline_root=str(tmpdir),
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -131,7 +131,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=str(tmpdir),
+            pipeline_root=str(tmpdir),
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -164,7 +164,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=str(tmpdir),
+            pipeline_root=str(tmpdir),
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -209,7 +209,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=str(tmpdir),
+            pipeline_root=str(tmpdir),
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -245,7 +245,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=str(tmpdir),
+            pipeline_root=str(tmpdir),
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -281,7 +281,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=str(tmpdir),
+            pipeline_root=str(tmpdir),
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -330,7 +330,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=mock_root,
+            pipeline_root=mock_root,
             db=mock_db,
             run_opts = mock_run_opts
         )
@@ -383,7 +383,7 @@ class TestSexChecker:
             processedlibrary=mock_object,
             reference='grch38',
             workflowbatch_id=mock_batchid,
-            genomics_root=mock_root,
+            pipeline_root=mock_root,
             db=mock_db,
             run_opts = mock_run_opts
         )
