@@ -149,7 +149,7 @@ class FlowcellRunImporter(object):
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsSequencedlibraries()
         
-        if collection in ['all', 'genLIMS', 'samples']:
+        if collection in ['all', 'genlims', 'samples']:
             logger.info(("Inserting sequenced libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_sequencedlibraries()

@@ -35,7 +35,7 @@ class TestFlowcellRunImporter:
         # `test_annotation` module)
         mock_root = '/mnt/'
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = '{}genomics/Illumina/{}'.format(mock_root, mock_id)
+        mock_path = '{}bioinformatics/pipeline/Illumina/{}'.format(mock_root, mock_id)
 
         # AND a set of quality control options
         mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
@@ -58,7 +58,10 @@ class TestFlowcellRunImporter:
         # database in which a document corresponding to the flowcell run
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id))
 
         # AND an unaligned folder, which includes multiple project folders,
         # each with multiple folders for sequenced libraries
@@ -95,7 +98,8 @@ class TestFlowcellRunImporter:
         # `test_genlims` module)
         mock_root = '/mnt/'
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = '{}genomics/Illumina/{}'.format(mock_root, mock_id)
+        mock_path = ('{}bioinformatics/pipeline/Illumina/{}'
+                    .format(mock_root, mock_id))
 
         # AND a set of quality control options
         mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
@@ -118,7 +122,10 @@ class TestFlowcellRunImporter:
         # database in which a document corresponding to the flowcell run
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id))
 
         # AND an unaligned folder, which includes multiple project folders,
         # each with multiple folders for sequenced libraries
@@ -153,7 +160,10 @@ class TestFlowcellRunImporter:
         # database in which a document corresponding to the flowcell run
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id))
 
         # AND an unaligned folder, which includes multiple project folders,
         # each with multiple folders for sequenced libraries
@@ -229,8 +239,11 @@ class TestWorkflowBatchImporter:
         # previously imported workflow batch is assumed to be tested in the
         # `test_annotation` module)
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id)
+                    .mkdir('globus_batch_submission'))
 
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
@@ -262,8 +275,10 @@ class TestWorkflowBatchImporter:
         # database in which a document corresponding to the workflow batch
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id).mkdir('globus_batch_submission'))
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
 
@@ -291,8 +306,10 @@ class TestWorkflowBatchImporter:
         # documents in the database is assumed to be tested in the
         # `test_genlims` module)
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id).mkdir('globus_batch_submission'))
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
 
@@ -325,8 +342,10 @@ class TestWorkflowBatchImporter:
         # database in which a document corresponding to the workflow batch
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id).mkdir('globus_batch_submission'))
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
 
@@ -352,8 +371,11 @@ class TestWorkflowBatchImporter:
         # database in which a document corresponding to the workflow batch
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id)
+                    .mkdir('globus_batch_submission'))
 
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
@@ -374,14 +396,17 @@ class TestWorkflowBatchImporter:
             run_opts = mock_run_opts
         )
 
-        # WHEN all objects are inserted into database
-        importer.insert()
+        # WHEN all objects are inserted into all database collections
+        importer.insert(collection = 'all')
 
-        # THEN documents should be present in the workflowbatches
-        # and samples collections
-        assert (len(list(mock_db.workflowbatches
+        # THEN documents should be present in the genomicsWorkflowbatches,
+        # genomicsSamples, and samples collections
+        assert (len(list(mock_db.genomicsWorkflowbatches
                          .find({'type': 'Galaxy workflow batch'})))
                 == 1)
+        assert (len(list(mock_db.genomicsSamples
+                        .find({'type': 'processed library'})))
+                == 2)
         assert (len(list(mock_db.samples.find({'type': 'processed library'})))
                 == 2)
 
@@ -396,7 +421,7 @@ class TestImportManager:
         # database in which a document corresponding to the flowcell run
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
+        mock_path = '/mnt/bioinformatics/pipeline/Illumina/{}'.format(mock_id)
 
         # AND a set of quality control options
         mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
@@ -420,7 +445,7 @@ class TestImportManager:
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
-        mock_path = ('/mnt/genomics/Illumina/{}/globus_batch_submission/{}'
+        mock_path = ('/mnt/bioinformatics/pipeline/Illumina/{}/globus_batch_submission/{}'
                      .format(mock_id, mock_filename))
 
         # AND a set of quality control options
@@ -444,7 +469,7 @@ class TestImportManager:
         # database in which a document corresponding to the flowcell run
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = '/mnt/genomics/Illumina/{}'.format(mock_id)
+        mock_path = '/mnt/bioinformatics/pipeline/Illumina/{}'.format(mock_id)
 
         # AND a set of quality control options
         mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
@@ -467,7 +492,7 @@ class TestImportManager:
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
-        mock_path = ('/mnt/genomics/Illumina/{}/globus_batch_submission/{}'
+        mock_path = ('/mnt/bioinformatics/pipeline/Illumina/{}/globus_batch_submission/{}'
                      .format(mock_id, mock_filename))
 
         # AND a set of quality control options
@@ -490,7 +515,10 @@ class TestImportManager:
         # database in which a document corresponding to the flowcell run
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = tmpdir.mkdir('genomics').mkdir('Illumina').mkdir(mock_id)
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id))
 
         # AND an unaligned folder, which includes multiple project folders,
         # each with multiple folders for sequenced libraries
@@ -526,8 +554,11 @@ class TestImportManager:
         # database in which a document corresponding to the workflow batch
         # may or may not exist
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_path = (tmpdir.mkdir('genomics').mkdir('Illumina')
-                     .mkdir(mock_id).mkdir('globus_batch_submission'))
+        mock_path = (tmpdir.mkdir('bioinformatics')
+                    .mkdir('pipeline')
+                    .mkdir('Illumina')
+                    .mkdir(mock_id)
+                    .mkdir('globus_batch_submission'))
 
         mock_filename = '161231_P1-1_P99-99_C00000XX_workflow-name.txt'
         mock_path = mock_batchfile(mock_filename, mock_path)
@@ -548,13 +579,15 @@ class TestImportManager:
             run_opts = mock_run_opts
         )
 
-        # WHEN all objects are inserted into database
-        manager.run()
+        # WHEN all objects are inserted into all relevant database collections
+        manager.run(collections = 'all')
 
-        # THEN documents should be present in the workflowbatches and
-        # samples collections
-        assert (len(list(mock_db.workflowbatches
+        # THEN documents should be present in the 
+        # genomicsWorkflowbatches, genomicsSamples, and samples collections
+        assert (len(list(mock_db.genomicsWorkflowbatches
                          .find({'type': 'Galaxy workflow batch'})))
                 == 1)
+        assert (len(list(mock_db.genomicsSamples.find({'type': 'processed library'})))
+                == 2)
         assert (len(list(mock_db.samples.find({'type': 'processed library'})))
                 == 2)
