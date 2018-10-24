@@ -83,17 +83,17 @@ class TestOutputStitcher:
         # for multiple samples
         mock_filedata = [
             {'mock_filename': 'lib1111_C00000XX_htseq_metrics.txt',
-             'mock_contents': ['__field_1\tsource1_value1\n',
-                               '__field_2\tsource1_value2\n']},
+             'mock_contents': ['__field_1\t123\n',
+                               '__field_2\t321\n']},
             {'mock_filename': 'lib1111_C00000XX_tophat_stats_metrics.txt',
-             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
-                               'source2_value2\treads aligned in sam file\n']},
+             'mock_contents': ['12345\ttotal reads in fastq file\n'
+                               '54321\treads aligned in sam file\n']},
             {'mock_filename': 'lib2222_C00000XX_htseq_metrics.txt',
-             'mock_contents': ['__field_1\tsource1_value1\n',
-                               '__field_2\tsource1_value2\n']},
+             'mock_contents': ['__field_1\t456\n',
+                               '__field_2\t654\n']},
             {'mock_filename': 'lib2222_C00000XX_tophat_stats_metrics.txt',
-             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
-                               'source2_value2\treads aligned in sam file\n']},
+             'mock_contents': ['56789\ttotal reads in fastq file\n'
+                               '98765\treads aligned in sam file\n']},
         ]
         for m in mock_filedata:
             mock_file = mock_path.ensure(m['mock_filename'])
@@ -114,20 +114,20 @@ class TestOutputStitcher:
         assert (stitcher.data['metrics'] ==
                 {
                     'lib1111_C00000XX': [
-                        {'htseq': {'field_1': 'source1_value1',
-                                   'field_2': 'source1_value2'}},
+                        {'htseq': {'field_1': 123,
+                                   'field_2': 321}},
                         {'tophat-stats': {'fastq_total_reads':
-                                              'source2_value1',
+                                              12345.0,
                                           'reads_aligned_sam':
-                                              'source2_value2'}},
+                                              54321.0}},
                     ],
                     'lib2222_C00000XX': [
-                        {'htseq': {'field_1': 'source1_value1',
-                                   'field_2': 'source1_value2'}},
+                        {'htseq': {'field_1': 456,
+                                   'field_2': 654}},
                         {'tophat-stats': {'fastq_total_reads':
-                                              'source2_value1',
+                                              56789.0,
                                           'reads_aligned_sam':
-                                              'source2_value2'}},
+                                              98765.0}},
                     ],
                 })
 
@@ -145,20 +145,20 @@ class TestOutputStitcher:
         # output type)
         mock_data = {
             'lib1111_C00000XX': [
-                {'htseq': {'field_1': 'source1_value1',
-                           'field_2': 'source1_value2'}},
+                {'htseq': {'field_1': 123,
+                           'field_2': 321}},
                 {'tophat_stats': {'fastq_total_reads':
-                                      'source2_value1',
+                                      12345,
                                   'reads_aligned_sam':
-                                      'source2_value2'}},
+                                      54321}},
             ],
             'lib2222_C00000XX': [
-                {'htseq': {'field_1': 'source1_value1',
-                           'field_2': 'source1_value2'}},
+                {'htseq': {'field_1': 456,
+                           'field_2': 654}},
                 {'tophat_stats': {'fastq_total_reads':
-                                      'source2_value1',
+                                      56789,
                                   'reads_aligned_sam':
-                                      'source2_value2'}},
+                                      98765}},
             ],
         }
         stitcher.data = {'metrics': mock_data}
@@ -174,10 +174,10 @@ class TestOutputStitcher:
                 == [
                     ['libId', 'fastq_total_reads',
                      'field_1', 'field_2', 'reads_aligned_sam'],
-                    ['lib2222_C00000XX', 'source2_value1',
-                     'source1_value1', 'source1_value2', 'source2_value2'],
-                    ['lib1111_C00000XX', 'source2_value1',
-                     'source1_value1', 'source1_value2', 'source2_value2'],
+                    ['lib2222_C00000XX', 56789,
+                     456, 654, 98765],
+                    ['lib1111_C00000XX', 12345,
+                     123, 321, 54321],
                 ])
 
     def test_build_table_for_count_data(self, tmpdir):
@@ -258,17 +258,17 @@ class TestOutputStitcher:
         # for multiple samples
         mock_filedata = [
             {'mock_filename': 'lib1111_C00000XX_htseq_metrics.txt',
-             'mock_contents': ['__field_1\tsource1_value1\n',
-                              '__field_2\tsource1_value2\n']},
+             'mock_contents': ['__field_1\t123\n',
+                              '__field_2\t321\n']},
             {'mock_filename': 'lib1111_C00000XX_tophat_stats_metrics.txt',
-             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
-                              'source2_value2\treads aligned in sam file\n']},
+             'mock_contents': ['12345\ttotal reads in fastq file\n'
+                              '54321\treads aligned in sam file\n']},
             {'mock_filename': 'lib2222_C00000XX_htseq_metrics.txt',
-             'mock_contents': ['__field_1\tsource1_value1\n',
-                              '__field_2\tsource1_value2\n']},
+             'mock_contents': ['__field_1\t456\n',
+                              '__field_2\t654\n']},
             {'mock_filename': 'lib2222_C00000XX_tophat_stats_metrics.txt',
-             'mock_contents': ['source2_value1\ttotal reads in fastq file\n'
-                              'source2_value2\treads aligned in sam file\n']},
+             'mock_contents': ['56789\ttotal reads in fastq file\n'
+                              '98765\treads aligned in sam file\n']},
         ]
         for m in mock_filedata:
             mock_file = mock_path.ensure(m['mock_filename'])
@@ -291,10 +291,10 @@ class TestOutputStitcher:
         mock_contents = [
             ','.join(['libId', 'fastq_total_reads',
                       'field_1', 'field_2', 'reads_aligned_sam\n']),
-            ','.join(['lib2222_C00000XX', 'source2_value1',
-                      'source1_value1', 'source1_value2', 'source2_value2\n']),
-            ','.join(['lib1111_C00000XX', 'source2_value1',
-                      'source1_value1', 'source1_value2', 'source2_value2\n']),
+            ','.join(['lib2222_C00000XX', '56789.0',
+                      '456', '654', '98765.0\n']),
+            ','.join(['lib1111_C00000XX', '12345.0',
+                      '123', '321', '54321.0\n']),
         ]
         assert (testtablefile == mock_tablefile)
         with open(testtablefile) as f:
