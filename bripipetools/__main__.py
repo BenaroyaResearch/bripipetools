@@ -120,7 +120,8 @@ def main(verbosity):
 @click.option('--endpoint', default='benaroyaresearch#BRIGridFTP',
               help=("Globus Online endpoint where input data is stored "
                     "and outputs will be saved"))
-@click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
+@click.option('--workflow-dir', 
+              default='/mnt/bioinformatics/pipeline/galaxy_workflows',
               help=("path to folder containing Galaxy workflow template "
                     "files to be used for batch processing"))
 @click.option('--all-workflows/--optimized-only', default=False,
@@ -189,7 +190,7 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
     print("\nPrepared the following workflow batch submit files:\n"
           "(ready for upload to Globus Genomics)\n")
     for p in submit_paths:
-        print(bripipetools.util.swap_root(p, 'pipeline', '/mnt/Bioinformatics/'))
+        print(bripipetools.util.swap_root(p, 'pipeline', '/mnt/bioinformatics/'))
 
 
 @main.command()
@@ -202,7 +203,7 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
 @click.option('--sexcutoff', default=0.5,
               help=("The cutoff for the sexmodel, where 'M' is the "
                 "prediction for a sexmodel value greater than cutoff"))
-@click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
+@click.option('--workflow-dir', default='/mnt/bioinformatics/pipeline/galaxy_workflows',
               help=("path to folder containing .ga Galaxy workflow "
                     "files to be used for batch processing"))
 @click.argument('path')
