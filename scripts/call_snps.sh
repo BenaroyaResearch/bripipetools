@@ -69,7 +69,7 @@ call_snps_for_query()
   mkdir $outdir
   
   echo "Submitting $infile to slurm..."
-  sbatch -N 1 --exclusive -J $workingfile -o $outdir/${workingfile}_slurm.out ./call_lib_snps.sh $squery $outdir $sbed
+  sbatch -N 1 --exclusive -J $workingfile -o $outdir/${workingfile}_slurm.out $(dirname $0)/call_lib_snps.sh $squery $outdir $sbed
 }
 
 # run the alignment(s) for the appropriate queries

@@ -25,7 +25,7 @@ infile=$1
 outdir=$2
 bedfile=$3
 
-refAssemblyFile="/mnt/genomics/mrosasco/annotation/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+refAssemblyFile="/mnt/bioinformatics/workspace/mrosasco/annotation/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
 
 echo "Processing $infile"
 
