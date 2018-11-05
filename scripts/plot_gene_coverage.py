@@ -164,12 +164,18 @@ def main(argv):
     path_parts = re.split("/", metrics_path)
     try:
         project_regex = re.compile('P+[0-9]+(-[0-9]+){,1}')
-        project = project_regex.search(path_parts[5]).group()
-        flowcell_id = path_parts[4]
+        #project = project_regex.search(path_parts[5]).group()
+        project = project_regex.search(metrics_path).group()
+        #flowcell_id = path_parts[4]
+        flowcell_regex = re.compile('[0-9]{6}_[A-Z0-9]+_[0-9]+_(A|B|D)([A-Z]|[0-9])*X(X|Y|2)')
+        flowcell_id =  flowcell_regex.search(metrics_path).group()
     except AttributeError:
         project = re.sub('Processed.*', '', path_parts[4].lstrip('Project_'))
         flowcell_id = path_parts[3]
 
+    print "Metrics path: " + metrics_path
+    print "Project: " + project
+    print "Flow cell ID: " + flowcell_id
     norm_cov_df = build_norm_cov_df(metrics_path)
     metrics_df = build_metrics_df(metrics_path)
     build_figure(norm_cov_df, metrics_df, project, flowcell_id, out_path)
