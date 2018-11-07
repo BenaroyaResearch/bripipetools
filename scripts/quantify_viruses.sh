@@ -68,7 +68,7 @@ quant_viruses_for_query()
   mkdir $outdir
   echo "Aligning $workingfile to idx $idxname"
   
-  sbatch -N 1 --exclusive -J $workingfile -o $outdir/${workingfile}_align_count.out ./submit_align_count.sh $sidx $squery $outdir/$outfile_align $outdir/$outfile_cts
+  sbatch -N 1 --exclusive -J $workingfile -o $outdir/${workingfile}_align_count.out $(dirname $0)/submit_align_count.sh $sidx $squery $outdir/$outfile_align $outdir/$outfile_cts
 }
 
 # run the alignment(s) for the appropriate queries
