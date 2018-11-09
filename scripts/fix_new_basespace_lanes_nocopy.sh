@@ -40,4 +40,4 @@ done
 # make a folder to hold the (now duplicated) lib folders
 dupFolder=$dataFolder/DupFromNewBasespace/
 mkdir $dupFolder
-find $dataFolder -regex .*dup[0-9]+_L[0-9]+.* -exec mv {} $dupFolder \;
+find $dataFolder -name "*dup*" -exec mv {} $dupFolder \;
