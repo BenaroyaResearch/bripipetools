@@ -108,6 +108,21 @@ class FlowcellRunAnnotator(object):
             for pp in os.listdir(flowcell_path)
             if re.search('Project_.*Processed', pp))
 
+    # def get_libraries(self, project=None):
+    #     """
+    #     Collect list of libraries for flowcell run from one or all projects.
+    #     """
+    #     unaligned_path = self.get_unaligned_path()
+    #     projects = self.get_projects()
+    #     if project is not None:
+    #         logger.debug("subsetting projects")
+    #         projects = [p for p in projects
+    #                     if re.search(project, p)]
+    #     logger.debug("collecting list of libraries")
+    #     logger.debug("searching in projects {}".format(projects))
+    #     return [l for p in projects
+    #             for l in os.listdir(os.path.join(unaligned_path, p))
+    #             if len(parsing.get_library_id(l))]
     def get_libraries(self, project=None):
         """
         Collect list of libraries for flowcell run from one or all projects.
@@ -120,9 +135,27 @@ class FlowcellRunAnnotator(object):
                         if re.search(project, p)]
         logger.debug("collecting list of libraries")
         logger.debug("searching in projects {}".format(projects))
-        return [l for p in projects
-                for l in os.listdir(os.path.join(unaligned_path, p))
-                if len(parsing.get_library_id(l))]
+        # Need to handle possibility of new basespace directory structure
+        libList = []
+        for p in projects:
+            logger.debug("Attempting to collect libs for project: {}".format(p))
+            for l in os.listdir(os.path.join(unaligned_path, p)):
+                logger.debug("Looking for lib name in: {}".format(l))
+                # Old basespace - able to parse libid from current dir
+                if (len(parsing.get_library_id(l))):
+                    libList.append(l)
+                # New basespace - need to go down one more level to parse lib
+                elif (os.path.isdir(os.path.join(unaligned_path, p, l))): 
+                    logger.debug("Lib name not found. Going down into: {}"
+                                .format(os.path.join(unaligned_path, p, l)))
+                    for lNext in os.listdir(os.path.join(unaligned_path, p, l)):
+                        if (len(parsing.get_library_id(lNext))):
+                            libList.append(os.path.join(l,lNext))
+                else:
+                    logger.debug("Lib name not found and {} is not a directory."
+                                .format(os.path.join(unaligned_path, p, l)))
+        
+        return libList
 
     def get_processed_libraries(self, project=None, sub_path="counts"):
         """
@@ -160,6 +193,7 @@ class FlowcellRunAnnotator(object):
                         l, p, self.run_id, self.db
                         ).get_sequenced_library()
                         for l in libraries]
+
         return sequencedlibraries
     
     def get_library_gene_counts(self, project=None):
