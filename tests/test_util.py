@@ -32,7 +32,34 @@ class TestStrings:
         # THEN the output string should match the expected result (i.e., the
         # matched substring, if found, or the default return string otherwise)
         assert (substring == expected_result)
-
+    
+    @pytest.mark.parametrize(
+        'test_input, expected_result',
+        [
+            (('foobar', 'foo'), 'foo'),
+            (('foobar', 'foo$'), ''),
+            (('foobar', 'foo', 'foo'), 'foo'),
+            (('foobar', 'foo$', 'foo'), 'foo'),
+            (('foo1bar1foo2bar2', 'foo[0-9]+'), 'foo2'),
+        ]
+    )
+    def test_matchlastdefault(self, test_input, expected_result):
+        # GIVEN any state
+        
+        # WHEN a string is searched for a pattern (regular expression) with
+        # a specified default return value if no match is found
+        string = test_input[0]
+        pattern = test_input[1]
+        if len(test_input) > 2:
+            default = test_input[2]
+            substring = util.matchdefault(pattern, string, default)
+        else:
+            substring = util.matchlastdefault(pattern, string)
+            
+        # THEN the output string should match the expected result (i.e., the
+        # last matched substring, if found, or the default string otherwise)
+        assert (substring == expected_result)
+        
     @pytest.mark.parametrize(
         'test_input, expected_result',
         [

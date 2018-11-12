@@ -26,6 +26,31 @@ def matchdefault(pattern, string, default=''):
     else:
         return default
 
+def matchlastdefault(pattern, string, default=''):
+    """
+    Search for pattern in string *from right*, return default string if no match
+
+    :type pattern: str
+    :param pattern: non-compiled regular expression to search for in
+        input string
+
+    :type string: str
+    :param string: any string
+
+    :type default: str
+    :param default: string to return if no match found
+
+    :rtype: str
+    :return: rightmost substring matched to regular expression 
+        or default string, if no match found
+    """
+    regex = re.compile(pattern)
+    matches = regex.findall(string)
+    if len(matches):
+        return matches[len(matches) - 1]
+    else:
+        return default
+
 
 def to_camel_case(snake_str):
     """
