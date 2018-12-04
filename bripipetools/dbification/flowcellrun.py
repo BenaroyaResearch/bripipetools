@@ -3,6 +3,7 @@ Class for importing data from a sequencing run into GenLIMS and the
 Research DB as new objects.
 """
 import logging
+import os
 
 from .. import parsing
 from .. import database
@@ -81,6 +82,23 @@ class FlowcellRunImporter(object):
             pipeline_root=path_items['pipeline_root'],
             db=self.db
             ).get_library_metrics()
+            
+    def _collect_flowcell_workflowbatches(self):
+        """
+        Collect WorkflowBatch objects for flowcell run.
+        """
+        path_items = parsing.parse_flowcell_path(self.path)
+        batchfile_dir = os.path.join(self.path, "globus_batch_submission")
+        logger.info("collecting info for workflow batch files in '{}'"
+                    .format(batchfile_dir))
+
+        return [annotation.WorkflowBatchAnnotator(
+            workflowbatch_file=os.path.join(batchfile_dir, curr_batchfile),
+            pipeline_root=path_items['pipeline_root'],
+            db=self.db,
+            run_opts = self.run_opts
+            ).get_workflow_batch() 
+            for curr_batchfile in os.listdir(batchfile_dir)]
 
     def _insert_flowcellrun(self, collection='all'):
         """
@@ -135,6 +153,15 @@ class FlowcellRunImporter(object):
         for lgc in librarymetrics:
             logger.debug("inserting library metrics '{}'".format(lgc))
             database.put_genomicsMetrics(self.db, lgc.to_json())
+    
+    def _insert_genomicsWorkflowbatches(self):
+        """
+        Collect WorkflowBatch objects and insert them into database.
+        """
+        workflowbatches = self._collect_flowcell_workflowbatches()
+        for workflowbatch in workflowbatches:
+            logger.debug("inserting workflow batch '{}'".format(workflowbatch))
+            database.put_genomicsWorkflowbatches(self.db, workflowbatch.to_json())
 
     def insert(self, collection='genlims'):
         """
@@ -165,6 +192,12 @@ class FlowcellRunImporter(object):
             logger.info(("Inserting metrics for libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsLibrarymetrics()
+        
+        # Workflow Batch files - only into ResDB
+        if collection in ['all', 'researchdb', 'genomicsWorkflowbatches']:
+            logger.info(("Inserting workflow batches for flowcell '{}' "
+                         "into '{}'").format(self.path, self.db.name))
+            self._insert_genomicsWorkflowbatches()
 
         # Run information into GenLIMS
         if collection in ['all', 'genlims', 'flowcell', 'runs']:

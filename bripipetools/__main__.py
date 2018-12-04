@@ -252,8 +252,11 @@ def qc(sexmodel, sexcutoff, path):
     ).get_processed_libraries(qc=True)
 
 @main.command()
+@click.option('--workflow-dir', default='/mnt/bioinformatics/pipeline/galaxy_workflows',
+              help=("path to folder containing .ga Galaxy workflow "
+                    "files to be used for batch processing"))
 @click.argument('path')
-def researchdb(path):
+def researchdb(path, workflow_dir):
     """
     Push library results to research database
     """
@@ -261,7 +264,7 @@ def researchdb(path):
     importer = bripipetools.dbification.ImportManager(
         path=path,
         db=RB,
-        run_opts=None
+        run_opts = {"workflow_dir":workflow_dir}
     )
     importer.run(collections='researchdb')
     logger.info("Import complete.")
