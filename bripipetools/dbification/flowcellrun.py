@@ -4,6 +4,7 @@ Research DB as new objects.
 """
 import logging
 import os
+import re
 
 from .. import parsing
 from .. import database
@@ -98,7 +99,8 @@ class FlowcellRunImporter(object):
             db=self.db,
             run_opts = self.run_opts
             ).get_workflow_batch() 
-            for curr_batchfile in os.listdir(batchfile_dir)]
+            for curr_batchfile in os.listdir(batchfile_dir)
+            if not re.search('DS_Store', curr_batchfile)]
 
     def _insert_flowcellrun(self, collection='all'):
         """
