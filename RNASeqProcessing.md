@@ -65,7 +65,7 @@ Processing fastq to counts using Globus Genomics Galaxy
 		+ Generate a summary file of the productive TCR chains found in each library:
 		+ `% Rscript --vanilla /mnt/genomics/code/shared/bripipetools/scripts/summarize_mixcr_output.R /mnt/genomics/Illumina/{FlowcellID}`
 	+ Wrap up the processing, stitching together files, inserting data into tg3 with:
-		+ `% bripipetools wrapup /mnt/genomics/Illumina/{FlowcellID}/`
+		+ `% bripipetools wrapup --workflow-dir /mnt/genomics/galaxy_workflows/ /mnt/genomics/Illumina/{FlowcellID}/`
 	+ Watch for missing files in the output of wrapup - select no, if there are missing files, and go back to galaxy and re-transfer if necessary, or recreate from above.
 	+ In order to call SNPs for a flow cell run, you can run the `scripts/call_snps.sh` script. Running this script without any arguments will give you usage information.
 	+ If the run contains SNP data you can perform kinship analysis to identify potential sample swaps:
