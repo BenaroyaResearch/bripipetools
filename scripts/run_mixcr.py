@@ -97,7 +97,7 @@ def main(argv):
     inputLibs = get_input_list(inputDir)
 
     for inLib in inputLibs:
-        mixcrCmd = build_mixcr_cmd(inLib, resultsDir, args.species)
+        mixcrCmd = build_mixcr_cmd(inLib, resultsDir, region = "full", species = args.species)
         slurmCmd = build_slurm_cmd(mixcrCmd, excludeNodes)
         os.system(slurmCmd)
         print slurmCmd + '\n'
