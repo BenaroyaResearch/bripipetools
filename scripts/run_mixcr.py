@@ -11,7 +11,7 @@ def get_lib_base(filePath):
     libBase = re.search('.*(lib|SRR)[0-9]+', filePath).group()
     return libBase
 
-def build_mixcr_cmd(inLib, resultsDir, region = "full"):
+def build_mixcr_cmd(inLib, resultsDir, region = "full", species = "hsa"):
     libBase = get_lib_base(inLib)
     fileBase = os.path.basename(libBase)
     libBase = os.path.join(resultsDir, fileBase)
@@ -28,14 +28,14 @@ def build_mixcr_cmd(inLib, resultsDir, region = "full"):
     
     # align to and produce sequence for entire chain
     if region == "full":
-        alignCmd = ("mixcr align -c TCR -OvParameters.geneFeatureToAlign=VTranscript -r %s %s %s" %
-                   (mixcrOut, inLib, tempVdjca))
+        alignCmd = ("mixcr align -s %s -c TCR -OvParameters.geneFeatureToAlign=VTranscript -r %s %s %s" %
+                   (species, mixcrOut, inLib, tempVdjca))
         assembleCmd = ("mixcr assemble -OassemblingFeatures=VDJRegion -r %s %s %s" %
                       (mixcrOut, tempVdjca, tempClns))
     # align to and produce sequence for only CDR3 region              
     elif region == "CDR3":
-        alignCmd = ("mixcr align -c TCR -r %s %s %s" %
-                    (mixcrOut, inLib, tempVdjca))
+        alignCmd = ("mixcr align -s %s -c TCR -r %s %s %s" %
+                    (species, mixcrOut, inLib, tempVdjca))
         assembleCmd = ("mixcr assemble -r %s %s %s" %
                        (mixcrOut, tempVdjca, tempClns))
                        
@@ -70,6 +70,10 @@ def main(argv):
                         required=False,
                         default=None,
                         help=("comma-separated SLURM node(s) to exclude"))
+    parser.add_argument('-s', '--species',
+                        required=False,
+                        default='hsa',
+                        help=("Species, either 'hsa' (human) or 'mmu' (mouse)"))
     # parser.add_argument('-s', '--sourceType,
     #                     required=False,
     #                     nargs=1,
@@ -93,7 +97,7 @@ def main(argv):
     inputLibs = get_input_list(inputDir)
 
     for inLib in inputLibs:
-        mixcrCmd = build_mixcr_cmd(inLib, resultsDir)
+        mixcrCmd = build_mixcr_cmd(inLib, resultsDir, args.species)
         slurmCmd = build_slurm_cmd(mixcrCmd, excludeNodes)
         os.system(slurmCmd)
         print slurmCmd + '\n'
