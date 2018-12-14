@@ -14,6 +14,8 @@ library(dplyr)
 library(purrr)
 library(parallel)
 
+mixcrOutputFolder <- "mixcrOutput_trinity"
+
 # clean column names of data frame
 clean_headers <- function(df) {
   headers <- names(df)
@@ -200,7 +202,7 @@ find_projects_with_mixcr <- function(fc_folder){
   libs_with_mixcr = NULL
   p_dirs <- list.files(fc_folder, pattern = "^Project_", full.names = TRUE)
   for (p_dir in p_dirs){
-    mixcr_dir <- list.files(p_dir, pattern = "^mixcrOutput_trinity")
+    mixcr_dir <- list.files(p_dir, pattern = paste0("^",mixcrOutputFolder)
     if(length(mixcr_dir) > 0) { 
       libs_with_mixcr <- c(libs_with_mixcr, p_dir)
     }
@@ -214,7 +216,7 @@ find_projects_with_mixcr <- function(fc_folder){
 # validate that all of the Trinity outputs made it into MiXCR files
 validate_mixcr_output <- function(proj_folder){
   trin_libs <- get_trinity_libs(proj_folder)
-  mixcr_files <- list.files(file.path(proj_folder, "mixcrOutput_trinity"))
+  mixcr_files <- list.files(file.path(proj_folder, mixcrOutputFolder))
   
   mixcr_file_suffixes <- 
     c("_mixcrAlign.vdjca",
@@ -250,7 +252,7 @@ make_mixcr_summary <- function(proj_folder){
   pname <- parse_project_name(proj_folder)
   currdate <- format(Sys.Date(), "%y%m%d")
   mixcr_file <- paste(pname, "mixcr_summary.csv", sep = "_")
-  mixcr_jxns <- read_mixcr(folder = file.path(proj_folder, "mixcrOutput_trinity"))
+  mixcr_jxns <- read_mixcr(folder = file.path(proj_folder, mixcrOutputFolder))
   if(nrow(mixcr_jxns) == 0){
     print(paste("WARNING: No junctions were detected in project", proj_folder))
     return(1)
