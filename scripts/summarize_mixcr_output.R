@@ -202,7 +202,7 @@ find_projects_with_mixcr <- function(fc_folder){
   libs_with_mixcr = NULL
   p_dirs <- list.files(fc_folder, pattern = "^Project_", full.names = TRUE)
   for (p_dir in p_dirs){
-    mixcr_dir <- list.files(p_dir, pattern = paste0("^",mixcrOutputFolder)
+    mixcr_dir <- list.files(p_dir, pattern = paste0("^",mixcrOutputFolder))
     if(length(mixcr_dir) > 0) { 
       libs_with_mixcr <- c(libs_with_mixcr, p_dir)
     }
