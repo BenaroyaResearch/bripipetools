@@ -407,7 +407,8 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             path=path,
             db=RB,
             run_opts = {"sexmodel":sexmodel, 
-                        "sexcutoff":sexcutoff}
+                        "sexcutoff":sexcutoff,
+                        "workflow_dir":workflow_dir}
         ).run(collections='researchdb')
         logger.info("Research Database flowcell run import complete.")
 
