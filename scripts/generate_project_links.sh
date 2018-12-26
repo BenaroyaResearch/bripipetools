@@ -5,7 +5,7 @@ FC_DIR=${1%/}
 while read proj_dir; do
     proj=$(echo $proj_dir | egrep "P[0-9]+(-[0-9]+)*" -o)
     projDetails=$(curl -s https://gcq.benaroyaresearch.org/project/projectByNumber/$proj | 
-      grep -Eo \"shortTitle\"\:.+\"projName\" | sed 's/\"shortTitle\"\://g;s/,\"projName\"//g')
+                  jq '.projects[0].shortTitle')
     echo $proj $projDetails
     smb_path=$(echo $proj_dir | awk '{gsub(/\/(mnt|Volumes)/, "smb://isilon.brivmrc.org")}1')
     echo "Mac: ${smb_path}"
