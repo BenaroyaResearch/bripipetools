@@ -372,7 +372,7 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
 @click.option('--all-workflows/--optimized-only', default=False,
               help=("indicate whether to include all detected workflows "
                     "as options or to keep 'optimized' workflows only"))
-@click.option('--workflow-dir', default='/mnt/genomics/galaxy_workflows',
+@click.option('--workflow-dir', default='/mnt/bioinformatics/pipeline/galaxy_workflows',
               help=("path to folder containing .ga Galaxy workflow "
                     "files to be used for batch processing"))
 @click.option('--database-type', default='all',
