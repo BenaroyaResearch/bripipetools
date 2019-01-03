@@ -11,7 +11,7 @@ def list_project_dirs(mount_path):
                 and not re.search('^\.', d)
                 and not re.search('-0', d))]
 
-def get_project_app_dir(project_path):
+def get_project_app_dirs(project_path):
     app_session_dir = os.path.join(project_path, 'AppSessions')
     fq_match = [s for s in os.listdir(app_session_dir) if "fastq" in s.lower()]
     if (fq_match == []):
@@ -21,7 +21,7 @@ def get_project_app_dir(project_path):
             for d in os.listdir(app_session_dir)
             if os.path.isdir(os.path.join(app_session_dir, d))
             and not re.search('^\.', d)
-            and re.search('fastq', d.lower())][-1]
+            and re.search('fastq', d.lower())]
 
 def get_app_props_dir(app_path):
     return(os.path.join(app_path, 'Properties'))
@@ -80,14 +80,15 @@ def copy_data(flowcell_path, app_logs_path, app_props_path):
         subprocess.Popen(props_copy_cmd, shell=True)
 
 def backup_project(project_path, target_path):
-    project_app_dir = get_project_app_dir(project_path)
-    if (project_app_dir == []):
+    project_app_dirs = get_project_app_dirs(project_path)
+    if (project_app_dirs == []):
         return()
-    app_logs_dir = get_app_logs_dir(project_app_dir)
-    app_props_dir = get_app_props_dir(get_project_app_dir(project_path))
-    project_flowcell = sniff_sample_sheet(app_logs_dir)
-    flowcell_path = os.path.join(target_path, project_flowcell)
-    copy_data(flowcell_path, app_logs_dir, app_props_dir)
+    for project_app_dir in project_app_dirs:
+        app_logs_dir = get_app_logs_dir(project_app_dir)
+        app_props_dir = get_app_props_dir(project_app_dir)
+        project_flowcell = sniff_sample_sheet(app_logs_dir)
+        flowcell_path = os.path.join(target_path, project_flowcell)
+        copy_data(flowcell_path, app_logs_dir, app_props_dir)
 
 def main(argv):
     bs_mount_dir = sys.argv[1]
