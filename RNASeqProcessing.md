@@ -14,9 +14,9 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ Optionally: inspect run QC at basespace website
 	+ Project downloads can take a few minutes to an hour - an entire flowcell will take about 1-2 hrs to download, depending on the number of libraries, and sequencing technology.
 	
-**NB:** Starting in October 2017, the BaseSpace data directory structure changed slightly. The upshot is that if projects were run split between multiple lanes in a flowcell, the FASTQ files for these projects need to be placed in the correct folder. **It is now necessary to run the script `fix_new_basespace_lanes_nocopy.sh` before proceeding to process the flow cell.** If this script is _not_ run, there will be no error or indication that anything went wrong, but only one lane's worth of data will be processed per project. Command:
+**NB:** Starting in October 2017, the BaseSpace data directory structure changed slightly. The upshot is that if projects were run split between multiple lanes in a flowcell, the FASTQ files for these projects need to be placed in the correct folder. **It is now necessary to run the script `fix_fastq_paths.sh` before proceeding to process the flow cell.** If this script is _not_ run, there will be no error or indication that anything went wrong, but only one lane's worth of data will be processed per project. Command:
 
-`bripipetools/scripts/fix_new_basespace_lanes_nocopy.sh /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}`
+`bripipetools/scripts/fix_fastq_paths.sh /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}`
 
 
 2. Create workflow batch file
