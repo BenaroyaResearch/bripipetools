@@ -75,7 +75,7 @@ then
   echo "Now traversing directory to find projects..."
   cd $workingdir
   echo "ProjectFastqDirectory" > $proj_file
-  find "`pwd`" -maxdepth $searchdepth -regex ".*/P.*" |\
+  find -E "`pwd`" -maxdepth $searchdepth -regex ".*Unaligned/P[0-9A-Za-z_-]+" |\
    sort >> $proj_file
 fi
 
@@ -84,7 +84,7 @@ if [ "$find_libs" = true ]
 then
   echo "Now traversing directory to find libraries..."
   cd $workingdir
-  libpaths=$(find "`pwd`" -maxdepth $searchdepth -regex ".*Unaligned.*\.fastq.gz$" | grep -E lib[0-9]+)
+  libpaths=$(find "`pwd`" -maxdepth $searchdepth -regex ".*Unaligned.*\.fastq.gz$" | grep -E lib[0-9]+ | grep -Ev empty_L[0-9]{3}\.fastq\.gz)
   
   printf "libID\tlibFolder\tflowcellFolder\tprojectFolder\tserverLocation\tfilePath\n" > $lib_file
   for libpath in $libpaths
@@ -102,10 +102,11 @@ then
       awk 'match($0, /P[0-9]+[a-zA-Z0-9-]*/){ print substr($0, RSTART, RLENGTH) }')
     serverloc=$(echo "$libpath" |\
       awk 'match($0, '$fcfolder'){ print substr($0, 0, RSTART-1) }')
-    filepath=$(echo "$libpath" | xargs -d '\n' dirname)
+    #filepath=$(echo "$libpath" | xargs -d '\n' dirname)
+    filepath=$(dirname "$libpath")
     
     printf "%s\t%s\t%s\t%s\t%s\t%s\n" $libid $libfolder $fcfolder $projfolder $serverloc $filepath
-  done >> $lib_file
+  done | sort >> $lib_file
   
   # restore record separator 
   IFS="$OIFS"
