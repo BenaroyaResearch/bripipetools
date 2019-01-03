@@ -75,7 +75,7 @@ then
   echo "Now traversing directory to find projects..."
   cd $workingdir
   echo "ProjectFastqDirectory" > $proj_file
-  find "`pwd`" -maxdepth $searchdepth -regex ".*/Unaligned/[Project_]*P[0-9]+[a-zA-Z0-9-]*" |\
+  find "`pwd`" -maxdepth $searchdepth -regex ".*/P.*" |\
    sort >> $proj_file
 fi
 
@@ -84,7 +84,7 @@ if [ "$find_libs" = true ]
 then
   echo "Now traversing directory to find libraries..."
   cd $workingdir
-  libpaths=$(find "`pwd`" -maxdepth $searchdepth -regex ".*\.fastq.gz$" | grep -E lib[0-9]+)
+  libpaths=$(find "`pwd`" -maxdepth $searchdepth -regex ".*Unaligned.*\.fastq.gz$" | grep -E lib[0-9]+)
   
   printf "libID\tlibFolder\tflowcellFolder\tprojectFolder\tserverLocation\tfilePath\n" > $lib_file
   for libpath in $libpaths
