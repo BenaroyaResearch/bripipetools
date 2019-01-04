@@ -55,7 +55,12 @@ def sniff_sample_sheet(app_logs_path):
                 if tmpfcid:
                     return tmpfcid.group(1)
                 else:
-                    pass
+                    # hail mary - try to sniff from path
+                    tmpfcid = re.search('((A|B|C|D)([A-Z]|[0-9])*X(X|Y|2))', app_logs_path)
+                    if tmpfcid:
+                        return tmpfcid.group(1)
+                    else:
+                        pass
             pass
 
 def copy_data(flowcell_path, app_logs_path, app_props_path):
