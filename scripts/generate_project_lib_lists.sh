@@ -75,8 +75,15 @@ then
   echo "Now traversing directory to find projects..."
   cd $workingdir
   echo "ProjectFastqDirectory" > $proj_file
-  find -E "`pwd`" -maxdepth $searchdepth -regex ".*Unaligned/P[0-9A-Za-z_-]+" |\
-   sort >> $proj_file
+  # need different find arguments for linux/mac
+  if [ `uname` = 'Linux' ] # GNU find - extended regex support by default
+  then 
+    find "`pwd`" -maxdepth $searchdepth -regex ".*Unaligned/P[0-9A-Za-z_-]+" |\
+     sort >> $proj_file
+  else
+    find -E "`pwd`" -maxdepth $searchdepth -regex ".*Unaligned/P[0-9A-Za-z_-]+" |\
+     sort >> $proj_file
+   fi
 fi
 
 # get list of libraries
