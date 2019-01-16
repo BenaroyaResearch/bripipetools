@@ -120,7 +120,7 @@ def main(argv):
                                    chainType = args.chainType,
                                    useKAligner2 = args.useKAligner2)
         slurmCmd = build_slurm_cmd(mixcrCmd, excludeNodes)
-        #os.system(slurmCmd)
+        os.system(slurmCmd)
         print slurmCmd + '\n'
 
 if __name__ == "__main__":
