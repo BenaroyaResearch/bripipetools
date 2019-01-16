@@ -11,7 +11,12 @@ def get_lib_base(filePath):
     libBase = re.search('.*(lib|SRR)[0-9]+', filePath).group()
     return libBase
 
-def build_mixcr_cmd(inLib, resultsDir, region = "full", species = "hsa", chainType="TCR"):
+def build_mixcr_cmd(inLib, 
+                    resultsDir, 
+                    region = "full", 
+                    species = "hsa", 
+                    chainType="TCR",
+                    useKAligner2=False):
     libBase = get_lib_base(inLib)
     fileBase = os.path.basename(libBase)
     libBase = os.path.join(resultsDir, fileBase)
@@ -26,16 +31,19 @@ def build_mixcr_cmd(inLib, resultsDir, region = "full", species = "hsa", chainTy
     #alignCmd = ("mixcr align -l TCR -r %s %s %s" %
     #            (mixcrOut, inLib, tempVdjca))
     
+    # add argument for new large gapped aligner if flag was set
+    alignerParam = "-p kaligner2" if useKAligner2 else "-p default"
+    
     # align to and produce sequence for entire chain
     if region == "full":
-        alignCmd = ("mixcr align -s %s -c %s -OvParameters.geneFeatureToAlign=VTranscript -r %s %s %s" %
-                   (species, chainType, mixcrOut, inLib, tempVdjca))
+        alignCmd = ("mixcr align %s -s %s -c %s -OvParameters.geneFeatureToAlign=VTranscript -r %s %s %s" %
+                   (alignerParam, species, chainType, mixcrOut, inLib, tempVdjca))
         assembleCmd = ("mixcr assemble -OassemblingFeatures=VDJRegion -r %s %s %s" %
                       (mixcrOut, tempVdjca, tempClns))
     # align to and produce sequence for only CDR3 region              
     elif region == "CDR3":
-        alignCmd = ("mixcr align -s %s -c %s -r %s %s %s" %
-                    (species, chainType, mixcrOut, inLib, tempVdjca))
+        alignCmd = ("mixcr align %s -s %s -c %s -r %s %s %s" %
+                    (alignerParam, species, chainType, mixcrOut, inLib, tempVdjca))
         assembleCmd = ("mixcr assemble -r %s %s %s" %
                        (mixcrOut, tempVdjca, tempClns))
                        
@@ -77,7 +85,11 @@ def main(argv):
     parser.add_argument('-c', '--chainType',
                         required=False,
                         default='TCR',
-                        help=("Immunological chain type, eg: TCR, BCR, TRA, TRB, etc..."))
+                        help=("Immunological chain type, eg: ALL, TCR, TRA, IGH, etc..."))
+    parser.add_argument('-k', '--useKAligner2',
+                        required=False,
+                        action='store_true',
+                        help=("Sets the aligner to be KAligner2, useful for large gapped alignments."))
     # parser.add_argument('-s', '--sourceType,
     #                     required=False,
     #                     nargs=1,
@@ -105,9 +117,10 @@ def main(argv):
                                    resultsDir, 
                                    region = "full", 
                                    species = args.species,
-                                   chainType = args.chainType)
+                                   chainType = args.chainType,
+                                   useKAligner2 = args.useKAligner2)
         slurmCmd = build_slurm_cmd(mixcrCmd, excludeNodes)
-        os.system(slurmCmd)
+        #os.system(slurmCmd)
         print slurmCmd + '\n'
 
 if __name__ == "__main__":
