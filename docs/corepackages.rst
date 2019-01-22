@@ -67,7 +67,7 @@ Package details
 -----
 
 ``database`` package
--------------------
+--------------------
 
 .. automodule:: bripipetools.database
 
