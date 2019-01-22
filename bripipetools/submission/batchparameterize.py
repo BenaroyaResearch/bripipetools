@@ -52,7 +52,7 @@ class BatchParameterizer(object):
                 if p['tag'] == 'fastq_in'
                 and re.search('from_path', p['name'])]
 
-    def _get_lane_fastq(self, sample_path, lane):
+    def _get_lane_fastq(self, sample_path, lane, read_number="R1"):
         """
         Retrieve the path for the FASTQ file from the specified lane
         within the sample folder. If no file exists, create and return
@@ -63,14 +63,14 @@ class BatchParameterizer(object):
                      .format(sample_path, lane))
         fastq_paths = [os.path.join(sample_path, f)
                        for f in os.listdir(sample_path)
-                       if re.search(r'L00{}'.format(lane), f)]
+                       if re.search(r'L00{}_{}'.format(lane, read_number), f)]
         if len(fastq_paths):
             fastq_path = fastq_paths[0]
 
         else:
             logger.debug("no FASTQ found for lane {}; creating empty file"
                          .format(lane))
-            empty_fastq = 'empty_L00{}.fastq.gz'.format(lane)
+            empty_fastq = 'empty_L00{}_{}.fastq.gz'.format(lane, read_number)
             fastq_path = os.path.join(sample_path, empty_fastq)
 
             if not os.path.exists(fastq_path):
@@ -372,13 +372,30 @@ class BatchParameterizer(object):
             elif param['type'] == 'sample':
                 param_values.append(sample_name)
             elif param['type'] == 'input':
-                lane = re.search('[1-8]', param['name']).group()
-                param_values.append(
-                    util.swap_root(
-                        self._get_lane_fastq(sample_path, lane),
-                        'pipeline', '/mnt/bioinformatics/'
+                if re.search('^fastq_in', param['tag']):
+                    lane = re.search('[1-8]', param['name']).group()
+                    param_values.append(
+                        util.swap_root(
+                            self._get_lane_fastq(sample_path, lane),
+                            'pipeline', '/mnt/bioinformatics/'
+                        )
                     )
-                )
+                elif re.search('^fastq-r1_in', param['tag']):
+                    lane = re.search('[1-8]', param['name']).group()
+                    param_values.append(
+                        util.swap_root(
+                            self._get_lane_fastq(sample_path, lane, "R1"),
+                            'pipeline', '/mnt/bioinformatics/'
+                        )
+                    )
+                elif re.search('^fastq-r2_in', param['tag']):
+                    lane = re.search('[1-8]', param['name']).group()
+                    param_values.append(
+                        util.swap_root(
+                            self._get_lane_fastq(sample_path, lane, "R2"),
+                            'pipeline', '/mnt/bioinformatics/'
+                        )
+                    )
             elif param['type'] == 'annotation':
                 param_values.append(self._build_reference_path(param))
             elif param['type'] == 'option':
@@ -386,6 +403,18 @@ class BatchParameterizer(object):
             elif param['type'] == 'output':
                 if re.search('^fastq_out', param['tag']):
                     final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
+                    output_path = os.path.join(
+                        util.swap_root(self.target_dir, 'pipeline', '/mnt/bioinformatics/'),
+                        'inputFastqs', final_fastq
+                    )
+                elif re.search('^fastq-r1_out', param['tag']):
+                    final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
+                    output_path = os.path.join(
+                        util.swap_root(self.target_dir, 'pipeline', '/mnt/bioinformatics/'),
+                        'inputFastqs', final_fastq
+                    )
+                elif re.search('^fastq-r2_out', param['tag']):
+                    final_fastq = '{}_R2-final.fastq.gz'.format(sample_name)
                     output_path = os.path.join(
                         util.swap_root(self.target_dir, 'pipeline', '/mnt/bioinformatics/'),
                         'inputFastqs', final_fastq
