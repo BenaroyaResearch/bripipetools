@@ -479,8 +479,15 @@ Note: requires SLURM!! (must run on server ``srvgalaxy01``)
 
 ::
 
-    usage: run_mixcr.py [-h] -i INPUTDIR -o RESULTSDIR
+    usage: run_mixcr.py [-h] -i INPUTDIR -o RESULTSDIR [-x EXCLUDENODES]
+                [-s SPECIES] [-c CHAINTYPE] [-k]
 
+Notes on arguments:
+
+- `-x nodename` allows the user to exclude slurm nodes from use in processing the batch
+- `-s species` sets the species ('hsa' = human (default), 'mmu' = mouse)
+- `-c chaintype` defines the immunological chain to check for. This should be 'TCR' (default) or 'ALL' (for BCR identification)
+- `-k` sets the use of KAligner2 during the align phase, which is useful for alignments with large gaps (ie: BCR identification).
 
 ::
 

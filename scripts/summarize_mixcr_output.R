@@ -111,14 +111,14 @@ parse_mixcr_clones <- function(mixcr_df) {
     transmute(cln_count = clonecount,
               full_nt_sequence = clonalsequence,
               v_gene = str_extract(allvhitswithscore,
-                                   "TR[A-Z]+[0-9]*(\\-[0-9])*(DV[0-9]+)*"),
+                                   "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9])*(DV[0-9]+)*"),
               # note: not currently possible to get region overlap with
               # current version/parameters we use for MiXCR
               v_region_score = str_extract(allvhitswithscore, "(?<=\\()[0-9]+") %>% 
                 as.integer(),
               v_align = allvalignments,
               j_gene = str_extract(alljhitswithscore, 
-                                   "TR[A-Z]+[0-9]*(\\-[0-9][A-Z]*)*"),
+                                   "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9][A-Z]*)*"),
               j_align = alljalignments,
               j_region_score = str_extract(alljhitswithscore, "(?<=\\()[0-9]+") %>% 
                 as.integer(),
