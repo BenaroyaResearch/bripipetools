@@ -61,6 +61,7 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ Or for a single Project:
 		+ `% python scripts/concatenate_trinity_output.py /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}/{ProjectID}/Trinity`
 	+ If a TCR based run, then run mixcr as well (**must** be done on srvgalaxy01 to use SLURM):
+		+ **NB** - In order for SLURM to run properly, it needs write privileges for a slurm.out file in the directory it's executed from. The easiest way to ensure this is to call the SLURM/MiXCR command from /mnt/bioinformatics/pipeline/Illumina and allow SLURM to append to the existing slurm.out file there.
 		+ **NB** - The following command assumes that all of the projects you're running MiXCR on identifying **human** TCRs. If you are analyzing mouse TCRs, or if there are both human and mouse TCRs on the same flow cell, you need to specify the species to MiXCR using the `-s` option with either `mmu` (mouse) or `hsa` (human) as appopriate. Note that in the case of both species on the same flow cell, the `run_mixcr.py` script can be called on each project's Trinity folder outside of the loop.
 		+ `% while read path; do outdir="$(dirname $path)/mixcrOutput_trinity"; python /mnt/bioinformatics/workspace/code/shared/bripipetools/scripts/run_mixcr.py -i $path -o $outdir; done < <(find /mnt/bioinformatics/pipeline/Illumina/{FlowcellID} -name "Trinity" -maxdepth 2)`
 		+ Generate a summary file of the productive TCR chains found in each library:
