@@ -140,8 +140,14 @@ class OutputStitcher(object):
         try:
             for idx, row in enumerate(data[1:]):
                 metrics = dict(zip(data[0], row))
-                mapped_reads = (float(metrics['UNPAIRED_READS_EXAMINED'])
-                                / float(metrics['fastq_total_reads']))
+                # handle pct mapped reads calculation differently for PE reads
+                if(metrics['CATEGORY'] == 'UNPAIRED'):
+                    mapped_reads = (float(metrics['UNPAIRED_READS_EXAMINED'])
+                                    / float(metrics['fastq_total_reads']))
+                else:
+                    mapped_reads = ((float(metrics['UNPAIRED_READS_EXAMINED'])
+                                    + float(metrics['READ_PAIRS_EXAMINED']))
+                                    / float(metrics['fastq_total_reads']))
                 data[idx + 1].append(mapped_reads)
             data[0].append('mapped_reads_w_dups')
         except KeyError:
