@@ -66,7 +66,7 @@ def to_camel_case(snake_str):
         components = snake_str.split('_')
         return components[0].lower() + ''.join(x.title() for x in components[1:])
     else:
-        return snake_str
+        return snake_str.lower()
 
 
 def to_snake_case(camel_str):
