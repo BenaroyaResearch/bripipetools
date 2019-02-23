@@ -94,7 +94,7 @@ class PicardMetricsFile(object):
                 return {}
             for td in tr.findAll('td'):
                 if re.search('^[A-Z]+', td.text):
-                    td_keys = td.text.split('\t')
+                    td_keys = td.text.lower().split('\t')
                     logger.debug("found wide metrics fields: {}".format(td_keys))
 
                     td_vals = tr.next_sibling.next_sibling.text.split('\t')
