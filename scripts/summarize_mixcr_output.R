@@ -188,6 +188,10 @@ parse_project_name <- function(proj_folder){
   return(p)
 }
 
+parse_mixcr_metadata <- function(proj_folder){
+  
+}
+
 # accepts a flow cell project folder path name with a Trinity folder,
 # returns a list of all the libs in the Trinity folder
 get_trinity_libs <- function(project_folder){
@@ -270,6 +274,8 @@ run_prog <- function(fc_path){
       nFailedProjects <- 
         nFailedProjects +
         make_mixcr_summary(p) # returns 0 if success, 1 if failure
+    } else {
+      nFailedProjects <- nFailedProjects + 1
     }
   }
   if (nFailedProjects > 0){
