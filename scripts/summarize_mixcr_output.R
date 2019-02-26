@@ -35,68 +35,6 @@ select_productive <- function(df) {
                !is.na(df$junction),]
   return(new_df)
 }
- 
-# read IMGT results Summary from file
-read_imgt_summary <- function(file) {
-  imgt_df <- read_tsv(file) %>% 
-    clean_headers() %>% 
-    filter(functionality != "No results")
-  
-  return(imgt_df)
-}
-
-# parse raw IMGT clonotype results from Summary file
-parse_imgt_summary <- function(imgt_df) {
-  imgt_df %>% 
-    select(sequence_id, v_gene_and_allele, v_region_score, v_region_identity_nt,
-           j_gene_and_allele, j_region_score, j_region_identity_nt,
-           aa_junction, 
-           functionality, functionality_comment, junction_frame) %>% 
-    mutate(v_gene = str_extract(v_gene_and_allele, 
-                                "TR.*?(?=(\\*))"),
-           v_region_score = as.integer(v_region_score),
-           j_gene = str_extract(j_gene_and_allele, 
-                                "TR.*?(?=(\\*))"),
-           j_region_score = as.integer(j_region_score),
-           junction = aa_junction) %>% 
-    select(one_of("sequence_id", 
-                  "v_gene", "v_region_score", "v_region_identity_nt",
-                  "j_gene", "j_region_score", "j_region_identity_nt",
-                  "junction",
-                  "functionality", "functionality_comment", "junction_frame"))
-  
-}
-
-# read and parse IMGT results from list of archive (.txz) files
-read_imgt <- function(file_list = NULL, folder = NULL, 
-                      sample_regex = "(lib|SRR)[0-9]+") {
-  if(is.null(file_list) & is.null(folder)) {
-    stop("Input must be provided for either `file_list` or `folder` argument.")
-  }
-  
-  if(!is.null(folder)) {
-    file_list <- list.files(folder, full.names = TRUE) %>% 
-      .[str_detect(tolower(.), ".txz")]
-  }
-  
-  if(!is.list(file_list)) {
-    file_list <- as.list(file_list)
-  }
-  
-  jxn_df <- mclapply(file_list, function(x) {
-    extract_cmd <- sprintf("tar -xf '%s' -O '1_Summary.txt'", x)
-    pipe(extract_cmd) %>% 
-      read_file() %>% 
-      read_imgt_summary() %>% 
-      parse_imgt_summary() %>% 
-      mutate(sequence_id = str_extract(sequence_id, sample_regex)) %>% 
-      rename(sample = sequence_id)
-  }) %>% 
-    bind_rows()
-  
-  return(jxn_df %>% 
-           arrange(sample))
-}
 
 # read MiXCR results from file
 read_mixcr_clones <- function(file) {
