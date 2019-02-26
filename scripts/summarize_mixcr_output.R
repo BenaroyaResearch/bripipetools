@@ -35,68 +35,6 @@ select_productive <- function(df) {
                !is.na(df$junction),]
   return(new_df)
 }
- 
-# read IMGT results Summary from file
-read_imgt_summary <- function(file) {
-  imgt_df <- read_tsv(file) %>% 
-    clean_headers() %>% 
-    filter(functionality != "No results")
-  
-  return(imgt_df)
-}
-
-# parse raw IMGT clonotype results from Summary file
-parse_imgt_summary <- function(imgt_df) {
-  imgt_df %>% 
-    select(sequence_id, v_gene_and_allele, v_region_score, v_region_identity_nt,
-           j_gene_and_allele, j_region_score, j_region_identity_nt,
-           aa_junction, 
-           functionality, functionality_comment, junction_frame) %>% 
-    mutate(v_gene = str_extract(v_gene_and_allele, 
-                                "TR.*?(?=(\\*))"),
-           v_region_score = as.integer(v_region_score),
-           j_gene = str_extract(j_gene_and_allele, 
-                                "TR.*?(?=(\\*))"),
-           j_region_score = as.integer(j_region_score),
-           junction = aa_junction) %>% 
-    select(one_of("sequence_id", 
-                  "v_gene", "v_region_score", "v_region_identity_nt",
-                  "j_gene", "j_region_score", "j_region_identity_nt",
-                  "junction",
-                  "functionality", "functionality_comment", "junction_frame"))
-  
-}
-
-# read and parse IMGT results from list of archive (.txz) files
-read_imgt <- function(file_list = NULL, folder = NULL, 
-                      sample_regex = "(lib|SRR)[0-9]+") {
-  if(is.null(file_list) & is.null(folder)) {
-    stop("Input must be provided for either `file_list` or `folder` argument.")
-  }
-  
-  if(!is.null(folder)) {
-    file_list <- list.files(folder, full.names = TRUE) %>% 
-      .[str_detect(tolower(.), ".txz")]
-  }
-  
-  if(!is.list(file_list)) {
-    file_list <- as.list(file_list)
-  }
-  
-  jxn_df <- mclapply(file_list, function(x) {
-    extract_cmd <- sprintf("tar -xf '%s' -O '1_Summary.txt'", x)
-    pipe(extract_cmd) %>% 
-      read_file() %>% 
-      read_imgt_summary() %>% 
-      parse_imgt_summary() %>% 
-      mutate(sequence_id = str_extract(sequence_id, sample_regex)) %>% 
-      rename(sample = sequence_id)
-  }) %>% 
-    bind_rows()
-  
-  return(jxn_df %>% 
-           arrange(sample))
-}
 
 # read MiXCR results from file
 read_mixcr_clones <- function(file) {
@@ -146,6 +84,65 @@ parse_mixcr_clones <- function(mixcr_df) {
                     "junction")))
 }
 
+# read and parse the MiXCR metadata from a mixcrReport file
+read_mixcr_metadata <- function(folder, sample_regex = "(lib|SRR)[0-9]+"){
+  file_list <- list.files(folder, full.names = TRUE) %>% 
+    .[str_detect(tolower(.), "mixcrreport.txt")]
+  
+  metadata_df <- NULL
+  for (curr_report in file_list){
+    if(file.size(curr_report)){
+      curr_metadata <- list(sample = str_extract(basename(curr_report), sample_regex))
+      # read file line by line to parse
+      # This is not efficient, but protects against giant files breaking things.
+      curr_fcon <- file(curr_report, "r")
+      while(T){
+        curr_line <- readLines(curr_fcon, n = 1)
+        if (length(curr_line) == 0){
+          break
+        }
+        # check for metatdata in line
+        curr_version <- 
+          str_extract(curr_line, "^Version: [0-9,\\.]+") %>%
+          str_replace("^Version: ", "")
+        if(!is.na(curr_version)){curr_metadata$mixcrVersion <- curr_version}
+        
+        curr_lib <- 
+          str_extract(curr_line, "lib=[a-zA-Z0-9\\.]+") %>%
+          str_replace("lib=", "")
+        if(!is.na(curr_lib)){curr_metadata$libVersion <- curr_lib}
+        
+        curr_args <- 
+          str_extract(curr_line, "^Command line arguments: .+") %>% 
+          str_replace("^Command line arguments: ", "")
+        
+        if(!is.na(curr_args)){
+          curr_parsed_args <- parse_command_line_args(curr_args)
+          if(curr_parsed_args$cmd == "align"){
+            curr_species <- curr_parsed_args$s
+            curr_metadata$species <- ifelse(is.null(curr_species), "hsa", curr_species)
+            
+            curr_chain <- ifelse(is.null(curr_parsed_args$c), 
+                                 curr_parsed_args$l, 
+                                 curr_parsed_args$c)
+            curr_metadata$chainType <- ifelse(is.null(curr_chain), "default", curr_chain)
+            
+            curr_aligner <- curr_parsed_args$p
+            curr_metadata$aligner <- ifelse(is.null(curr_aligner), "default", curr_aligner)
+          }
+        }
+      }
+      close(curr_fcon)
+      
+      if(is.null(curr_metadata$mixcrVersion)){ curr_metadata$mixcrVersion <- "< 2.1.3" }
+      if(is.null(curr_metadata$libVersion)){curr_metadata$libVersion <- "unknown" }
+
+      metadata_df <- rbind(metadata_df, data.frame(curr_metadata))
+    }
+  }
+  return(metadata_df)
+}
+
 # read and parse MiXCR results from list of files
 read_mixcr <- function(file_list = NULL, folder = NULL, 
                        sample_regex = "(lib|SRR)[0-9]+") {
@@ -186,6 +183,19 @@ read_mixcr <- function(file_list = NULL, folder = NULL,
 parse_project_name <- function(proj_folder){
   p <- str_extract(proj_folder, "P[0-9]+-[0-9]+")
   return(p)
+}
+
+# accepts a string representing a command with arguments (eg: "cmd -c cVal")
+# returns a named list containing the arguments (eg: list(cmd="cmd", c="cVal"))
+# Flags that don't take an argument will be in the list with "NA" values
+parse_command_line_args <- function(cmd_string){
+  split_cmd <- str_split(cmd_string, " -")[[1]]
+  arg_list <- list(cmd = split_cmd[1])
+  for (arg in split_cmd[-1]){
+    split_arg = str_split(arg, " ")[[1]]
+    arg_list[split_arg[1]] <- split_arg[2]
+  }
+  return(arg_list)
 }
 
 # accepts a flow cell project folder path name with a Trinity folder,
@@ -251,8 +261,10 @@ validate_mixcr_output <- function(proj_folder){
 make_mixcr_summary <- function(proj_folder){
   pname <- parse_project_name(proj_folder)
   currdate <- format(Sys.Date(), "%y%m%d")
-  mixcr_file <- paste(pname, "mixcr_summary.csv", sep = "_")
+  mixcr_file <- paste(pname, currdate, "mixcr_summary.csv", sep = "_")
   mixcr_jxns <- read_mixcr(folder = file.path(proj_folder, mixcrOutputFolder))
+  mixcr_metadata <- read_mixcr_metadata(folder = file.path(proj_folder, mixcrOutputFolder))
+  mixcr_jxns <- left_join(mixcr_jxns, mixcr_metadata, by = "sample")
   if(nrow(mixcr_jxns) == 0){
     print(paste("WARNING: No junctions were detected in project", proj_folder))
     return(1)
@@ -270,6 +282,8 @@ run_prog <- function(fc_path){
       nFailedProjects <- 
         nFailedProjects +
         make_mixcr_summary(p) # returns 0 if success, 1 if failure
+    } else {
+      nFailedProjects <- nFailedProjects + 1
     }
   }
   if (nFailedProjects > 0){
