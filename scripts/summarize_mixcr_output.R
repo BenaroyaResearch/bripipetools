@@ -9,12 +9,38 @@
 # MiXCR loading functions, adapted from James Eddy's code
 #########################################################
 library(readr)
+library(rlang)
 library(stringr)
 library(dplyr)
 library(purrr)
 library(parallel)
+library(mongolite)
 
 mixcrOutputFolder <- "mixcrOutput_trinity"
+
+# Open a connection to a collection in the research db
+# collection: the name of the collection to access
+resDbConnect <- function(collection){
+  dbref <- mongo(collection,
+                 db = "bri",
+                 #url = "mongodb://browser:bibliome@srvsdb11")
+                 url = "mongodb://browser:bibliome@srvresearchdb01")
+  return(dbref)
+}
+
+# Insert a dataframe of tcr data into the genomicsTCR collection
+insertMixcrOutput <- function(tcrData){
+  tcrDb <- resDbConnect("genomicsTCR")
+  tcrDb$insert(tcrData)
+  return(T)
+}
+
+# Check to see if a project ID exists in the genomicsTCR collection
+checkMixcrProjectExists <- function(projId){
+  tcrDb <- resDbConnect("genomicsTCR")
+  result <- tcrDb$find(paste0('{"project":"', projId, '"}'), limit = 1)
+  return(nrow(result) > 0)
+}
 
 # clean column names of data frame
 clean_headers <- function(df) {
@@ -36,18 +62,30 @@ select_productive <- function(df) {
   return(new_df)
 }
 
+# mark which chains are unproductive, but only filter out "NA" junctions
+mark_productive <- function(df) {
+  new_df <- 
+    df %>%
+    dplyr::mutate(productive = ifelse(str_detect(junction, "[_|\\*]"), F, T)) %>%
+    dplyr::filter(!is.na(junction))
+  return(new_df)
+}
+
 # read MiXCR results from file
 read_mixcr_clones <- function(file) {
-  mixcr_df <- read_delim(file, delim = "\t") %>% 
+  mixcr_df <- suppressMessages(read_delim(file, delim = "\t")) %>% 
     clean_headers()
 }
 
 # parse raw MiXCR clonotype results
 parse_mixcr_clones <- function(mixcr_df) {
-  tmp <<- mixcr_df
+  # handle different versions of MiXCR that change names of columns
+  seq_col_name <- ifelse("clonalsequence" %in% names(mixcr_df),
+                         "clonalsequence", 
+                         "targetsequences")
   mixcr_df %>% 
     transmute(cln_count = clonecount,
-              full_nt_sequence = clonalsequence,
+              full_nt_sequence = !!parse_quosure(seq_col_name),
               v_gene = str_extract(allvhitswithscore,
                                    "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9])*(DV[0-9]+)*"),
               # note: not currently possible to get region overlap with
@@ -92,7 +130,7 @@ read_mixcr_metadata <- function(folder, sample_regex = "(lib|SRR)[0-9]+"){
   metadata_df <- NULL
   for (curr_report in file_list){
     if(file.size(curr_report)){
-      curr_metadata <- list(sample = str_extract(basename(curr_report), sample_regex))
+      curr_metadata <- list(libid = str_extract(basename(curr_report), sample_regex))
       # read file line by line to parse
       # This is not efficient, but protects against giant files breaking things.
       curr_fcon <- file(curr_report, "r")
@@ -172,9 +210,17 @@ read_mixcr <- function(file_list = NULL, folder = NULL,
     bind_rows() %>% 
     select(one_of("sample", setdiff(names(.), "sample")))
   
+  # make sure there was mixcr data for the project
+  if(nrow(jxn_df) == 0){
+    print(paste("WARNING: No chains identified for project."))
+    return(jxn_df)
+  }
+  
   return(jxn_df %>% 
-           select_productive() %>%
-           arrange(sample))
+           # include all chains, including unproductive, but mark which are productive
+           mark_productive() %>%
+           rename(libid = sample) %>% 
+           arrange(libid))
 }
 
 #########################################################
@@ -263,13 +309,31 @@ make_mixcr_summary <- function(proj_folder){
   currdate <- format(Sys.Date(), "%y%m%d")
   mixcr_file <- paste(pname, currdate, "mixcr_summary.csv", sep = "_")
   mixcr_jxns <- read_mixcr(folder = file.path(proj_folder, mixcrOutputFolder))
-  mixcr_metadata <- read_mixcr_metadata(folder = file.path(proj_folder, mixcrOutputFolder))
-  mixcr_jxns <- left_join(mixcr_jxns, mixcr_metadata, by = "sample")
   if(nrow(mixcr_jxns) == 0){
     print(paste("WARNING: No junctions were detected in project", proj_folder))
     return(1)
   }
-  write_csv(mixcr_jxns, file.path(proj_folder, mixcr_file))
+  # add in metadata
+  mixcr_metadata <- read_mixcr_metadata(folder = file.path(proj_folder, mixcrOutputFolder))
+  mixcr_jxns <- left_join(mixcr_jxns, mixcr_metadata, by = "libid")
+  write_csv(mixcr_jxns %>% dplyr::filter(productive) %>% dplyr::select(-productive), 
+            file.path(proj_folder, mixcr_file))
+  
+  # add timestamp, project, and run ID columns
+  currTime <- Sys.time()
+  runId <- str_extract(proj_folder, "[0-9]{6}_D00565_[0-9]{4}_[A-Z0-9]+(XX|XY|X2)")
+  projId <- str_extract(proj_folder, "P[0-9]+-[0-9]+")
+  mixcr_jxns$dateCreated <- currTime
+  mixcr_jxns$project <- projId
+  mixcr_jxns$run <- runId
+  
+  # push mixcr information to research database
+  if(checkMixcrProjectExists(projId)){
+    print(paste("WARNING: Could not push data for project", projId, "to the TCR database, because it already exists."))
+  } else {
+    print(paste("Data for project", projId, "are summarized and being pushed to the TCR database."))
+    insertMixcrOutput(tcrData = mixcr_jxns)
+  }
   return(0)
 }
 
@@ -295,7 +359,6 @@ run_prog <- function(fc_path){
 # Main Program
 #########################################################
 # Read in the command line args and process the project
-
 args = commandArgs(trailingOnly=TRUE)
 
 if (length(args) == 0 || length(args) > 1) {
