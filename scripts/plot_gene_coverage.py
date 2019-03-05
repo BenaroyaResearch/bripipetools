@@ -110,7 +110,7 @@ def build_figure(ncDf, metDf, project, fc, outFolder):
                      x=0.02, y=textHeight, fontsize=11,
                      horizontalalignment='left', verticalalignment='center')
 
-        fig.text(0.93, textHeight, '*libID_fcID [MEDIAN_CV_COVERAGE]',
+        fig.text(0.93, textHeight, '*libID_fcID [median_cv_coverage]',
                  fontsize=10, fontstyle='italic',
                  horizontalalignment='right', verticalalignment='center')
 
@@ -124,10 +124,11 @@ def build_figure(ncDf, metDf, project, fc, outFolder):
             except AttributeError:
                 logger.warn("failed; locating sample metrics by field 'libID'")
                 libIdx = metDf.libID == lib
-            mcc = float(metDf[libIdx]['MEDIAN_CV_COVERAGE'])
+            mcc = float(metDf[libIdx]['median_cv_coverage'])
             fqReads = int(metDf[libIdx]['fastq_total_reads'])
-#             percAligned = float(metDf[libIdx]['READ_PAIRS_EXAMINED']) / \
-            percAligned = float(metDf[libIdx]['UNPAIRED_READS_EXAMINED']) / \
+            # Handle read pairs and unpaired reads, in case of PE alignment.
+            percAligned = (float(metDf[libIdx]['unpaired_reads_examined']) + \
+                          float(metDf[libIdx]['read_pairs_examined'])) / \
                           float(metDf[libIdx]['fastq_total_reads'])* 100
 
             mccColorIdx = min(int(mcc * 100), 200)
