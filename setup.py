@@ -7,9 +7,9 @@ config = {
     'name': 'bripipetools',
     'version': '0.4.0',
     'description': 'Software for managing BRI bioinformatics pipelines',
-    'author': 'James A. Eddy',
-    'author_email': 'james.a.eddy@gmail.com',
-    'url': 'https://github.com/jaeddy/bripipetools',
+    'author': 'James A. Eddy, Scott Presnell, Mario Rosasco',
+    'author_email': 'mrosasco@BenaroyaResearch.org',
+    'url': 'https://github.com/BenaroyaResearch/bripipetools',
     'license': 'MIT',
     'packages': ['bripipetools'],
     'package_data': {
