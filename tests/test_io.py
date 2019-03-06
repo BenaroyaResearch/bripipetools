@@ -150,9 +150,9 @@ class TestPicardMetricsFile:
         # WHEN the table is parsed
         table_data = testfile._parse_long()
 
-        # THEN should return a dict with fields and values stored as
+        # THEN should return a dict with lower-case fields and values stored as
         # key-value pairs
-        assert (table_data == {'FIELD1': 'value1', 'FIELD2': 'value2'})
+        assert (table_data == {'field1': 'value1', 'field2': 'value2'})
 
     def test_parse_wide(self):
         # GIVEN some HTML file content with at least one table with the
@@ -180,9 +180,9 @@ class TestPicardMetricsFile:
         # WHEN the table is parsed
         table_data = testfile._parse_wide()
 
-        # THEN should return a dict with fields and values stored as
+        # THEN should return a dict with lower-case fields and values stored as
         # key-value pairs
-        assert (table_data == {'FIELD1': 'value1', 'FIELD2': 'value2'})
+        assert (table_data == {'field1': 'value1', 'field2': 'value2'})
 
     def test_parse_w_long_table(self, tmpdir):
         # GIVEN an HTML file with at least one table with the
@@ -210,7 +210,7 @@ class TestPicardMetricsFile:
         table_data = testfile.parse()
 
         # THEN should return parsed dict
-        assert (table_data == {'FIELD1': 'value1', 'FIELD2': 'value2'})
+        assert (table_data == {'field1': 'value1', 'field2': 'value2'})
 
     def test_parse_w_wide_table(self, tmpdir):
         # GIVEN an HTML file with at least one table with the
@@ -237,8 +237,8 @@ class TestPicardMetricsFile:
         # WHEN parsing metrics table
         table_data = testfile.parse()
 
-        # THEN should return parsed dict
-        assert (table_data == {'FIELD1': 'value1', 'FIELD2': 'value2'})
+        # THEN should return parsed dict with lower-case fields
+        assert (table_data == {'field1': 'value1', 'field2': 'value2'})
 
 
 class TestTophatStatsFile:

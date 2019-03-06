@@ -87,7 +87,7 @@ class TestBatchParameterizer:
         mock_path = tmpdir.mkdir('lib1111-11111111')
         mock_lane = '2'
         mock_path.ensure('sample-name_S001_L001_R1_001.fastq.gz')
-        mock_fastqpath = mock_path.join('empty_L00{}.fastq.gz'
+        mock_fastqpath = mock_path.join('empty_L00{}_R1.fastq.gz'
                                         .format(mock_lane))
 
         parameterizer = submission.BatchParameterizer(
@@ -241,7 +241,7 @@ class TestBatchParameterizer:
         mock_emptypaths = {
             lane: re.sub(
                 str(tmpdir), '/mnt', str(mock_path.join(
-                    'empty_L00{}.fastq.gz'.format(lane))
+                    'empty_L00{}_R1.fastq.gz'.format(lane))
                 )
             )
             for lane in range(2, 9)
