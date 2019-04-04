@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 import lxml.html as lh
+from datetime import datetime as dt
 
 
 def read_rnaseq_metrics(path):
@@ -149,10 +150,14 @@ def build_figure(ncDf, metDf, project, fc, outFolder):
 
             ax_i.set_title('%s [%1.2f]' % (lib, mcc))
             ax_i.set_facecolor('white')
+            
+        # pull out fc id from full run string
+        fcid_regex = fcid_regex = re.compile('(A|B|D)([A-Z]|[0-9])*X(X|Y|2)')
+        fcid =  fcid_regex.search(fc).group()
 
         fig.set_size_inches(7.5, figHeight)
         fig.tight_layout(rect=(0, 0, 1, plotMargin))
-        fig.savefig(outFolder + project + '_' + 'geneModelCoverage.pdf',
+        fig.savefig(outFolder + project + '_' + fcid + '_' + dt.now().strftime('%y%m%d') + '_' + 'geneModelCoverage.pdf',
               format = "pdf")
 
 def main(argv):
