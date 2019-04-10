@@ -13,6 +13,9 @@ def list_project_dirs(mount_path):
 
 def get_project_app_dirs(project_path):
     app_session_dir = os.path.join(project_path, 'AppSessions')
+    if(not os.path.isdir(app_session_dir)):
+        print "WARNING! Could not find an AppSessions directory in " + app_session_dir + "; skipping."
+        return([])
     fq_match = [s for s in os.listdir(app_session_dir) if "fastq" in s.lower()]
     if (fq_match == []):
         print "WARNING! Could not find a fastq directory in " + app_session_dir + "; skipping."
@@ -42,8 +45,7 @@ def sniff_sample_sheet(app_logs_path):
                          for f in os.listdir(app_logs_path)
                          if re.search('^SampleSheet', f)][0]
     with open(sample_sheet_file) as f:
-        while True:
-            ss_line = f.readline()
+        for ss_line in f:
             # try to sniff flowcell ID from the experiment name
             if re.search('experimentname', re.sub(' ', '', ss_line).lower()):
                 expid = ss_line.rstrip().split('_')
@@ -62,6 +64,7 @@ def sniff_sample_sheet(app_logs_path):
                     else:
                         pass
             pass
+    return ""    
 
 def copy_data(flowcell_path, app_logs_path, app_props_path):
     if os.path.isdir(flowcell_path):
@@ -92,6 +95,10 @@ def backup_project(project_path, target_path):
         app_logs_dir = get_app_logs_dir(project_app_dir)
         app_props_dir = get_app_props_dir(project_app_dir)
         project_flowcell = sniff_sample_sheet(app_logs_dir)
+        if(project_flowcell == ""):
+            project_flowcell = os.path.basename(project_path) + "_Flowcell"
+            print "WARNING! Could not find a flowcell id for " + project_app_dir + "."
+            print "Assigning a mock flow cell of " + project_flowcell + "."
         flowcell_path = os.path.join(target_path, project_flowcell)
         copy_data(flowcell_path, app_logs_dir, app_props_dir)
 
