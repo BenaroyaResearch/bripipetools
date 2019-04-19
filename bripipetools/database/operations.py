@@ -89,14 +89,6 @@ def get_runs(db, query):
     """
     return db, query
 
-@find_objects('workflowbatches')
-def get_workflowbatches(db, query):
-    """
-    Return list of documents from 'workflowbatches' collection based
-    on query.
-    """
-    return db, query
-
 @find_objects('genomicsWorkflowbatches')
 def get_genomicsWorkflowbatches(db, query):
     """
@@ -165,13 +157,6 @@ def put_runs(db, runs):
     """
     return db, runs
 
-@insert_objects('workflowbatches')
-def put_workflowbatches(db, workflowbatches):
-    """
-    Insert each document in list into 'workflowbatches' collection.
-    """
-    return db, workflowbatches
-
 @insert_objects('genomicsWorkflowbatches')
 def put_genomicsWorkflowbatches(db, workflowbatches):
     """
@@ -231,9 +216,9 @@ def create_workflowbatch_id(db, prefix, date):
     """
     isodate = datetime.date.isoformat(date)
     query = {'_id': {'$regex': '{}_{}_.+'.format(prefix, isodate)}}
-    logger.debug("searching 'workflowbatches' collection with query '{}'"
+    logger.debug("searching 'genomicsWorkflowbatches' collection with query '{}'"
                  .format(query))
-    workflowbatches = get_workflowbatches(db, query)
+    workflowbatches = get_genomicsWorkflowbatches(db, query)
     logger.debug("matched workflow batches: '{}'".format(workflowbatches))
 
     num = 1

@@ -53,14 +53,6 @@ class WorkflowBatchImporter(object):
             db=self.db,
             run_opts=self.run_opts
             ).get_processed_libraries(qc=True)
-
-    def _insert_workflowbatch(self):
-        """
-        Convert WorkflowBatch object and insert into database.
-        """
-        workflowbatch = self._collect_workflowbatch()
-        logger.debug("inserting workflow batch '{}'".format(workflowbatch))
-        database.put_workflowbatches(self.db, workflowbatch.to_json())
         
     def _insert_genomicsWorkflowbatch(self):
         """

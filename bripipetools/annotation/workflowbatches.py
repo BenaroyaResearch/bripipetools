@@ -60,11 +60,11 @@ class WorkflowBatchAnnotator(object):
                                             'pipeline', '/')
 
         try:
-            logger.debug("getting `GalaxyWorkflowBatch` from GenLIMS; "
+            logger.debug("getting `GalaxyWorkflowBatch` from Research DB; "
                          "searching for record with batch file '{}'"
                          .format(workflowbatch_file))
             return database.map_to_object(
-                database.get_workflowbatches(
+                database.get_genomicsWorkflowbatches(
                     self.db,
                     {'workflowbatchFile': workflowbatch_file}
                 )[0]
