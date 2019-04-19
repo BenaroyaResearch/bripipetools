@@ -553,7 +553,7 @@ class TestWorkflowBatchAnnotator:
 
         # AND a connection to a database in which a document corresponding
         # to the workflow batch exists already
-        mock_db.workflowbatches.insert_one(
+        mock_db.genomicsWorkflowbatches.insert_one(
             {'_id': mock_id,
              'workflowbatchFile': mock_file,
              'date': datetime.datetime(2016, 12, 31, 0, 0),

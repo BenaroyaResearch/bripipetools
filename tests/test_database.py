@@ -162,7 +162,7 @@ class TestDatabaseOperations:
         [
             ('samples', database.get_samples),
             ('runs', database.get_runs),
-            ('workflowbatches', database.get_workflowbatches)
+            ('workflowbatches', database.get_genomicsWorkflowbatches)
         ]
     )
     def test_wrapped_get_functions(self, mock_db, test_collection, test_function):
@@ -182,7 +182,7 @@ class TestDatabaseOperations:
         [
             ('samples', database.put_samples),
             ('runs', database.put_runs),
-            ('workflowbatches', database.put_workflowbatches)
+            ('genomicsWorkflowbatches', database.put_genomicsWorkflowbatches)
         ]
     )
     def test_wrapped_put_functions(self, mock_db, mock_dbobject,
@@ -205,7 +205,7 @@ class TestDatabaseOperations:
         # of the workflow batch is either new or already exists in the
         # 'workflowbatches' collection in the database
         if id_exists:
-            mock_db.workflowbatches.insert(
+            mock_db.genomicsWorkflowbatches.insert(
                 {'_id': 'mockprefix_2000-01-01_1',
                  'date': datetime.datetime(2000, 1, 1, 0, 0)})
 
@@ -219,7 +219,7 @@ class TestDatabaseOperations:
 
         # THEN the constructed workflow batch ID should end in the
         # expected number: 1 if new, or 2 if the same prefix/date combo
-        # already existed in the 'workflowbatches' collection
+        # already existed in the 'genomicsWorkflowbatches' collection
         id_tag = 2 if id_exists else 1
         assert (wb_id == 'mockprefix_2000-01-01_{}'.format(id_tag))
 

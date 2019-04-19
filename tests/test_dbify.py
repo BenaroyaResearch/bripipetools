@@ -299,7 +299,7 @@ class TestWorkflowBatchImporter:
         # THEN should return objects of correct type
         assert (all(type(pl) == docs.ProcessedLibrary for pl in test_objects))
 
-    def test_insert_workflowbatch(self, mock_db, tmpdir):
+    def test_insert_genomicsWorkflowbatch(self, mock_db, tmpdir):
         # GIVEN a path to a workflow batch file and a connection to a
         # database in which a document corresponding to the workflow batch
         # may or may not exist (note: behavior for inserting or updating
@@ -330,10 +330,10 @@ class TestWorkflowBatchImporter:
         )
 
         # WHEN workflow batch is inserted into database
-        importer._insert_workflowbatch()
+        importer._insert_genomicsWorkflowbatch()
 
         # THEN document should be present in the workflowbatches collection
-        assert (len(list(mock_db.workflowbatches
+        assert (len(list(mock_db.genomicsWorkflowbatches
                          .find({'type': 'Galaxy workflow batch'})))
                 == 1)
 
