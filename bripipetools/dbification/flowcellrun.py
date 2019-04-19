@@ -83,24 +83,6 @@ class FlowcellRunImporter(object):
             pipeline_root=path_items['pipeline_root'],
             db=self.db
             ).get_library_metrics()
-            
-    def _collect_flowcell_workflowbatches(self):
-        """
-        Collect WorkflowBatch objects for flowcell run.
-        """
-        path_items = parsing.parse_flowcell_path(self.path)
-        batchfile_dir = os.path.join(self.path, "globus_batch_submission")
-        logger.info("collecting info for workflow batch files in '{}'"
-                    .format(batchfile_dir))
-
-        return [annotation.WorkflowBatchAnnotator(
-            workflowbatch_file=os.path.join(batchfile_dir, curr_batchfile),
-            pipeline_root=path_items['pipeline_root'],
-            db=self.db,
-            run_opts = self.run_opts
-            ).get_workflow_batch() 
-            for curr_batchfile in os.listdir(batchfile_dir)
-            if not re.search('DS_Store', curr_batchfile)]
 
     def _insert_flowcellrun(self, collection='all'):
         """
@@ -160,8 +142,21 @@ class FlowcellRunImporter(object):
         """
         Collect WorkflowBatch objects and insert them into database.
         """
-        workflowbatches = self._collect_flowcell_workflowbatches()
-        for workflowbatch in workflowbatches:
+        path_items = parsing.parse_flowcell_path(self.path)
+        batchfile_dir = os.path.join(self.path, "globus_batch_submission")
+        logger.info("collecting info for workflow batch files in '{}'"
+                    .format(batchfile_dir))
+                    
+        batchfile_list = [batchfile for batchfile in os.listdir(batchfile_dir)
+                         if not re.search('DS_Store', batchfile)]
+        
+        for curr_batchfile in batchfile_list:
+            workflowbatch = annotation.WorkflowBatchAnnotator(
+                workflowbatch_file=os.path.join(batchfile_dir, curr_batchfile),
+                pipeline_root=path_items['pipeline_root'],
+                db=self.db,
+                run_opts = self.run_opts
+                ).get_workflow_batch() 
             logger.debug("inserting workflow batch '{}'".format(workflowbatch))
             database.put_genomicsWorkflowbatches(self.db, workflowbatch.to_json())
 
