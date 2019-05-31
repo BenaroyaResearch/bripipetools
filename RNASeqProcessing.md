@@ -38,13 +38,13 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ Enter your BRI credentials, and be sure to click "advanced" and set Credential Lifetime to 10,000hrs (this will get you the 7 day max of authentication).
 
 4. Upload workflow batch file to Globus Genomics (from step 2)
-	+ Go to the [BRI instance of Globus Genomics](https://benaroyaresearch.globusgenomics.org/)
+	+ Go to the [BRI instance of Globus Genomics](https://bri.globusgenomics.org/)
 	+ Under 'DATA TRANSFER', (top, left menu) look for 'Get Data via Globus'
 	+ Cut and paste in the /mnt/bioinformatics/pipeline... path for the workflow data file that was generated in step 2.
 	+ You will be using globus to upload the workflow batch file.
 
 5. Submit uploaded workflow batch file - start processing the data
-	+ Again, at the [BRI instance of Globus Genomics](https://benaroyaresearch.globusgenomics.org/)
+	+ Again, at the [BRI instance of Globus Genomics](https://bri.globusgenomics.org/)
 	+ Under 'DATA MANAGEMENT' (near bottom, left menu) look for 'Workflow batch submit'
 	+ select the base filename you uploaded in step 4.
 	+ You will be triggering the batch application of workflows to the libraries from the projects projects you selected in step 2.
