@@ -25,9 +25,9 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ `% cd ~/git/bripipetools` (or the relevant repository location)
 	+ `% source activate bripipetools` (activate is from anaconda2)
 	+ **NB** - Make sure that the database configuration at `bripipetools/bripipetools/config/default.ini` is set correctly. 
-			+ There need to be config entries in place for [database] and [researchdb]. 
-			+ If you are using a local copy of GenLIMS and the Research Database, you will need to have a local instance of the mongo server daemon running (command: `mongod`).
-			+ If you have questions about which database servers to use, please contact Mario Rosasco (mrosasco@benaroyaresearch.org).
+		+ There need to be config entries in place for [database] and [researchdb]. 
+		+ If you are using a local copy of GenLIMS and the Research Database, you will need to have a local instance of the mongo server daemon running (command: `mongod`).
+		+ If you have questions about which database servers to use, please contact Mario Rosasco (mrosasco@benaroyaresearch.org).
 	+ Create a batch submission file while in the bripipetools environment:
 	+ `(bripipetools) bash-3.2$ bripipetools submit --workflow-dir /mnt/bioinformatics/pipeline/galaxy_workflows/ /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}` You may need to use the `--all-workflows` option if you want to use a non standard workflow.
 	+ Select projects that have used the same technology, strandedness, and reference genome (or whatever combination you'd like).  The result is a workflow batch file.
