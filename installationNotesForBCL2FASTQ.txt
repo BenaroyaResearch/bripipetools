@@ -1,0 +1,64 @@
+#################################################################################
+# These are instructions on installing and running bcl2fastq2 from Illumina.
+# This program is used to generate the FASTQ sequence files used in the pipeline.
+# Because our systems are running Ubuntu and Illumina offers only rpm packages,
+# it's necessary to install from source. Unfortunately, there are a couple of
+# known issues with the source, which are described as relevant below. 
+#################################################################################
+
+# go root
+
+mrosasco@srvgalaxy01:~$ sudo su -p
+
+# get the tarball
+
+root@srvgalaxy01:~# 
+root@srvgalaxy01:~/downloads# wget ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/software/bcl2fastq/bcl2fastq2-v2-20-0-tar.zip
+
+# set up environ vars for the build
+
+root@srvgalaxy01:~/downloads# export TMP=/home/mrosasco/downloads
+root@srvgalaxy01:~/downloads# export SOURCE=${TMP}/bcl2fastq
+root@srvgalaxy01:/~/downloads# export BUILD=${TMP}/bcl2fastq2-v2-20-0-build
+root@srvgalaxy01:~/downloads# export INSTALL_DIR=/usr/local/bin/bcl2fastq2-20
+
+# decompress
+
+root@srvgalaxy01:~/downloads# unzip bcl2fastq2-v2-20-0-tar.zip
+root@srvgalaxy01:~/downloads# tar -xvzf bcl2fastq2-v2.20.0.422-Source.tar.gz
+
+# Tell the make files where to find the headers to include. 
+# See https://stackoverflow.com/questions/48717822/cmake-required-header-sys-stat-h-not-found
+
+root@srvgalaxy01:~/downloads# export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+
+# Remove some buggy lines from the source. 
+# See https://gist.github.com/moonwatcher/5698a70fe4be81d1277ee0296c4c8b0c
+
+root@srvgalaxy01:~/downloads# cd bcl2fastq/src/cxx/lib/io
+root@srvgalaxy01:~/downloads/bcl2fastq/src/cxx/lib/io# vim Xml.cpp
+
+# commented out lines 171-173, 175, 179-181, 183
+
+
+# set up build
+root@srvgalaxy01:~/downloads# mkdir $BUILD
+root@srvgalaxy01:~/downloads# cd $BUILD
+root@srvgalaxy01:~/downloads/bcl2fastq2-v2-20-0-build# chmod ugo+x ${SOURCE}/src/configure
+root@srvgalaxy01:~/downloads/bcl2fastq2-v2-20-0-build# chmod ugo+x ${SOURCE}/src/cmake/bootstrap/installCmake.sh
+root@srvgalaxy01:~/downloads/bcl2fastq2-v2-20-0-build# ${SOURCE}/src/configure --prefix=${INSTALL_DIR}
+
+# Build
+
+root@srvgalaxy01:~/downloads/bcl2fastq2-v2-20-0-build# make
+root@srvgalaxy01:~/downloads/bcl2fastq2-v2-20-0-build# make install
+
+# Create a link to the executable, then exit
+
+root@srvgalaxy01:~/downloads/bcl2fastq2-v2-20-0-build# cd /usr/local/bin
+root@srvgalaxy01:/usr/local/bin# ln -s /usr/local/bin/bcl2fastq2-20/bin/bcl2fastq bcl2fastq
+root@srvgalaxy01:/usr/local/bin# exit
+
+### Example Conversion (ATAC-Seq Rapid Run flow cell that lost connection to BaseSpace during run)
+
+mrosasco@srvgalaxy01:~$ nohup bcl2fastq --runfolder-dir /mnt/genomics/Illumina/190626_D00565_0228_BH2HMHBCX3 --output-dir /mnt/bioinformatics/pipeline/Illumina/190626_D00565_0228_BH2HMHBCX3/Unaligned/
