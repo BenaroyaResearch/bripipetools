@@ -195,7 +195,7 @@ class TestFlowcellRunImporter:
                 == 4)
 
 
-@pytest.fixture(scope='function')
+#@pytest.fixture(scope='function')
 def mock_batchfile(filename, tmpdir):
     # GIVEN a simplified workflow batch content with protypical contents
     mock_contents = ['###METADATA\n',
@@ -211,7 +211,7 @@ def mock_batchfile(filename, tmpdir):
     mock_file.write(''.join(mock_contents))
     return str(mock_file)
 
-@pytest.fixture(scope='function')
+#@pytest.fixture(scope='function')
 def mock_workflowfile(filename, tmpdir):
     # GIVEN a simplified workflow batch content with protypical contents
     mock_contents = ['{',

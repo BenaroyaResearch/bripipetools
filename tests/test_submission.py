@@ -304,7 +304,7 @@ class TestBatchParameterizer:
                     'value': 'lib1111'})
 
 
-@pytest.fixture(scope='function')
+#@pytest.fixture(scope='function')
 def mock_template(filename, tmpdir):
     # GIVEN a simplified workflow batch content with protypical contents
     mock_params = ['SampleName',

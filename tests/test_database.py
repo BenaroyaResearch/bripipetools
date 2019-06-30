@@ -56,7 +56,7 @@ class TestDatabaseOperations:
         # AND the mock database is either empty or contains a mocked
         # collection with a single pre-defined object
         if dbobject_exists:
-            mock_db['mockcollection'].insert(mock_dbobject)
+            mock_db['mockcollection'].insert_one(mock_dbobject)
 
         # WHEN the wrapper function `find_objects()` is used to query for
         # objects in a collection
@@ -84,7 +84,7 @@ class TestDatabaseOperations:
         # AND the mock database is either empty or contains a mocked
         # collection with a single pre-defined object
         if dbobject_exists:
-            mock_db['mockcollection'].insert(mock_dbobject)
+            mock_db['mockcollection'].insert_one(mock_dbobject)
 
         # WHEN an object is inserted into the database (in the mock
         # collection) using the wrapper function `insert_objects()`
@@ -113,7 +113,7 @@ class TestDatabaseOperations:
                                         update_field):
         # AND the mock database is contains a mocked collection with
         # a single pre-defined object
-        mock_db['mockcollection'].insert(mock_dbobject)
+        mock_db['mockcollection'].insert_one(mock_dbobject)
 
         # AND the local copy of the mock object is updated with either
         # a new field or an updated value of an existing field
@@ -205,7 +205,7 @@ class TestDatabaseOperations:
         # of the workflow batch is either new or already exists in the
         # 'workflowbatches' collection in the database
         if id_exists:
-            mock_db.genomicsWorkflowbatches.insert(
+            mock_db.genomicsWorkflowbatches.insert_one(
                 {'_id': 'mockprefix_2000-01-01_1',
                  'date': datetime.datetime(2000, 1, 1, 0, 0)})
 
@@ -229,9 +229,9 @@ class TestDatabaseOperations:
     def test_search_ancestors_field(self, mock_db, field_level):
         # AND a hierarchy of objects in the 'samples' collection, with
         # parent relationship specified by the 'parentId' field
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': 'sample0', 'parentId': 'sample1'})
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': 'sample1', 'parentId': 'sample2'})
         mock_db.samples.update_one(
             {'_id': 'sample{}'.format(field_level)},
@@ -252,9 +252,9 @@ class TestDatabaseOperations:
     def test_search_ancestors_no_parent(self, mock_db):
         # AND a hierarchy of objects in the 'samples' collection, but
         # parent relationship indicator is missing
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': 'sample0'})
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': 'sample1', 'mockfield': 'mockvalue'})
 
         # WHEN searching for the field among all sample ancestors in

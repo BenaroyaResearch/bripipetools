@@ -22,7 +22,7 @@ def mock_db():
                   "from mock Mongo database"))
 
 
-@pytest.fixture(scope='function')
+#@pytest.fixture(scope='function')
 def mock_stringfile(s, filename, tmpdir):
     f = tmpdir.join(filename)
     f.write(s)
@@ -30,7 +30,7 @@ def mock_stringfile(s, filename, tmpdir):
     return str(f)
 
 
-@pytest.fixture(scope='function')
+#@pytest.fixture(scope='function')
 def mock_proclib(count_filename=None):
     # GIVEN a processed library object
     mock_batchid = 'globusgalaxy_2016-12-31_1'
@@ -533,10 +533,10 @@ class TestSexVerifier:
 
         # AND a hierarchy of documents exists in the 'samples' collection,
         # with parent relationship specified by the 'parentId' field
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': mock_object._id, 'parentId': mock_object.parent_id}
         )
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': mock_object.parent_id, 'reportedSex': 'male'}
         )
 
@@ -568,10 +568,10 @@ class TestSexVerifier:
 
         # AND a hierarchy of documents exists in the 'samples' collection,
         # with parent relationship specified by the 'parentId' field
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': mock_object._id, 'parentId': mock_object.parent_id}
         )
-        mock_db.samples.insert(
+        mock_db.samples.insert_one(
             {'_id': mock_object.parent_id, 'reportedSex': 'male'}
         )
 

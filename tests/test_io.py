@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture(scope='function')
+#@pytest.fixture(scope='function')
 def mockstringfile(s, tmpdir):
     """
     Given a 'tmpdir' object and an input string, return a
