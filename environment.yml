@@ -3,7 +3,7 @@ channels: !!python/tuple
 - !!python/unicode 'defaults'
 dependencies:
 - beautifulsoup4=4.5.1=py27_0
-- python-dateutil=2.3=py27_0
+- python-dateutil=2.7.3=py27_0
 - coverage=4.2=py27_0
 - funcsigs=1.0.2=py27_0
 - mkl=11.3.3=0
