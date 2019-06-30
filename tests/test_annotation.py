@@ -392,8 +392,9 @@ class TestFlowcellRunAnnotator:
         mock_id = '161231_INSTID_0001_AC00000XX'
 
         # AND the unaligned folder includes multiple project folders
-        #mock_projects = ['P1-1-11111111', 'P99-99-99999999']
-        mock_projects = ['P99-99-99999999', 'P1-1-11111111']
+        mock_projects = ['P1-1-11111111', 'P99-99-99999999']
+        ##mock_projects = ['P99-99-99999999', 'P1-1-11111111']
+	# this may no be determiistic - getting different results
         mock_path = (tmpdir.mkdir('pipeline').mkdir('Illumina').mkdir(mock_id)
                     .mkdir('Unaligned'))
         for p in mock_projects:
@@ -418,7 +419,7 @@ class TestFlowcellRunAnnotator:
 
         # THEN the list of projects should include all project folders
         # in the unaligned folder (and nothing else)
-        assert (test_projects == mock_projects)
+        assert (set(test_projects) == set(mock_projects))
 
     def test_get_libraries(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
