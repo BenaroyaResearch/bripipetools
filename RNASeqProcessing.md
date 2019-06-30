@@ -10,7 +10,7 @@ Processing fastq to counts using Globus Genomics Galaxy
 		+ Download into `/mnt/bioinformatics/pipeline/Illumina/{FlowcellID}/Unaligned`
 			+ Can be downloaded onto any machine that can mount /mnt/bioinformatics/pipeline (Linux), or 
 			+ /Volumes/bioinformatics/pipeline (MacOS X)
-			+ \\\\ZED-SEA-01\genomics WinOS (set to z: drive)
+			+ \\\\isilon.brivmrc.org\bioinformatics WinOS (set to I: drive)
 	+ Optionally: inspect run QC at basespace website
 	+ Project downloads can take a few minutes to an hour - an entire flowcell will take about 1-2 hrs to download, depending on the number of libraries, and sequencing technology.
 	
@@ -24,17 +24,20 @@ Processing fastq to counts using Globus Genomics Galaxy
 	+ Make sure anaconda2/bin is in your path
 	+ `% cd ~/git/bripipetools` (or the relevant repository location)
 	+ `% source activate bripipetools` (activate is from anaconda2)
-	+ Make sure that your `bripipetools/config/default.ini` settings are properly configured. Note that if you are using a local copy of GenLIMS and the Research Database, you must have a local instance of the mongo server daemon running (command: `mongod`). 
+	+ **NB** - Make sure that the database configuration at `bripipetools/bripipetools/config/default.ini` is set correctly. 
+		+ There need to be config entries in place for [database] and [researchdb]. 
+		+ If you are using a local copy of GenLIMS and the Research Database, you will need to have a local instance of the mongo server daemon running (command: `mongod`).
+		+ If you have questions about which database servers to use, please contact Mario Rosasco (mrosasco@benaroyaresearch.org).
 	+ Create a batch submission file while in the bripipetools environment:
-	+ `(bripipetools) bash-3.2$ bripipetools submit --workflow-dir /Volumes/genomics/galaxy_workflows/ /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}` You may need to use the `--all-workflows` option if you want to use a non standard workflow.
+	+ `(bripipetools) bash-3.2$ bripipetools submit --workflow-dir /mnt/bioinformatics/pipeline/galaxy_workflows/ /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}` You may need to use the `--all-workflows` option if you want to use a non standard workflow.
 	+ Select projects that have used the same technology, strandedness, and reference genome (or whatever combination you'd like).  The result is a workflow batch file.
-	+ Don't worry if the path doesn't look right, use the path that looks like /mnt/bioinformatics/pipeline..., this is how it will appear on the machine that Globus Genomics uses for access (srvgridftp01).
+	+ Don't worry if the path doesn't look right, use the path that looks like /mnt/bioinformatics/pipeline..., this is how it will appear on the machine that Globus Genomics uses for access (srvgridftp02).
 
 3. Prepare Globus transfer endpoint
 	+ **Prerequisite**: Globus ID account
-	+ Authenticate at [Globus](https://www.globus.org/app/transfer) with your globusid credentials
-	+ Click on "Endpoints" at the top of the screen.
-	+ Click on "benaroyaresearch#BRIGridFTP," then "Activate" -> "Activate Now". 
+	+ Authenticate at [Globus](https://app.globus.org/endpoints) with your globusid credentials
+	+ Click on "Endpoints" at the left of the screen if you're not already there.
+	+ Click on "benaroyaresearch#BRIGridFTP," then "Activate". 
 	+ Enter your BRI credentials, and be sure to click "advanced" and set Credential Lifetime to 10,000hrs (this will get you the 7 day max of authentication).
 
 4. Upload workflow batch file to Globus Genomics (from step 2)
@@ -52,10 +55,11 @@ Processing fastq to counts using Globus Genomics Galaxy
 6. Wait for data to upload, process, then download
 	+ The entire batch will take on the order of 24hrs to process, depending on the number of libraries and the size of the fastq files.
 	+ There will be a history for each library workflow processed.  Use the gear (upper right) to refresh 'Saved Histories' to inspect the running workflows. You can see the number of steps that have been completed, are running, and are still pending for each library+workflow.
-	+ Watch for red boxes, indicating a failed step - most times it's a transfer step, which you can manually re-trigger to complete (not a fatal error, just resubmit).  Also at the time of this writing, the "delete workflow log" is failing (theoretically, as a workflow sucessfully completes, it is auto-deleted from the saved histories list). If this occurs, you will have to delete the completed workflows yourself.
+	+ Watch for red boxes, indicating a failed step - most times it's a transfer step, which you can manually re-trigger to complete (not a fatal error, just resubmit).
 
 7. Post Processing
-	+ Run these operations within `bripipetools` repostory, either on your own machine, or on srvgalaxy01.  If you are on a Mac, the leading mount may start with `/Volumes` instead of `/mnt`. Also consider that if you are using a local copy of GenLIMS and the Research Database, you will need to have `mongod` running (as in step 2).
+	+ Run these operations within `bripipetools` repostory, either on your own machine, or on srvgalaxy01.  If you are on a Mac, the leading mount may start with `/Volumes` instead of `/mnt`. 
+	+ **NB** - Once again, make sure that the database configuration at `bripipetools/bripipetools/config/default.ini` is set correctly. 
 	+ Concatenate trinity results:
 		+ `% while read path; do python scripts/concatenate_trinity_output.py $path; done < <(find /mnt/bioinformatics/pipeline/Illumina/{FlowcellID} -name "Trinity" -maxdepth 2)`
 	+ Or for a single Project:
