@@ -28,7 +28,7 @@ class ImportManager(object):
         Check path for known patterns and return path type for importer.
         """
         path_types = {
-            'flowcell_path': re.compile('Illumina/.*X(X|Y|2)$'),
+            'flowcell_path': re.compile('Illumina/.*X(X|Y|2|3)$'),
             'workflowbatch_file': re.compile('batch_submission.*\.txt$')
         }
         return [k for k, v in path_types.items()
