@@ -53,12 +53,12 @@ def sniff_sample_sheet(app_logs_path):
                     return ss_line.rstrip().split('_')[1]
             # if flowcell ID isn't in expt name, try to sniff based on regex
             else:
-                tmpfcid = re.search('((A|B|C|D)([A-Z]|[0-9])*X(X|Y|2))', ss_line)
+                tmpfcid = re.search('((A|B|C|D)([A-Z]|[0-9])*X(X|Y|2|3))', ss_line)
                 if tmpfcid:
                     return tmpfcid.group(1)
                 else:
                     # hail mary - try to sniff from path
-                    tmpfcid = re.search('((A|B|C|D)([A-Z]|[0-9])*X(X|Y|2))', app_logs_path)
+                    tmpfcid = re.search('((A|B|C|D)([A-Z]|[0-9])*X(X|Y|2|3))', app_logs_path)
                     if tmpfcid:
                         return tmpfcid.group(1)
                     else:

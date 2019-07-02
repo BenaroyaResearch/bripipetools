@@ -102,7 +102,7 @@ then
     libfolder=$(echo "$libpath" | \
       awk 'match($0, /\/[^\/]*lib[0-9]+[^\/]*\//){ print substr($0, RSTART, RLENGTH) }')
     fcfolder=$(echo "$libpath" | \
-      awk 'match($0, /\/[^\/]*[a-zA-Z0-9]+X[X|Y|2][^\/]*\//){ print substr($0, RSTART, RLENGTH) }')
+      awk 'match($0, /\/[^\/]*[a-zA-Z0-9]+X[X|Y|2|3][^\/]*\//){ print substr($0, RSTART, RLENGTH) }')
     projfolder=$(echo "$libpath" |\
       awk 'match($0, /\/[^\/]*P[0-9]+[^\/]*\//){ print substr($0, RSTART, RLENGTH) }')
     projid=$(echo "$libpath" |\
