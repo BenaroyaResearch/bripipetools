@@ -63,7 +63,9 @@ class OutputReader(object):
                         'picard-align': getattr(io, 'PicardMetricsFile'),
                         'picard-alignment': getattr(io, 'PicardMetricsFile'),
                         'tophat-stats': getattr(io, 'TophatStatsFile')},
-            'qc': {'fastqc': getattr(io, 'FastQCFile')},
+            'qc': {'fastqc': getattr(io, 'FastQCFile'),
+		   'fastqc-R1': getattr(io, 'FastQCFile'),
+		   'fastqc-R2': getattr(io, 'FastQCFile')},
             'counts': {'htseq': getattr(io, 'HtseqCountsFile')},
             'validation': {'sexcheck': getattr(io, 'SexcheckFile')}
         }
