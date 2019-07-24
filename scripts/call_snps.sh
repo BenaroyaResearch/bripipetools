@@ -20,7 +20,7 @@
 
 # default parameters
 usage="Usage: $0 [-q <query>] [-f <flowcell>] [-p <project dir>] [-b <bedfile name>] [-o <output dir name>]"
-bedfile="/mnt/bioinformatics/workspace/mrosasco/annotation/snp_ref/GRCh38_NGSCheckMate_andInterestingSNP.bed"
+bedfile="/mnt/bioinformatics/pipeline/annotation/snp_ref/GRCh38_NGSCheckMate_andInterestingSNP.bed"
 outdirname="snps"
 
 # user-set params
