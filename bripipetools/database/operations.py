@@ -58,37 +58,6 @@ def insert_objects(collection):
         return wrapper
     return decorator
 
-
-@find_objects('samples')
-def get_samples(db, query):
-    """
-    Return list of documents from 'samples' collection based on query.
-    """
-    return db, query
-
-
-@find_objects('counts')
-def get_counts(db, query):
-    """
-    Return list of documents from 'counts' collection based on query.
-    """
-    return db, query
-
-@find_objects('metrics')
-def get_metrics(db, query):
-    """
-    Return list of documents from 'metrics' collection based on query.
-    """
-    return db, query
-
-
-@find_objects('runs')
-def get_runs(db, query):
-    """
-    Return list of documents from 'runs' collection based on query.
-    """
-    return db, query
-
 @find_objects('genomicsWorkflowbatches')
 def get_genomicsWorkflowbatches(db, query):
     """

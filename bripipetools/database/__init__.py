@@ -11,7 +11,6 @@ database connection, depending on environment and configurations.
 """
 from .connection import connect
 from .operations import (find_objects, insert_objects,
-                         get_samples, get_counts, get_metrics, get_runs,
                          get_genomicsSamples, get_genomicsCounts, get_genomicsMetrics, get_genomicsRuns, get_genomicsWorkflowbatches,
                          put_genomicsSamples, put_genomicsCounts, put_genomicsMetrics, put_genomicsRuns, put_genomicsWorkflowbatches,
                          create_workflowbatch_id, search_ancestors)
