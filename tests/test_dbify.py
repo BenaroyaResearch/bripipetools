@@ -112,10 +112,10 @@ class TestFlowcellRunImporter:
         )
 
         # WHEN flowcell run is inserted into database
-        importer._insert_flowcellrun()
+        importer._insert_genomicsFlowcellRun()
 
-        # THEN document should be present in the runs collection
-        assert (len(list(mock_db.runs.find({'type': 'flowcell'}))) == 1)
+        # THEN document should be present in the genomicsRuns collection
+        assert (len(list(mock_db.genomicsRuns.find({'type': 'flowcell'}))) == 1)
 
     def test_insert_sequencedlibraries(self, mock_db, tmpdir):
         # GIVEN a path to a flowcell run folder and a connection to a
@@ -149,10 +149,10 @@ class TestFlowcellRunImporter:
         )
 
         # WHEN sequenced libraries are inserted into database
-        importer._insert_sequencedlibraries()
+        importer._insert_genomicsSequencedlibraries()
 
-        # THEN document should be present in the runs collection
-        assert (len(list(mock_db.samples.find({'type': 'sequenced library'})))
+        # THEN document should be present in the genomicsSamples collection
+        assert (len(list(mock_db.genomicsSamples.find({'type': 'sequenced library'})))
                 == 4)
 
     def test_insert(self, mock_db, tmpdir):
@@ -164,6 +164,7 @@ class TestFlowcellRunImporter:
                     .mkdir('pipeline')
                     .mkdir('Illumina')
                     .mkdir(mock_id))
+                    
 
         # AND an unaligned folder, which includes multiple project folders,
         # each with multiple folders for sequenced libraries
@@ -175,6 +176,9 @@ class TestFlowcellRunImporter:
             projpath = unalignedpath.mkdir(p)
             for l in mock_libs[idx]:
                 projpath.mkdir(l)
+                
+        # AND a batch submission directory in the run folder
+        mock_path.mkdir("globus_batch_submission")
 
         # AND a set of quality control options
         mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
@@ -190,8 +194,8 @@ class TestFlowcellRunImporter:
         importer.insert()
 
         # THEN documents should be present in the runs and samples collections
-        assert (len(list(mock_db.runs.find({'type': 'flowcell'}))) == 1)
-        assert (len(list(mock_db.samples.find({'type': 'sequenced library'})))
+        assert (len(list(mock_db.genomicsRuns.find({'type': 'flowcell'}))) == 1)
+        assert (len(list(mock_db.genomicsSamples.find({'type': 'sequenced library'})))
                 == 4)
 
 
@@ -360,10 +364,10 @@ class TestWorkflowBatchImporter:
         )
 
         # WHEN processed libraries inserted into database
-        importer._insert_processedlibraries()
+        importer._insert_genomicsProcessedlibraries()
 
-        # THEN documents should be present in the samples collection
-        assert (len(list(mock_db.samples.find({'type': 'processed library'})))
+        # THEN documents should be present in the genomicsSamples collection
+        assert (len(list(mock_db.genomicsSamples.find({'type': 'processed library'})))
                 == 2)
 
     def test_insert(self, mock_db, tmpdir):
@@ -399,15 +403,13 @@ class TestWorkflowBatchImporter:
         # WHEN all objects are inserted into all database collections
         importer.insert(collection = 'all')
 
-        # THEN documents should be present in the genomicsWorkflowbatches,
-        # genomicsSamples, and samples collections
+        # THEN documents should be present in the genomicsWorkflowbatches
+        # and genomicsSamples collections
         assert (len(list(mock_db.genomicsWorkflowbatches
                          .find({'type': 'Galaxy workflow batch'})))
                 == 1)
         assert (len(list(mock_db.genomicsSamples
                         .find({'type': 'processed library'})))
-                == 2)
-        assert (len(list(mock_db.samples.find({'type': 'processed library'})))
                 == 2)
 
 
@@ -530,6 +532,9 @@ class TestImportManager:
             projpath = unalignedpath.mkdir(p)
             for l in mock_libs[idx]:
                 projpath.mkdir(l)
+                
+        # AND a batch submission directory in the run folder
+        mock_path.mkdir("globus_batch_submission")
 
         # AND a set of quality control options
         mock_run_opts = {"sexmodel":'y_sq_over_tot', "sexcutoff":1}
@@ -544,9 +549,9 @@ class TestImportManager:
         # WHEN all objects are inserted into database
         manager.run()
 
-        # THEN documents should be present in the runs and samples collections
-        assert (len(list(mock_db.runs.find({'type': 'flowcell'}))) == 1)
-        assert (len(list(mock_db.samples.find({'type': 'sequenced library'})))
+        # THEN documents should be present in the genomics runs and samples collections
+        assert (len(list(mock_db.genomicsRuns.find({'type': 'flowcell'}))) == 1)
+        assert (len(list(mock_db.genomicsSamples.find({'type': 'sequenced library'})))
                 == 4)
 
     def test_run_for_workflow_batch(self, mock_db, tmpdir):
@@ -588,6 +593,4 @@ class TestImportManager:
                          .find({'type': 'Galaxy workflow batch'})))
                 == 1)
         assert (len(list(mock_db.genomicsSamples.find({'type': 'processed library'})))
-                == 2)
-        assert (len(list(mock_db.samples.find({'type': 'processed library'})))
                 == 2)
