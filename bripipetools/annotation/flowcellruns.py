@@ -108,21 +108,6 @@ class FlowcellRunAnnotator(object):
             for pp in os.listdir(flowcell_path)
             if re.search('Project_.*Processed', pp))
 
-    # def get_libraries(self, project=None):
-    #     """
-    #     Collect list of libraries for flowcell run from one or all projects.
-    #     """
-    #     unaligned_path = self.get_unaligned_path()
-    #     projects = self.get_projects()
-    #     if project is not None:
-    #         logger.debug("subsetting projects")
-    #         projects = [p for p in projects
-    #                     if re.search(project, p)]
-    #     logger.debug("collecting list of libraries")
-    #     logger.debug("searching in projects {}".format(projects))
-    #     return [l for p in projects
-    #             for l in os.listdir(os.path.join(unaligned_path, p))
-    #             if len(parsing.get_library_id(l))]
     def get_libraries(self, project=None):
         """
         Collect list of libraries for flowcell run from one or all projects.
