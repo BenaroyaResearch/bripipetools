@@ -33,7 +33,7 @@ class TestSequencedLibraryAnnotator:
         # a document corresponding to the sequenced library exists already
         mock_id = 'lib1111_C00000XX'
 
-        mock_db.samples.insert_one(
+        mock_db.genomicsSamples.insert_one(
             {'_id': mock_id,
              'type': 'sequenced library'}
         )
@@ -212,7 +212,7 @@ class TestFlowcellRunAnnotator:
         # GIVEN a flowcell run ID and a connection to a database in which
         # a document corresponding to the flowcell run exists already
         mock_id = '161231_INSTID_0001_AC00000XX'
-        mock_db.runs.insert_one(
+        mock_db.genomicsRuns.insert_one(
             {'_id': mock_id,
              'type': 'flowcell'}
         )
@@ -738,7 +738,7 @@ class TestProcessedLibraryAnnotator:
         # a document corresponding to the processed library exists already
         mock_id, mock_params = mock_batchdata
 
-        mock_db.samples.insert_one(
+        mock_db.genomicsSamples.insert_one(
             {'_id': '{}_processed'.format(mock_id),
              'type': 'processed library'}
         )
