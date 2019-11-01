@@ -44,7 +44,7 @@ class ProcessedLibraryAnnotator(object):
         try:
             logger.debug("getting `ProcessedLibrary` from GenLIMS")
             return database.map_to_object(
-                database.get_samples(self.db, {'_id': self.proclib_id})[0])
+                database.get_genomicsSamples(self.db, {'_id': self.proclib_id})[0])
         except IndexError:
             logger.debug("creating new ProcessedLibrary object")
             return docs.ProcessedLibrary(_id=self.proclib_id)
