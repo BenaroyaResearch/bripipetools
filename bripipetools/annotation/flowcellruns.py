@@ -157,7 +157,7 @@ class FlowcellRunAnnotator(object):
         
         return libList
 
-    def get_processed_libraries(self, project=None, sub_path="counts"):
+    def get_processed_libraries(self, project=None, sub_path="inputFastqs"):
         """
         Collect list of libraries for flowcell run from one or all projects.
         """
