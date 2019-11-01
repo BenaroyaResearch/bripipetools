@@ -39,7 +39,7 @@ class SequencedLibraryAnnotator(object):
         try:
             logger.debug("getting `SequencedLibrary` from GenLIMS")
             return database.map_to_object(
-                database.get_samples(self.db, {'_id': self.seqlib_id})[0])
+                database.get_genomicsSamples(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
             logger.debug("creating new `SequencedLibrary` object")
             return docs.SequencedLibrary(_id=self.seqlib_id)
