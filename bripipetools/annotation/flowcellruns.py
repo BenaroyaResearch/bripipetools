@@ -39,7 +39,7 @@ class FlowcellRunAnnotator(object):
         try:
             logger.debug("getting `FlowcellRun` from GenLIMS")
             return database.map_to_object(
-                database.get_runs(self.db, {'_id': self.run_id})[0])
+                database.get_genomicsRuns(self.db, {'_id': self.run_id})[0])
         except IndexError:
             logger.debug("creating new `FlowcellRun` object", exc_info=True)
             return docs.FlowcellRun(_id=self.run_id)
