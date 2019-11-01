@@ -125,37 +125,7 @@ def get_genomicsRuns(db, query):
     Return list of documents from 'genomicsRuns' collection based on query.
     """
     return db, query
-    
 
-@insert_objects('samples')
-def put_samples(db, samples):
-    """
-    Insert each document in list into 'samples' collection.
-    """
-    return db, samples
-
-
-@insert_objects('counts')
-def put_counts(db, counts):
-    """
-    Insert each document in list into 'counts' collection.
-    """
-    return db, counts
-
-@insert_objects('metrics')
-def put_metrics(db, metrics):
-    """
-    Insert each document in list into 'metrics' collection.
-    """
-    return db, metrics
-
-
-@insert_objects('runs')
-def put_runs(db, runs):
-    """
-    Insert each document in list into 'runs' collection.
-    """
-    return db, runs
 
 @insert_objects('genomicsWorkflowbatches')
 def put_genomicsWorkflowbatches(db, workflowbatches):
