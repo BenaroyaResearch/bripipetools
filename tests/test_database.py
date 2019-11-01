@@ -160,9 +160,11 @@ class TestDatabaseOperations:
     @pytest.mark.parametrize(
         'test_collection, test_function',
         [
-            ('samples', database.get_samples),
-            ('runs', database.get_runs),
-            ('workflowbatches', database.get_genomicsWorkflowbatches)
+            ('genomicsSamples', database.get_genomicsSamples),
+            ('genomicsCounts', database.get_genomicsCounts),
+            ('genomicsMetrics', database.get_genomicsMetrics),
+            ('genomicsRuns', database.get_genomicsRuns),
+            ('genomicsWorkflowbatches', database.get_genomicsWorkflowbatches)
         ]
     )
     def test_wrapped_get_functions(self, mock_db, test_collection, test_function):
@@ -180,8 +182,10 @@ class TestDatabaseOperations:
     @pytest.mark.parametrize(
         'test_collection, test_function',
         [
-            ('samples', database.put_samples),
-            ('runs', database.put_runs),
+            ('genomicsSamples', database.put_genomicsSamples),
+            ('genomicsCounts', database.put_genomicsCounts),
+            ('genomicsMetrics', database.put_genomicsMetrics),
+            ('genomicsRuns', database.put_genomicsRuns),
             ('genomicsWorkflowbatches', database.put_genomicsWorkflowbatches)
         ]
     )
