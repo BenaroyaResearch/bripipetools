@@ -157,7 +157,7 @@ class FlowcellRunImporter(object):
             self._insert_genomicsSequencedlibraries()
         
         # Gene counts
-        if collection in ['all', 'researchdb', 'genomicsCounts']:
+        if collection in ['all',  'genomicsCounts']:
             logger.info(("Inserting gene counts for libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_librarygenecounts()
