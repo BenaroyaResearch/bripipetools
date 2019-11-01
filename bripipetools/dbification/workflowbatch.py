@@ -52,7 +52,7 @@ class WorkflowBatchImporter(object):
             pipeline_root=path_items['pipeline_root'],
             db=self.db,
             run_opts=self.run_opts
-            ).get_processed_libraries(qc=True)
+            ).get_processed_libraries(qc=False)
         
     def _insert_genomicsWorkflowbatch(self):
         """
@@ -61,15 +61,6 @@ class WorkflowBatchImporter(object):
         workflowbatch = self._collect_workflowbatch()
         logger.debug("inserting workflow batch '{}'".format(workflowbatch))
         database.put_genomicsWorkflowbatches(self.db, workflowbatch.to_json())
-
-    def _insert_processedlibraries(self):
-        """
-        Convert ProcessedLibrary objects and insert into database.
-        """
-        processedlibraries = self._collect_processedlibraries()
-        for pl in processedlibraries:
-            logger.debug("inserting processed library '{}'".format(pl))
-            database.put_samples(self.db, pl.to_json())
             
     def _insert_genomicsProcessedlibraries(self):
         """
@@ -85,18 +76,12 @@ class WorkflowBatchImporter(object):
         Insert documents into databases. Note that ResearchDB collections
         are prepended by "genomics" to indicate the data origin.
         """
-        # Data for GenLIMS
-        if collection in ['all', 'samples', 'genlims']:
-            logger.info(("Inserting processed libraries for workflow batch "
-                         "'{}' into '{}'").format(self.path, self.db.name))
-            self._insert_processedlibraries()
-        
         # Data for ResearchDB
-        if collection in ['all', 'genomicsSamples', 'researchdb']:
+        if collection in ['all', 'genomicsSamples']:
             logger.info(("Inserting processed libraries for workflow batch "
                          "'{}' into '{}'").format(self.path, self.db.name))
             self._insert_genomicsProcessedlibraries()
-        if collection in ['all', 'genomicsWorkflowbatches', 'researchdb']:
+        if collection in ['all', 'genomicsWorkflowbatches']:
             logger.info("Inserting workflow batch '{}' into '{}'"
                         .format(self.path, self.db.name))
             self._insert_genomicsWorkflowbatch()

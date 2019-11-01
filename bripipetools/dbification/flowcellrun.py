@@ -74,7 +74,8 @@ class FlowcellRunImporter(object):
         Collect list of library metrics objects for flowcell run.
         """
         path_items = parsing.parse_flowcell_path(self.path)
-#        print("path: {}, items: {}".format(self.path, path_items))
+        logger.debug("Looking for metrics in path: {}, found items: {}"
+                    .format(self.path, path_items))
         logger.info("Collecting library metrics for flowcell run '{}'"
                     .format(path_items['run_id']))
 
@@ -83,24 +84,6 @@ class FlowcellRunImporter(object):
             pipeline_root=path_items['pipeline_root'],
             db=self.db
             ).get_library_metrics()
-
-    def _insert_flowcellrun(self, collection='all'):
-        """
-        Convert FlowcellRun object and insert into GenLIMS database.
-        """
-        flowcellrun = self._collect_flowcellrun()
-        logger.debug("inserting flowcell run {} into {}"
-                     .format(flowcellrun, self.db.name))
-        database.put_runs(self.db, flowcellrun.to_json())
-
-    def _insert_sequencedlibraries(self):
-        """
-        Convert SequencedLibrary objects and insert into GenLIMS database.
-        """
-        sequencedlibraries = self._collect_sequencedlibraries()
-        for sl in sequencedlibraries:
-            logger.debug("inserting sequenced library {}".format(sl))
-            database.put_samples(self.db, sl.to_json())
     
     def _insert_genomicsSequencedlibraries(self):
         """
@@ -119,15 +102,6 @@ class FlowcellRunImporter(object):
         for lgc in librarygenecounts:
             logger.debug("inserting library gene counts '{}'".format(lgc))
             database.put_genomicsCounts(self.db, lgc.to_json())
-
-    def _insert_librarymetrics(self):
-        """
-        Convert Library Results objects and insert into GenLIMS database.
-        """
-        librarymetrics = self._collect_librarymetrics()
-        for lgc in librarymetrics:
-            logger.debug("inserting library metrics '{}'".format(lgc))
-            database.put_metrics(self.db, lgc.to_json())
             
     def _insert_genomicsLibrarymetrics(self):
         """
@@ -159,45 +133,49 @@ class FlowcellRunImporter(object):
                 ).get_workflow_batch() 
             logger.debug("inserting workflow batch '{}'".format(workflowbatch))
             database.put_genomicsWorkflowbatches(self.db, workflowbatch.to_json())
-
-    def insert(self, collection='genlims'):
+            
+    def _insert_genomicsFlowcellRun(self, collection='all'):
         """
-        Insert documents into GenLIMS or ResearchDB databases.
+        Convert FlowcellRun object and insert into research database
+        """
+        flowcellrun = self._collect_flowcellrun()
+        logger.debug("inserting flowcell run {} into {}"
+                     .format(flowcellrun, self.db.name))
+        database.put_genomicsRuns(self.db, flowcellrun.to_json())
+
+    def insert(self, collection='all'):
+        """
+        Insert documents into ResearchDB databases.
         Note that ResearchDB collections are prepended by 'genomics'
         to indicate the data origin.
         """
         
-        # Sample information into ResDB/GenLIMS
-        if collection in ['all', 'researchdb', 'genomicsSamples']:
+        # Sample information
+        if collection in ['all', 'genomicsSamples']:
             logger.info(("Inserting sequenced libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsSequencedlibraries()
         
-        if collection in ['all', 'genlims', 'samples']:
-            logger.info(("Inserting sequenced libraries for flowcell '{}' "
-                         "into '{}'").format(self.path, self.db.name))
-            self._insert_sequencedlibraries()
-        
-        # Gene counts - only into ResDB
+        # Gene counts
         if collection in ['all', 'researchdb', 'genomicsCounts']:
             logger.info(("Inserting gene counts for libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_librarygenecounts()
         
-        # Metrics information - only into ResDB
-        if collection in ['all', 'researchdb', 'genomicsMetrics']:
+        # Metrics information
+        if collection in ['all', 'genomicsMetrics']:
             logger.info(("Inserting metrics for libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsLibrarymetrics()
         
-        # Workflow Batch files - only into ResDB
-        if collection in ['all', 'researchdb', 'genomicsWorkflowbatches']:
+        # Workflow Batch files
+        if collection in ['all', 'genomicsWorkflowbatches']:
             logger.info(("Inserting workflow batches for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsWorkflowbatches()
-
-        # Run information into GenLIMS
-        if collection in ['all', 'genlims', 'flowcell', 'runs']:
-            logger.info("Inserting flowcell run '{}' into '{}'"
-                        .format(self.path, self.db.name))
-            self._insert_flowcellrun()
+        
+        # Genomics run info
+        if collection in ['all', 'genomicsRuns']:
+            logger.info(("Inserting run information for flowcell '{}' "
+                         "into '{}'").format(self.path, self.db.name))
+            self._insert_genomicsFlowcellRun()
