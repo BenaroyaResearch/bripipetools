@@ -17,8 +17,7 @@ fileConfig(os.path.join(config_path, 'logging_config.ini'),
            disable_existing_loggers=False)
 logger = logging.getLogger()
 logger.info("Starting `bripipetools`")
-DB = bripipetools.database.connect("database")
-RB = bripipetools.database.connect("researchdb")
+RDB = bripipetools.database.connect("researchdb")
 
 def get_workflow_batches(flowcell_path, all_workflows=False):
     """
@@ -213,10 +212,10 @@ def dbify(sexmodel, sexcutoff, workflow_dir, path):
     research database.
     """
     logger.info("Importing data to '{}' based on path '{}'"
-                .format(DB.name, path))
+                .format(RDB.name, path))
     importer = bripipetools.dbification.ImportManager(
         path=path,
-        db=DB,
+        db=RDB,
         run_opts = {"sexmodel":sexmodel, 
                     "sexcutoff":sexcutoff,
                     "workflow_dir":workflow_dir}
@@ -260,13 +259,13 @@ def researchdb(path, workflow_dir):
     """
     Push library results to research database
     """
-    logger.info("Research Database Name: {} based on path {}".format(RB.name, path))
+    logger.info("Research Database Name: {} based on path {}".format(RDB.name, path))
     importer = bripipetools.dbification.ImportManager(
         path=path,
-        db=RB,
+        db=RDB,
         run_opts = {"workflow_dir":workflow_dir}
     )
-    importer.run(collections='researchdb')
+    importer.run(collections='all')
     logger.info("Import complete.")
 
 @main.command()
@@ -392,7 +391,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
                     .format(path))
         bripipetools.dbification.ImportManager(
             path=path,
-            db=RB,
+            db=RDB,
             run_opts = {"sexmodel":sexmodel, 
                         "sexcutoff":sexcutoff,
                         "workflow_dir":workflow_dir}
@@ -453,10 +452,10 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
         
         if (database_type in ['researchdb', 'all']):
             logger.debug("Importing data into ResDB Database: {}".
-                format(DB.name))
+                format(RDB.name))
             bripipetools.dbification.ImportManager(
                 path=wb,
-                db=RB,
+                db=RDB,
                 run_opts = {"sexmodel":sexmodel, 
                             "sexcutoff":sexcutoff,
                             "workflow_dir": workflow_dir}
