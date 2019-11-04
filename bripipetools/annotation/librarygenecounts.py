@@ -37,7 +37,7 @@ class LibraryGeneCountAnnotator(object):
         try:
             logger.debug("getting `GeneCounts` from ResearchDatabase")
             return database.map_to_object(
-                database.get_counts(self.db, {'_id': self.seqlib_id})[0])
+                database.get_genomicsCounts(self.db, {'_id': self.seqlib_id})[0])
         except IndexError:
             logger.debug("creating new `GeneCounts` object")
             return docs.GeneCounts(_id=self.seqlib_id)
