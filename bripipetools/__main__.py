@@ -460,7 +460,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
                 run_opts = {"sexmodel":sexmodel, 
                             "sexcutoff":sexcutoff,
                             "workflow_dir": workflow_dir}
-            ).run(collections='researchdb')
+            ).run(collections='all')
             logger.info("ResDB workflow batch import for '{}' complete."
                         .format(os.path.basename(wb)))
 
