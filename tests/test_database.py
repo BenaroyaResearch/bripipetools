@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 def test_database_connection():
     # TODO: come up with a better way to test this
-    db = database.connect('database')
-    assert ('tg3' in db.name)
+    db = database.connect('researchdb')
+    assert ('bri' in db.name)
     if os.environ.get('DB_PARAM_FILE') != 'default.ini':
         assert (db.collection_names())
 
