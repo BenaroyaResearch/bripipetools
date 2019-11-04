@@ -210,7 +210,7 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
 def dbify(sexmodel, sexcutoff, workflow_dir, path):
     """
     Import data from a flowcell run or workflow processing batch into
-    GenLIMS database.
+    research database.
     """
     logger.info("Importing data to '{}' based on path '{}'"
                 .format(DB.name, path))
@@ -377,7 +377,7 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
                     "files to be used for batch processing"))
 @click.option('--database-type', default='all',
               help=("Database to contain sample information. Options are:\n"
-              "\'researchdb\'\n\'genlims\'\n\'all\'\n\'none\'"))
+              "\'researchdb\'\n\'all\'\n\'none\'"))
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel, 
            sexcutoff, all_workflows, workflow_dir, database_type, path):
@@ -385,19 +385,6 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
     Perform 'dbification' and 'postprocessing' operations on all projects and
     workflow batches from a flowcell run.
     """
-    
-    # Push data into GenLIMS                   
-    if (database_type in ['genlims', 'all']):
-        # import flowcell run details and raw data for sequenced libraries
-        logger.info("Importing raw data for flowcell at path '{}' into GenLIMS"
-                    .format(path))
-        bripipetools.dbification.ImportManager(
-            path=path,
-            db=DB,
-            run_opts = {"sexmodel":sexmodel, 
-                    "sexcutoff":sexcutoff}
-        ).run(collections='genlims')
-        logger.info("GenLIMS flowcell run import complete.")
     
     # Push data into ResDB                   
     if (database_type in ['researchdb', 'all']):
@@ -409,7 +396,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             run_opts = {"sexmodel":sexmodel, 
                         "sexcutoff":sexcutoff,
                         "workflow_dir":workflow_dir}
-        ).run(collections='researchdb')
+        ).run(collections='all')
         logger.info("Research Database flowcell run import complete.")
 
     workflow_batches = list(get_workflow_batches(path, all_workflows))
@@ -463,18 +450,6 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             "importing processed data for workflow batch in file '{}'"
             .format(wb)
         )
-        if (database_type in ['genlims', 'all']):
-            logger.debug("Importing data into GenLIMS Database: {}".
-                format(DB.name))
-            bripipetools.dbification.ImportManager(
-                path=wb,
-                db=DB,
-                run_opts = {"sexmodel":sexmodel, 
-                            "sexcutoff":sexcutoff,
-                            "workflow_dir": workflow_dir}
-            ).run(collections='genlims')
-            logger.info("GenLIMS workflow batch import for '{}' complete."
-                        .format(os.path.basename(wb)))
         
         if (database_type in ['researchdb', 'all']):
             logger.debug("Importing data into ResDB Database: {}".
