@@ -48,7 +48,12 @@ class LibraryGeneCountAnnotator(object):
         """
         logger.debug("updating `GeneCounts` object attributes")
         path = os.path.join(self.path, 'counts')
-        genecounts = postprocessing.OutputReader(path).read_data(self.seqlib_id)
+        if(os.path.exists(path)):
+            cts = postprocessing.OutputReader(path).read_data(self.seqlib_id)
+        else:
+            logger.info("WARNING! Path {} doesn't exist. Skipping gene counts."
+                        .format(path))
+            cts = None
         #logger.info("library counts: {}".format(librarycounts))
 #        logger.info("counts: {}".format(librarycounts))
 #        project_items = parsing.parse_project_label(self.project_label)
@@ -57,7 +62,7 @@ class LibraryGeneCountAnnotator(object):
 #                          'run_id': self.run_id,
 #                          'parent_id': self.library_id}
         self.librarycounts.is_mapped = False
-        self.librarycounts.update_attrs({'gene_counts': genecounts}, force=True)
+        self.librarycounts.update_attrs({'gene_counts': cts}, force=True)
 
     def get_library_gene_counts(self):
         """
