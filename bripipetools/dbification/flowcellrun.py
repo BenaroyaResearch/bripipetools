@@ -108,9 +108,9 @@ class FlowcellRunImporter(object):
         Convert Library Results objects and insert into Research database.
         """
         librarymetrics = self._collect_librarymetrics()
-        for lgc in librarymetrics:
-            logger.debug("inserting library metrics '{}'".format(lgc))
-            database.put_genomicsMetrics(self.db, lgc.to_json())
+        for lm in librarymetrics:
+            logger.debug("inserting library metrics '{}'".format(lm))
+            database.put_genomicsMetrics(self.db, lm.to_json())
     
     def _insert_genomicsWorkflowbatches(self):
         """
