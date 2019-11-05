@@ -203,6 +203,8 @@ class FlowcellRunAnnotator(object):
                         l, p, self.run_id, self.db
                         ).get_library_gene_counts()
                         for l in libraries]
+        librarygenecounts = [lgc for lgc in librarygenecounts 
+                             if lgc.gene_counts != None]
         return librarygenecounts
     
     def get_library_metrics(self, project=None):
