@@ -174,10 +174,10 @@ class TestOutputStitcher:
                 == [
                     ['libId', 'fastq_total_reads',
                      'field_1', 'field_2', 'reads_aligned_sam'],
-                    ['lib2222_C00000XX', 56789,
-                     456, 654, 98765],
                     ['lib1111_C00000XX', 12345,
                      123, 321, 54321],
+                    ['lib2222_C00000XX', 56789,
+                     456, 654, 98765]
                 ])
 
     def test_build_table_for_count_data(self, tmpdir):
