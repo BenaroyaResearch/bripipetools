@@ -37,7 +37,7 @@ class TophatStatsFile(object):
         }
         logger.debug("{}".format(self.data['raw']))
         self.data['table'] = {metric_keys[l.strip().split('\t')[1]]: 
-                              float(l.strip().translate(None, '%').split('\t')[0])
+                              float(l.strip().translate({ord('%'):None}).split('\t')[0])
                               for l in self.data['raw']}
 
     def parse(self):
