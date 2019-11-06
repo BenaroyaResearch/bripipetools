@@ -291,10 +291,10 @@ class TestOutputStitcher:
         mock_contents = [
             ','.join(['libId', 'fastq_total_reads',
                       'field_1', 'field_2', 'reads_aligned_sam\n']),
-            ','.join(['lib2222_C00000XX', '56789.0',
-                      '456', '654', '98765.0\n']),
             ','.join(['lib1111_C00000XX', '12345.0',
                       '123', '321', '54321.0\n']),
+            ','.join(['lib2222_C00000XX', '56789.0',
+                      '456', '654', '98765.0\n']),
         ]
         assert (testtablefile == mock_tablefile)
         with open(testtablefile) as f:
@@ -340,9 +340,9 @@ class TestOutputStitcher:
             'P00-00_C00000XX_161231_combined_counts.csv'
         )
         mock_contents = [
-            ','.join(['geneName', 'lib2222_C00000XX', 'lib1111_C00000XX\n']),
-            ','.join(['field1', '1', '0\n']),
-            ','.join(['field2', '0', '1\n']),
+            ','.join(['geneName', 'lib1111_C00000XX', 'lib2222_C00000XX\n']),
+            ','.join(['field1', '0', '1\n']),
+            ','.join(['field2', '1', '0\n']),
         ]
         assert (testtablefile == mock_tablefile)
         with open(testtablefile) as f:
