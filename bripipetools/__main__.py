@@ -86,7 +86,7 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
             bripipetools.postprocessing.OutputStitcher(path).write_table()
         )
     except OSError:
-        logger.warn(("no validation files found "
+        logger.warning(("no validation files found "
                      "for project {}; skiproject_pathing")
                     .format(project_path))
     logger.info("Combined output files generated for '{}' with option '{}'"

@@ -24,7 +24,7 @@ def read_rnaseq_metrics(path):
             metrics_file = zfile.open('RNA_Seq_Metrics_html.html')
         return metrics_file.readlines()
     except:
-        logger.warn("not a zip file; reading lines directly")
+        logger.warning("not a zip file; reading lines directly")
         with open(path) as f:
             return f.readlines()
 
@@ -38,7 +38,7 @@ def get_norm_cov(rnaseq_metrics_lines):
                     for line in cov_hist_lines]
     except ValueError:
         try:
-            logger.warn("parsing failed; attempting to parse histogram from "
+            logger.warning("parsing failed; attempting to parse histogram from "
                         "alternative location (lines 31-132)")
             cov_hist_lines = rnaseq_metrics_lines[31:132]
             norm_cov = [float(re.search('[0-9]*\t[0-9]+(\.[0-9]+)*', line)
@@ -48,7 +48,7 @@ def get_norm_cov(rnaseq_metrics_lines):
         # THIS IS A HACK-Y WORKAROUND. NEED TO PARSE TABLE BETTER
         except AttributeError:
             try:
-                logger.warn("parsing failed; attempting to parse histogram from "
+                logger.warning("parsing failed; attempting to parse histogram from "
                             "alternative location (lines 30-131)")
                 cov_hist_lines = rnaseq_metrics_lines[30:131]
                 norm_cov = [float(re.search('[0-9]*\t[0-9]+(\.[0-9]+)*', line)
@@ -56,7 +56,7 @@ def get_norm_cov(rnaseq_metrics_lines):
                                   .split('\t')[-1])
                             for line in cov_hist_lines]
             except AttributeError:
-                logger.warn("no coverage histogram found, returning empty list")
+                logger.warning("no coverage histogram found, returning empty list")
                 norm_cov = []
     return norm_cov
     
@@ -123,7 +123,7 @@ def build_figure(ncDf, metDf, project, fc, outFolder):
                 logger.debug("locating sample metrics by field 'libId'")
                 libIdx = metDf.libId == lib
             except AttributeError:
-                logger.warn("failed; locating sample metrics by field 'libID'")
+                logger.warning("failed; locating sample metrics by field 'libID'")
                 libIdx = metDf.libID == lib
             mcc = float(metDf[libIdx]['median_cv_coverage'])
             fqReads = int(metDf[libIdx]['fastq_total_reads'])

@@ -153,7 +153,7 @@ class OutputStitcher(object):
                 data[idx + 1].append(mapped_reads)
             data[0].append('mapped_reads_w_dups')
         except KeyError:
-            logger.warn("required fields missing; skipping calculation "
+            logger.warning("required fields missing; skipping calculation "
                         "of 'mapped_reads_w_dups")
         return data
 
