@@ -9,7 +9,7 @@ dependencies:
 - mkl=11.3.3
 - mock=2.0.0
 - numpy=1.11.2
-- openssl=1.0.2j
+- openssl
 - pandas
 - pbr=1.10.0
 - pip
