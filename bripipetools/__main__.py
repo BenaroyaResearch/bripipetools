@@ -161,7 +161,7 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
         submitter = bripipetools.submission.FlowcellSubmissionBuilder(
             path=path,
             endpoint=endpoint,
-            db=DB,
+            db=RDB,
             workflow_dir=workflow_dir,
             all_workflows=all_workflows
         )
@@ -246,7 +246,7 @@ def qc(sexmodel, sexcutoff, path):
     annotator = bripipetools.annotation.WorkflowBatchAnnotator(
         workflowbatch_file=path,
         pipeline_root=path_items['pipeline_root'],
-        db = DB,
+        db = RDB,
         run_opts = {"sexmodel":sexmodel, "sexcutoff":sexcutoff}
     ).get_processed_libraries(qc=True)
 
