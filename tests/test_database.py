@@ -136,9 +136,9 @@ class TestDatabaseOperations:
         test_dbobject = mock_db['mockcollection'].find_one(test_query)
         assert (mock_db['mockcollection'].find(test_query).count() == 1)
         assert (all({test_dbobject[field] == mock_dbobject[field]
-                     for field in mock_dbobject.keys()
-                     if field not in update_field.keys()}))
-        for field, value in update_field.items():
+                     for field in list(mock_dbobject.keys())
+                     if field not in list(update_field.keys())}))
+        for field, value in list(update_field.items()):
             if value is not None:
                 assert(test_dbobject[field] == value)
         assert ('skipField' not in test_dbobject)

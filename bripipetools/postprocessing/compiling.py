@@ -46,7 +46,7 @@ class OutputCompiler(object):
         """
         Modify input path to create filename for combined CSV file.
         """
-        return re.sub('(?<=combined_)\w*', 'summary-data',
+        return re.sub(r'(?<=combined_)\w*', 'summary-data',
                       os.path.basename(self.paths[0]))
 
     def write_table(self):

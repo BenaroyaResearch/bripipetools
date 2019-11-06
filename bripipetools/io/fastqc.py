@@ -52,7 +52,7 @@ class FastQCFile(object):
                           if re.search('>>(?!END)', l)]
         section_ends = [idx for idx, l in enumerate(self.data['raw'])
                         if re.search('>>(?=END)', l)]
-        return dict(zip(section_headers, zip(section_starts, section_ends)))
+        return dict(list(zip(section_headers, list(zip(section_starts, section_ends)))))
 
     def _get_section_status(self, section_name, section_info):
         """
@@ -84,7 +84,7 @@ class FastQCFile(object):
         self._read_file()
         sections = self._locate_sections()
         data = []
-        for section_name, section_info in sections.items():
+        for section_name, section_info in list(sections.items()):
             data.append(self._get_section_status(section_name, section_info))
             if section_name in ['basic_statistics',
                                 'sequence_duplication_levels']:
@@ -109,9 +109,9 @@ class FastQCFile(object):
 
             headers = [self._clean_header(item)
                        for item in overrep_seq_table[0].rstrip().split('\t')]
-            return [dict(zip(headers,
+            return [dict(list(zip(headers,
                              [self._clean_value(item)
-                              for item in l.rstrip().split('\t')]))
+                              for item in l.rstrip().split('\t')])))
                     for l in overrep_seq_table[1:]]
         else:
             return []

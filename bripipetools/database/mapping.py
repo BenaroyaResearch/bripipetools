@@ -75,7 +75,7 @@ def map_to_object(doc):
                      .format(doc_class))
     obj = mappedclass(_id=doc['_id'], is_mapped=True)
 
-    logger.debug("document has following fields: {}".format(doc.keys()))
+    logger.debug("document has following fields: {}".format(list(doc.keys())))
     snake_doc = map_keys(doc)
     obj.update_attrs(snake_doc, force=True)
     return obj

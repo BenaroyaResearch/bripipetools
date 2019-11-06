@@ -141,7 +141,7 @@ class WorkflowBatchFile(object):
         self._read_file()
         self.data['workflow_name'] = self.get_workflow_name()
         self.data['batch_name'] = self.get_batch_name()
-        self.data['parameters'] = [v for k, v in self.get_params().items()]
+        self.data['parameters'] = [v for k, v in list(self.get_params().items())]
         if self.state == 'submit':
             sample_lines = self.data['raw'][self._locate_sample_start_line():]
             self.data['samples'] = [self.get_sample_params(l)

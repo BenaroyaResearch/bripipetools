@@ -28,7 +28,7 @@ class SexcheckFile(object):
         Get key-value pairs from text lines and return dictionary.
         """
         rows = [l.rstrip().split(',') for l in self.data['raw']]
-        self.data['table'] = dict(zip(rows[0], rows[1]))
+        self.data['table'] = dict(list(zip(rows[0], rows[1])))
 
     def parse(self):
         """

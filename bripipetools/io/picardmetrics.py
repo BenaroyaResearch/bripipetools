@@ -44,7 +44,7 @@ class PicardMetricsFile(object):
         or wide (keys in one row, values in the other).
         """
         table = self.data['table']
-        if any([re.search(u'\xa0', td.text)
+        if any([re.search('\xa0', td.text)
                 for tr in table.findAll('tr')
                 for td in tr.findAll('td')]):
             logger.debug("non-breaking space found in table; long format")
@@ -66,7 +66,7 @@ class PicardMetricsFile(object):
                     td_key = td.text.lower().replace('\n', '')
                     logger.debug("found long metrics field '{}'".format(td_key))
 
-                    td_val = td.next_sibling.string.replace(u'\xa0', u'')
+                    td_val = td.next_sibling.string.replace('\xa0', '')
                     td_val = td_val.replace('\n', '')
                     logger.debug("with corresponding long value '{}'".format(td_val))
 
@@ -90,7 +90,7 @@ class PicardMetricsFile(object):
         table = self.data['table']
         metrics = {}
         for tr in table.findAll('tr'):
-            if re.search(u'\xa0', tr.text):
+            if re.search('\xa0', tr.text):
                 return {}
             for td in tr.findAll('td'):
                 if re.search('^[A-Z]+', td.text):
@@ -101,10 +101,10 @@ class PicardMetricsFile(object):
                     logger.debug("found corresponding wide values: {}"
                                  .format(td_vals))
 
-                    metrics_tmp = dict(zip(td_keys, td_vals))
+                    metrics_tmp = dict(list(zip(td_keys, td_vals)))
                     metrics.update({k: float(v) if not re.search(r'[^\d.]+', v)
                                     else v
-                                    for k, v in metrics_tmp.items()})
+                                    for k, v in list(metrics_tmp.items())})
         logger.debug("parsed wide metrics table: {}".format(metrics))
         return metrics
 

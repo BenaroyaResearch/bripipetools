@@ -56,7 +56,7 @@ def postprocess_project(output_type, exclude_types, stitch_only, clean_outputs,
         # Determine whether the path exists before calling write_table
         # important for eg: ChIPseq, which doesn't contain a 'counts' folder.
         if not os.path.exists(path):
-            proceed = raw_input("{} not found & will be skipped. Proceed? (y/[n]): "
+            proceed = input("{} not found & will be skipped. Proceed? (y/[n]): "
                                 .format(path))
             if proceed != 'y':
                 logger.info("Exiting program.")
@@ -189,7 +189,7 @@ def submit(endpoint, workflow_dir, all_workflows, sort_samples, num_samples,
     print("\nPrepared the following workflow batch submit files:\n"
           "(ready for upload to Globus Genomics)\n")
     for p in submit_paths:
-        print(bripipetools.util.swap_root(p, 'pipeline', '/mnt/bioinformatics/'))
+        print((bripipetools.util.swap_root(p, 'pipeline', '/mnt/bioinformatics/')))
 
 
 @main.command()
@@ -280,7 +280,7 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
     # Find all workflow batch files for a given project
     project_id = bripipetools.parsing.get_project_label(path)
     
-    print project_id
+    print(project_id)
     flowcell_dir = os.path.abspath(os.path.join(path, '..'))
     
     workflow_batches =  list(wb for wb in 
@@ -300,19 +300,18 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
             workflowbatch_file=wb, pipeline_root=pipeline_root
         ).check_project_outputs(project_id)
 
-        problem_outputs = filter(lambda x: x[1]['status'] != 'ok',
-                                 wb_outputs.items())
+        problem_outputs = [x for x in list(wb_outputs.items()) if x[1]['status'] != 'ok']
         problem_count += len(problem_outputs)
         if len(problem_outputs):
-            output_warnings = map(lambda x: 'OUTPUT {}: {}'.format(
+            output_warnings = ['OUTPUT {}: {}'.format(
                 x[1]['status'].upper(), x[0]
-            ), problem_outputs)
+            ) for x in problem_outputs]
             for w in output_warnings:
                 logger.warning(w)
 
     # give option to continue
     if problem_count > 0:
-        proceed = raw_input("{} problems encountered; proceed? (y/[n]): "
+        proceed = input("{} problems encountered; proceed? (y/[n]): "
                             .format(problem_count))
         if proceed != 'y':
             logger.info("Exiting program.")
@@ -384,7 +383,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
     # If non-optimized workflows were used, the all-workflows flag is 
     # necessary to get, eg: sexcheck information.
     if len(workflow_batches) == 0:
-        proceed = raw_input("No workflow batches detected.\n"
+        proceed = input("No workflow batches detected.\n"
                             "Did you mean to use the '--all-workflows' tag?\n"
                             "Further processing may not include all data.\n"
                             "Continue processing? (y/[n]): ")
@@ -405,19 +404,18 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             workflowbatch_file=wb, pipeline_root=pipeline_root
         ).check_outputs()
 
-        problem_outputs = filter(lambda x: x[1]['status'] != 'ok',
-                                 wb_outputs.items())
+        problem_outputs = [x for x in list(wb_outputs.items()) if x[1]['status'] != 'ok']
         problem_count += len(problem_outputs)
         if len(problem_outputs):
-            output_warnings = map(lambda x: 'OUTPUT {}: {}'.format(
+            output_warnings = ['OUTPUT {}: {}'.format(
                 x[1]['status'].upper(), x[0]
-            ), problem_outputs)
+            ) for x in problem_outputs]
             for w in output_warnings:
                 logger.warning(w)
 
     # give option to continue
     if problem_count > 0:
-        proceed = raw_input("{} problems encountered; proceed? (y/[n]): "
+        proceed = input("{} problems encountered; proceed? (y/[n]): "
                             .format(problem_count))
         if proceed != 'y':
             logger.info("Exiting program.")

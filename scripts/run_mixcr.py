@@ -121,7 +121,7 @@ def main(argv):
                                    useKAligner2 = args.useKAligner2)
         slurmCmd = build_slurm_cmd(mixcrCmd, excludeNodes)
         os.system(slurmCmd)
-        print slurmCmd + '\n'
+        print(slurmCmd + '\n')
 
 if __name__ == "__main__":
    main(sys.argv[1:])

@@ -459,7 +459,7 @@ class TestFlowcellRunAnnotator:
         # THEN the list should include all library folders across all projects
         # in the unaligned folder (and nothing else)
         assert (set(test_libs) ==
-                set([l for libs in mock_libs.values() for l in libs]))
+                set([l for libs in list(mock_libs.values()) for l in libs]))
 
     def test_get_sequenced_libraries(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
@@ -506,7 +506,7 @@ class TestFlowcellRunAnnotator:
         # sequenced library is be stored in the 'parent_id' attribute
         assert (all[type(sl) == docs.SequencedLibrary] for sl in test_objects)
         assert (set([sl.parent_id for sl in test_objects]) ==
-                set([l.split('-')[0] for libs in mock_libs.values()
+                set([l.split('-')[0] for libs in list(mock_libs.values())
                      for l in libs]))
 
 

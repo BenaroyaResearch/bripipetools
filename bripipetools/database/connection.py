@@ -4,7 +4,7 @@ Connect to a BRI Mongo database.
 import logging
 from logging.config import fileConfig
 import os
-import ConfigParser
+import configparser
 
 import pymongo
 
@@ -37,11 +37,11 @@ def connect(db_config_name):
     else:
         logger.info("property file set: '{}'".format(property_file))
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
 
     property_path = os.path.join(config_path, property_file)
     with open(property_path) as f:
-        config.readfp(f)
+        config.read_file(f)
     db_host = config.get(db_config_name, 'db_host')
     db_name = config.get(db_config_name, 'db_name')
 
@@ -53,7 +53,7 @@ def connect(db_config_name):
         logger.info("Authenticating database '{}'.".format(db_name))
         client[db_name].authenticate(config.get(db_config_name, 'user'),
                                      config.get(db_config_name, 'password'))
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         logger.info("No username/password provided; "
                     "attempting to connect anyway.")
 

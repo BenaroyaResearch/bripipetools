@@ -73,7 +73,7 @@ class TG3Object(object):
             they already exist
         """
         updated = False
-        for attr, val in attr_map.items():
+        for attr, val in list(attr_map.items()):
             if hasattr(self, attr):
                 if (getattr(self, attr) is None
                         or (getattr(self, attr) != val and force)):

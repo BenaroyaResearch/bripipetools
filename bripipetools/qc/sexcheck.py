@@ -138,7 +138,7 @@ class SexChecker(object):
             logger.debug("creating directory '{}'".format(output_dir))
             os.makedirs(output_dir)
         with open(output_path, 'w') as f:
-            writer = csv.DictWriter(f, fieldnames=self.data.keys())
+            writer = csv.DictWriter(f, fieldnames=list(self.data.keys()))
             writer.writeheader()
             writer.writerow(self.data)
         return output_path

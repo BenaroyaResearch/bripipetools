@@ -14,11 +14,11 @@ def list_project_dirs(mount_path):
 def get_project_app_dirs(project_path):
     app_session_dir = os.path.join(project_path, 'AppSessions')
     if(not os.path.isdir(app_session_dir)):
-        print "WARNING! Could not find an AppSessions directory in " + app_session_dir + "; skipping."
+        print("WARNING! Could not find an AppSessions directory in " + app_session_dir + "; skipping.")
         return([])
     fq_match = [s for s in os.listdir(app_session_dir) if "fastq" in s.lower()]
     if (fq_match == []):
-        print "WARNING! Could not find a fastq directory in " + app_session_dir + "; skipping."
+        print("WARNING! Could not find a fastq directory in " + app_session_dir + "; skipping.")
         return([])
     return [os.path.join(app_session_dir, d) 
             for d in os.listdir(app_session_dir)
@@ -68,20 +68,20 @@ def sniff_sample_sheet(app_logs_path):
 
 def copy_data(flowcell_path, app_logs_path, app_props_path):
     if os.path.isdir(flowcell_path):
-        print(' - Flowcell folder {} already exists; skipping.'.format(flowcell_path))
+        print((' - Flowcell folder {} already exists; skipping.'.format(flowcell_path)))
     else:
         target_logs_path = os.path.join(flowcell_path, 'logs')
         os.makedirs(target_logs_path)
-        print(' - Copying log data from {} to {}...'.format(app_logs_path,
-                                                            target_logs_path))
+        print((' - Copying log data from {} to {}...'.format(app_logs_path,
+                                                            target_logs_path)))
         log_copy_cmd = 'rsync -r {} {}'.format(pipes.quote(app_logs_path + '/'), 
                                             target_logs_path)
         subprocess.Popen(log_copy_cmd, shell=True)
 
         target_props_path = os.path.join(flowcell_path, 'properties')
         os.makedirs(target_props_path)
-        print(' - Copying property data from {} to {}...'.format(app_props_path,
-                                                                 target_props_path))
+        print((' - Copying property data from {} to {}...'.format(app_props_path,
+                                                                 target_props_path)))
 
         props_copy_cmd = 'rsync -r {} {}'.format(pipes.quote(app_props_path + '/'),
                                                  target_props_path)
@@ -97,8 +97,8 @@ def backup_project(project_path, target_path):
         project_flowcell = sniff_sample_sheet(app_logs_dir)
         if(project_flowcell == ""):
             project_flowcell = os.path.basename(project_path) + "_Flowcell"
-            print "WARNING! Could not find a flowcell id for " + project_app_dir + "."
-            print "Assigning a mock flow cell of " + project_flowcell + "."
+            print("WARNING! Could not find a flowcell id for " + project_app_dir + ".")
+            print("Assigning a mock flow cell of " + project_flowcell + ".")
         flowcell_path = os.path.join(target_path, project_flowcell)
         copy_data(flowcell_path, app_logs_dir, app_props_dir)
 
@@ -108,7 +108,7 @@ def main(argv):
 
     project_dirs = list_project_dirs(bs_mount_dir)
     for idx,p in enumerate(project_dirs):
-        print('\n[{} / {}] Backing up project data in {}'.format(idx + 1, len(project_dirs), p))
+        print(('\n[{} / {}] Backing up project data in {}'.format(idx + 1, len(project_dirs), p)))
         backup_project(p, backup_dir)
 
 if __name__ == "__main__":

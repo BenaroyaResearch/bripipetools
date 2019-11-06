@@ -38,10 +38,10 @@ class SnpChecker(object):
         """
         show_prompt = True
         while(show_prompt):
-            for n,s in enumerate(sorted(self.lib_list.iterkeys())):
-                print("{}:\t{}".format(n,s))
+            for n,s in enumerate(sorted(self.lib_list.keys())):
+                print(("{}:\t{}".format(n,s)))
             
-            famid = raw_input("Please enter an ID from the list to assign a \n"
+            famid = input("Please enter an ID from the list to assign a \n"
                               "family ID for this library, or enter to skip:\n")
             
             if(not len(famid)):
@@ -50,7 +50,7 @@ class SnpChecker(object):
             if famid in self.lib_list:
                 show_prompt = False
             else:
-                print("{} was not found in the list.\n".format(famid))                
+                print(("{} was not found in the list.\n".format(famid)))                
         
         self.lib_list[libid]['libfamily'] = famid
         self.lib_list[libid]['write'] = True
@@ -79,7 +79,7 @@ class SnpChecker(object):
             return
         
         # fill in the family info                 
-        for lib in sorted(self.lib_list.iterkeys()):
+        for lib in sorted(self.lib_list.keys()):
             # Check if lib already has a family assigned
             if ('libfamily' in self.lib_list[lib]):
                 self.lib_list[lib]['write'] = True
@@ -100,22 +100,22 @@ class SnpChecker(object):
                          
             # if API inaccessible...
             if (lib_api_reponse.status_code != 200):
-                print("Requesting the API at {} returned a status code of {}. "
-                      .format(api, lib_api_reponse.status_code))
+                print(("Requesting the API at {} returned a status code of {}. "
+                      .format(api, lib_api_reponse.status_code)))
                 self._manually_assign_family(lib)
             
             else:
                 api_data = json.loads(lib_api_reponse.content)
                 # if API failed...
                 if (api_data['retCode'] != 1):
-                    print("The API at {} responded with a return code of {}. "
-                          .format(api, api_data['retCode']))
+                    print(("The API at {} responded with a return code of {}. "
+                          .format(api, api_data['retCode'])))
                     self._manually_assign_family(lib)
                 
                 # if API returned no matches...
                 elif (not len(api_data['libIds'])):
-                    print("The API at {} could not find any libs related to {}. "
-                          .format(api, lib))
+                    print(("The API at {} could not find any libs related to {}. "
+                          .format(api, lib)))
                     self._manually_assign_family(lib)
                 
                 # API returned matches! Label all matches with the current lib

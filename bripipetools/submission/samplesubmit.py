@@ -62,13 +62,13 @@ class SampleSubmissionBuilder(object):
         build_opts = ['GRCh38.77', 'GRCh38.91', 'NCBIM37.67', 'GRCm38.91', 'hg19', 'mm10', 'mm9', 'ebv']
 
         for j, w in enumerate(workflow_opts):
-            print("   {} : {}".format(j, os.path.basename(w)))
-        w_j = raw_input("\nSelect the number of the workflow to use: ")
+            print(("   {} : {}".format(j, os.path.basename(w))))
+        w_j = input("\nSelect the number of the workflow to use: ")
         selected_workflow = workflow_opts[int(w_j)]
 
         for j, b in enumerate(build_opts):
-            print("   {} : {}".format(j, b))
-        b_j = raw_input("\nSelect the genome build to use: ")
+            print(("   {} : {}".format(j, b)))
+        b_j = input("\nSelect the genome build to use: ")
         selected_build = build_opts[int(b_j)]
 
         batch_key = (selected_workflow, selected_build)
@@ -83,7 +83,7 @@ class SampleSubmissionBuilder(object):
             self._assign_workflow()
 
         batch_paths = []
-        for batchkey, paths in self.batch_map.items():
+        for batchkey, paths in list(self.batch_map.items()):
             workflow, build = batchkey
             logger.info("Building batch for workflow '{}' and build '{}'"
                         .format(os.path.basename(workflow), build))

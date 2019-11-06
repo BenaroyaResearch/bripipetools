@@ -61,7 +61,7 @@ class LibraryMetricsAnnotator(object):
         self.librarymetrics.libraryId = seqlib_id_parts[0]
         self.librarymetrics.flowcellId = seqlib_id_parts[1]
         #self.librarymetrics.update_attrs(metrics, force=True)
-        for m, r in metrics.items():
+        for m, r in list(metrics.items()):
             #logger.info("{} metrics update_attrs {} <-> {}".format(self.seqlib_id, m, r))
             for v in r:
                 #logger.info("{} metrics update_attrs {}".format(self.seqlib_id, v))

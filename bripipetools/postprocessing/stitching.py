@@ -114,15 +114,15 @@ class OutputStitcher(object):
         else:
             logger.info("combining non-counts data")
             table_data = []
-            for sample_id, sample_data in output_data.items():
+            for sample_id, sample_data in list(output_data.items()):
                 header = [field for source in sample_data
-                          for name, data in source.items()
-                          for field in data.keys()]
+                          for name, data in list(source.items())
+                          for field in list(data.keys())]
                 logger.debug("header row: {}".format(header))
 
                 values = [value for source in sample_data
-                          for name, data in source.items()
-                          for value in data.values()]
+                          for name, data in list(source.items())
+                          for value in list(data.values())]
                 logger.debug("values: {}".format(values))
 
                 if not len(table_data):
@@ -141,7 +141,7 @@ class OutputStitcher(object):
         """
         try:
             for idx, row in enumerate(data[1:]):
-                metrics = dict(zip(data[0], row))
+                metrics = dict(list(zip(data[0], row)))
                 # handle pct mapped reads calculation differently for PE reads
                 if(metrics['category'] == 'unpaired'):
                     mapped_reads = (float(metrics['unpaired_reads_examined'])

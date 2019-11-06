@@ -180,9 +180,9 @@ def main(argv):
         project = re.sub('Processed.*', '', path_parts[4].lstrip('Project_'))
         flowcell_id = path_parts[3]
 
-    print "Metrics path: " + metrics_path
-    print "Project: " + project
-    print "Flow cell ID: " + flowcell_id
+    print("Metrics path: " + metrics_path)
+    print("Project: " + project)
+    print("Flow cell ID: " + flowcell_id)
     norm_cov_df = build_norm_cov_df(metrics_path)
     metrics_df = build_metrics_df(metrics_path)
     build_figure(norm_cov_df, metrics_df, project, flowcell_id, out_path)

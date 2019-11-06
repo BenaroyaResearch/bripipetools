@@ -82,7 +82,7 @@ class ProcessedLibraryAnnotator(object):
         """
         outputs = self._get_outputs()
         grouped_outputs = {}
-        for k, v in outputs.items():
+        for k, v in list(outputs.items()):
             if 'fastq_' not in k:
                 output_items = self._parse_output_name(k)
                 grouped_outputs.setdefault(

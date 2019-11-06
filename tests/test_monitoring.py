@@ -114,7 +114,7 @@ class TestWorkflowBatchMonitor:
         # 'out_file1' should match expected result
         assert (all(field in status_fields
                 for field in ['exists', 'size', 'status']
-                for status_fields in test_status.values()))
+                for status_fields in list(test_status.values())))
         assert (test_status[str(mock_outfile)]['status'] == mock_status)
 
 

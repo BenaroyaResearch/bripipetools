@@ -79,8 +79,7 @@ class FlowcellSubmissionBuilder(object):
             print("\nFound the following projects: "
                   "[current workflows (w) and builds (b) selected]")
             for i, p in enumerate(self.project_paths):
-                opts_p = map(lambda x: x[0],
-                             filter(lambda x: p in x[1], batch_map.items()))
+                opts_p = [x[0] for x in [x for x in list(batch_map.items()) if p in x[1]]]
 
                 w_p = ['w:{}'.format([w for w, k in enumerate(workflow_opts)
                                       if k == opt[0]][0])
@@ -89,30 +88,30 @@ class FlowcellSubmissionBuilder(object):
                 s_p = ['stranded' if opt[2] else 'unstranded'
                        for opt in opts_p]
 
-                print("   {} : {} {}".format(i, os.path.basename(p),
-                                             zip(w_p, b_p, s_p)))
+                print(("   {} : {} {}".format(i, os.path.basename(p),
+                                             list(zip(w_p, b_p, s_p)))))
 
-            p_i = raw_input("\nType the number of the project you wish "
+            p_i = input("\nType the number of the project you wish "
                             "to select or hit enter to finish: ")
 
             if len(p_i):
                 selected_project = self.project_paths[int(p_i)]
 
                 for j, w in enumerate(workflow_opts):
-                    print("   {} : {}".format(j, os.path.basename(w)))
-                w_j = raw_input(("\nSelect the number of the workflow to use "
+                    print(("   {} : {}".format(j, os.path.basename(w))))
+                w_j = input(("\nSelect the number of the workflow to use "
                                  "for project {}: ")
                                 .format(os.path.basename(selected_project)))
                 selected_workflow = workflow_opts[int(w_j)]
 
                 for j, b in enumerate(build_opts):
-                    print("   {} : {}".format(j, b))
-                b_j = raw_input(("\nSelect the genome build (and release, "
+                    print(("   {} : {}".format(j, b)))
+                b_j = input(("\nSelect the genome build (and release, "
                                  "if applicable) to use for project {}: ")
                                 .format(os.path.basename(selected_project)))
                 selected_build = build_opts[int(b_j)]
 
-                s_j = raw_input("\nIs the library type stranded? (y/[n]): ")
+                s_j = input("\nIs the library type stranded? (y/[n]): ")
                 stranded = s_j == 'y'
 
                 batch_key = (selected_workflow, selected_build, stranded)
@@ -136,7 +135,7 @@ class FlowcellSubmissionBuilder(object):
             self._assign_workflows()
 
         batch_paths = []
-        for batchkey, projects in self.batch_map.items():
+        for batchkey, projects in list(self.batch_map.items()):
             workflow, build, stranded = batchkey
             
             # Need to handle new version of BaseSpace directory structure,

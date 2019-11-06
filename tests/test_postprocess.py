@@ -217,7 +217,7 @@ class TestOutputStitcher:
             [['field1', 0, 1], ['field2', 1, 0]],
             columns=['geneName', 'lib1111_C00000XX', 'lib2222_C00000XX']
         )
-        assert all((testdata[k] == mock_df[k]).all() for k in mock_df.keys())
+        assert all((testdata[k] == mock_df[k]).all() for k in list(mock_df.keys()))
 
     def test_build_combined_filename(self, tmpdir):
         # GIVEN a path to a folder with output data of type 'metrics',

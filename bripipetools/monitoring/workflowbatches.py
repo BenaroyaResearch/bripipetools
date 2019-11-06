@@ -61,7 +61,7 @@ class WorkflowBatchMonitor(object):
         """
         return [{out_tag: util.swap_root(out_path,
                                          'pipeline', self.pipeline_root)
-                 for out_tag, out_path in sample_outputs.items()}
+                 for out_tag, out_path in list(sample_outputs.items())}
                 for sample_outputs in outputs]
 
     def check_outputs(self):
@@ -79,7 +79,7 @@ class WorkflowBatchMonitor(object):
 
         output_status = {}
         for sample_outputs in outputs:
-            for out_tag, out_path in sample_outputs.items():
+            for out_tag, out_path in list(sample_outputs.items()):
                 logger.debug("checking status for output '{}' at path '{}'"
                              .format(out_tag, out_path))
                 path_exists = os.path.exists(out_path)
@@ -112,7 +112,7 @@ class WorkflowBatchMonitor(object):
         project_outputs = []
         for sample_output in all_outputs:
             project_output = {k:v for k,v 
-                              in sample_output.items() 
+                              in list(sample_output.items()) 
                               if project_id in v}
             if project_output:
                 project_outputs.append(project_output)
@@ -120,7 +120,7 @@ class WorkflowBatchMonitor(object):
         output_status = {}
 
         for sample_outputs in project_outputs:
-            for out_tag, out_path in sample_outputs.items():
+            for out_tag, out_path in list(sample_outputs.items()):
                 logger.debug("checking status for output '{}' at path '{}'"
                              .format(out_tag, out_path))
                 path_exists = os.path.exists(out_path)

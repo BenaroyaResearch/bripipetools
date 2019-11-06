@@ -48,7 +48,7 @@ def insert_objects(collection):
             for o in objects:
                 logger.debug("inserting '{}' into '{}' collection"
                              .format(o, collection))
-                for k, v in o.items():
+                for k, v in list(o.items()):
                     if v is not None:
                         logger.debug("updating field {}".format(k))
                         db[collection].update_one({'_id': o['_id']},
