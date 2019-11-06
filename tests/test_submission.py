@@ -832,7 +832,6 @@ class TestFlowcellSubmissionBuilder:
     def test_assign_workflows(self, mock_db, tmpdir):
         # GIVEN a flowcell run ID and an arbitrary root directory,
         # under which a folder exists at 'bioinformatics/pipeline/Illumina/<run_id>',
-        # and that folder contains a subfolder named 'Unaligned'
         mock_runid = '161231_INSTID_0001_AC00000XX'
         mock_endpoint = 'benaroyaresearch#BRIGridFTP'
         mock_path = (tmpdir
@@ -840,7 +839,15 @@ class TestFlowcellSubmissionBuilder:
                     .mkdir('pipeline')
                     .mkdir('Illumina')
                     .mkdir(mock_runid))
+        
+        # AND that folder contains a subfolder named 'Unaligned'
+        mock_unaligndir = mock_path.mkdir('Unaligned')
 
+        # AND the unaligned folder includes multiple project folders
+        mock_projects = ['P1-1-11111111', 'P99-99-99999999']
+        mock_paths = [str(mock_unaligndir.mkdir(p)) for p in mock_projects]
+
+        # WHEN a flowcell submission is built using the available workflows
         mock_workflowdir = mock_path.mkdir('galaxy_workflows')
         mock_workflows = ['workflow1.txt', 'optimized_workflow1.txt']
         mock_workflowopts = [str(mock_workflowdir.ensure(w))
@@ -849,12 +856,7 @@ class TestFlowcellSubmissionBuilder:
         mock_workflowopts.sort()
 
         mock_buildopts = ['GRCh38.77', 'NCBIM37.67', 'mm10']
-
-        # AND the unaligned folder includes multiple project folders
-        mock_projects = ['P1-1-11111111', 'P99-99-99999999']
-        mock_unaligndir = mock_path.mkdir('Unaligned')
-        mock_paths = [str(mock_unaligndir.mkdir(p)) for p in mock_projects]
-
+        
         builder = submission.FlowcellSubmissionBuilder(
             path=str(mock_path),
             endpoint=mock_endpoint,
@@ -862,10 +864,12 @@ class TestFlowcellSubmissionBuilder:
             workflow_dir=str(mock_workflowdir)
         )
 
-        with mock.patch('__builtin__.raw_input',
+        with mock.patch('builtins.input',
                         side_effect=iter(["0", "0", "0", "", ""])):
             builder._assign_workflows()
 
+        # THEN the workflow builder will generate workflow batch files
+        # and store the paths to these files in a batch map
         mock_batchkey = (mock_workflowopts[0], mock_buildopts[0], False)
         assert (builder.batch_map == {mock_batchkey: [mock_paths[0]]})
 
@@ -1042,7 +1046,7 @@ class TestSampleSubmissionBuilder:
 
         builder.paths = mock_paths
 
-        with mock.patch('__builtin__.raw_input',
+        with mock.patch('builtins.input',
                         side_effect=iter(["0", "0"])):
             builder._assign_workflow()
 
