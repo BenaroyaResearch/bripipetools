@@ -22,6 +22,9 @@ tmp
 # PyCharm files
 .idea
 
+# Python 2to3 conversion backups
+*.bak
+
 # BRI-specific config files
 bri*.ini
 .Rproj.user
