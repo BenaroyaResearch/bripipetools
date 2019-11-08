@@ -1,6 +1,6 @@
 __author__ = 'James A. Eddy; Mario G. Rosasco'
 __email__ = 'james.a.eddy@gmail.com; m.g.rosasco@gmail.com'
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
 from . import util
 
