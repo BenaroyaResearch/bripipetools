@@ -41,7 +41,7 @@ class FlowcellSubmissionBuilder(object):
         workflow_opts = [os.path.join(self.workflow_dir, f)
                          for f in os.listdir(self.workflow_dir)
                          if 'Galaxy-API' not in f
-                         and not re.search('^\.', f)
+                         and not re.search(r'^\.', f)
                          and re.search('.txt$', f)]
         workflow_opts.sort()
         logger.debug("found the following workflow options: {}"

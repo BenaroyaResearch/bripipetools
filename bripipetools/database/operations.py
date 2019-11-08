@@ -162,7 +162,7 @@ def create_workflowbatch_id(db, prefix, date):
 
     num = 1
     if len(workflowbatches):
-        num = max([int(util.matchdefault('\d$', wb['_id']))
+        num = max([int(util.matchdefault(r'\d$', wb['_id']))
                    for wb in workflowbatches])
         while True:
             num_regex = re.compile('_{}$'.format(num))

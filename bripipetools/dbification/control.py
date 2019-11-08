@@ -29,7 +29,7 @@ class ImportManager(object):
         """
         path_types = {
             'flowcell_path': re.compile('Illumina/.*X(X|Y|2|3)$'),
-            'workflowbatch_file': re.compile('batch_submission.*\.txt$')
+            'workflowbatch_file': re.compile(r'batch_submission.*\.txt$')
         }
         return [k for k, v in list(path_types.items())
                 if v.search(self.path.rstrip('/'))][0]

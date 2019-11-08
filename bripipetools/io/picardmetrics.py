@@ -62,7 +62,7 @@ class PicardMetricsFile(object):
         metrics = {}
         for tr in table.findAll('tr'):
             for td in tr.findAll('td'):
-                if re.search('^(\w+_*)+$', td.text):
+                if re.search(r'^(\w+_*)+$', td.text):
                     td_key = td.text.lower().replace('\n', '')
                     logger.debug("found long metrics field '{}'".format(td_key))
 
