@@ -3,6 +3,7 @@ channels: !!python/tuple
 - !!python/unicode 'defaults'
 dependencies:
 - beautifulsoup4=4.5.1
+- biopython
 - python-dateutil=2.7.3
 - coverage=4.2
 - funcsigs=1.0.2
