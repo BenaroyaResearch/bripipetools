@@ -79,6 +79,7 @@ class OutputStitcher(object):
         Parse and store data for each output file.
         """
         outputs = self._get_outputs(self.type)
+        outputs.sort()
         self.data = {}
 
         for o in outputs:
