@@ -257,18 +257,18 @@ class TestOutputStitcher:
         # AND the folder contains outputs from multiple sources and
         # for multiple samples
         mock_filedata = [
-            {'mock_filename': 'lib2222_C00000XX_htseq_metrics.txt',
-             'mock_contents': ['__field_1\t456\n',
-                              '__field_2\t654\n']},
-            {'mock_filename': 'lib2222_C00000XX_tophat_stats_metrics.txt',
-             'mock_contents': ['56789\ttotal reads in fastq file\n'
-                              '98765\treads aligned in sam file\n']},
             {'mock_filename': 'lib1111_C00000XX_htseq_metrics.txt',
              'mock_contents': ['__field_1\t123\n',
                               '__field_2\t321\n']},
             {'mock_filename': 'lib1111_C00000XX_tophat_stats_metrics.txt',
              'mock_contents': ['12345\ttotal reads in fastq file\n'
                               '54321\treads aligned in sam file\n']},
+            {'mock_filename': 'lib2222_C00000XX_htseq_metrics.txt',
+             'mock_contents': ['__field_1\t456\n',
+                              '__field_2\t654\n']},
+            {'mock_filename': 'lib2222_C00000XX_tophat_stats_metrics.txt',
+             'mock_contents': ['56789\ttotal reads in fastq file\n'
+                              '98765\treads aligned in sam file\n']},
         ]
         for m in mock_filedata:
             mock_file = mock_path.ensure(m['mock_filename'])
