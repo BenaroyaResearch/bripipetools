@@ -68,6 +68,7 @@ def build_norm_cov_df(metrics_path):
                             for f in os.listdir(metrics_path)
                             if re.search('_al.zip', f)
                             or re.search('rnaseq_metrics.html', f)]
+    rnaseq_metrics_files.sort()
     logger.info("found Picard RNA-seq metrics files for {} samples"
                 .format(len(rnaseq_metrics_files)))
 
