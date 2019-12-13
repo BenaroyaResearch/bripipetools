@@ -22,7 +22,8 @@ dependencies:
 - pyyaml=3.12=py27_0
 - zlib=1.2.8=3
 - readline=6.2=2
-- setuptools=27.2.0=py27_0
+- requests
+- setuptools
 - six=1.10.0=py27_0
 - sqlite=3.13.0=0
 - tk=8.5.18=0
