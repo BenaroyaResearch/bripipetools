@@ -16,16 +16,17 @@ To install bripipetools, you'll first need to install a copy of Anaconda by foll
     conda activate bripipetools
 
 
-For development::
+After the Anaconda environment has been set up with the required packages and activated, you can install ``bripipetools``. There are two ways of installing; currently it is recommended that you use the first method, designed to install while the package is undergoing active development::
 
     pip install -e .
     py.test
-    bripipetools
 
-For production (not currently tested)::
+There is also an installation method designed for production::
 
     pip install .
     python setup.py test
+    
+Following successful installation, you should be able to run the command ``bripipetools`` to see usage information.
 
 -----
 
@@ -38,7 +39,7 @@ Currently, there are three primary functions served by package modules:
 
 - Generation of workflow instructions and submission of data processing batches
 - Collection and organization of output data from bioinformatics processing workflows
-- Annotation and import of pipeline input & output data into Mongo databases — i.e., **GenLIMS** and the **Research Database**
+- Annotation and import of pipeline input & output data into Mongo databases — i.e., the **Research Database**
 
 These features are continuing to expand and evolve over time.
 
@@ -46,6 +47,11 @@ Workflow batch submission
 -------------------------
 
 Batch submission to Globus Galaxy for bioinformatics data processing is currently managed through ``bripipetools submit`` command, which uses the ``submission`` package.
+
+Workflow batch data summarization
+---------------------------------
+
+Following a successful submission and completion of a Globus Galaxy batch of jobs, the data can be summarized and inserted into the Research Database using the ``bripipetools wrapup`` command, which uses the packages described below.
 
 Quality control
 ---------------
@@ -60,7 +66,7 @@ The entrypoint for tasks related to organizing processing output files (e.g., fi
 Data management
 ---------------
 
-Annotation of sequencing and processing data — as well as corresponding retrieval and import of data from/to the GenLIMS database — is performed through the ``bripipetools dbify`` command, which uses the ``dbify`` package.
+Annotation of sequencing and processing data — as well as corresponding retrieval and import of data from/to the Research Database — is performed through the ``bripipetools dbify`` command, which uses the ``dbify`` package.
 
 
 
