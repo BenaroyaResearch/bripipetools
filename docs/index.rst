@@ -20,6 +20,7 @@ Contents:
    :maxdepth: 1
 
    getstarted.rst
+   rnaseqprocessing.rst
    processing.rst
    postprocessing.rst
    brigenomics.rst
