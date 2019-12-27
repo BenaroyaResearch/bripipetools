@@ -4,6 +4,31 @@
 Getting started
 ***************
 
+.. _start-install:
+
+Installing bripipetools
+=======================
+
+To install bripipetools, you'll first need to install a copy of Anaconda by following the instructions at `<https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_. Once you have Anaconda installed, you can execute the following commands::
+
+    git clone https://github.com/BenaroyaResearch/bripipetools
+    conda env create -n bripipetools environment.yml
+    conda activate bripipetools
+
+
+For development::
+
+    pip install -e .
+    py.test
+    bripipetools
+
+For production (not currently tested)::
+
+    pip install .
+    python setup.py test
+
+-----
+
 .. _start-using:
 
 Using bripipetools
@@ -37,27 +62,6 @@ Data management
 
 Annotation of sequencing and processing data — as well as corresponding retrieval and import of data from/to the GenLIMS database — is performed through the ``bripipetools dbify`` command, which uses the ``dbify`` package.
 
------
 
 
-.. _start-install:
 
-Installing bripipetools
-=======================
-
-::
-
-    git clone https://github.com/BenaroyaResearch/bripipetools
-    conda env create -n bripipetools environment.yml
-
-
-For development::
-
-    pip install -e .
-    py.test
-    bripipetools
-
-For production (not currently tested)::
-
-    pip install .
-    python setup.py test
