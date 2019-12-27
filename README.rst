@@ -56,8 +56,8 @@ The documentation for bripipetools is available `here <http://bripipetools.readt
 Contribute
 ----------
 
-- Issue tracker: github.com/jaeddy/bripipetools/issues
-- Source code: github.com/jaeddy/bripipetools
+- Issue tracker: github.com/BenaroyaResearch/bripipetools/issues
+- Source code: github.com/BenaroyaResearch/bripipetools/bripipetools
 
 License
 -------
