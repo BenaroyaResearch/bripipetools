@@ -149,6 +149,6 @@ Backing Up Illumina Run Data
 
 3. After the backup is complete, unmount the BaseSpace directory.
 
-..code-block:: sh
+.. code-block:: sh
 
     basemount --unmount ~/basespace_mount
