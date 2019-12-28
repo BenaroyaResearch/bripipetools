@@ -40,11 +40,13 @@ Creating Workflow Batch Files
 *Before you begin:* Make sure that the database configuration in ``bripipetools/bripipetools/config/default.ini`` is correct. There should be a config entry for ``[researchdb]`` with appropriately-set fields ``db_name``, ``db_host``, ``user``, and ``password``. If you have questions about the appropriate values to use, please contact Mario Rosasco.
 
 1. Activate the ``bripipetools`` environment
+
 .. code-block:: sh
 
     source activate bripipetools
 
 2. Create a batch submission file. If you need to select non-standard workflows, you may want to look at the ``--workflow-dir`` and ``--all-workflows`` options. 
+
 .. code-block:: sh
     
     bripipetools submit /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}
@@ -74,16 +76,19 @@ Post Processing: Gene Counts and Alignment Metrics
 ==================================================
 
 1. Make sure that you're in the ``bripipetools`` environment again if necessary.
+
 .. code-block:: sh
 
     source activate bripipetools
     
 2. Wrap up the processing, stitching together summary files and inserting data into the Research Database. This step will alert you if there are any missing or empty files from the run. If that's the case, you can make a copy of the workflow batch file you submitted, and modify it to include only the jobs that need to be re-processed. This can be re-submitted as described above.
+
 .. code-block:: sh
 
     bripipetools wrapup /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}
     
 3. Create the gene metrics plots
+
 .. code-block:: sh
 
     while read path; do python scripts/plot_gene_coverage.py $path/; done < <(find /mnt/bioinformatics/pipeline/Illumina/{FlowcellID} -name "metrics" -maxdepth 2)
@@ -95,11 +100,13 @@ Post Processing: Trinity and MiXCR (Optional)
 *Before you begin:* Regardless of the machine you used for the previous steps, you must do the following from ``srvgalaxy01``, which serves as the head node for the SLURM cluster at BRI.
 
 1. Concatenate Trinity results.
+
 .. code-block:: sh
 
     while read path; do python scripts/concatenate_trinity_output.py $path; done < <(find /mnt/bioinformatics/pipeline/Illumina/{FlowcellID} -name "Trinity" -maxdepth 2)
     
 2. Run MiXCR on the Trinity contigs. Note that you first have to move to a directory where SLURM has write capabilities, or the jobs will not be started properly.
+
 .. code-block:: sh
     
     # this could be a different SLURM-writeable directory, but this one is standard.
@@ -107,6 +114,7 @@ Post Processing: Trinity and MiXCR (Optional)
     while read path; do outdir="$(dirname $path)/mixcrOutput_trinity"; python /mnt/bioinformatics/workspace/code/shared/bripipetools/scripts/run_mixcr.py -i $path -o $outdir; done < <(find /mnt/bioinformatics/pipeline/Illumina/{FlowcellID} -name "Trinity" -maxdepth 2)
 
 3. Confirm that the jobs are running properly using ``squeue``. Once they've completed, generate a summary file and push the TCR data into the Research Database:
+
 .. code-block:: sh
 
     Rscript --vanilla /mnt/bioinformatics/workspace/code/shared/bripipetools/scripts/summarize_mixcr_output.R /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}
@@ -116,6 +124,7 @@ Sharing Data
 ============
 
 Depending on the flow cell, information will need to be shared with bioinformaticians and analysts, other researchers, and outside collaborators/contractors. The nature of the data to be shared will vary from flow cell to flow cell, but to generate a list of links to the summarized project directories, you can use the following script:
+
 .. code-block:: sh
     
     /mnt/bioinformatics/workspace/code/shared/bripipetools/scripts/generate_project_links.sh /mnt/bioinformatics/pipeline/Illumina/{FlowcellID}
@@ -126,17 +135,20 @@ Backing Up Illumina Run Data
 *Before you begin:* Make sure that you're on a machine with Illumina's ``basemount`` tool installed.
 
 1. Mount BaseSpace data (the first time you do this you'll need to authenticate with your BaseSpace account).
+
 .. code-block:: sh
     
     mkdir ~/basespace_mount # if necessary
     basemount ~/basespace_mount
 
 2. Run the backup script
+
 .. code-block:: sh
 
     python /mnt/bioinformatics/workspace/code/shared/bripipetools/scripts/backup_basespace.py ~/basespace_mount/ /mnt/bioinformatics/pipeline/Illumina/basespace_backup
 
 3. After the backup is complete, unmount the BaseSpace directory.
+
 ..code-block:: sh
 
     basemount --unmount ~/basespace_mount
