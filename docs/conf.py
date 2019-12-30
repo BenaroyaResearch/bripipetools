@@ -56,8 +56,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'bripipetools'
-copyright = '2016, James A. Eddy'
-author = 'James A. Eddy'
+copyright = '2019, Benaroya Research Institute'
+author = 'James A. Eddy, Mario G. Rosasco'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -275,7 +275,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'bripipetools.tex', 'bripipetools Documentation',
-     'James A. Eddy', 'manual'),
+     'James A. Eddy, Mario G. Rosasco', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
