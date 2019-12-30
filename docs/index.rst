@@ -24,7 +24,7 @@ Contents:
    processing.rst
    postprocessing.rst
    brigenomics.rst
-   genlims.rst
+   databases.rst
    basespace.rst
    galaxy.rst
    refdata.rst
