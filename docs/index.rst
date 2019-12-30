@@ -20,11 +20,11 @@ Contents:
    :maxdepth: 1
 
    getstarted.rst
+   databases.rst
    rnaseqprocessing.rst
    processing.rst
    postprocessing.rst
    brigenomics.rst
-   databases.rst
    basespace.rst
    galaxy.rst
    refdata.rst
