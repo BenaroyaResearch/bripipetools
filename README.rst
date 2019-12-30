@@ -5,8 +5,8 @@
 .. image:: https://img.shields.io/coveralls/BenaroyaResearch/bripipetools.svg
         :target: https://coveralls.io/github/BenaroyaResearch/bripipetools
 
-.. image:: https://readthedocs.org/projects/bripipetools/badge/?version=latest
-        :target: http://bripipetools.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/bripipelinetools/badge/?version=latest
+        :target: http://bripipelinetools.readthedocs.io/en/latest/?badge=latest
 
 
 bripipetools
@@ -51,7 +51,7 @@ To test that the application was installed:
 Documentation
 -------------
 
-The documentation for bripipetools is available `here <http://bripipetools.readthedocs.io/en/latest/?badge=latest>`_ (courtesy of `ReadTheDocs <http://readthedocs.org/>`_).
+The documentation for bripipetools is available `here <http://bripipelinetools.readthedocs.io/en/latest/?badge=latest>`_ (courtesy of `ReadTheDocs <http://readthedocs.org/>`_).
 
 Contribute
 ----------
