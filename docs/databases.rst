@@ -4,7 +4,7 @@
 Databases
 *********
 
-There are two databases which are important to consider in the context of the BRI genomics pipeline. These databases are called *GenLIMS* and the *Research Database*.
+There are two databases which are important to consider in the context of the BRI genomics pipeline. These databases are called **GenLIMS** and the **Research Database**.
 
 .. _genlims-intro:
 
@@ -32,7 +32,7 @@ The underlying MongoDB database for the Research Database is currently named ``b
 Research Database Servers
 -------------------------
 
-Accessing the Research Database servers requires access to the BRI network, either on-site or via VPN. The production instance of the Research Database is hosted at ``srvresearchdb01.brivmrc.org``. A test instance of the database also exists at ``srvsdb11.brivmrc.org``. For development purposes, testing with a local copy of ``srvresearchdb01`` works well. Please contact the Bioinformatics or Software Development groups at BRI for database user and password information.
+Accessing the Research Database servers requires access to the BRI network, either on-site or via VPN. The production instance of the Research Database is hosted at ``srvresearchdb01.brivmrc.org``. A test instance of the database also exists at ``srvsdb11.brivmrc.org``. For development purposes, testing with a local copy of ``srvresearchdb01`` is possible, but in many cases testing against the staging server is preferred (see warning about database copy sizes below). Please contact the Bioinformatics or Software Development groups at BRI for database user and password information.
 
 .. _databases-infra:
 
@@ -49,7 +49,7 @@ Collections
 
 Collections represent fundamental abstractions of physical objects, procedures, and data objects within the Genomics and Bioinformatics groups. One of the key advantages of managing data within a NoSQL database is the flexibility to handle new data types, without needing to fit within a rigid schema. As such, the list of collections and object types below are likely to expand over time. 
 
-As described below, bripipetools interacts with collections the Research Database, but data in these collections may contain references to documents in GenLIMS. There are also collections in the Research Database which are not immediately accessed by bripipetools. These collections may contain information relevant to samples processed by bripipetools, but will not be discussed in detail here. To designate collections that are accessed by or relevant to bripipetools, a prefix of "genomics" is used in the collection name.
+As described below, bripipetools interacts with collections the Research Database, but data in these collections may contain references to documents in GenLIMS. There are also collections in the Research Database which are not accessed by bripipetools. These collections may contain information relevant to samples processed by bripipetools, but will not be discussed in detail here. To designate collections that are accessed by or relevant to bripipetools, a prefix of "genomics" is used in the collection name.
 
 Setting up a Local Database Copy
 --------------------------------
@@ -145,7 +145,7 @@ Counts documents contain raw gene count data, generally from an RNAseq sequencin
 
 .. warning:: **Number of Fields Per Document**
     
-    Note that each document in this collection contains a nested document field, ``geneCounts``, which contains a field for each gene in the reference genome. Depending on the genome used, this means there are likely 10s of thousands of fields for each document in the collection. As you browse data, be aware of this fact; trying to load multiple documents from this collection can cause slowdown of your computer while the mongo client tries to render the large documents.
+    Note that each document in this collection contains a field, ``geneCounts``, which contains a subdocument with a field for each gene in the reference genome. Depending on the genome used, this means there are likely tens of thousands of fields for each document in the collection. As you browse data, be aware of this fact; trying to load multiple documents from this collection can cause slowdown of your computer while the mongo client tries to render the large documents.
     
 
 genomicsMetrics
@@ -191,7 +191,7 @@ This collection stores information about how projects on a flow cell were proces
 .. _genlims-collections:
 
 GenLIMS Collections
--------------------
+===================
 
 Although bripipetools now relies entirely on the Research Database and no longer directly interacts GenLIMS, older versions of bripipetools had a closer connection to GenLIMS. Sample IDs should connect the data between the two databases to help trace back sample processing steps. For this reason, the following description of GenLIMS collections has been copied for reference/completeness.
 
