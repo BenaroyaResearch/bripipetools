@@ -11,7 +11,7 @@ The vast majority of data handled by the Bioinformatics Core — and by extensio
 Protocols
 =========
 
-Operations related to experimental processing and data generation of Genomics Core samples are generally described by **protocols** (see the :ref:`genlims-page` page). Protocols are classified by type, indicating the overall goal or purpose of a procedure or series of steps. A **run** represents an identifiable instance of a protocol, typically corresponding to a specific chip, plate, or flowcell. Current protocols and associated run types are listed below.
+Operations related to experimental processing and data generation of Genomics Core samples are generally described by **protocols** and are tracked in GenLIMS (see the :ref:`databases-page` page). Protocols are classified by type, indicating the overall goal or purpose of a procedure or series of steps. A **run** represents an identifiable instance of a protocol, typically corresponding to a specific chip, plate, or flow cell. Current protocols and associated run types are listed below.
 
 * incoming
 * RNA extraction
@@ -34,30 +34,34 @@ Operations related to experimental processing and data generation of Genomics Co
 Data storage
 ============
 
-(sea-zed-01, Chaussabel lab share)
+(isilon, Chaussabel lab share)
+
+Isilon
+------
+In 2019, BRI set up the primary storage server for genomics (and other data) to be ``isilon.brivmrc.org`` to replace ``sea-zed-01.brivmrc.org``.
 
 
+Genomics/Bioinformatics shares
+------------------------------
 
-Genomics share
---------------
-
-The 'genomics' share is the primary location at which data (sequencing or otherwise) is stored. A variety of other data files and code related to processing are also stored under the 'genomics' share, but raw data is nominally stored in one of several subfolders according to source. These are described as "landing points" below.
+**NB** - Following the implementation of isilon at BRI, the primary data from the sequencing machine (.bcl image files) were separated from the processed data (.fastq sequences and further downstream files) in order to aid in improving disaster recovery efforts by IT. The former (raw data) are stored in the ``/genomics/`` share on Isilon, and should not need to be accessed during normal operations. The processed data (sequencing and otherwise) are stored in the ``/bioinformatics`` share region  of Isilon. A variety of other data files and code related to processing are also stored under the ``/bioinformatics/`` share, but data are nominally stored in one of several subfolders according to source. These are described as "landing points" below.
 
 
 Basic landing points
 ^^^^^^^^^^^^^^^^^^^^
 
-* ``Illumina`` (``/mnt/genomics/Illumina/``)
-* ``SRA`` (``/mnt/genomics/SRA/``)
-* ``ICAC`` (``/mnt/genomics/ICAC/``)
-* ``NGXBio`` (``/mnt/genomics/NGXBio/``)
-* ``Fluidigm`` (``/mnt/genomics/Fluidigm/``)
+* ``Illumina`` (``/mnt/bioinformatics/pipeline/Illumina/``)
+* ``Annotations`` (``/mnt/bioinformatics/pipeline/annotation/)
+* ``SRA`` (``/mnt/bioinformatics/workspace/SRA/``)
+* ``ICAC`` (``/mnt/bioinformatics/workspace/ICAC/``)
+* ``NGXBio`` (``/mnt/bioinformatics/workspace/NGXBio/``)
+* ``Fluidigm`` (``/mnt/bioinformatics/workspace/Fluidigm/``)
 
 
 Reference data
 ^^^^^^^^^^^^^^
 
-``/mnt/genomics/reference_data/``
+``/mnt/bioinformatics/workspace/reference_data/``
 
 * ``annotationsForGalaxy``
 * ``Genomes``
@@ -68,20 +72,24 @@ Reference data
 Special folders
 ^^^^^^^^^^^^^^^
 
-* ``code`` (``/mnt/genomics/code/``)
-* ``galaxy_workflows`` (``/mnt/genomics/galaxy_workflows/``)
-* ``geo_submissions`` (``/mnt/genomics/geo_submissions/``)
+* ``code`` (``/mnt/bioinformatics/workspace/code/``)
+* ``galaxy_workflows`` (``/mnt/bioinformatics/pipeline/galaxy_workflows/``)
+* ``geo_submissions`` (``/mnt/bioinformatics/workspace/geo_submissions/``)
 
 
 Old Galaxy data
 ^^^^^^^^^^^^^^^
 
-* ``srvgalaxy02``
+* ``/mnt/bioinformatics/pipeline/Archive``
 
+
+Project tracking database
+-------------------------
+
+`GCQ (Genomics Core Queue) <https://gcq.benaroyaresearch.org/>_` 
 
 Chaussabel lab share
 --------------------
 
-Projects
-
-Flowcell log
+* Main lab share: ``srvstor01/DFS_Chaussabel_LabShare``
+* Flowcell log: ``srvstor01/DFS_Chaussabel_LabShare/Illumina HiScan SQ/Flowcell log.xlsx``
