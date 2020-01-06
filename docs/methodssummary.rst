@@ -1,8 +1,8 @@
 .. _methods-page:
 
-**********************
-Common methods summary
-**********************
+************************
+Common Methods Summaries
+************************
 
 The following paragraphs describe the methods used in different workflows managed by *bripipetools*. These paragraphs are meant to serve as boilerplate for methods sections in manuscripts. Note that there are sometimes subtle differences different workflows, so be sure to choose the workflow description that's appropriate for your project.
 

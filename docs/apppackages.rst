@@ -1,5 +1,5 @@
 *********************************
-bripipetools application packages
+bripipetools Application Packages
 *********************************
 
 Overview

@@ -1,7 +1,7 @@
 .. _postprocess-page:
 
 ********************
-Post-processing Data
+Post-Processing Data
 ********************
 
 Postprocessing nominally entails any operations performed on data `after` it has left Galaxy (or more generally, outside the scope of a bioinformatics processing workflow).

@@ -1,5 +1,5 @@
 **************************
-bripipetools core packages
+bripipetools Core Packages
 **************************
 
 Overview

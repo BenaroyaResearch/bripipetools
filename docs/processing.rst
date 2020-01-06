@@ -1,7 +1,7 @@
 .. _process-page:
 
 ***************
-Processing data
+Processing Data
 ***************
 
 Data processing is the primary function of **bripipetools**, encompassing all bioinformatics operations performed on raw data (typically sequencing libraries) to generate processed output files. BRI processing pipelines do not include statistical analyses performed on output data.
