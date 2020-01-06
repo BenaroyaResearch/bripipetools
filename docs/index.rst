@@ -22,6 +22,7 @@ Contents:
    getstarted.rst
    databases.rst
    rnaseqprocessing.rst
+   methodssummary.rst
    processing.rst
    postprocessing.rst
    brigenomics.rst
