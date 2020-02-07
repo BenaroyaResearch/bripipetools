@@ -14,8 +14,9 @@ def parse_batch_name(batch_name):
     return individual components indicating date, list of project
     labels, and flowcell ID.
     """
+    fcRegex = "(?<=_)((([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4}))"
     
-    fc_id = util.matchdefault('(?<=(_))([A-Z]|[0-9])*X(X|Y|2|3)', batch_name)
+    fc_id = util.matchdefault(fcRegex, batch_name)
     name_parts = batch_name.split('_')
     project_ids = [x for x in name_parts if re.match("P[0-9]*-[0-9]*", x)]
     date = datetime.datetime.strptime(name_parts.pop(0), '%y%m%d')
@@ -31,7 +32,7 @@ def parse_run_id_for_batch(batch_file):
     """
     name_parts = batch_file.split('/')
     try:
-        return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+X(X|Y|2|3)$", p)][0]
+        return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+((X(X|Y|2|3|F))|(-C[A-Z0-9]{4}))$", p)][0]
     except IndexError:
         return "Could not determine."
 

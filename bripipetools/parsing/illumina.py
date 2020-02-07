@@ -18,7 +18,8 @@ def get_flowcell_id(string):
     :return: the matching substring representing the flowcell ID or an
         empty string ('') if no match found
     """
-    return util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*X(X|Y|2|3)', string)
+    fcRegex = "((?<=(_(A|B|D)))([A-Z0-9])*X(X|Y|2|3|F))|((?<=_)000000000-C[A-Z0-9]{4})"
+    return util.matchdefault(fcRegex, string)
 
 
 def parse_flowcell_run_id(run_id):
@@ -59,7 +60,7 @@ def parse_flowcell_run_id(run_id):
                        "run number")
         run_num = None
 
-    fc_id = util.matchdefault('(?<=(_(A|B|D)))([A-Z]|[0-9])*X(X|Y|2|3)', run_id)
+    fc_id = get_flowcell_id(run_id)
     fc_pos = util.matchdefault('.{1}(?=%s)' % fc_id, run_id)
 
     return {'date': date, 'instrument_id': instr_id, 'run_number': run_num,
