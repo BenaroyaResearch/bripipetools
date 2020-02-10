@@ -357,7 +357,7 @@ def postprocess(output_type, exclude_types, stitch_only, clean_outputs,
                     "files to be used for batch processing"))
 @click.option('--database-type', default='all',
               help=("Database to contain sample information. Options are:\n"
-              "\'researchdb\'\n\'all\'\n\'none\'"))
+              "\'all\'\n\'allButCounts\'\n\'none\'"))
 @click.argument('path')
 def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel, 
            sexcutoff, all_workflows, workflow_dir, database_type, path):
@@ -367,7 +367,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
     """
     
     # Push data into ResDB                   
-    if (database_type in ['researchdb', 'all']):
+    if (database_type in ['allButCounts', 'all']):
         logger.info("Importing raw data for flowcell at path '{}' into ResDB"
                     .format(path))
         bripipetools.dbification.ImportManager(
@@ -376,7 +376,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             run_opts = {"sexmodel":sexmodel, 
                         "sexcutoff":sexcutoff,
                         "workflow_dir":workflow_dir}
-        ).run(collections='all')
+        ).run(collections=database_type) #run(collections='all')
         logger.info("Research Database flowcell run import complete.")
 
     workflow_batches = list(get_workflow_batches(path, all_workflows))
@@ -430,7 +430,7 @@ def wrapup(output_type, exclude_types, stitch_only, clean_outputs, sexmodel,
             .format(wb)
         )
         
-        if (database_type in ['researchdb', 'all']):
+        if (database_type in ['allButCounts', 'all']):
             logger.debug("Importing data into ResDB Database: {}".
                 format(RDB.name))
             bripipetools.dbification.ImportManager(

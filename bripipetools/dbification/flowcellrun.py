@@ -147,11 +147,12 @@ class FlowcellRunImporter(object):
         """
         Insert documents into ResearchDB databases.
         Note that ResearchDB collections are prepended by 'genomics'
-        to indicate the data origin.
+        to indicate the data origin. For workflows without gene count data
+        the argument 'collection' can be set to 'allButCounts'.
         """
         
         # Sample information
-        if collection in ['all', 'genomicsSamples']:
+        if collection in ['all', 'allButCounts', 'genomicsSamples']:
             logger.info(("Inserting sequenced libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsSequencedlibraries()
@@ -163,19 +164,19 @@ class FlowcellRunImporter(object):
             self._insert_librarygenecounts()
         
         # Metrics information
-        if collection in ['all', 'genomicsMetrics']:
+        if collection in ['all', 'allButCounts', 'genomicsMetrics']:
             logger.info(("Inserting metrics for libraries for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsLibrarymetrics()
         
         # Workflow Batch files
-        if collection in ['all', 'genomicsWorkflowbatches']:
+        if collection in ['all', 'allButCounts', 'genomicsWorkflowbatches']:
             logger.info(("Inserting workflow batches for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsWorkflowbatches()
         
         # Genomics run info
-        if collection in ['all', 'genomicsRuns']:
+        if collection in ['all', 'allButCounts', 'genomicsRuns']:
             logger.info(("Inserting run information for flowcell '{}' "
                          "into '{}'").format(self.path, self.db.name))
             self._insert_genomicsFlowcellRun()
