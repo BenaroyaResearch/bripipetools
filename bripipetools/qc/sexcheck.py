@@ -79,11 +79,11 @@ class SexChecker(object):
         self.total_counts = sum(counts_df[counts_df['count'] > 0]['count'])
 
         y_counts = pd.merge(self._load_y_genes(ref=self.reference), counts_df,
-                            how='inner')
+                            how='inner', sort=True)
         self.y_counts = y_counts[y_counts['count'] > 0]
         logger.debug("detected {} Y gene(s)".format(len(self.y_counts)))
         x_counts = pd.merge(self._load_x_genes(ref=self.reference), counts_df,
-                            how='inner')
+                            how='inner', sort=True)
         self.x_counts = x_counts[x_counts['count'] > 0]
         logger.debug("detected {} X gene(s)".format(len(self.x_counts)))
 
