@@ -100,11 +100,17 @@ class PicardMetricsFile(object):
                     td_vals = tr.next_sibling.next_sibling.text.split('\t')
                     logger.debug("found corresponding wide values: {}"
                                  .format(td_vals))
-
-                    metrics_tmp = dict(list(zip(td_keys, td_vals)))
-                    metrics.update({k: float(v) if not re.search(r'[^\d.]+', v)
-                                    else v
-                                    for k, v in list(metrics_tmp.items())})
+                                 
+                    # markdups generates a table with the header 'BIN VALUE'
+                    # which gets parsed incorrectly. Detect and ignore this.
+                    if(set(td_keys) == set(["bin", "value"]) or
+                            set(td_vals) == set(["BIN", "VALUE"])):
+                        logger.debug("Found 'BIN/VALUE' data. Skipping.")
+                    else:
+                        metrics_tmp = dict(list(zip(td_keys, td_vals)))
+                        metrics.update({k: float(v) if not re.search(r'[^\d.]+', v)
+                                        else v
+                                        for k, v in list(metrics_tmp.items())})
         logger.debug("parsed wide metrics table: {}".format(metrics))
         return metrics
 

@@ -111,27 +111,37 @@ class OutputStitcher(object):
                 if idx == 0:
                     table_data = data
                 else:
-                    table_data = pd.merge(table_data, data, on='geneName')
+                    table_data = pd.merge(table_data, data, on='geneName', sort=True)
         else:
             logger.info("combining non-counts data")
             table_data = []
+            # need to retrieve all possible header fields, in case of missing data
+            header = []
             for sample_id, sample_data in list(output_data.items()):
-                header = [field for source in sample_data
+                tmp_header = [field for source in sample_data
                           for name, data in list(source.items())
                           for field in list(data.keys())]
-                logger.debug("header row: {}".format(header))
+                header = sorted(list(set(header) | set(tmp_header)))
+            logger.debug("header row: {}".format(header))
+            
+            # now pull out each library's data
+            for sample_id, sample_data in list(output_data.items()):
+                # initialize with empty default vals
+                curr_row_data = {k:'' for k in header} 
+                # fill in with available data
+                for curr_data in sample_data:
+                    for data_source, results in list(curr_data.items()):
+                        for curr_name, curr_result in list(results.items()):
+                            curr_row_data[curr_name] = curr_result
 
-                values = [value for source in sample_data
-                          for name, data in list(source.items())
-                          for value in list(data.values())]
-                logger.debug("values: {}".format(values))
+                logger.debug("values: {}".format(curr_row_data.values()))
 
                 if not len(table_data):
                     table_data.append(['libId'] + sorted(header))
                     logger.debug("added header row: {}".format(table_data[-1]))
 
                 table_data.append(
-                    [sample_id] + [v for h, v in sorted(zip(header, values))]
+                    [sample_id] + [curr_row_data[h] for h in header]
                 )
                 logger.debug("added values row: {}".format(table_data[-1]))
         return table_data
