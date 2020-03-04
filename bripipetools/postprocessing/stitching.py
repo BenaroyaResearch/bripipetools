@@ -211,7 +211,7 @@ class OutputStitcher(object):
                            .assign(libId=proclib_id))
                 logger.debug("found {} overrepresented sequence(s) "
                              "for sample '{}'".format(len(o_table), proclib_id))
-                overrep_seq_table = overrep_seq_table.append(o_table)
+                overrep_seq_table = overrep_seq_table.append(o_table, sort=True)
         return overrep_seq_table
 
     def write_overrepresented_seq_table(self):
