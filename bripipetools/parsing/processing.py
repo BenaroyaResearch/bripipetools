@@ -14,7 +14,7 @@ def parse_batch_name(batch_name):
     return individual components indicating date, list of project
     labels, and flowcell ID.
     """
-    fcRegex = "(?<=_)((([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4}))"
+    fcRegex = "(?<=_)((([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4})|(A[0-9a-zA-Z]+M5))"
     
     fc_id = util.matchdefault(fcRegex, batch_name)
     name_parts = batch_name.split('_')

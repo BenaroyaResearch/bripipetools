@@ -153,7 +153,7 @@ def build_figure(ncDf, metDf, project, fc, outFolder):
             ax_i.set_facecolor('white')
             
         # pull out fc id from full run string
-        fcid_regex = re.compile( "(([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4})")
+        fcid_regex = re.compile( "(([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4})|(A[0-9a-zA-Z]+M5)")
         fcid =  fcid_regex.search(fc).group()
 
         fig.set_size_inches(7.5, figHeight)
@@ -175,7 +175,7 @@ def main(argv):
         #project = project_regex.search(path_parts[5]).group()
         project = project_regex.search(metrics_path).group()
         #flowcell_id = path_parts[4]
-        flowcell_regex = re.compile('[0-9]{6}_[A-Z0-9]+_[0-9]+_(([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4})')
+        flowcell_regex = re.compile('[0-9]{6}_[A-Z0-9]+_[0-9]+_(([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4})|(000000000-C[A-Z0-9]{4})|(A[0-9a-zA-Z]+M5)')
         flowcell_id =  flowcell_regex.search(metrics_path).group()
     except AttributeError:
         project = re.sub('Processed.*', '', path_parts[4].lstrip('Project_'))

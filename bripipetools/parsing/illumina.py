@@ -18,7 +18,8 @@ def get_flowcell_id(string):
     :return: the matching substring representing the flowcell ID or an
         empty string ('') if no match found
     """
-    fcRegex = "((?<=(_(A|B|D)))([A-Z0-9])*X(X|Y|2|3|F))|((?<=_)000000000-C[A-Z0-9]{4})"
+    fcRegex = "((?<=(_(A|B|D)))([A-Z0-9])*X(X|Y|2|3|F))|((?<=_)000000000-C[A-Z0-9]{4})|((?<=_)A[0-9a-zA-Z]+M5)"
+    
     return util.matchdefault(fcRegex, string)
 
 

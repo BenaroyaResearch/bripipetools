@@ -6,7 +6,8 @@ def get_fc_id(filePath):
     if re.search('SRP', filePath):
         return re.search('SRP[0-9]+', filePath).group()
     filePath = re.sub('EXTERNAL_[A-B]', 'EXTERNAL_', filePath)
-    fcRe = re.compile('((?<=(EXTERNAL_))|(?<=(_[A-B]))).*[X-Y][X-Y|2](?=/)')
+    fcRe = re.compile("((?<=(_(A|B|D)))([A-Z0-9])*X(X|Y|2|3|F))|((?<=_)000000000-C[A-Z0-9]{4})|((?<=_)A[0-9a-zA-Z]+M5)")
+    #fcRe = re.compile('((?<=(EXTERNAL_))|(?<=(_[A-B]))).*[X-Y][X-Y|2](?=/)')
     return fcRe.search(filePath).group()
 
 def mergeFlowCellLibraries(inputFolder):
