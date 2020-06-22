@@ -554,6 +554,61 @@ After running the `pulldownGalaxyData.py` script, results will be stored under t
 
 -----
 
+Reprocessing old data
+=====================
+
+Because of the nature of NGS processing and rapid developments in the technology available to the field, we can expect periodic updates to the pipeline that will be unable to support older data. The following section describes how to address some of these situations.
+
+Generating .fastqs: bcl2fastq
+-----------------------------
+
+Overview
+^^^^^^^^
+
+``bcl2fastq`` is software provided by Illumina to help convert raw sequence data (binary call files - '.bcl's) to .fastq data. This program will also perform 'demultiplexing', or the assignment of reads to libraries. Because we most commonly sequence multiple libraries on the same lane of a flow cell, it is necessary to find the index sequence for each read to determine which library the sequence data came from.
+
+This step is usually performed automatically by BaseSpace based on the sample sheet that's submitted when the sequencing run begins. However, it is sometimes necessary to manually run ``bcl2fastq``, for example if BaseSpace encounters an error, or if there's a need to recover .fastq files from older sequencing runs before BaseSpace.
+
+Version
+^^^^^^^
+
+The exact version of ``bcl2fastq`` being used is important, because different versions support different sample sheet formats for use in demultiplexing (see details below). As of June 22nd 2020, ``bcl2fastq`` v2.20.0.422 is installed on ``srvgalaxy01`` at ``/usr/local/bin/bcl2fastq``. All details below are with respect to this version. Documentation for other versions is available at `Illumina's support site <https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software.html>`_.
+
+Demultiplexing Considerations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The connection between the index sequence and library/sample identifier is made through the sample sheet. ``bcl2fastq`` looks for this file in a default location at ``path/to/flowcell/run/SampleSheet.csv``, but you can specify a different location for the sample sheet using the ``--sample-sheet`` argument.
+
+If ``bcl2fastq`` cannot find a sample sheet or cannot read the format of the sample sheet, it won't display any diagnostic message, but will assign all reads to a project-less "Undetermined_*.fastq.gz" output file.
+
+.. note:: **Sample Sheet Format**
+
+    It is important to make sure that the sample sheet conforms to the file specifications outlined in `the bcl2fastq documentation <https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq2-v2-20-software-guide-15051736-03.pdf>`_. In particular, the sample sheet must have a ``data`` section with columns named 'Lane', 'Sample_ID', 'Sample_Name', 'Sample_Project', and 'index' (note capitalization). Older versions of the sample sheet contained the camel case variants of these column names (eg: 'SampleName') and do not have a '[data]' section designator. These files cannot be read by ``bcl2fastq`` and need to be re-formatted for use in demultiplexing.
+    
+.. note:: **Index Reads**
+
+    By default, ``bcl2fastq`` will attmept to use the information contained in ``path/to/flowcell/run/RunInfo.xml`` to determine where the index sequence information is contained in the read data. In most cases this should work fine, but if you encounter issues with different types of indexing combined on one flow cell, you can explicitly tell ``bcl2fastq`` where to read the index data using the ``--use-bases-mask`` argument, as detailed in `the bcl2fastq documentation <https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq2-v2-20-software-guide-15051736-03.pdf>`_. You can also specify which lanes/tiles to use with the ``--tiles`` argument.
+    
+    For example, a sequencing run with Nextera dual-indexed libraries and TruSeq single run may have a ``RunInfo.xml`` file that contains
+    
+    ::
+      <Reads>
+        <Read Number="1" NumCycles="100" IsIndexedRead="N" />
+        <Read Number="2" NumCycles="8" IsIndexedRead="Y" />
+        <Read Number="3" NumCycles="8" IsIndexedRead="Y" />
+      </Reads>
+    
+    This is appropriate for the dual, 8-length indices used in the Nextera libraries, but not the 6-length single-indexed TruSeq libraries. If the TruSeq libs were run in lanes 1 and 5, processing the TruSeq libraries can be handled using the command 
+    
+    ::
+      bcl2fastq \
+      ... # input, output, sample sheet, other arguments go here
+      --tiles s_1,s_5 \
+      --use-bases-mask y*,i6n*,n* 
+      
+    
+-----
+
 .. _processing-local:
 
 Retrieving details for old workflows (DEPRECATED)
