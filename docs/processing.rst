@@ -591,21 +591,24 @@ If ``bcl2fastq`` cannot find a sample sheet or cannot read the format of the sam
     
     For example, a sequencing run with Nextera dual-indexed libraries and TruSeq single run may have a ``RunInfo.xml`` file that contains
     
-    ::
+    .. code-block:: xml
       <Reads>
-        <Read Number="1" NumCycles="100" IsIndexedRead="N" />
-        <Read Number="2" NumCycles="8" IsIndexedRead="Y" />
-        <Read Number="3" NumCycles="8" IsIndexedRead="Y" />
+      <Read Number="1" NumCycles="100" IsIndexedRead="N" />
+      <Read Number="2" NumCycles="8" IsIndexedRead="Y" />
+      <Read Number="3" NumCycles="8" IsIndexedRead="Y" />
       </Reads>
     
     This is appropriate for the dual, 8-length indices used in the Nextera libraries, but not the 6-length single-indexed TruSeq libraries. If the TruSeq libs were run in lanes 1 and 5, processing the TruSeq libraries can be handled using the command 
     
-    ::
+    .. code-block:: sh
       bcl2fastq \
-      ... # input, output, sample sheet, other arguments go here
+      --runfolder-dir /path/to/my/flowCell \
+      --output-dir /path/to/my/flowCell/Unaligned \
+      --sample-sheet /path/to/my/flowCell/SampleSheet.csv \
       --tiles s_1,s_5 \
       --use-bases-mask y*,i6n*,n* 
-      
+    
+    The example base mask ``y*,i6n*,n*`` means "Read 1 is all insert sequence data. Read 2 contains index data in the first 6 bases, then ignore the rest of the read. Ignore all of read 3."
     
 -----
 
