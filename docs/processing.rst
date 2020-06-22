@@ -581,34 +581,34 @@ The connection between the index sequence and library/sample identifier is made 
 
 If ``bcl2fastq`` cannot find a sample sheet or cannot read the format of the sample sheet, it won't display any diagnostic message, but will assign all reads to a project-less "Undetermined_*.fastq.gz" output file.
 
-.. note:: **Sample Sheet Format**
+**Sample Sheet Format**
 
-    It is important to make sure that the sample sheet conforms to the file specifications outlined in `the bcl2fastq documentation <https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq2-v2-20-software-guide-15051736-03.pdf>`_. In particular, the sample sheet must have a ``data`` section with columns named 'Lane', 'Sample_ID', 'Sample_Name', 'Sample_Project', and 'index' (note capitalization). Older versions of the sample sheet contained the camel case variants of these column names (eg: 'SampleName') and do not have a '[data]' section designator. These files cannot be read by ``bcl2fastq`` and need to be re-formatted for use in demultiplexing.
+It is important to make sure that the sample sheet conforms to the file specifications outlined in `the bcl2fastq documentation <https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq2-v2-20-software-guide-15051736-03.pdf>`_. In particular, the sample sheet must have a '[data]' section with columns named 'Lane', 'Sample_ID', 'Sample_Name', 'Sample_Project', and 'index' (note capitalization). Older versions of the sample sheet contained the camel case variants of these column names (eg: 'SampleName') and do not have a '[data]' section designator. These files cannot be read by ``bcl2fastq`` and need to be re-formatted for use in demultiplexing.
     
-.. note:: **Index Reads**
+**Index Reads**
 
-    By default, ``bcl2fastq`` will attmept to use the information contained in ``path/to/flowcell/run/RunInfo.xml`` to determine where the index sequence information is contained in the read data. In most cases this should work fine, but if you encounter issues with different types of indexing combined on one flow cell, you can explicitly tell ``bcl2fastq`` where to read the index data using the ``--use-bases-mask`` argument, as detailed in `the bcl2fastq documentation <https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq2-v2-20-software-guide-15051736-03.pdf>`_. You can also specify which lanes/tiles to use with the ``--tiles`` argument.
+By default, ``bcl2fastq`` will attmept to use the information contained in ``path/to/flowcell/run/RunInfo.xml`` to determine where the index sequence information is contained in the read data. In most cases this should work fine, but if you encounter issues with different types of indexing combined on one flow cell, you can explicitly tell ``bcl2fastq`` where to read the index data using the ``--use-bases-mask`` argument, as detailed in `the bcl2fastq documentation <https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq2-v2-20-software-guide-15051736-03.pdf>`_. You can also specify which lanes/tiles to use with the ``--tiles`` argument.
     
-    For example, a sequencing run with Nextera dual-indexed libraries and TruSeq single run may have a ``RunInfo.xml`` file that contains
+For example, a sequencing run with Nextera dual-indexed libraries and TruSeq single run may have a ``RunInfo.xml`` file that contains
     
-    .. code-block:: xml
-      <Reads>
-      <Read Number="1" NumCycles="100" IsIndexedRead="N" />
-      <Read Number="2" NumCycles="8" IsIndexedRead="Y" />
-      <Read Number="3" NumCycles="8" IsIndexedRead="Y" />
-      </Reads>
-    
-    This is appropriate for the dual, 8-length indices used in the Nextera libraries, but not the 6-length single-indexed TruSeq libraries. If the TruSeq libs were run in lanes 1 and 5, processing the TruSeq libraries can be handled using the command 
-    
-    .. code-block:: sh
-      bcl2fastq \
-      --runfolder-dir /path/to/my/flowCell \
-      --output-dir /path/to/my/flowCell/Unaligned \
-      --sample-sheet /path/to/my/flowCell/SampleSheet.csv \
-      --tiles s_1,s_5 \
-      --use-bases-mask y*,i6n*,n* 
-    
-    The example base mask ``y*,i6n*,n*`` means "Read 1 is all insert sequence data. Read 2 contains index data in the first 6 bases, then ignore the rest of the read. Ignore all of read 3."
+.. code-block:: xml
+  <Reads>
+  <Read Number="1" NumCycles="100" IsIndexedRead="N" />
+  <Read Number="2" NumCycles="8" IsIndexedRead="Y" />
+  <Read Number="3" NumCycles="8" IsIndexedRead="Y" />
+  </Reads>
+
+This is appropriate for the dual, 8-length indices used in the Nextera libraries, but not the 6-length single-indexed TruSeq libraries. If the TruSeq libs were run in lanes 1 and 5, processing the TruSeq libraries can be handled using the command 
+
+.. code-block:: sh
+  bcl2fastq \
+  --runfolder-dir /path/to/my/flowCell \
+  --output-dir /path/to/my/flowCell/Unaligned \
+  --sample-sheet /path/to/my/flowCell/SampleSheet.csv \
+  --tiles s_1,s_5 \
+  --use-bases-mask y*,i6n*,n* 
+
+The example base mask ``y*,i6n*,n*`` means "Read 1 is all insert sequence data. Read 2 contains index data in the first 6 bases, then ignore the rest of the read. Ignore all of read 3."
     
 -----
 
