@@ -99,6 +99,7 @@ while getopts ":hd:p:n:v:a:t:g:b:q:" opt; do
       ;;
     q)
       baseGenDir=$OPTARG
+      ;;
     \? )
       echo -e $usage
       exit 1
