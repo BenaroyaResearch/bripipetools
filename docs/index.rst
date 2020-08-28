@@ -22,6 +22,7 @@ Contents:
    getstarted.rst
    databases.rst
    rnaseqprocessing.rst
+   process10x.rst
    gotchas.rst
    methodssummary.rst
    processing.rst

@@ -11,6 +11,8 @@ Introduction
 
 This page summarizes the steps that must be completed to process a flow cell's worth of RNAseq data. All of these steps assume that you have installed ``bripipetools`` according to the instructions at :ref:`start-install`.
 
+Note that these instructions are appropriate for bulk, C1, and plate-sorted libraries. Processing of 10X libraries follows a different workflow based on the Cell Ranger platform. Instructions for processing 10X libraries can be found at :ref:`process-10x`.
+
 .. _rnaseqproc-getdata:
 
 Retrieving Data
