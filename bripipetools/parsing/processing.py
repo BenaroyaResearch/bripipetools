@@ -63,7 +63,7 @@ def parse_workflow_param(param):
 
 def parse_output_name(output_name):
     output_name_short = re.sub('_out$', '', output_name)
-    if re.search('trimmed_fastq', output_name_short):
+    if re.search('^trimmed_fastq', output_name_short):
         output_name_short = re.sub('trimmed', 'fastqmcf_trimmed',
                                    output_name_short)
 
