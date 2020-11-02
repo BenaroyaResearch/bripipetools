@@ -356,8 +356,7 @@ copyOutputs() {
       
       if $(echo ${currSample} | grep -q "TCR"); then
         mkdir -p ${summaryDir}/tcr
-        cp ${libDir}/metrics_summary.csv ${summaryDir}/tcr/${currLibid}_metrics_summary.csv
-        cp ${libDir}/outs/web_summary.html ${summaryDir}/tcr/${currLibid}_web_summary.html
+        cp ${libDir}/web_summary.html ${summaryDir}/tcr/${currLibid}_web_summary.html
         cp ${libDir}/vloupe.vloupe ${summaryDir}/tcr/${currLibid}_vloupe.vloupe
         cp ${libDir}/clonotypes.csv ${summaryDir}/tcr/${currLibid}_clonotypes.csv
         cp ${libDir}/all_contig_annotations.csv ${summaryDir}/tcr/${currLibid}_all_contig_annotations.csv
