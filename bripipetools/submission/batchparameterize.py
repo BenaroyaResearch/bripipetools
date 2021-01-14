@@ -407,18 +407,21 @@ class BatchParameterizer(object):
                         util.swap_root(self.target_dir, 'pipeline', '/mnt/bioinformatics/'),
                         'inputFastqs', final_fastq
                     )
+                    self._prep_output_dir('inputFastqs')
                 elif re.search('^fastq-r1_out', param['tag']):
                     final_fastq = '{}_R1-final.fastq.gz'.format(sample_name)
                     output_path = os.path.join(
                         util.swap_root(self.target_dir, 'pipeline', '/mnt/bioinformatics/'),
                         'inputFastqs', final_fastq
                     )
+                    self._prep_output_dir('inputFastqs')
                 elif re.search('^fastq-r2_out', param['tag']):
                     final_fastq = '{}_R2-final.fastq.gz'.format(sample_name)
                     output_path = os.path.join(
                         util.swap_root(self.target_dir, 'pipeline', '/mnt/bioinformatics/'),
                         'inputFastqs', final_fastq
                     )
+                    self._prep_output_dir('inputFastqs')
                 else:
                     output_path = self._build_output_path(sample_name, param)
                 param_values.append(output_path)
