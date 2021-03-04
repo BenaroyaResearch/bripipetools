@@ -32,7 +32,7 @@ def parse_run_id_for_batch(batch_file):
     """
     name_parts = batch_file.split('/')
     try:
-        return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+((X(X|Y|2|3|F))|(-C[A-Z0-9]{4}))$", p)][0]
+        return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+(X(X|Y|2|3|F)|(-C[A-Z0-9]{4})|(A[0-9a-zA-Z]+M5))$", p)][0]
     except IndexError:
         return "Could not determine."
 
