@@ -28,6 +28,7 @@ usage="Usage: $0 [args] [list of flow cell run IDs]\n
 -v <pathToVdjRef> (default: '/nfs/bioinformatics/pipeline/annotation/10x/refdata-cellranger-vdj-GRCh38-alts-ensembl-4.0.0')\n
 -r <flowCellIdPattern> (default: '[A-Za-z0-9]+(HV|M5)')\n
 -o <summaryOutputDirectory> (default: '/nfs/bioinformatics/pipeline/tenxSummaries')\n
+-c <cellRangerBinary> (default: '/opt/cellranger-4.0.0/cellranger')\n
 -----------------\n
 # Required Args\n
 -----------------\n
@@ -54,9 +55,10 @@ fcIdRegex="[A-Za-z0-9]+(HV|M5)"
 transcriptomeReference="/nfs/bioinformatics/pipeline/annotation/10x/GRCh38.91"
 vdjReference="/nfs/bioinformatics/pipeline/annotation/10x/refdata-cellranger-vdj-GRCh38-alts-ensembl-4.0.0"
 outputDir="/nfs/bioinformatics/pipeline/tenxSummaries"
+cellRangerBin="/opt/cellranger-4.0.0/cellranger"
 
 # user-set params
-while getopts ":p:d:w:s:e:t:v:r:o:" opt; do
+while getopts ":p:d:w:s:e:t:v:r:o:c:" opt; do
   case $opt in
     p) 
       pid=$OPTARG
@@ -85,6 +87,9 @@ while getopts ":p:d:w:s:e:t:v:r:o:" opt; do
     v)
       vdjReference=$OPTARG
       ;;
+    c)
+      cellRangerBin=$OPTARG
+      ;;
     \? )
       echo -e $usage
       exit 1
@@ -111,7 +116,6 @@ sampleSheetDir="${processingDir}/sampleSheets"
 # shouldn't need to change the following on srvtenx02
 genCoreRoot="/nfs/genomics/Illumina"
 bfxCoreRoot="/nfs/bioinformatics/pipeline/Illumina"
-cellRangerBin="/opt/cellranger-4.0.0/cellranger"
 
 # check required args 
 if [ ! "$pid" ] || [ ! "$processedDirName" ] || [ ! "$processingDir" ]
