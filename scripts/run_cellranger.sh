@@ -365,6 +365,8 @@ copyOutputs() {
         cp ${libDir}/clonotypes.csv ${summaryDir}/tcr/${currLibid}_clonotypes.csv
         cp ${libDir}/all_contig_annotations.csv ${summaryDir}/tcr/${currLibid}_all_contig_annotations.csv
         cp ${libDir}/metrics_summary.csv ${summaryDir}/tcr/${currLibid}_metrics_summary.csv
+        cp ${libDir}/filtered_contig.fasta ${summaryDir}/tcr/${currLibid}_filtered_contig.fasta
+        cp ${libDir}/filtered_contig.fastq ${summaryDir}/tcr/${currLibid}_filtered_contig.fastq
       elif $(echo ${currSample} | grep -q "GEX"); then
         mkdir -p ${summaryDir}/gex/
         cp ${libDir}/web_summary.html ${summaryDir}/gex/${currLibid}_web_summary.html
