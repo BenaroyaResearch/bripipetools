@@ -304,7 +304,7 @@ validate_mixcr_output <- function(proj_folder){
 
 # generate a mixcr summary for a project folder containing 
 # a mixcrOutput_trinity folder
-make_mixcr_summary <- function(proj_folder){
+make_mixcr_summary <- function(proj_folder, lib_type){
   pname <- parse_project_name(proj_folder)
   currdate <- format(Sys.Date(), "%y%m%d")
   mixcr_file <- paste(pname, currdate, "mixcr_summary.csv", sep = "_")
@@ -326,6 +326,7 @@ make_mixcr_summary <- function(proj_folder){
   mixcr_jxns$dateCreated <- currTime
   mixcr_jxns$project <- projId
   mixcr_jxns$run <- runId
+  mixcr_jxns$libType <- lib_type
   
   # push mixcr information to research database
   if(checkMixcrProjectExists(projId)){
@@ -338,14 +339,14 @@ make_mixcr_summary <- function(proj_folder){
 }
 
 # Run the program on a given flowcell path
-run_prog <- function(fc_path){
+run_prog <- function(fcPath, libType){
   nFailedProjects <- 0
-  project_paths <- find_projects_with_mixcr(fc_path)
+  project_paths <- find_projects_with_mixcr(fcPath)
   for (p in project_paths){
     if(validate_mixcr_output(p)){
       nFailedProjects <- 
         nFailedProjects +
-        make_mixcr_summary(p) # returns 0 if success, 1 if failure
+        make_mixcr_summary(p, libType) # returns 0 if success, 1 if failure
     } else {
       nFailedProjects <- nFailedProjects + 1
     }
@@ -361,12 +362,18 @@ run_prog <- function(fc_path){
 # Read in the command line args and process the project
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args) == 0 || length(args) > 1) {
-  stop("Exactly one flow cell path must be passed as an argument.", call.=FALSE)
+if (length(args) == 0 || length(args) > 2) {
+  stop("One flow cell path must be passed as an argument with an optional '-bulk' flag.", call.=FALSE)
 }
 
-fc_path <- args[1]
-run_prog(fc_path)
+if (length(args) == 2 & !("-bulk" %in% args)) {
+  stop("One flow cell path must be passed as an argument with an optional '-bulk' flag.", call.=FALSE)
+}
+
+fcPath <- args[args != "-bulk"]
+libType <- ifelse(("-bulk" %in% args), "bulk", "single cell")
+
+run_prog(fcPath, libType)
 
 
 
