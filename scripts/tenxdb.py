@@ -77,23 +77,28 @@ def processTenxResults(procDirPath):
     with open(sampleSheetPath, newline='') as sampleSheet:
         sampleReader = csv.reader(sampleSheet)
         for row in sampleReader:
-            # check library info and 
-            if(re.match("lib[0-9]+", row[0])):
+            # check library ID and information
+            rowMatch = re.match("lib[0-9]+", row[0])
+            if(rowMatch):
+                libid = rowMatch[0]
                 rowStr = "_".join(row).lower()
                 isTcrLib = ("vdj" in rowStr or "tcr" in rowStr)
                 isGexLib = ("gex" in rowStr)
-                libDirExists = os.path.exists(os.path.join(procDirPath, row[0]))
+                libDirExists = os.path.exists(os.path.join(procDirPath, libid))
                 
                 if(isTcrLib and isGexLib):
-                    exit("ERROR: Library " + row[0] + " appears to have both GEX and VDJ annotations.")
+                    exit("ERROR: Library " + libid + " appears to have both GEX and VDJ annotations.")
                 elif(isTcrLib and libDirExists):
-                    vdjLibs.append(row[0])
+                    vdjLibs.append(libid)
                 elif(isGexLib and libDirExists):
-                    gexLibs.append(row[0])
+                    gexLibs.append(libid)
                 elif (not libDirExists):
-                    exit("ERROR: Library " + row[0] + " does not appear to have been processed.")
+                    exit("ERROR: Library " + libid + " does not appear to have been processed.")
                 else:
-                    exit("ERROR: Could not determine type of library " + row[0])
+                    exit("ERROR: Could not determine type of library " + libid)
+        # get unique libs
+        vdjLibs = list(set(vdjLibs))
+        gexLibs = list(set(gexLibs))
         
         # process features common to VDJ and GEX - metrics and data file locs
         for currLib in gexLibs + vdjLibs:
