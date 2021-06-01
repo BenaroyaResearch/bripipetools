@@ -37,3 +37,4 @@ dependencies:
   - mongomock==3.6.0
   - sentinels==1.0.0
   - sphinx_rtd_theme==0.5.1
+  - readthedocs-sphinx-ext==2.1.4
