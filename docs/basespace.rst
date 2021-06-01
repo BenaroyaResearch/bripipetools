@@ -40,27 +40,29 @@ The ``basemount`` tool can be used to access BaseSpace data through the command 
 
 `BaseMount <https://basemount.basespace.illumina.com/>`_ is a tool provided by Illumina that allows you to mount BaseSpace data as a file system through an API.
 
-From ``srvgalaxy01``, to activate the mount point::
+From ``srvgalaxy01``, make sure a directory is available to serve as a mount point (eg: ``mkdir ~/basespace_mount``). Then to activate the mount point::
 
-    basemount /mnt/genomics/Illumina/basespace_mount/
+    basemount ~/basespace_mount/
 
 This gives access via the command line to all projects that have been shared by Vivian.
 
 Using ``backup_basespace.py``
 -----------------------------
 
-This script will backup data files from projects on BaseSpace to the directory ``/mnt/genomics/Illumina/basespace_backup``. For each project, logs and property data are copied to a subfolder corresponding to the flowcell ID (note: these data are the same for all projects on a flowcell, so if the subfolder already exists, the project will be skipped).
+A copy of the script is available in the ``scripts`` directory of the ``bripipetools`` repository. A copy is kept at ``/mnt/bioinformatics/workspace/code/shared/bripipetools/scripts/``.
+
+This script will backup data files from projects on BaseSpace to the directory ``/mnt/bioinformatics/pipeline/Illumina/basespace_backup``. For each project, logs and property data are copied to a subfolder corresponding to the flowcell ID (note: these data are the same for all projects on a flowcell, so if the subfolder already exists, the project will be skipped).
 
 ::
 
-    python basespace_backup.py \
-	    /mnt/genomics/Illumina/basespace_mount \
-    	/mnt/genomics/Illumina/basespace_backup
+    python backup_basespace.py \
+    ~/basespace_mount/ \
+    /mnt/bioinformatics/pipeline/Illumina/basespace_backup
 
 
 The following data will be backed up for each flowcell run::
 
-    /mnt/genomics/Illumina/basespace_backup/BCAC6PANXX/
+    /mnt/bioinformatics/pipeline/Illumina/basespace_backup/BCAC6PANXX/
     ├── logs
     │   ├── AdapterTrimming.txt
     │   ├── CompletedJobInfo.xml
@@ -112,7 +114,7 @@ The following data will be backed up for each flowcell run::
 
 This data is accessed once per flowcell at a project path like this::
 
-    /mnt/genomics/Illumina/basespace_mount/Projects/P123-13/AppSessions/
+    /mnt/bioinformatics/pipeline/Illumina/basespace_mount/Projects/P123-13/AppSessions/
     └── FASTQ Generation 2017-01-20 02:14:43Z
         ├── Logs
         ├── Logs.metadata
