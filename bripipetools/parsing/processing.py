@@ -14,7 +14,7 @@ def parse_batch_name(batch_name):
     return individual components indicating date, list of project
     labels, and flowcell ID.
     """
-    fcRegex = "(?<=_)((([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4})|(A[0-9a-zA-Z]+M5))"
+    fcRegex = "(?<=_)((([A-Z0-9])*X(X|Y|2|3|F))|(000000000-C[A-Z0-9]{4})|(A[0-9a-zA-Z]+(M5|HV)))"
     
     fc_id = util.matchdefault(fcRegex, batch_name)
     name_parts = batch_name.split('_')
@@ -32,7 +32,7 @@ def parse_run_id_for_batch(batch_file):
     """
     name_parts = batch_file.split('/')
     try:
-        return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+((X(X|Y|2|3|F))|(-C[A-Z0-9]{4}))$", p)][0]
+        return [p for p in name_parts if re.match("^[0-9]+_.+_.+_.+(X(X|Y|2|3|F)|(-C[A-Z0-9]{4})|(A[0-9a-zA-Z]+(M5|HV)))$", p)][0]
     except IndexError:
         return "Could not determine."
 
@@ -63,7 +63,7 @@ def parse_workflow_param(param):
 
 def parse_output_name(output_name):
     output_name_short = re.sub('_out$', '', output_name)
-    if re.search('trimmed_fastq', output_name_short):
+    if re.search('^trimmed_fastq', output_name_short):
         output_name_short = re.sub('trimmed', 'fastqmcf_trimmed',
                                    output_name_short)
 
