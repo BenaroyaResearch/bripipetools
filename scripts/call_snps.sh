@@ -19,12 +19,13 @@
 ################################################################################
 
 # default parameters
-usage="Usage: $0 [-q <query>] [-f <flowcell>] [-p <project dir>] [-b <bedfile name>] [-o <output dir name>]"
+usage="Usage: $0 [-q <query>] [-f <flowcell>] [-p <project dir>] [-b <bedfile name>] [-o <output dir name>] [-x <exclude slurm nodes>]"
 bedfile="/mnt/bioinformatics/pipeline/annotation/snp_ref/GRCh38_NGSCheckMate_andInterestingSNP.bed"
 outdirname="snps"
+excludeNodes=""
 
 # user-set params
-while getopts ":b:q:f:p:o:" opt; do
+while getopts ":b:q:f:x:p:o:" opt; do
   case $opt in
     b) 
       bedfile=$OPTARG
@@ -40,6 +41,9 @@ while getopts ":b:q:f:p:o:" opt; do
       ;;
     o)
       outdirname=$OPTARG
+      ;;
+    x)
+      excludeNodes="-x ${OPTARG}"
       ;;
     \? )
       echo $usage
@@ -69,7 +73,7 @@ call_snps_for_query()
   mkdir $outdir
   
   echo "Submitting $squery to slurm..."
-  sbatch -N 1 --exclusive -J $workingfile -o $outdir/${workingfile}_slurm.out $(dirname $0)/call_lib_snps.sh $squery $outdir $sbed
+  sbatch -N 1 $excludeNodes --exclusive -J $workingfile -o $outdir/${workingfile}_slurm.out $(dirname $0)/call_lib_snps.sh $squery $outdir $sbed
 }
 
 # run the alignment(s) for the appropriate queries
