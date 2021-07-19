@@ -15,16 +15,28 @@ library(dplyr)
 library(purrr)
 library(parallel)
 library(mongolite)
+library(ini)
 
 mixcrOutputFolder <- "mixcrOutput_trinity"
+
+# Read in database config information
+allArgs <- commandArgs(trailingOnly=FALSE)
+scriptName <- sub("--file=", "", allArgs[grep("--file=", allArgs)])
+scriptDir <- dirname(scriptName)
+configFile <- file.path(scriptDir, "..", "bripipetools", "config", "default.ini")
+config <- ini::read.ini(configFile)
 
 # Open a connection to a collection in the research db
 # collection: the name of the collection to access
 resDbConnect <- function(collection){
   dbref <- mongo(collection,
-                 db = "bri",
-                 #url = "mongodb://browser:bibliome@srvsdb11")
-                 url = "mongodb://browser:bibliome@srvresearchdb01")
+                 db = config$researchdb$db_name,
+                 url = paste0(
+                   "mongodb://",
+                   config$researchdb$user, ":",
+                   config$researchdb$password, "@",
+                   config$researchdb$db_host)
+                 )
   return(dbref)
 }
 
