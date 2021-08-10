@@ -1,6 +1,6 @@
 channels:
-- python/unicode 'bioconda'
-- python/unicode 'defaults'
+- bioconda
+- defaults
 dependencies:
 - python=3.6
 - beautifulsoup4=4.8.1
