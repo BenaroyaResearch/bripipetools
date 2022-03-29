@@ -32,7 +32,7 @@ The underlying MongoDB database for the Research Database is currently named ``b
 Research Database Servers
 -------------------------
 
-Accessing the Research Database servers requires access to the BRI network, either on-site or via VPN. The production instance of the Research Database is hosted at ``srvresearchdb01.brivmrc.org``. A test instance of the database also exists at ``srvsdb11.brivmrc.org``. For development purposes, testing with a local copy of ``srvresearchdb01`` is possible, but in many cases testing against the staging server is preferred (see warning about database copy sizes below). Please contact the Bioinformatics or Software Development groups at BRI for database user and password information.
+Accessing the Research Database servers requires access to the BRI network, either on-site or via VPN. The production instance of the Research Database is hosted at ``srvmongo01.brivmrc.org``. A test instance of the database also exists at ``srvsdb11.brivmrc.org``. For development purposes, testing with a local copy of ``srvmongo01`` is possible, but in many cases testing against the staging server is preferred (see warning about database copy sizes below). Please contact the Bioinformatics or Software Development groups at BRI for database user and password information.
 
 .. _databases-infra:
 
@@ -108,7 +108,7 @@ Copy database into ``jnk/dump`` (see warning above about database sizes):
     mkdir jnk
     cd jnk
     # retrieve a copy of the database using mongodump
-    mongodump -u <user> -p <password> --host srvresearchdb01 -d bri
+    mongodump -u <user> -p <password> --host srvmongo01 -d bri
     cd dump
     # restore a database to your local mongo instance (host default is localhost)
     # BE CAREFUL IF YOU MODIFY THIS COMMAND:
