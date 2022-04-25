@@ -15,7 +15,6 @@ library(dplyr)
 library(purrr)
 library(parallel)
 library(mongolite)
-library(ini)
 
 mixcrOutputFolder <- "mixcrOutput_trinity"
 
@@ -52,6 +51,12 @@ checkMixcrProjectExists <- function(projId){
   tcrDb <- resDbConnect("genomicsTCR")
   result <- tcrDb$find(paste0('{"project":"', projId, '"}'), limit = 1)
   return(nrow(result) > 0)
+}
+
+removeMixcrProject <- function(projId) {
+  tcrDb <- resDbConnect("genomicsTCR")
+  result <- tcrDb$remove(paste0('{"project":"', projId, '"}'))
+  return(T)
 }
 
 # clean column names of data frame
@@ -97,7 +102,7 @@ parse_mixcr_clones <- function(mixcr_df) {
                          "targetsequences")
   mixcr_df %>% 
     transmute(cln_count = clonecount,
-              full_nt_sequence = !!parse_quosure(seq_col_name),
+              full_nt_sequence = !!parse_expr(seq_col_name),
               v_gene = str_extract(allvhitswithscore,
                                    "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9])*(DV[0-9]+)*"),
               # note: not currently possible to get region overlap with
@@ -316,7 +321,7 @@ validate_mixcr_output <- function(proj_folder){
 
 # generate a mixcr summary for a project folder containing 
 # a mixcrOutput_trinity folder
-make_mixcr_summary <- function(proj_folder, lib_type){
+make_mixcr_summary <- function(proj_folder, lib_type, forceRemove=FALSE){
   pname <- parse_project_name(proj_folder)
   currdate <- format(Sys.Date(), "%y%m%d")
   mixcr_file <- paste(pname, currdate, "mixcr_summary.csv", sep = "_")
@@ -342,7 +347,14 @@ make_mixcr_summary <- function(proj_folder, lib_type){
   
   # push mixcr information to research database
   if(checkMixcrProjectExists(projId)){
-    print(paste("WARNING: Could not push data for project", projId, "to the TCR database, because it already exists."))
+    if (forceRemove) {
+      print(paste("WARNING: Removing previous TCR collection for project", projId))
+      removeMixcrProject(projId)
+      print(paste("Data for project", projId, "are summarized and being pushed to the TCR database."))
+      insertMixcrOutput(tcrData = mixcr_jxns)
+    } else {
+      print(paste("WARNING: Could not push data for project", projId, "to the TCR database, because it already exists."))
+    }
   } else {
     print(paste("Data for project", projId, "are summarized and being pushed to the TCR database."))
     insertMixcrOutput(tcrData = mixcr_jxns)
@@ -351,14 +363,18 @@ make_mixcr_summary <- function(proj_folder, lib_type){
 }
 
 # Run the program on a given flowcell path
-run_prog <- function(fcPath, libType){
+run_prog <- function(fcPath, libType, forceRemove=FALSE){
   nFailedProjects <- 0
-  project_paths <- find_projects_with_mixcr(fcPath)
+  if (str_detect(fcPath, "/Project_")) {
+    project_paths <- fcPath
+  } else {
+    project_paths <- find_projects_with_mixcr(fcPath)
+  }
   for (p in project_paths){
     if(validate_mixcr_output(p)){
       nFailedProjects <- 
         nFailedProjects +
-        make_mixcr_summary(p, libType) # returns 0 if success, 1 if failure
+        make_mixcr_summary(p, libType, forceRemove) # returns 0 if success, 1 if failure
     } else {
       nFailedProjects <- nFailedProjects + 1
     }
@@ -384,8 +400,7 @@ if (length(args) == 2 & !("-bulk" %in% args)) {
 
 fcPath <- args[args != "-bulk"]
 libType <- ifelse(("-bulk" %in% args), "bulk", "single cell")
+forceRemove <- TRUE
 
-run_prog(fcPath, libType)
-
-
+run_prog(fcPath, libType, forceRemove)
 
