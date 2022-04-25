@@ -7,6 +7,8 @@
 
 #########################################################
 # MiXCR loading functions, adapted from James Eddy's code
+# Upgraded to work with R version 4.x and to remove previously existing TCRs by Stephan Pribitzer
+# Use database configuration file, Matt Lawrence
 #########################################################
 library(readr)
 library(rlang)
