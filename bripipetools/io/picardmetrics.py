@@ -3,6 +3,8 @@ Class for reading and parsing Picard metrics files.
 """
 import logging
 import re
+import csv
+import pathlib
 
 from bs4 import BeautifulSoup
 
@@ -114,18 +116,30 @@ class PicardMetricsFile(object):
         logger.debug("parsed wide metrics table: {}".format(metrics))
         return metrics
 
+    def _read_from_txt(self):
+        with open(self.path) as tsv_file:
+            csv_reader = csv.reader(tsv_file, delimiter= "\t")
+            rows = list(csv_reader)
+
+        metrics = {rows[6][i]: rows[7][i] for i in range(len(rows[6]))}
+
+        return metrics 
+
     def parse(self):
         """
         Parse metrics table and return dictionary.
         """
         try:
-            self._read_file()
-            self._get_table()
-            table_format = self._check_table_format()
-            if table_format == 'long':
-                return self._parse_long()
-            else:
-                return self._parse_wide()
+            try:
+                self._read_file()
+                self._get_table()
+                table_format = self._check_table_format()
+                if table_format == 'long':
+                    return self._parse_long()
+                else:
+                    return self._parse_wide()
+            except:
+                return self._read_from_txt()
         except IndexError:
             logger.info("WARNING! Parsing file {} failed.".format(self.path))
             return {}
