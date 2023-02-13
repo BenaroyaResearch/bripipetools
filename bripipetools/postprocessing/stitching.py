@@ -81,7 +81,6 @@ class OutputStitcher(object):
         outputs = self._get_outputs(self.type)
         outputs.sort()
         self.data = {}
-
         for o in outputs:
             logger.debug("parsing output file '{}'".format(o))
             out_items = parsing.parse_output_filename(o)
