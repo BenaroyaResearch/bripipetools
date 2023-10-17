@@ -20,7 +20,7 @@
 
 # default parameters
 usage="Usage: $0 [-q <query>] [-f <flowcell>] [-p <project dir>] [-b <bedfile name>] [-o <output dir name>] [-x <exclude slurm nodes>]"
-bedfile="/mnt/bioinformatics/pipeline/annotation/snp_ref/GRCh38_NGSCheckMate_andInterestingSNP.bed"
+bedfile="/nfs/bioinformatics/pipeline/annotation/snp_ref/GRCh38_NGSCheckMate_andInterestingSNP.bed"
 outdirname="snps"
 excludeNodes=""
 
