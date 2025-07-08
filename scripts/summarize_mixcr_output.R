@@ -106,7 +106,7 @@ parse_mixcr_clones <- function(mixcr_df) {
     transmute(cln_count = clonecount,
               full_nt_sequence = !!parse_expr(seq_col_name),
               v_gene = str_extract(allvhitswithscore,
-                                   "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9])*(DV[0-9]+)*"),
+                                   "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9]+)*(DV[0-9]+)*"),
               # note: not currently possible to get region overlap with
               # current version/parameters we use for MiXCR
               v_region_score = str_extract(allvhitswithscore, "(?<=\\()[0-9]+") %>% 
@@ -117,6 +117,9 @@ parse_mixcr_clones <- function(mixcr_df) {
               j_align = alljalignments,
               j_region_score = str_extract(alljhitswithscore, "(?<=\\()[0-9]+") %>% 
                 as.integer(),
+              c_gene = str_extract(allchitswithscore, "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9][A-Z]*)*"),
+              c_region_score = str_extract(allchitswithscore, "(?<=\\()[0-9]+") %>% as.integer(),
+              c_align = allcalignments,  
               junction = as.character(aaseqcdr3)) %>% 
     rowwise() %>% 
     mutate(v_cd3_part_identity_nt = str_split(v_align, pattern = "\\|") %>% 
@@ -134,12 +137,15 @@ parse_mixcr_clones <- function(mixcr_df) {
     #                 "v_cd3_part_identity_nt", "j_gene", "j_region_score",
     #                 "j_cd3_part_score", "j_cd3_part_identity_nt", 
     #                 "junction")))
-    select(one_of(c("full_nt_sequence", "v_gene",
-                    "v_region_score", "v_cd3_part_score",
-                    "v_cd3_part_identity_nt", "j_gene", "j_region_score",
-                    "j_cd3_part_score", "j_cd3_part_identity_nt",
-                    "junction")))
+    select(one_of(c(
+          "full_nt_sequence", "v_gene", "v_region_score", "v_cd3_part_score", "v_cd3_part_identity_nt",
+          "j_gene", "j_region_score", "j_cd3_part_score", "j_cd3_part_identity_nt",
+          "c_gene", "c_region_score", "c_align",
+          "junction"
+        )))
+
 }
+
 
 # read and parse the MiXCR metadata from a mixcrReport file
 read_mixcr_metadata <- function(folder, sample_regex = "(lib|SRR)[0-9]+"){
