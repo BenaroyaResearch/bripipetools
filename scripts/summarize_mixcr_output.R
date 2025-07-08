@@ -120,7 +120,8 @@ parse_mixcr_clones <- function(mixcr_df) {
               c_gene = str_extract(allchitswithscore, "[(TR)(IG)][A-Z]+[0-9]*(\\-[0-9][A-Z]*)*"),
               c_region_score = str_extract(allchitswithscore, "(?<=\\()[0-9]+") %>% as.integer(),
               c_align = allcalignments,  
-              junction = as.character(aaseqcdr3)) %>% 
+              junction = as.character(aaseqcdr3),
+              cdr3_nt_sequence = nseqcdr3) %>% 
     rowwise() %>% 
     mutate(v_cd3_part_identity_nt = str_split(v_align, pattern = "\\|") %>% 
              map_int(function(x) {as.integer(x[length(x) - 2]) -
@@ -138,7 +139,7 @@ parse_mixcr_clones <- function(mixcr_df) {
     #                 "j_cd3_part_score", "j_cd3_part_identity_nt", 
     #                 "junction")))
     select(one_of(c(
-          "full_nt_sequence", "v_gene", "v_region_score", "v_cd3_part_score", "v_cd3_part_identity_nt",
+          "full_nt_sequence","cdr3_nt_sequence", "v_gene", "v_region_score", "v_cd3_part_score", "v_cd3_part_identity_nt",
           "j_gene", "j_region_score", "j_cd3_part_score", "j_cd3_part_identity_nt",
           "c_gene", "c_region_score", "c_align",
           "junction"
